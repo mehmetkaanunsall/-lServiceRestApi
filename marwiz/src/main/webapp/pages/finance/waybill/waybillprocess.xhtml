@@ -1,0 +1,514 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <!-- 
+        Açıklama : Satış ve satın alma irsaliyelerinin ortak process sayfası tasarımı
+        Yazan    : Ali Kurt
+        Bean     : waybillProcessBean
+        Sayfa    : Finans yönetimi altında irsaliye sayfalarının processi 
+        Tarih    : 05.04.2017
+    -->
+
+    <h:form id="frmWaybillProcess">  
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{waybillProcessBean.selectedObject.isPurchase ? loc.purchasingwaybillprocesses : loc.saleswaybillprocesses}"/>
+            <ui:param name="bean" value='#{waybillProcessBean}' />
+            <ui:param name="update" value="pgrWaybillProcess" />
+            <ui:param name="btnSaveId" value="#{waybillProcessBean.getRendered(12, 0) and (waybillProcessBean.processType==1 or waybillProcessBean.selectedObject.status.id!=27) ? 
+                                                sessionBean.user.lastBranchSetting.isCentralIntegration and waybillProcessBean.selectedObject.isPurchase and sessionBean.user.lastBranchSetting.erpIntegrationId == 1 and sessionBean.user.isAuthorized ? waybillProcessBean.selectedObject.sapLogİsSend ? false : true : true : false}" />
+            <ui:param name="renderback" value='true'/>
+            <ui:param name="btnDeleteId" value='false' /> 
+            <ui:param name="btnPrinterId" value="false" /> 
+            <ui:param name="target" value="frmWaybillPrinter" /> 
+            <c:if test="#{waybillProcessBean.processType==2}">
+                <ui:param name="btnCreateInvoice" value="#{!waybillProcessBean.selectedObject.isInvoice and waybillProcessBean.selectedObject.status.id!=27 and waybillProcessBean.processType==2 and !waybillProcessBean.isCreateWaybillFromOrder and waybillProcessBean.getRendered(2, 0)}" />
+                <ui:param name="renderSelectedObject" value='true'/>
+                <ui:param name="selectedObjectName" value="#{waybillProcessBean.selectedObject}"/>
+                <ui:param name="btnDeleteId" value="#{waybillProcessBean.processType==2 and !waybillProcessBean.isCreateWaybillFromOrder and waybillProcessBean.getRendered(13, 0) ?
+                                                      sessionBean.user.lastBranchSetting.isCentralIntegration and waybillProcessBean.selectedObject.isPurchase and sessionBean.user.lastBranchSetting.erpIntegrationId == 1  and sessionBean.user.isAuthorized ? waybillProcessBean.selectedObject.sapLogİsSend ? false : true : true : false}" />
+                <ui:param name="btnTestBeforeDeleteId" value="#{waybillProcessBean.processType==2 and !waybillProcessBean.isCreateWaybillFromOrder}" />
+                <ui:param name="createExcelFile" value="#{!waybillProcessBean.isCreateWaybillFromOrder}"/>
+                <ui:param name="labelCreateExcelFile" value="#{loc.transfertoexcel}"/>
+                <ui:param name="btnPrinterDesign" value="#{waybillProcessBean.processType==2 and !waybillProcessBean.isCreateWaybillFromOrder}" />
+                <ui:param name="btnChangeInfo" value="#{!waybillProcessBean.selectedObject.isOrderConnection and !waybillProcessBean.selectedObject.isInvoice and !waybillProcessBean.isCreateWaybillFromOrder and waybillProcessBean.getRendered(14, 0) ?
+                                                        sessionBean.user.lastBranchSetting.isCentralIntegration and waybillProcessBean.selectedObject.isPurchase and sessionBean.user.lastBranchSetting.erpIntegrationId == 1  and sessionBean.user.isAuthorized ? waybillProcessBean.selectedObject.sapLogİsSend ? false : true : true : false}"/>
+                <ui:param name="renderOpen" value="#{sessionBean.user.lastBranchSetting.isCentralIntegration and !waybillProcessBean.isCreateWaybillFromOrder and waybillProcessBean.selectedObject.isPurchase and sessionBean.user.lastBranchSetting.erpIntegrationId == 1 and (sessionBean.user.lastBranchSetting.pastPeriodClosingDate == null ? 'true' : waybillProcessBean.selectedObject.waybillDate.compareTo(sessionBean.user.lastBranchSetting.pastPeriodClosingDate) >0) and
+                                                   waybillProcessBean.getRendered(345, 0) and  waybillProcessBean.selectedObject.status.id!=27 ? waybillProcessBean.selectedObject.sapLogİsSend ? true : false : false}"/>
+                <ui:param name="titleOpen" value="#{loc.openedit}" />
+            </c:if>
+        </ui:include>
+
+        <div class="divContent ui-g-12">
+            <h:panelGroup id="pgrWaybillProcess" layout="block">  
+                <div class="ui-g panelToggle">
+                    <h:panelGroup rendered="#{waybillProcessBean.listOfBranch.size() > 1}">
+                        <div class="ui-g-12 ui-md-3 ui-lg-2">
+                            <p:outputLabel value="#{loc.branch}" for="slcBranch" styleClass="Fs12 FontBold"/>
+                            <p:selectOneMenu id="slcBranch" value="#{waybillProcessBean.selectedObject.branchSetting.branch.id}" disabled="#{waybillProcessBean.processType==2}">
+                                <f:selectItem itemValue="#{null}" itemLabel="#{loc.choose}" itemDisabled="true"/>
+                                <f:selectItems value="#{waybillProcessBean.listOfBranch}" var="branchSetting" itemValue="#{branchSetting.branch.id}" itemLabel="#{branchSetting.branch.name}" />
+                                <p:ajax update="pgrWaybillProcess" listener="#{waybillProcessBean.changeBranch()}" process="@this"/>
+                            </p:selectOneMenu>
+                        </div>
+                    </h:panelGroup> 
+                    <div class="#{waybillProcessBean.listOfBranch.size() > 1 ? 'ui-g-12 ui-md-3 ui-lg-4' : 'ui-g-12 ui-md-3 ui-lg-3'}">
+                        <p:outputLabel value="#{loc.current}" for="txtAccountName" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtAccountName" onclick="showAccountBook()" disabled="#{waybillProcessBean.selectedObject.status.id==26 or waybillProcessBean.selectedObject.status.id==27 or waybillProcessBean.processType==2}" 
+                                     value="#{waybillProcessBean.selectedObject.account.name}" class="inputPositionForBookFilter" required="true" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.current}">
+
+                        </p:inputText>
+                        <p:commandLink id="btnAccountName" class="commandLinkPositionForBookFilter" disabled="#{waybillProcessBean.processType==2}" process="@this" oncomplete="PF('olp_account').loadContents();" >
+                            <i class="fa fa-book Fs16 softgray iconPositionForBookFilter "/>   
+                            <p:ajax listener="#{accountBookFilterBean.findFilterListLazyLoading([waybillProcessBean.selectedObject.branchSetting.branch],'frmAccountBookFilter','olp_account','waybill')}" global="false" />
+                        </p:commandLink>
+                    </div>
+
+                    <div class="#{waybillProcessBean.listOfBranch.size() > 1 ? 'ui-g-12 ui-md-3 ui-lg-2' : 'ui-g-12 ui-md-3 ui-lg-3'}">
+                        <p:outputLabel value="#{waybillProcessBean.selectedObject.isPurchase ? loc.senderperson : loc.deliveryperson}" for="txtDeliveryPerson"  styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtDeliveryPerson" disabled="#{waybillProcessBean.selectedObject.status.id==26 or waybillProcessBean.selectedObject.status.id==27}"
+                                     value="#{waybillProcessBean.selectedObject.deliveryPerson}"  styleClass="Wid95" placeholder="#{loc.deliveryperson}" >
+                            <p:ajax global="false" />
+                        </p:inputText>
+                    </div>
+
+
+                    <h:panelGroup rendered="#{waybillProcessBean.selectedObject.isPurchase or (!waybillProcessBean.selectedObject.isPurchase and waybillProcessBean.selectedObject.isWaybillInvoice)}" >
+                        <div class="#{waybillProcessBean.listOfBranch.size() > 1 ? 'ui-g-12 ui-md-3 ui-lg-2' : 'ui-g-12 ui-md-3 ui-lg-3'}">
+                            <p:outputLabel value="#{loc.documentnumber}" for="txtDocumentNumber" styleClass="Fs12 FontBold"/>
+                            <p:inputText id="txtDocumentNumber" value="#{waybillProcessBean.selectedObject.documentNumber}" disabled="#{waybillProcessBean.selectedObject.isWaybillInvoice}" required="true"  styleClass="Wid95" placeholder="#{loc.documentnumber}"  /> 
+                        </div>
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{!waybillProcessBean.selectedObject.isPurchase and !waybillProcessBean.selectedObject.isWaybillInvoice}" >
+                        <div class="ui-g-12 ui-md-1 ui-lg-1">
+                            <p:outputLabel value="#{loc.serialno}" for="slcDocumentNumber" styleClass="Fs12 FontBold"/>
+                            <p:selectOneMenu id="slcDocumentNumber" required="true" value="#{waybillProcessBean.selectedObject.dNumber.id}" 
+                                             styleClass="Wid95" >
+                                <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true" />
+                                <f:selectItems value="#{waybillProcessBean.listOfDocumentNumber}"  var="dnumber" itemLabel="#{dnumber.serial}" itemValue="#{dnumber.id}" />
+                                <p:ajax listener="#{waybillProcessBean.bringDocument}" global="false" update="txtDocumentNumber2" />
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="#{waybillProcessBean.listOfBranch.size() > 1 ? 'ui-g-12 ui-md-2 ui-lg-1' : 'ui-g-12 ui-md-2 ui-lg-2'}">
+                            <p:outputLabel value="#{loc.orderno}" for="txtDocumentNumber2" styleClass="Fs12 FontBold"/>
+                            <p:inputNumber id="txtDocumentNumber2" value="#{waybillProcessBean.selectedObject.dNumber.actualNumber}" required="true" 
+                                           styleClass="Wid95" placeholder="#{loc.number}"
+                                           thousandSeparator="" decimalSeparator="." decimalPlaces="0" minValue="0"
+                                           />
+                        </div>
+                    </h:panelGroup>
+
+                    <div class="#{waybillProcessBean.listOfBranch.size() > 1 ? 'ui-g-12 ui-md-3 ui-lg-2' : 'ui-g-12 ui-md-3 ui-lg-3'}">
+                        <p:outputLabel value="#{loc.type}" for="slcType" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcType" value="#{waybillProcessBean.selectedObject.type.id}" disabled="#{waybillProcessBean.processType==2}" filter="true" required="true" styleClass="Wid95">
+                            <f:selectItems value="#{sessionBean.getTypes(16)}"  var="type" itemLabel="#{type.nameMap.get(sessionBean.langId).name}" itemValue="#{type.id}" />
+                            <p:ajax global="false" update="pgrWaybillProcess" />
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="#{waybillProcessBean.selectedObject.type.id == 21 ? 'ui-g-12 ui-md-3 ui-lg-2' : 'ui-g-12 ui-md-3 ui-lg-3'}">
+                        <p:outputLabel value="#{loc.statu}" for="slcStatus" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcStatus" value="#{waybillProcessBean.selectedObject.status.id}" disabled="#{waybillProcessBean.selectedObject.status.id==27 or waybillProcessBean.selectedObject.isInvoice}" filter="true" required="true" styleClass="Wid95">
+                            <f:selectItems value="#{waybillProcessBean.listOfStatus}"  var="status" itemLabel="#{status.nameMap.get(sessionBean.langId).name}" itemValue="#{status.id}" />
+                        </p:selectOneMenu>
+                    </div>
+
+
+                    <h:panelGroup rendered="#{waybillProcessBean.selectedObject.type.id == 21}" >
+                        <div class="ui-g-12 ui-md-2 ui-lg-2">
+                            <p:outputLabel value="#{loc.fuelwaybill}" styleClass="Fs12 FontBold"/>
+                            <p:panelGrid layout="grid" columns="1" class="pngCheckBox"  >  
+                                <p:selectBooleanCheckbox id="sbcFuelWaybill"  disabled="#{waybillProcessBean.processType==2}" value="#{waybillProcessBean.selectedObject.isFuel}"   class="Fleft" >
+                                    <p:outputLabel value="#{loc.isfuelwaybill}"  style="margin-left: 2px;"  class="FontNormal"/>
+                                    <p:ajax global="false" listener="#{waybillProcessBean.changeFuelWaybill()}" update="pgrWaybillProcess"  /> 
+                                </p:selectBooleanCheckbox>
+
+                            </p:panelGrid> 
+                        </div> 
+                    </h:panelGroup>
+
+                        <div class="#{waybillProcessBean.selectedObject.type.id == 21 ? 'ui-g-12 ui-md-3 ui-lg-2' : 'ui-g-12 ui-md-3 ui-lg-3'}">
+                            <h:panelGroup rendered="#{waybillProcessBean.processType==1 and !waybillProcessBean.selectedObject.isFuel or waybillProcessBean.isCreateWaybillFromOrder }">
+                                <p:outputLabel value="#{loc.warehouse}" for="slcWareHouse" styleClass="Fs12 FontBold"/>
+                                <p:selectOneMenu id="slcWareHouse" value="#{waybillProcessBean.selectedObject.warehouse.id}" filter="true" required="true" styleClass="Wid95">
+                                    <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true" />
+                                    <f:selectItems value="#{waybillProcessBean.listWarehouses}"  var="ware" itemLabel="#{ware.name}" itemValue="#{ware.id}" />
+                                    <p:ajax global="false" />
+                                </p:selectOneMenu>
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{waybillProcessBean.processType==2 and !waybillProcessBean.selectedObject.isFuel and !waybillProcessBean.isCreateWaybillFromOrder }">
+                                <p:outputLabel value="#{loc.warehouse}" for="slcWareHouse2" styleClass="Fs12 FontBold"/>
+                                <p:selectCheckboxMenu  id="slcWareHouse2" converter="entityConverter" value="#{waybillProcessBean.selectedObject.listOfWarehouse}" filter="true" 
+                                                       filterMatchMode="contains" widgetVar="slc_warehouseCheckBox"  disabled="true"
+                                                       label="#{waybillProcessBean.selectedObject.warehouseNameList.equals('') ? loc.choose : waybillProcessBean.selectedObject.warehouseNameList}" styleClass="Wid90" >
+                                    <f:selectItems value="#{waybillProcessBean.listWarehouses}" var="ware" itemLabel="#{ware.name}" itemValue="#{ware}" />       
+                                    <p:ajax update="slcWareHouse2" oncomplete="PF('slc_warehouseCheckBox').show()" global="false"/>
+                                    <p:ajax event="toggleSelect" update="slcWareHouse2" oncomplete="PF('slc_warehouseCheckBox').show()" global="false"/>
+                                </p:selectCheckboxMenu>
+                            </h:panelGroup>
+                        </div>
+
+                        <div class="ui-g-12 ui-md-3 ui-lg-3">
+                            <p:outputLabel value="#{loc.documentdate}" for="cldSalesWayBillDate" styleClass="Fs12 FontBold"/>
+                            <p:calendar  id="cldSalesWayBillDate" value="#{waybillProcessBean.selectedObject.waybillDate}"  
+                                         required="true" class="datepicker" beforeShow="dpClearButton" timeControlType="select"
+                                         pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" 
+                                         disabled="#{waybillProcessBean.selectedObject.status.id==26 or waybillProcessBean.selectedObject.status.id==27}"
+                                         showOn="button" showButtonPanel="true" placeholder="#{loc.documentdate}" 
+                                         mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                                <p:ajax event="change" update="cldSalesWayBillDate" resetValues="true" global="false"/>
+                            </p:calendar>
+                        </div>
+
+                        <div class="ui-g-12 ui-md-3 ui-lg-3">
+                            <p:outputLabel value="#{loc.dispatchdate}" for="cldDispatchDate" styleClass="Fs12 FontBold"/>
+                            <p:calendar  id="cldDispatchDate" value="#{waybillProcessBean.selectedObject.dispatchDate}" 
+                                         required="true" class="datepicker" beforeShow="dpClearButton" timeControlType="select"
+                                         disabled="#{waybillProcessBean.selectedObject.status.id==26 or waybillProcessBean.selectedObject.status.id==27}"
+                                         pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" showOn="button" 
+                                         showButtonPanel="true" placeholder="#{loc.dispatchdate}" mask="true" navigator="true" 
+                                         locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                                <p:ajax event="change" update="cldDispatchDate" resetValues="true" global="false"/>
+                            </p:calendar>
+                        </div>
+
+                        <div class="ui-g-12 ui-md-6 ui-lg-6">
+                            <p:outputLabel value="#{loc.description}" for="txtDescription"  styleClass="Fs12 FontBold"/>
+                            <p:inputText id="txtDescription"  value="#{waybillProcessBean.selectedObject.description}"  styleClass="Wid95" 
+                                         readonly="#{waybillProcessBean.selectedObject.status.id==26 or waybillProcessBean.selectedObject.status.id==27}" 
+                                         placeholder="#{loc.description}" >
+                                <p:ajax global="false" />
+                            </p:inputText>
+                        </div>
+
+                        <div class="ui-g-12 ui-md-6 ui-lg-6">
+                            <p:outputLabel value="#{loc.dispatchaddress}" for="txtDispatchAddress" styleClass="Fs12 FontBold"/>
+                            <p:inputText id="txtDispatchAddress" value="#{waybillProcessBean.selectedObject.dispatchAddress}" required="true" 
+                                         readonly="#{waybillProcessBean.selectedObject.status.id==26 or waybillProcessBean.selectedObject.status.id==27}" 
+                                         placeholder="#{loc.dispatchaddress}" styleClass="Wid97" /> 
+                        </div>
+
+                </div>
+
+            </h:panelGroup>
+        </div>
+        <div class="EmptyBox5"></div>
+
+        <p:remoteCommand name="showAccountBook" process="@this" oncomplete="PF('olp_account').loadContents();" actionListener="#{accountBookFilterBean.findFilterListLazyLoading([waybillProcessBean.selectedObject.branchSetting.branch],'frmAccountBookFilter','olp_account','waybill')}" />
+        <p:remoteCommand name="goToRelatedRecordWaybill" actionListener="#{waybillProcessBean.goToRelatedRecord()}" delay="200"/>
+        <p:remoteCommand name="saveChangingRecord" actionListener="#{waybillProcessBean.confirmSave()}" delay="200"/>
+    </h:form> 
+
+    <p:tabView id="tbvWaybill" activeIndex="#{marwiz.tabIndex}" rendered="#{waybillProcessBean.processType==2 and (waybillProcessBean.getRendered(5, 1) or waybillProcessBean.getRendered(6, 1))}" scrollable="true" dynamic="true" cache="true">
+        <p:ajax event="tabChange" listener="#{waybillProcessBean.onTabChange}" update="pngWaybillStockBook" />
+
+        <p:tab id="tab5" title="#{loc.products}" rendered="#{waybillProcessBean.getRendered(5, 1)}">
+
+            <ui:include src="/pages/finance/waybill/waybillitemtab.xhtml"/> 
+
+        </p:tab>
+
+        <p:tab id="tab6" title="#{loc.relatedrecords}" rendered="#{waybillProcessBean.getRendered(6, 1)}">
+            <c:if test="#{waybillProcessBean.activeIndex==6}" >
+                <ui:include src="/pages/finance/waybill/relatedrecordstab.xhtml"/>
+            </c:if>
+        </p:tab>
+
+    </p:tabView>
+
+    <h:panelGroup id="pngWaybillAccountBook">
+        <!--Kitaptan cari seçtirmek için açılan overlay panel-->
+        <ui:include src="/pages/general/common/accountbook.xhtml" >
+            <ui:param name="updateBean" value='#{waybillProcessBean}' />
+            <ui:param name="for" value="#{waybillProcessBean.isChangeInfoDialog ? 'frmChangeWaybillInfo:btnAccountName' : 'frmWaybillProcess:btnAccountName'}" />
+            <ui:param name="type" value='waybill' />
+            <ui:param name="parameters" value='#{[waybillProcessBean.selectedObject.branchSetting.branch]}' /> 
+            <ui:param name="columnsize" value='2' /> 
+            <ui:param name="form" value='frmAccountBookFilter' /> 
+            <ui:param name="overlay" value="olp_account" />
+        </ui:include>
+    </h:panelGroup>
+
+
+    <h:panelGroup id="pngWaybillStockBook">
+        <c:if test="#{waybillProcessBean.activeIndex==5}" >
+            <!-- kitaptan hızlı stok secme ve eklemek için -->
+            <ui:include src="/pages/general/common/stockbook.xhtml" >
+                <ui:param name="updateBean" value='#{waybillItemTabBean}' />
+                <ui:param name="for" value='frmItemsProcess:btnStockName' />
+                <ui:param name="type" value="#{waybillItemTabBean.bookType}" />
+                <ui:param name="parameters" value="#{[waybillItemTabBean.selectedWaybill]}" /> 
+                <ui:param name="columnsize" value='4' />
+                <ui:param name="form" value='frmStockBookFilter' /> 
+                <ui:param name="overlay" value="olp_stock" />
+            </ui:include>
+        </c:if>
+    </h:panelGroup>
+
+    <!-- irsaliye ürünler tabı için ekleme ve güncelleme yapan dialog -->
+    <p:dialog id="dlgWaybillItem" widgetVar="dlg_waybillitem" resizable="false" width="35%" modal="true" focus="dlgWaybillItem" responsive="true" dynamic="true" closeOnEscape="true">
+        <c:if test="#{waybillProcessBean.activeIndex==5}" >
+            <ui:include src="/pages/finance/waybill/waybillitemstabprocess.xhtml" />
+        </c:if>
+    </p:dialog>
+
+    <!--Hızlı Stok Ekleme Dialogu-->
+    <p:dialog id="dlgQuickAddProduct" widgetVar="dlg_quickaddproduct" resizable="false" focus="dlgQuickAddProduct" responsive="true" dynamic="true" modal="true" closeOnEscape="true" width="30%" height="50%">
+        <c:if test="#{waybillProcessBean.activeIndex==5}" >
+            <h:panelGroup id="frmQuickAddProduct">
+                <p:toolbar>
+                    <f:facet name="left">
+                        <h:outputText value="#{loc.quickaddproduct}" class="outputTextFont Fleft MarRight8"/> 
+                    </f:facet>
+                    <f:facet name="right">
+                        <p:commandLink id="btnSave"  title="#{loc.save}" actionListener="#{waybillItemTabBean.createWayBillProductItem()}" rendered="#{waybillItemTabBean.listOfProduct.size()>0}" class="Fleft MarTop4" >
+                            <i class="fa fa-save tlbrAddBtn Fs20" />
+                        </p:commandLink>  
+                    </f:facet>
+                </p:toolbar>
+
+
+                <div class="ui-g-12 divContent">
+                    <h:form id="frmSaveData" prependId="false">
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+                            <p:defaultCommand target="btnSaveData"/> 
+                            <p:focus for="txtStockBarcode"/>
+
+                            <div class="ui-g-6 ui-md-6 ui-lg-6">
+                                <p:outputLabel value="#{loc.barcode}" for="txtStockBarcode" styleClass="Fs12 FontBold"/>
+                                <p:inputText id="txtStockBarcode"  value="#{waybillItemTabBean.productBarcode}" placeholder="#{loc.barcode}">
+                                </p:inputText>
+                            </div>
+
+                            <div class="ui-g-12 ui-md-6 ui-lg-6">
+                                <p:outputLabel value="#{loc.amount}"  for="txtStockAmount" styleClass="Fs12 FontBold"/>
+                                <p:inputText id="txtStockAmount" onfocus="this.value = ''" value="#{waybillItemTabBean.productAmount}"  class="Wid95"  placeholder="#{loc.amount}">
+                                    <p:keyFilter regEx ="/[0-9]/"/>
+                                </p:inputText> 
+                            </div>
+
+                            <p:commandLink id="btnSaveData"  title="#{loc.save}" style="visibility: hidden;" actionListener="#{waybillItemTabBean.saveData}" global="false" class="Fleft" >
+                                <i class="fa fa-save tlbrAddBtn Fs20" />
+                            </p:commandLink>  
+                        </div>
+                    </h:form>
+
+
+                    <h:panelGroup rendered="#{waybillItemTabBean.listOfProduct.size()>0}" >
+                        <div class="#{waybillItemTabBean.listOfProduct.size()>0 ? 'EmptyBox5': ''}" />
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+                            <h:form id="frmUpdate">
+                                <div style="overflow-y: auto !important;max-height: 300px !important;">
+                                    <c:forEach items="#{waybillItemTabBean.listOfProduct}" var="product"> 
+                                        <div class="ui-g-12">
+                                            <div class="ui-g-12 ui-md-5 ui-lg-6">
+                                                <p:inputText id="txt#{product.stock.id}" onchange="document.getElementById('frmUpdate:btnUpdate#{product.stock.id}').click();"  onkeypress="if (event.keyCode == 13) {
+                                                            document.getElementById('frmUpdate:btnUpdate#{product.stock.id}').click();
+                                                            return false;
+                                                        }" value="#{product.stock.barcode}"  placeholder="#{loc.barcode}">
+                                                </p:inputText>
+                                            </div>
+
+                                            <div class="ui-g-12 ui-md-5 ui-lg-5">
+                                                <p:inputText id="txtAmount#{product.stock.id}" onchange="document.getElementById('frmUpdate:btnUpdate#{product.stock.id}').click();"  onkeypress="if (event.keyCode == 13) {
+                                                            document.getElementById('frmUpdate:btnUpdate#{product.stock.id}').click();
+                                                            return false;
+                                                        }" value="#{product.quantity}" class="Wid95"  placeholder="#{loc.amount}">
+                                                    <p:keyFilter regEx ="/[0-9]/"/>
+                                                </p:inputText> 
+                                            </div>
+
+                                            <div class="ui-g-12 ui-md-2 ui-lg-1">
+                                                <p:commandLink id="btnDelete" resetValues="true" global="false" title="#{loc.delete}" update="frmUpdate" action="#{waybillItemTabBean.deleteRecord(product)}" >
+                                                    <i class="fa fa-remove Fs25 MarTop2" style="color: #b71717 !important"/>                 
+                                                 <!--   <f:setPropertyActionListener value="#{product}" target="#{waybillItemTabBean.deleteItem}" />-->
+                                                </p:commandLink>
+                                            </div>
+
+                                            <p:commandButton style="visibility: hidden" id="btnUpdate#{product.stock.id}" resetValues="true" global="false" title="#{loc.save}" update="frmUpdate" action="#{waybillItemTabBean.updateData(product)}" >
+                                             <!--   <f:setPropertyActionListener value="#{product}" target="#{waybillItemTabBean.selectedInvoiceItem}" /> -->
+                                            </p:commandButton>
+                                        </div>
+                                    </c:forEach> 
+                                </div>
+
+                            </h:form>
+
+                        </div>
+                    </h:panelGroup>
+
+                </div>
+            </h:panelGroup>
+        </c:if>
+    </p:dialog> 
+
+    <!-- İrsaliye Silme kontrol -->
+    <p:confirmDialog id="dlgRelatedRecordInfoWaybill"  class="deleteConfirm controlDelete"  widgetVar="dlg_RelatedRecordInfoWaybill" closable="true" width="20%" responsive="true">
+        <f:facet name="message">
+            <p:panel class="divContent">
+                <div class="ui-g">
+                    <div class="ui-g-12 ui-md-12 ui-lg-12">
+                        <h:outputText value="#{waybillProcessBean.deleteControlMessage}" />
+                    </div>
+                    <div class="ui-g-12 ui-md-12 ui-lg-12">
+                        <h:outputText value="#{waybillProcessBean.deleteControlMessage1}" />
+                    </div>
+                    <div class="ui-g-12 ui-md-12 ui-lg-6">
+                        <h:outputText rendered="#{waybillProcessBean.checkDelete.r_response!=1}" value="#{waybillProcessBean.deleteControlMessage2}" class="Fright"/>
+                    </div>
+                    <div class="ui-g-12 ui-md-12 ui-lg-6">
+                        <p:commandLink rendered="#{waybillProcessBean.checkDelete.r_response!=1}" value="#{waybillProcessBean.relatedRecord}" class="Fleft cmdRelatedRecord" title="#{loc.gotorelatedrecord}" actionListener="#{waybillProcessBean.goToRelatedRecordBefore()}" />
+                    </div>
+                    <div class="ui-g-12 ui-md-12 ui-lg-6">
+                        <p:commandButton rendered="#{waybillProcessBean.checkDelete.r_response==1}" value="#{loc.yes}" actionListener="#{waybillProcessBean.delete()}" async="true" global="true" onclick="PF('dlg_RelatedRecordInfoWaybill').hide()"   styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+                    </div>
+                    <div class="ui-g-12 ui-md-12 ui-lg-6">
+                        <p:commandButton rendered="#{waybillProcessBean.checkDelete.r_response==1}" value="#{loc.no}"  onclick="PF('dlg_RelatedRecordInfoWaybill').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+                    </div>
+                </div>
+            </p:panel>
+        </f:facet>
+    </p:confirmDialog>
+
+    <!-- Item Silme kontrol -->
+    <p:confirmDialog id="dlgRelatedRecordInfo"  class="deleteConfirm controlDelete"  widgetVar="dlg_RelatedRecordInfo" closable="true" width="20%" responsive="true">
+        <c:if test="#{waybillProcessBean.activeIndex==5}" >
+            <f:facet name="message">
+                <p:panel class="divContent">
+                    <div class="ui-g">
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+                            <h:outputText value="#{waybillItemTabBean.deleteControlMessage}" style="color:black !important"/>
+                        </div>
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+                            <h:outputText value="#{waybillItemTabBean.deleteControlMessage1}" style="color:black !important"/>
+                        </div>
+                        <div class="ui-g-12 ui-md-12 ui-lg-6">
+                            <h:outputText value="#{waybillItemTabBean.deleteControlMessage2}" class="Fright"/>
+                        </div>
+                        <div class="ui-g-12 ui-md-12 ui-lg-6">
+                            <p:commandLink value="#{waybillItemTabBean.relatedRecord}" class="Fleft cmdRelatedRecord" title="#{loc.gotorelatedrecord}" actionListener="#{waybillItemTabBean.goToRelatedRecordBefore()}" />
+                        </div>
+                    </div>
+                </p:panel>
+            </f:facet>
+        </c:if>
+    </p:confirmDialog>
+
+    <!-- Cari ve belge no değiştirme dialogu-->
+    <p:dialog id="dlgChangeWaybillInfo" widgetVar="dlg_ChangeWaybillInfo" resizable="false" width="40%" focus="dlgChangeWaybillInfo" responsive="true" dynamic="true" modal="true" closeOnEscape="true" >
+        <p:ajax event="close" listener="#{waybillProcessBean.resetChangingInfoDialog()}" global="false" update="pngWaybillAccountBook"/>
+        <h:form id="frmChangeWaybillInfo">
+            <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+                <ui:param name="outputtext" value="#{loc.waybillprocess}"/>
+                <ui:param name="bean" value='#{waybillProcessBean}' />
+                <ui:param name="update" value="pgrChangeWaybillInfo" />
+                <ui:param name="btnSaveId" value="true" />    
+            </ui:include>
+            <h:panelGroup id="pgrChangeWaybillInfo" layout="block" class="divContent">
+                <div class="ui-g">
+                    <div class="#{waybillProcessBean.selectedObject.isPurchase ? 'ui-g-12 ui-md-6 ui-lg-6' : 'ui-g-12 ui-md-4 ui-lg-6'}">
+                        <p:outputLabel value="#{loc.current}" for="txtAccountName" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtAccountName" onclick="showBookChangeAccount()" 
+                                     value="#{waybillProcessBean.selectedChangingWaybill.account.name}" class="inputPositionForBookFilter" required="true" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.current}">
+
+                        </p:inputText>
+                        <p:commandLink id="btnAccountName" class="commandLinkPositionForBookFilter" process="@this" oncomplete="PF('olp_account').loadContents();" >
+                            <i class="fa fa-book Fs16 softgray iconPositionForBookFilter "/>   
+                            <p:ajax listener="#{accountBookFilterBean.findFilterListLazyLoading([waybillProcessBean.selectedObject.branchSetting.branch],'frmAccountBookFilter','olp_account','waybill')}" global="false" />
+                        </p:commandLink>
+                    </div>
+
+                    <h:panelGroup rendered="#{waybillProcessBean.selectedObject.isPurchase}" >
+                        <div class="ui-g-12 ui-md-6 ui-lg-6">
+                            <p:outputLabel value="#{loc.documentnumber}" for="txtDocumentNumber" styleClass="Fs12 FontBold"/>
+                            <p:inputText id="txtDocumentNumber" value="#{waybillProcessBean.selectedChangingWaybill.documentNumber}" required="true"  styleClass="Wid95" placeholder="#{loc.documentnumber}"  /> 
+                        </div>
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{!waybillProcessBean.selectedObject.isPurchase}" >
+                        <div class="ui-g-12 ui-md-4 ui-lg-3">
+                            <p:outputLabel value="#{loc.serialno}" for="slcDocumentNumber" styleClass="Fs12 FontBold"/>
+                            <p:selectOneMenu id="slcDocumentNumber" required="true" value="#{waybillProcessBean.selectedChangingWaybill.dNumber.id}" 
+                                             styleClass="Wid95" >
+                                <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true" />
+                                <f:selectItems value="#{waybillProcessBean.listOfDocumentNumber}"  var="dnumber" itemLabel="#{dnumber.serial}" itemValue="#{dnumber.id}" />
+                                <p:ajax listener="#{waybillProcessBean.bringDocument}" global="false" update="txtDocumentNumber2" />
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="ui-g-12 ui-md-4 ui-lg-3">
+                            <p:outputLabel value="#{loc.orderno}" for="txtDocumentNumber2" styleClass="Fs12 FontBold"/>
+                            <p:inputNumber id="txtDocumentNumber2" value="#{waybillProcessBean.selectedChangingWaybill.dNumber.actualNumber}" required="true" 
+                                           styleClass="Wid95" placeholder="#{loc.number}"
+                                           thousandSeparator="" decimalSeparator="." decimalPlaces="0" minValue="0"
+                                           />
+                        </div>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{!waybillProcessBean.selectedObject.isPurchase}" >
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+                            <p:outputLabel value="#{loc.dispatchaddress}" for="txtChangeDispatchAddress" styleClass="Fs12 FontBold"/>
+                            <p:inputText id="txtChangeDispatchAddress" value="#{waybillProcessBean.selectedChangingWaybill.dispatchAddress}" required="true" 
+                                         placeholder="#{loc.dispatchaddress}" styleClass="Wid97" /> 
+                        </div>
+                    </h:panelGroup>
+                </div>
+            </h:panelGroup>
+            <p:remoteCommand name="showBookChangeAccount" process="@this" oncomplete="PF('olp_account').loadContents();" update="pngWaybillAccountBook" actionListener="#{accountBookFilterBean.findFilterListLazyLoading([waybillProcessBean.selectedObject.branchSetting.branch],'frmAccountBookFilter','olp_account','waybill')}" global="false" />
+
+        </h:form>
+    </p:dialog>
+
+    <!-- Fatura cari ve belge no değiştirme için açılan confirm -->
+    <p:confirmDialog id="dlgWaybillConfirmChangeInfo"  class="deleteConfirm controlDelete"  widgetVar="dlg_WaybillConfirmChangeInfo" closable="true" width="20%" responsive="true">
+        <f:facet name="message">
+            <p:panel class="divContent">
+                <div class="ui-g">
+                    <div class="ui-g-12 ui-md-12 ui-lg-12">
+                        <h:outputText value="#{loc.waybillwithchangingissaved}" />
+                    </div>
+                    <div class="ui-g-12 ui-md-12 ui-lg-12">
+                        <h:outputText value="#{loc.areyousureyouwanttocontinue}" />
+                    </div>
+                    <div class="ui-g-12 ui-md-12 ui-lg-6">
+                        <p:commandButton value="#{loc.yes}" actionListener="#{waybillProcessBean.confirmSaveBefore()}" global="true" onclick="PF('dlg_WaybillConfirmChangeInfo').hide()"   styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+                    </div>
+                    <div class="ui-g-12 ui-md-12 ui-lg-6">
+                        <p:commandButton value="#{loc.no}"  onclick="PF('dlg_WaybillConfirmChangeInfo').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+                    </div>
+                </div>
+            </p:panel>
+        </f:facet>
+    </p:confirmDialog>
+
+    <div style="display: none">
+        <p:outputPanel id="printPanel"  style="width: 22cm;height: 29cm;">
+        </p:outputPanel>  
+        <script>
+            function printData() {
+                var contents = document.getElementById("printPanel").innerHTML;
+                var frame1 = document.createElement('iframe');
+                frame1.name = "frame1";
+                frame1.style.position = "absolute";
+                frame1.style.top = "-1000000px";
+                document.body.appendChild(frame1);
+                var frameDoc = (frame1.contentWindow) ? frame1.contentWindow : (frame1.contentDocument.document) ? frame1.contentDocument.document : frame1.contentDocument;
+                frameDoc.document.open();
+                frameDoc.document.write('<html><head><title>DIV Contents</title>');
+                frameDoc.document.write('</head><body>');
+                frameDoc.document.write(contents);
+                frameDoc.document.write('</body></html>');
+                frameDoc.document.close();
+                setTimeout(function () {
+                    window.frames["frame1"].focus();
+                    window.frames["frame1"].print();
+                    document.body.removeChild(frame1);
+                }, 500);
+                return false;
+            }
+        </script>
+    </div>
+</ui:composition>
+

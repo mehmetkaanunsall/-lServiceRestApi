@@ -1,0 +1,522 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+    <h:form id="frmFuelShiftTransfer">
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.fuelshiftpreview}"/>
+            <ui:param name="bean" value='#{fuelShiftPreviewBean}' />
+            <ui:param name="update" value="" />
+            <ui:param name="btnSaveId" value="false" />     
+            <ui:param name="renderback" value='true'/>
+        </ui:include>
+
+        <h:panelGroup id="pgrFuelShiftTransfer" layout="block" transient="true" >  
+            <div class="ui-g divContent">
+                <div class="ui-g-12 panelToggle">
+                    <div class="EmptyBox10"/>
+                    <div class="ui-g-12 ui-md-12 ui-lg-8">
+                        <div class="ui-g-12 ui-md-12 ui-lg-4">
+                            <div class="ui-g-12 ui-md-12 ui-lg-12" style="text-align: center">
+                                <h:outputText   value="#{loc.branchname}" class="FontBold Fs15"/>
+                            </div>
+                            <div class="ui-g-12 ui-md-12 ui-lg-12" style="text-align: center">
+                                <h:outputText style="text-align: left !important;" value="#{sessionBean.user.lastBranch.name}"/>
+                            </div>
+                        </div>
+                        <div class="ui-g-12 ui-md-12 ui-lg-4">
+                            <div class="ui-g-12 ui-md-12 ui-lg-12" style="text-align: center">
+                                <h:outputText   value="#{loc.shiftno}" class="FontBold Fs15"/>
+                            </div>
+                            <div class="ui-g-12 ui-md-12 ui-lg-12" style="text-align: center">
+                                <h:outputText style="text-align: left !important;" value="#{fuelShiftPreviewBean.selectedShift.shiftNo}"/>
+                            </div>
+                        </div>
+                        <div class="ui-g-12 ui-md-12 ui-lg-4">
+                            <div class="ui-g-12 ui-md-12 ui-lg-12" style="text-align: center">
+                                <h:outputText   value="#{loc.startdate}" class="FontBold Fs15"/>
+                            </div>
+                            <div class="ui-g-12 ui-md-12 ui-lg-12" style="text-align: center">
+                                <h:outputText   value="#{fuelShiftPreviewBean.selectedShift.beginDate}">
+                                    <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" />
+                                </h:outputText>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="ui-g-12 ui-md-12 ui-lg-4">
+                        <div class="ui-g-12 ui-md-12 ui-lg-6">
+                            <div class="ui-g-12 ui-md-12 ui-lg-12" style="text-align: center">
+                                <h:outputText value="#{loc.enddate}" class="FontBold Fs15" />
+                            </div>
+                            <div class="ui-g-12 ui-md-12 ui-lg-12" style="text-align: center">
+                                <h:outputText   value="#{fuelShiftPreviewBean.selectedShift.endDate}">
+                                    <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" />
+                                </h:outputText>
+                            </div>
+                        </div>
+                        <div class="ui-g-12 ui-md-12 ui-lg-6">
+                            <div class="ui-g-12 ui-md-12 ui-lg-12" style="text-align: center">
+                                <h:outputText value="#{loc.totalsalesamount}" class="FontBold Fs15" />
+                            </div>
+                            <div class="ui-g-12 ui-md-12 ui-lg-12" style="text-align: center">
+                                <h:outputText   value="#{fuelShiftPreviewBean.selectedShift.totalMoney}">
+                                    <f:converter converterId="currencyConverter"  />
+                                    <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                    <f:attribute name="type" value="currency" />
+                                </h:outputText>
+                            </div>
+                        </div>   
+                    </div>
+                </div>
+            </div>
+        </h:panelGroup>
+        <div class="EmptyBox20" />
+        <p:fieldset legend="#{loc.accordingtostockquantity}" class="shiftSaleFieldSet" toggleable="true">
+            <p:dataTable id="dtbStockSales" value="#{fuelShiftPreviewBean.listOfStockSales}" rowKey="#{fuelShiftPreview.id}" emptyMessage="#{loc.norecordsfound}" var="fuelShiftPreview" >
+
+                <p:column headerText="#{loc.stockbarcode}">
+                    <h:outputText value="#{fuelShiftPreview.stock.barcode}" />
+                </p:column>
+                <p:column headerText="#{loc.stockname}">
+                    <h:outputText value="#{fuelShiftPreview.stock.name}" />
+                </p:column>
+                <p:column headerText="#{loc.previousamount}"   >
+                    <h:outputText value="#{fuelShiftPreview.previousAmount}" style="float:right;" >
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="unit"  value="#{fuelShiftPreview.stock.unit}"/>
+                        <f:attribute name="type" value="unit" />
+                    </h:outputText>
+                </p:column>
+                <p:column headerText="#{loc.salesamount}"   >
+                    <h:outputText value="#{fuelShiftPreview.amount}" style="float:right;" >
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="unit"  value="#{fuelShiftPreview.stock.unit}"/>
+                        <f:attribute name="type" value="unit" />
+                    </h:outputText>
+                </p:column>
+                <p:column headerText="#{loc.unitprice}"   >
+                    <h:outputText value="#{fuelShiftPreviewBean.calculateAvUnitPrice(fuelShiftPreview.amount,fuelShiftPreview.totalMoney)}" style="float:right;" >
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                </p:column>
+                <p:column headerText="#{loc.salesprice}"   >
+                    <h:outputText value="#{fuelShiftPreview.totalMoney}" style="float:right;" >
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                </p:column>
+                <p:column headerText="#{loc.remainingamount}"   >
+                    <h:outputText value="#{fuelShiftPreview.remainingAmount}" style="float:right;" >
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="unit"  value="#{fuelShiftPreview.stock.unit}"/>
+                        <f:attribute name="type" value="unit" />
+                    </h:outputText>
+                </p:column>
+                <p:columnGroup type="footer">
+                    <p:column colspan="2">
+                        <f:facet name="footer" >
+                            <h:outputText value="#{loc.sum}" class="Fright FontBold" style="color: #565656;"></h:outputText>
+                        </f:facet>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="footer" >
+                            <h:outputText value="#{fuelShiftPreviewBean.calculateAccordingUnit(1)}" class="Fright FontBold" style="color: #565656;"/>
+                        </f:facet>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="footer" >
+                            <h:outputText value="#{fuelShiftPreviewBean.calculateAccordingUnit(2)}" class="Fright FontBold" style="color: #565656;"/>
+                        </f:facet>
+                    </p:column>
+                    <p:column></p:column>
+                    <p:column>
+                        <f:facet name="footer" >
+                            <h:outputText value="#{fuelShiftPreviewBean.calculateStockTotal()}" class="Fright FontBold" style="color: #565656;">
+                                <f:converter converterId="currencyConverter"  />
+                                <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="footer" >
+                            <h:outputText value="#{fuelShiftPreviewBean.calculateAccordingUnit(3)}" class="Fright FontBold" style="color: #565656;"/>
+                        </f:facet>
+                    </p:column>
+                </p:columnGroup>
+
+            </p:dataTable>
+
+        </p:fieldset>
+        <div class="EmptyBox20" />
+        <p:fieldset legend="#{loc.cashdelivery}" class="shiftSaleFieldSet" toggleable="true">
+            <p:dataTable id="dtbCashDelivery" value="#{fuelShiftPreviewBean.listOfCashDelivery}" rowKey="#{fuelShiftPreview.id}" emptyMessage="#{loc.norecordsfound}" var="fuelShiftPreview" >
+
+                <p:column headerText="#{loc.safecode}">
+                    <h:outputText value="#{fuelShiftPreview.safe.code}" />
+                </p:column>
+                <p:column headerText="#{loc.safename}">
+                    <h:outputText value="#{fuelShiftPreview.safe.name}" />
+                </p:column>
+                <p:column headerText="#{loc.total}"   >
+                    <h:outputText value="#{fuelShiftPreview.price}" style="float:right;" >
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{fuelShiftPreview.safe.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                </p:column>
+                <p:column headerText="#{loc.exchangerate}"   >
+                    <h:outputText value="#{fuelShiftPreview.exchangeRate}" style="float:right;" >
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="type" value="" />
+                    </h:outputText>
+                </p:column>
+                <p:column headerText="#{loc.exchangeprice}"   >
+                    <h:outputText value="#{fuelShiftPreview.price.multiply(fuelShiftPreview.exchangeRate)}" style="float:right;" >
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                </p:column>
+                <p:columnGroup type="footer">
+                    <p:column colspan="2">
+                        <f:facet name="footer" >
+                            <h:outputText value="#{loc.sum}" class="Fright FontBold" style="color: #565656;"></h:outputText>
+                        </f:facet>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="footer" >
+                            <h:outputText value="#{fuelShiftPreviewBean.calculateCashDelivery()}" class="Fright FontBold" style="color: #565656;">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+                    <p:column colspan="2"></p:column>
+                </p:columnGroup>
+
+            </p:dataTable>
+
+        </p:fieldset>
+        <div class="EmptyBox20" />
+        <p:fieldset legend="#{loc.creditcarddelivery}" class="shiftSaleFieldSet" toggleable="true">
+            <p:dataTable id="dtbCreditCardDelivery" value="#{fuelShiftPreviewBean.listOfCreditCardDelivery}" rowKey="#{fuelShiftPreview.id}" emptyMessage="#{loc.norecordsfound}" var="fuelShiftPreview" >
+
+                <p:column headerText="#{loc.bankname}">
+                    <h:outputText value="#{fuelShiftPreview.bankAccount.name}" />
+                </p:column>
+                <p:column headerText="#{loc.total}"   >
+                    <h:outputText value="#{fuelShiftPreview.price}" style="float:right;" >
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{fuelShiftPreview.bankAccount.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                </p:column>
+
+                <p:columnGroup type="footer">
+                    <p:column >
+                        <f:facet name="footer" >
+                            <h:outputText value="#{loc.sum}" class="Fright FontBold" style="color: #565656;"></h:outputText>
+                        </f:facet>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="footer" >
+                            <h:outputText value="#{fuelShiftPreviewBean.calculateCreditCard()}" class="Fright FontBold" style="color: #565656;"/>
+                        </f:facet>
+                    </p:column>
+                </p:columnGroup>
+
+            </p:dataTable>
+
+        </p:fieldset>
+
+        <div class="EmptyBox20" />
+        <p:fieldset legend="#{loc.creditdelivery}" class="shiftSaleFieldSet" toggleable="true">
+            <p:dataTable id="dtbCreditDelivery" value="#{fuelShiftPreviewBean.listOfCredit}" rowKey="#{fuelShiftPreview.id}" emptyMessage="#{loc.norecordsfound}" var="fuelShiftPreview" >
+
+                <p:column headerText="#{loc.accountcode}">
+                    <h:outputText value="#{fuelShiftPreview.account.code}" />
+                </p:column>
+                <p:column headerText="#{loc.currentname}">
+                    <h:outputText value="#{fuelShiftPreview.account.name}" />
+                </p:column>
+                <p:column headerText="#{loc.receiptcount}"   >
+                    <h:outputText value="#{fuelShiftPreview.saleCount}" style="float:right;" >
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="type" value="" />
+                    </h:outputText>
+                </p:column>
+                <p:column headerText="#{loc.totalofpostpaid}"   >
+                    <h:outputText value="#{fuelShiftPreview.price}" style="float:right;" >
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                </p:column>
+
+                <p:columnGroup type="footer">
+                    <p:column colspan="2">
+                        <f:facet name="footer" >
+                            <h:outputText value="#{loc.sum}" class="Fright FontBold" style="color: #565656;"></h:outputText>
+                        </f:facet>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="footer" >
+                            <h:outputText value="#{fuelShiftPreviewBean.calculateCredit()}" class="Fright FontBold" style="color: #565656;">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="footer" >
+                            <h:outputText value="#{fuelShiftPreviewBean.total2}" class="Fright FontBold" style="color: #565656;">
+                                <f:converter converterId="currencyConverter"  />
+                                <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+                </p:columnGroup>
+
+            </p:dataTable>
+
+        </p:fieldset>
+        <div class="EmptyBox20" />
+        <p:fieldset legend="#{loc.accountcollectionepayment}" class="shiftSaleFieldSet" toggleable="true">
+            <p:dataTable id="dtbAccountRecoveries" value="#{fuelShiftPreviewBean.listOfAccountRecoveries}" rowKey="#{fuelShiftPreview.id}" emptyMessage="#{loc.norecordsfound}" var="fuelShiftPreview" >
+
+                <p:column headerText="#{loc.accountcode}">
+                    <h:outputText value="#{fuelShiftPreview.account.code}" />
+                </p:column>
+                <p:column headerText="#{loc.currentname}">
+                    <h:outputText value="#{fuelShiftPreview.account.name}" />
+                </p:column>
+                <p:column headerText="#{loc.documentno}">
+                    <h:outputText value="#{fuelShiftPreview.documentNumber}" />
+                </p:column>
+                <p:column headerText="#{loc.description}">
+                    <h:outputText value="#{fuelShiftPreview.description}" />
+                </p:column>
+                <p:column headerText="#{loc.entryttotal}"   >
+                    <h:outputText value="#{fuelShiftPreview.incomingAmount}" style="float:right;" >
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                </p:column>
+                <p:column headerText="#{loc.exittotal}"   >
+                    <h:outputText value="#{fuelShiftPreview.outcomingAmount}" style="float:right;" >
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                </p:column>
+                <p:column headerText="#{loc.operationtype}"> 
+                    <h:outputText value="#{fuelShiftPreview.account.isEmployee ? fuelShiftPreview.type.id==49 ? loc.shiftdeficit : loc.shiftexcess : fuelShiftPreview.type.id==49 ? loc.accountcollection : loc.accountpayment}" />
+                </p:column>
+
+                <p:columnGroup type="footer">
+                    <p:column colspan="4">
+                        <f:facet name="footer" >
+                            <h:outputText value="#{loc.sum}" class="Fright FontBold" style="color: #565656;"></h:outputText>
+                        </f:facet>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="footer" >
+                            <h:outputText value="#{fuelShiftPreviewBean.calculateAccountRecoveries()}" class="Fright FontBold" style="color: #565656;">
+                                <f:converter converterId="currencyConverter"  />
+                                <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="footer" >
+                            <h:outputText value="#{fuelShiftPreviewBean.total2}" class="Fright FontBold" style="color: #565656;">
+                                <f:converter converterId="currencyConverter"  />
+                                <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+                    <p:column></p:column>
+                </p:columnGroup>
+
+            </p:dataTable>
+
+        </p:fieldset>
+
+        <div class="EmptyBox20" />
+        <p:fieldset legend="#{loc.shiftgeneraltotals}" class="shiftSaleFieldSet" toggleable="true">
+            <div class="divContent">
+                <h:panelGrid columns="3" class="Wid100 summaryPanelGrid">
+                    <h:outputText value="#{loc.description}" />
+                    <h:outputText value="#{loc.entryttotal}" />
+                    <h:outputText value="#{loc.exittotal}"/>
+
+                    <h:outputText value="#{loc.saleamountwithfuelcounter}" />
+                    <h:outputText value="#{fuelShiftPreviewBean.selectedShift.totalMoney}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                    <h:outputText value="0" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+
+                    <h:outputText value="#{loc.totalofpostpaid}" />
+                    <h:outputText value="0" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                    <h:outputText value="#{fuelShiftPreviewBean.listOfGeneralTotal.get(0).creditAmout}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+
+                    <h:outputText value="#{loc.automationamount}" />
+                    <h:outputText value="0" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                    <h:outputText value="#{fuelShiftPreviewBean.listOfGeneralTotal.get(0).automationSaleAmount}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+
+                    <h:outputText value="#{loc.totalofpos}" />
+                    <h:outputText value="0" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                    <h:outputText value="#{fuelShiftPreviewBean.listOfGeneralTotal.get(0).creditCardAmount}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+
+                    <h:outputText value="#{loc.cashdeliveryamount}" />
+                    <h:outputText value="0" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                    <h:outputText value="#{fuelShiftPreviewBean.listOfGeneralTotal.get(0).cashAmount}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+
+                    <h:outputText value="#{loc.totalofincome}" />
+                    <h:outputText value="#{fuelShiftPreviewBean.listOfGeneralTotal.get(0).incomeAmount}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                    <h:outputText value="0" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                    <h:outputText value="#{loc.totalofexpense}" />
+                    <h:outputText value="0" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                    <h:outputText value="#{fuelShiftPreviewBean.listOfGeneralTotal.get(0).expenseAmount}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                    <h:outputText value="#{loc.totalofemployee}" />
+                    <h:outputText value="#{fuelShiftPreviewBean.listOfGeneralTotal.get(0).givenEmployee}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                    <h:outputText value="#{fuelShiftPreviewBean.listOfGeneralTotal.get(0).employeeDebt}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                    <h:outputText value="#{loc.totalofaccount}" />
+                    <h:outputText value="#{fuelShiftPreviewBean.listOfGeneralTotal.get(0).accountCollection}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                    <h:outputText value="#{fuelShiftPreviewBean.listOfGeneralTotal.get(0).accountPayment}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                    
+                    
+                    <h:outputText value="#{loc.subtotal}" />
+                    <h:outputText value="#{fuelShiftPreviewBean.listOfGeneralTotal.get(0).entrySubTotal.add(fuelShiftPreviewBean.selectedShift.totalMoney)}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                    <h:outputText value="#{fuelShiftPreviewBean.listOfGeneralTotal.get(0).exitSubTotal}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                    <h:outputText value="#{loc.difference}" />
+                    <h:outputText value="#{fuelShiftPreviewBean.calculateGeneralDifference()}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                    <h:outputText value="#{fuelShiftPreviewBean.total2}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+
+                    <h:outputText value="#{loc.overalltotal}" />
+                    <h:outputText value="#{fuelShiftPreviewBean.total3}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                    <h:outputText value="#{fuelShiftPreviewBean.total4}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+
+
+                </h:panelGrid>
+            </div>
+
+        </p:fieldset>
+
+
+
+    </h:form>
+
+</ui:composition>
+
+
+

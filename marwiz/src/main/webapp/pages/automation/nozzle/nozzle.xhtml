@@ -1,0 +1,79 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <ui:include src="/pages/general/common/datagridtoolbar.xhtml" >
+        <ui:param name="bean" value="#{nozzleBean}"/> 
+        <ui:param name="update" value=""/>
+        <ui:param name="btnNewId" value="#{nozzleBean.getRendered(167, 0)}"/>
+        <ui:param name="datatable" value="#{nozzleBean.formId}frmNozzle:dtbNozzle" /> <!---->
+        <ui:param name="dtbWidgetVar" value="nozzlePF" /> <!---->
+        <ui:param name="fileName" value="#{loc.nozzles}"/>,
+        <ui:param name="renderedFilter" value='true'/>
+        <ui:param name="renderedAdd" value='true'/>
+        <ui:param name="renderedToggler" value='true'/>
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+    </ui:include>
+
+    <h:form id="frmNozzle">
+        <p:remoteCommand name="go"  delay="700"  resetValues="false"  action="#{nozzleBean.goToProcess()}" />
+
+        <p:dataTable  id="dtbNozzle" var="Nozzle"  value="#{nozzleBean.listOfObjects}" selection="#{nozzleBean.selectedObject}" selectionMode="single"  widgetVar="nozzlePF" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{Nozzle.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="false" lazy="true"
+                      rowStyleClass="#{Nozzle.status.id==50 ? 'ColumnColorRed' : null}"
+                      >
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" onsuccess="go(); " listener="#{nozzleBean.checckBeforeMove()}" global="false" />  
+
+            <p:ajax event="sort" listener="#{nozzleBean.sortListener}" />        
+            <p:ajax event="colReorder" listener="#{nozzleBean.reorder}" update="#{nozzleBean.formId}frmGridToolbar:toggle" />    <!--tbvTankProc: -->
+            <p:ajax event="colResize"  listener="#{nozzleBean.onResize}" />
+
+            <p:column id="clmName" headerText="#{loc.nozzlename}"  sortable="true" sortBy="#{Nozzle.nz.name}"   visible="#{nozzleBean.toogleList[0]}" exportable="#{nozzleBean.toogleList[0]}">
+                <h:outputText value="#{Nozzle.name}" style="text-align: center !important; " /> 
+            </p:column>
+
+            <p:column id="clmTankName" headerText="#{loc.tankname}" sortable="true" sortBy="#{Nozzle.wr.name}"  visible="#{nozzleBean.toogleList[1]}"   exportable="#{nozzleBean.toogleList[1]}">
+                <h:outputText value="#{Nozzle.warehouse.name}"   style="text-align: center !important; " />
+            </p:column>
+
+            <p:column id="clmPumpNo" headerText="#{loc.pumpno}"   sortable="true" sortBy="#{Nozzle.nz.pumpno}"  visible="#{nozzleBean.toogleList[2]}"   exportable="#{nozzleBean.toogleList[2]}">
+                <h:outputText value="#{Nozzle.pumpNo}"   style="text-align: center !important; " />
+            </p:column>
+
+            <p:column id="clmNozzleNo" headerText="#{loc.nozzleno}" sortable="true" sortBy="#{Nozzle.nz.nozzleno}"   visible="#{nozzleBean.toogleList[3]}"   exportable="#{nozzleBean.toogleList[3]}">
+                <h:outputText value="#{Nozzle.nozzleNo}"   style="text-align: center !important; " />
+            </p:column>
+
+            <p:column id="clmIndex" headerText="#{loc.index}"  sortable="true" sortBy="#{Nozzle.nz.index}"   visible="#{nozzleBean.toogleList[4]}"   exportable="#{nozzleBean.toogleList[4]}">
+                <h:outputText value="#{Nozzle.index}"  class="Fright">
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="type" value="" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmAscending" headerText="#{loc.indextype}"   sortable="true" sortBy="#{Nozzle.nz.is_ascending}"  visible="#{nozzleBean.toogleList[5]}" exportable="#{nozzleBean.toogleList[5]}">
+                <h:outputText value="#{Nozzle.isAscending == true ? loc.growing : loc.decreasing}" style="text-align: center !important; " /> 
+            </p:column>
+
+            <p:column id="clmDescription" headerText="#{loc.description}"   sortable="true" sortBy="#{Nozzle.nz.description}" visible="#{nozzleBean.toogleList[6]}"   exportable="#{nozzleBean.toogleList[6]}">
+                <h:outputText value="#{Nozzle.description}"   style="text-align: center !important; " />
+            </p:column>
+
+            <p:column id="clmStatus" headerText="#{loc.statu}"   sortable="true" sortBy="#{Nozzle.nz.status_id}"  visible="#{nozzleBean.toogleList[7]}" exportable="#{nozzleBean.toogleList[7]}">
+                <h:outputText value="#{Nozzle.status.tag}" style="text-align: center !important; " /> 
+            </p:column>
+   
+        </p:dataTable>  
+        
+    </h:form>
+
+</ui:composition>
+
+
+

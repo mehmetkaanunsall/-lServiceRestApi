@@ -1,0 +1,58 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions" 
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmShelfStockTabProcess">
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.stockprocess}"/>
+            <ui:param name="bean" value='#{warehouseShelfTabStockTabBean}' />
+            <ui:param name="update" value="pgrWarehouseStockProcess" />
+            <ui:param name="btnSaveId" value="#{warehouseShelfTabStockTabBean.warehouse.isAutomat ? 'false' : warehouseShelfTabStockTabBean.getRendered(156, 0)}" />     
+            <ui:param name="renderback" value='false'/>
+            <c:if test="#{warehouseShelfTabStockTabBean.processType==2}">
+                <ui:param name="btnDeleteId" value="#{warehouseShelfTabStockTabBean.warehouse.isAutomat ? 'false' : warehouseShelfTabStockTabBean.getRendered(157, 0)}" />
+            </c:if>
+        </ui:include>
+
+        <h:panelGroup id="pgrWarehouseStockProcess" layout="block">
+            <div class="ui-g divContent">
+                <div class="ui-g-12 panelToggle">
+
+
+                    <div class="ui-g-12  ui-md-12">
+                        <p:outputLabel value="#{loc.stock}" for="txtStock" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtStock" value="#{warehouseShelfTabStockTabBean.selectedObject.stock.name}" onclick="showBook()" class="inputPositionForBookFilter" required="true"  readonly="#{facesContext.currentPhaseId.ordinal ge 4}" rendered="#{facesContext.currentPhaseId.ordinal ne 4}" placeholder="#{loc.stock} ">
+
+                        </p:inputText>
+                        <p:commandLink id="btnStockName" class="commandLinkPositionForBookFilter"  process="@this" oncomplete="PF('olp_shelftabstock').loadContents()"  >
+                            <i class="fa fa-book Fs16 black iconPositionForBookFilter "/>   
+                            <p:ajax listener="#{stockBookFilterBean.findFilterListLazyLoading([warehouseShelfTabStockTabBean.selectedObject.warehouseShelf],'frmShelfTabStockBookFilter','olp_shelftabstock','warehouseshelf')}"/>
+                        </p:commandLink>
+                    </div>
+
+
+                </div>
+            </div>
+        </h:panelGroup>
+        <p:remoteCommand name="showBook" process="@this" oncomplete="PF('olp_shelftabstock').loadContents();" actionListener="#{stockBookFilterBean.findFilterListLazyLoading([warehouseShelfTabStockTabBean.selectedObject.warehouseShelf],'frmShelfTabStockBookFilter','olp_shelftabstock','warehouseshelf')}" />
+
+
+    </h:form>
+
+    <ui:include src="/pages/general/common/stockbook.xhtml" >
+        <ui:param name="updateBean" value='#{warehouseShelfTabStockTabBean}' />
+        <ui:param name="for" value='frmShelfStockTabProcess:btnStockName' />
+        <ui:param name="type" value='warehouseshelf' />
+        <ui:param name="parameters" value='#{[warehouseShelfTabStockTabBean.selectedObject.warehouseShelf]}' /> 
+        <ui:param name="columnsize" value='4' /> 
+        <ui:param name="form" value='frmShelfTabStockBookFilter' /> 
+        <ui:param name="overlay" value="olp_shelftabstock" />
+    </ui:include>
+
+</ui:composition>

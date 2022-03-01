@@ -1,0 +1,49 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets">
+
+
+    <h:form id="frmInvoicePaymentProcess">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{invoicePaymentsTabBean.selectedInvoice.isPurchase==true and invoicePaymentsTabBean.selectedInvoice.type.id ==26 and invoicePaymentsTabBean.selectedInvoice.isDifferenceDirection ? loc.payments
+                                                 : invoicePaymentsTabBean.selectedInvoice.isPurchase==true and invoicePaymentsTabBean.selectedInvoice.type.id ==26 and !invoicePaymentsTabBean.selectedInvoice.isDifferenceDirection ? loc.recoveries
+                                                 : invoicePaymentsTabBean.selectedInvoice.isPurchase==false and invoicePaymentsTabBean.selectedInvoice.type.id ==26 and invoicePaymentsTabBean.selectedInvoice.isDifferenceDirection ? loc.recoveries
+                                                 : invoicePaymentsTabBean.selectedInvoice.isPurchase==false and invoicePaymentsTabBean.selectedInvoice.type.id ==26 and !invoicePaymentsTabBean.selectedInvoice.isDifferenceDirection ? loc.payments
+                                                 : invoicePaymentsTabBean.selectedInvoice.isPurchase==false and invoicePaymentsTabBean.selectedInvoice.type.id !=27 ? loc.collectionprocess
+                                                 : invoicePaymentsTabBean.selectedInvoice.isPurchase==true and invoicePaymentsTabBean.selectedInvoice.type.id !=27 ? loc.paymentprocess
+                                                 : invoicePaymentsTabBean.selectedInvoice.isPurchase==false and invoicePaymentsTabBean.selectedInvoice.type.id ==27 ? loc.paymentprocess
+                                                 : invoicePaymentsTabBean.selectedInvoice.isPurchase==true and invoicePaymentsTabBean.selectedInvoice.type.id ==27 ? loc.collectionprocess
+                                                 : ''}"/>
+            <ui:param name="bean" value='#{invoicePaymentsTabBean}' />
+            <ui:param name="update" value="grdPaymentProcess" />
+            <ui:param name="btnSaveId" value="#{sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranchSetting.erpIntegrationId == 1  and
+                                                invoicePaymentsTabBean.selectedInvoice.status.id==28 and invoicePaymentsTabBean.selectedInvoice.posId==0 and 
+                                                (invoicePaymentsTabBean.processType==1 or
+                                                (invoicePaymentsTabBean.processType==2 and !(invoicePaymentsTabBean.selectedObject.type.id==66 or invoicePaymentsTabBean.selectedObject.type.id==69 or invoicePaymentsTabBean.selectedObject.type.id==19))) ? invoicePaymentsTabBean.selectedInvoice.sapLogIsSend ? false : invoicePaymentsTabBean.getRendered(9, 0) :
+                                                invoicePaymentsTabBean.getRendered(9, 0) and invoicePaymentsTabBean.selectedInvoice.status.id==28 and invoicePaymentsTabBean.selectedInvoice.posId==0 and 
+                                                (invoicePaymentsTabBean.processType==1 or
+                                                (invoicePaymentsTabBean.processType==2 and !(invoicePaymentsTabBean.selectedObject.type.id==66 or invoicePaymentsTabBean.selectedObject.type.id==69 or invoicePaymentsTabBean.selectedObject.type.id==19)))}" />      
+            <ui:param name="btnDeleteId" value='false' />
+            <ui:param name="pageId" value="340"/>
+            <ui:param name="privateDelete" value="true"/>
+            <ui:param name="btnDetail" value="#{invoicePaymentsTabBean.processType==2 and (invoicePaymentsTabBean.selectedObject.type.id==66 or invoicePaymentsTabBean.selectedObject.type.id==69 or invoicePaymentsTabBean.selectedObject.type.id==19)}"/>
+            <ui:param name="btnDeleteId" value="#{sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranchSetting.erpIntegrationId == 1  and
+                                                  invoicePaymentsTabBean.processType==2 and invoicePaymentsTabBean.selectedInvoice.posId==0 ? invoicePaymentsTabBean.selectedInvoice.sapLogIsSend ? false : invoicePaymentsTabBean.getRendered(10, 0) :
+                                                  invoicePaymentsTabBean.processType==2 and invoicePaymentsTabBean.selectedInvoice.posId==0 and invoicePaymentsTabBean.getRendered(10, 0)}" />
+            <ui:param name="btnTestBeforeDeleteId" value="true" />
+        </ui:include>
+
+
+        <ui:include src="/pages/finance/invoice/paymentprocess.xhtml" >
+            <ui:param name="bean" value='#{invoicePaymentsTabBean}' />
+            <ui:param name="isPurchase" value='#{invoicePaymentsTabBean.selectedInvoice.isPurchase}' />
+            <ui:param name="isAccount" value='#{false}' />
+            <ui:param name="account" value='#{invoicePaymentsTabBean.selectedObject.financingDocument.account}' />
+            <ui:param name="currency" value='#{invoicePaymentsTabBean.selectedInvoice.currency}' />
+            <ui:param name="paymentType" value='#{invoicePaymentsTabBean.selectedInvoice.isPurchase}' />
+        </ui:include>
+    </h:form>
+
+
+
+</ui:composition>

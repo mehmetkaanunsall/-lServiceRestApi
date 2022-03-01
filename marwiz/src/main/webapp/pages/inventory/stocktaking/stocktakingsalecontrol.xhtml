@@ -1,0 +1,103 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions" 
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <div class="ContainerIndent"> 
+        <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+            <ui:param name="bean" value="#{stockTakingStockSaleControlBean}"/>   <!-- Bean -->
+            <ui:param name="update" value=""/> 
+            <ui:param name="btnNewId" value="false"/>  <!-- buton id yetki kontrolü için  -->
+            <ui:param name="datatable" value="frmStockTakingStockSaleControl:dtbStockTakingItemSaleContol" />  <!-- datatable  -->       
+            <ui:param name="widgetvar" value='stockTakingItemSaleControlPF' />
+            <ui:param name="form" value='frmToolbarStockTakingStockSaleControl' />
+            <ui:param name="renderedToggler" value='false'/>       
+            <ui:param name="renderedExel" value='false'/>
+            <ui:param name="renderedPdf" value='false'/>
+            <ui:param name="renderedStockTaking" value='false'/>
+        </ui:include>
+
+        <h:form id="frmStockTakingStockSaleControl" >
+
+
+
+            <p:dataTable id="dtbStockTakingItemSaleContol" editable="true" editMode="cell" widgetVar="stockTakingItemSaleControlPF"  var="StockTakingItem" value="#{stockTakingStockSaleControlBean.listOfObjects}" filteredValue="#{stockTakingStockSaleControlBean.listOfFilteredObjects}" selection="#{stockTakingStockSaleControlBean.selectedObject}" selectionMode="single" rowKey="#{StockTakingItem.stock.id}"
+                         rows="#{sessionBean.user.defualtGridSize}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                         rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"
+                         emptyMessage="#{loc.norecordsfound}" class="tabDatatable"  >
+
+
+
+                <p:ajax event="page" global="false"/>
+                <p:ajax event="filter" global="false"/>
+                <p:ajax event="colReorder" listener="#{stockTakingStockSaleControlBean.reorder}" update="frmToolbarStockTakingStockSaleControl:toggle" />     
+                <p:ajax event="colResize"  listener="#{stockTakingStockSaleControlBean.onResize}" /> 
+
+                <f:facet  name="footer"     >
+                    <p:inputText id="globalFilter" value="#{stockTakingStockSaleControlBean.autoCompleteValue}"  style="display: none" />
+                </f:facet>
+
+                <p:column headerText="#{loc.stockname}" sortBy="#{StockTakingItem.stock.name}" sortable="true" filterable="true"  filterBy="#{StockTakingItem.stock.name}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet> 
+                    <h:outputText value="#{StockTakingItem.stock.name}" />
+                </p:column>
+                <p:column headerText="#{loc.countquantity}" sortBy="#{StockTakingItem.realQuantity}" sortable="true" filterable="true"  filterBy="#{StockTakingItem.realQuantity}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet> 
+                    <h:outputText value="#{StockTakingItem.realQuantity}" class="Fright">
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="type" value="" />
+                    </h:outputText>
+                </p:column>
+                <p:column headerText="#{loc.entryquantityafterthecount}" sortBy="#{StockTakingItem.entryQuantity}" sortable="true" filterable="true"  filterBy="#{StockTakingItem.entryQuantity}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet> 
+                    <h:outputText value="#{StockTakingItem.entryQuantity}" class="Fright">
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="type" value="" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column headerText="#{loc.exitquantityafterthecount}" sortBy="#{StockTakingItem.exitQuantity}" sortable="true" filterable="true"  filterBy="#{StockTakingItem.exitQuantity}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet> 
+                    <h:outputText value="#{StockTakingItem.exitQuantity}" class="Fright">
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="type" value="" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column headerText="#{loc.currentquantity}" sortBy="#{StockTakingItem.currentQuantity}" sortable="true" filterable="true"  filterBy="#{StockTakingItem.currentQuantity}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet>
+                    <h:outputText  value="#{StockTakingItem.currentQuantity}" class="Fright">
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="type" value="" />
+                    </h:outputText>
+
+                </p:column>
+
+
+
+            </p:dataTable>
+            <div class="EmptyBox10"/>
+
+            <p:commandButton class="btnStockTaking" value="#{loc.cancel}" process="@this" oncomplete="PF('dlg_StockTakingStockControl').hide();"/>
+
+            <p:commandButton delay="100" class="btnStockTaking Fright" value="#{loc.apply}" process="@this" actionListener="#{stockTakingStockSaleControlBean.save()}" />
+
+
+        </h:form>
+    </div>
+
+</ui:composition>

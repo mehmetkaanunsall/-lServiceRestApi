@@ -1,0 +1,127 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+
+
+    <h:form id="frmMovementTab" style="padding: 5px 6px 0px 6px;">
+        <div class="EmptyBox20" />
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.movements}"/>
+            <ui:param name="selectedObjectName" value=""/>
+            <ui:param name="bean" value='#{accountMovementTabBean}' />
+            <ui:param name="update" value="tbvAccountProc:pgrMovementDatatableProcess tbvAccountProc:frmMovementTab" />
+            <ui:param name="btnSaveId" value="false" />
+            <ui:param name="renderback" value='false'/>
+            <ui:param name="btnDeleteId" value='false' /> 
+            <ui:param name="renderSelectedObject" value='false'/>
+            <ui:param name="renderedFindReport" value='true'/>
+        </ui:include>
+
+
+        <h:panelGroup id="pgrMovementProcess" layout="block" transient="true">  
+            <div class="ui-g-12 divContent">
+                <div class="ui-g">
+                    <h:panelGroup rendered="#{accountMovementTabBean.listOfBranch.size() > 1}">
+                        <div class="ui-g-12 ui-md-6 ui-lg-2">
+                            <p:outputLabel value="#{loc.branch}" for="slcBranch" styleClass="Fs12 FontBold"/>
+                            <p:selectCheckboxMenu  id="slcBranch"  value="#{accountMovementTabBean.selectedBranchList}" 
+                                                   filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                                   label="#{accountMovementTabBean.selectedBranchList.size()!=0 ? accountMovementTabBean.selectedBranchList.size() : loc.all} #{accountMovementTabBean.selectedBranchList.size()!=0 ? loc.branch : ''} #{accountMovementTabBean.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                                <f:selectItems value="#{accountMovementTabBean.listOfBranch}" itemLabel="#{branch.name}" itemValue="#{branch}" var="branch" />       
+                                <p:ajax oncomplete="PF('slcBranchCheckBox').show()" global="false" update="tbvAccountProc:frmMovementTab:slcBranch" />
+                                <p:ajax event="toggleSelect" oncomplete="PF('slcBranchCheckBox').show()" update="tbvAccountProc:frmMovementTab:slcBranch" global="false"/>
+                            </p:selectCheckboxMenu>
+                        </div>
+                    </h:panelGroup>  
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldStartDate" class="datepicker" value="#{accountMovementTabBean.beginDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select"  showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldEndDate" class="datepicker" value="#{accountMovementTabBean.endDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select"  showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="#{accountMovementTabBean.listOfBranch.size() > 1 ? 'ui-g-12 ui-md-6 ui-lg-4' : 'ui-g-12 ui-md-6 ui-lg-6'}">
+                        <p:outputLabel value="#{loc.processtype}" for="srdOperationType" styleClass="Fs12 FontBold"/>
+                        <p:panelGrid layout="grid" columns="1" class="pngCheckBox" >  
+                            <p:selectOneRadio id="srdOperationType" value="#{accountMovementTabBean.opType}" class="srcExtractRadio" layout="responsive" columns="3">
+                                <f:selectItem itemLabel="#{loc.incoming}" itemValue="1" />
+                                <f:selectItem itemLabel="#{loc.outcoming}" itemValue="2" />
+                                <f:selectItem itemLabel="#{loc.all}" itemValue="3" />
+                                <p:ajax listener="#{accountMovementTabBean.find()}" update="tbvAccountProc:pgrMovementDatatableProcess"/>
+                            </p:selectOneRadio>
+                        </p:panelGrid>
+                    </div> 
+                    
+                    <div  class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.financingdocumenttype}" for="slcOperationType" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcOperationType" value="#{accountMovementTabBean.financingTypeId}" styleClass="Wid97">
+                            <f:selectItem itemLabel="#{loc.all}" itemValue="0" /> 
+                            <f:selectItems value="#{accountMovementTabBean.listOfFinancingType}" var="operationtype" itemLabel="#{operationtype.nameMap.get(sessionBean.langId).name}" itemValue="#{operationtype.id}"  />
+                            <p:ajax global="false"/>
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2" >
+                        <p:outputLabel value="#{loc.termdate}" for="cldTermDate" class="Fs12 FontBold"/> <!--style="visibility: hidden;"-->
+                        <p:calendar  id="cldTermDate" class="datepicker" value="#{accountMovementTabBean.termDate}" beforeShow="dpClearButton"  pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.termdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="valueChange" update="cldTermDate pgrMovementProcess" resetValues="true" listener="#{accountMovementTabBean.termDateUpdate()}" global="false"/>
+                            <p:ajax event="dateSelect" update="pgrMovementProcess" global="false" listener="#{accountMovementTabBean.termDateUpdate()}" />
+                        </p:calendar> 
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.processtype}" for="slcTermDateOpType" class="Fs12 FontBold" />
+                        <p:selectOneMenu id="slcTermDateOpType" value="#{accountMovementTabBean.termDateOpType}" required="#{accountMovementTabBean.termDate != null}" >
+                            <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}"  />
+                            <f:selectItem itemLabel="#{loc.smallsymbol}" itemValue="1"/>
+                            <f:selectItem itemLabel="#{loc.equalssymbol}" itemValue="2"/>
+                            <f:selectItem itemLabel="#{loc.bigsymbol}" itemValue="3"/>
+                        </p:selectOneMenu>
+                    </div>  
+
+
+
+
+
+                </div>  
+            </div>
+        </h:panelGroup>
+    </h:form>
+    <div class="EmptyBox20" />
+    <h:panelGroup id="pgrMovementDatatableProcess">
+        <div class="ui-g">
+            <div class="ui-g-12">
+                <h:panelGroup rendered="#{accountMovementTabBean.isFind}">
+
+                    <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                        <ui:param name="bean" value="#{accountMovementTabBean}"/>
+                        <ui:param name="datatable" value="tbvAccountProc:frmMovementDataTable:dtbMovement" />
+                        <ui:param name="fileName" value=""/>
+                        <ui:param name="renderedToggler" value='false'/>
+                        <ui:param name="renderedExcel" value='true'/>
+                        <ui:param name="renderedPdf" value='true'/>
+                        <ui:param name="renderedPrint" value='true'/>
+                        <ui:param name="renderedGraphic" value='false'/>
+                        <ui:param name="renderedAdd" value="#{(!sessionBean.user.lastBranchSetting.isProcessPassiveAccount and accountMovementTabBean.account.status.id == 6) ? 'false' : marwiz.pageIdOfGoToPage==11 ? accountMovementTabBean.getRendered(62, 0) : accountMovementTabBean.getRendered(66, 0)}"/>
+                        <ui:param name="renderedCustomerMovementDlg" value="#{(!sessionBean.user.lastBranchSetting.isProcessPassiveAccount and accountMovementTabBean.account.status.id == 6) ? 'false' : marwiz.pageIdOfGoToPage==11 ? accountMovementTabBean.getRendered(63, 0) : accountMovementTabBean.getRendered(67, 0)}"/>
+                    </ui:include>
+
+                    <ui:include src="/pages/general/account/accountmovementdatatable.xhtml">
+                        <ui:param name="type" value="account"/>
+                    </ui:include>
+                </h:panelGroup>
+            </div>
+        </div>
+    </h:panelGroup>
+
+
+
+</ui:composition>

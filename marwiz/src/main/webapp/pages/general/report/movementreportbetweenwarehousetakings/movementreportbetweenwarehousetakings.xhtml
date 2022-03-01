@@ -1,0 +1,287 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+
+
+    <h:form id="frmMovementReportBetweenWarehouseTakings">
+
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.movementreportbetweenwarehousetakings}"/>
+            <ui:param name="bean" value='#{movementReportBetweenWarehouseTakingsBean}' />
+            <ui:param name="update" value="frmMovementReportBetweenWarehouseTakingsDatatable:dtbMovementReportBetweenWarehouseTakings pgrMovementReportBetweenWarehouseTakingsDatatable pgrMovementReportBetweenWarehouseTakingsReport" />
+        </ui:include>
+
+        <h:panelGroup id="pgrMovementReportBetweenWarehouseTakingsReport" layout="block" transient="true">  
+            <div class="ui-g divContent">
+                <div class="panelToggle ui-g-12">
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.warehousestocktaking} 1" for="slcWarehouseTaking1" class="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcWarehouseTaking1" value="#{movementReportBetweenWarehouseTakingsBean.selectedObject.stockTaking1.id}" required="true" filter="true" filterMatchMode="contains">
+                            <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true"/>
+                            <f:selectItems value="#{movementReportBetweenWarehouseTakingsBean.listOfStockTaking1}" var="stockTaking1" itemLabel="#{stockTaking1.name}" itemValue="#{stockTaking1.id}"  />
+                            <p:ajax listener="#{movementReportBetweenWarehouseTakingsBean.changeStockTaking1()}" global="true"/>
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.warehousestocktaking} 2 " for="slcWarehouseTaking2" class="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcWarehouseTaking2" value="#{movementReportBetweenWarehouseTakingsBean.selectedObject.stockTaking2.id}" required="true" filter="true" filterMatchMode="contains">
+                            <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true" />
+                            <f:selectItems value="#{movementReportBetweenWarehouseTakingsBean.listOfStockTaking2}" var="stockTaking2" itemLabel="#{stockTaking2.name}" itemValue="#{stockTaking2.id}"  />
+                            <p:ajax listener="#{movementReportBetweenWarehouseTakingsBean.changeStockTaking2()}" global="false"/>
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.stock}" for="txtStock" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtStock" value="#{stockBookCheckboxFilterBean.selectedCount}" onclick="showStockBook()" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}" >
+                        </p:inputText>
+                        <p:commandLink id="btnStock" process="@this" actionListener="#{movementReportBetweenWarehouseTakingsBean.openDialog(2)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_stockcheckbox').loadContents();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax   listener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckbox')}" />
+                        </p:commandLink>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6  ui-lg-2">
+                        <p:outputLabel value="#{loc.stock} #{loc.category}" for="txtCategory"  styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtCategory" onclick="showCategoryBook()" value="#{categoryBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter"  readonly="true"  placeholder="#{loc.all}" >
+                        </p:inputText>
+                        <p:commandLink id="btnCategory" process="@this" update="frmCategoryBookFilter" action="#{movementReportBetweenWarehouseTakingsBean.openDialog(1)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_Category').loadContents();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax   listener="#{categoryBookCheckboxFilterBean.findFilterList([2],'frmCategoryBookFilter','olp_Category','movementReportBetweenWarehouseTakings')}" />
+                        </p:commandLink>
+                    </div>
+
+                </div>
+            </div>
+        </h:panelGroup>
+        <p:remoteCommand name="showStockBook" process="@this" oncomplete="PF('olp_stockcheckbox').loadContents();" action="#{movementReportBetweenWarehouseTakingsBean.openDialog(2)}" actionListener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckbox')}" />
+        <p:remoteCommand name="showCategoryBook" process="@this" update="frmCategoryBookFilter" action="#{movementReportBetweenWarehouseTakingsBean.openDialog(1)}" oncomplete="PF('olp_Category').loadContents();" actionListener="#{categoryBookCheckboxFilterBean.findFilterList([2],'frmCategoryBookFilter','olp_Category','movementReportBetweenWarehouseTakings')}" />
+
+    </h:form>
+    <div class="EmptyBox20" />
+    <h:panelGroup id="pgrMovementReportBetweenWarehouseTakingsDatatable" >
+        <h:panelGroup rendered="#{movementReportBetweenWarehouseTakingsBean.isFind}">
+            <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                <ui:param name="bean" value="#{movementReportBetweenWarehouseTakingsBean}"/>
+                <ui:param name="datatable" value="frmMovementReportBetweenWarehouseTakingsDatatable:dtbMovementReportBetweenWarehouseTakings" />
+                <ui:param name="fileName" value="#{loc.movementreportbetweenwarehousetakings}"/>
+                <ui:param name="renderedToggler" value='true'/>
+                <ui:param name="renderedExcel" value='true'/>
+                <ui:param name="renderedPdf" value='true'/>
+                <ui:param name="renderedPrint" value='true'/>
+                <ui:param name="renderedGraphic" value='false'/>
+            </ui:include>
+            <h:form id="frmMovementReportBetweenWarehouseTakingsDatatable" >
+                <p:dataTable  id="dtbMovementReportBetweenWarehouseTakings" var="movementReportBetweenWarehouseTakings" widgetVar="MovementReportBetweenWarehouseTakingsPF" emptyMessage="#{loc.norecordsfound}" value="#{movementReportBetweenWarehouseTakingsBean.listOfObjects}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{movementReportBetweenWarehouseTakings.stock.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true" lazy="true"
+                              >
+                    <p:ajax event="colReorder" listener="#{movementReportBetweenWarehouseTakingsBean.reorder}" update="frmGridToolbar:toggle" />     
+                    <p:ajax event="colResize"  listener="#{movementReportBetweenWarehouseTakingsBean.onResize}" />
+                    <p:column id="clmBarcode" headerText="#{loc.stockbarcode}" visible="#{movementReportBetweenWarehouseTakingsBean.toogleList[0]}" exportable="#{movementReportBetweenWarehouseTakingsBean.toogleList[0]}">
+                        <h:outputText  value="#{movementReportBetweenWarehouseTakings.stock.barcode}" />
+                    </p:column>
+
+                    <p:column id="clmStock" headerText="#{loc.stock}" visible="#{movementReportBetweenWarehouseTakingsBean.toogleList[1]}" exportable="#{movementReportBetweenWarehouseTakingsBean.toogleList[1]}">
+                        <h:outputText  value="#{movementReportBetweenWarehouseTakings.stock.name}" />
+                    </p:column>
+
+                    <p:column id="clmStockTakingoneQuantity" headerText="#{loc.warehousestocktakingone}" visible="#{movementReportBetweenWarehouseTakingsBean.toogleList[2]}" exportable="#{movementReportBetweenWarehouseTakingsBean.toogleList[2]}">
+                        <h:outputText  value="#{movementReportBetweenWarehouseTakings.stockTaking1Quantity}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value="#{movementReportBetweenWarehouseTakings.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmEntryAmount" headerText="#{loc.entrymovement}" visible="#{movementReportBetweenWarehouseTakingsBean.toogleList[3]}" exportable="#{movementReportBetweenWarehouseTakingsBean.toogleList[3]}">
+                        <h:outputText  value="#{movementReportBetweenWarehouseTakings.entryAmount}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value="#{movementReportBetweenWarehouseTakings.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmExitamount" headerText="#{loc.exitmovement}" visible="#{movementReportBetweenWarehouseTakingsBean.toogleList[4]}" exportable="#{movementReportBetweenWarehouseTakingsBean.toogleList[4]}">
+                        <h:outputText  value="#{movementReportBetweenWarehouseTakings.exitamount}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value="#{movementReportBetweenWarehouseTakings.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmDifference" headerText="#{loc.movementdifference}" visible="#{movementReportBetweenWarehouseTakingsBean.toogleList[5]}" exportable="#{movementReportBetweenWarehouseTakingsBean.toogleList[5]}">
+                        <h:outputText  value="#{movementReportBetweenWarehouseTakings.entryAmount-movementReportBetweenWarehouseTakings.exitamount}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value="#{movementReportBetweenWarehouseTakings.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmStockTakingtwoQuantity" headerText="#{loc.warehousestocktakingtwo}" visible="#{movementReportBetweenWarehouseTakingsBean.toogleList[6]}" exportable="#{movementReportBetweenWarehouseTakingsBean.toogleList[6]}">
+                        <h:outputText  value="#{movementReportBetweenWarehouseTakings.stockTaking2Quantity}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value="#{movementReportBetweenWarehouseTakings.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+
+
+                    <p:column id="clmDifferenceBetweenStockTaking" headerText="#{loc.differencebetweenstocktaking}" visible="#{movementReportBetweenWarehouseTakingsBean.toogleList[7]}" exportable="#{movementReportBetweenWarehouseTakingsBean.toogleList[7]}">
+                        <h:outputText  value="#{movementReportBetweenWarehouseTakings.stockTaking2Quantity-movementReportBetweenWarehouseTakings.stockTaking1Quantity}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value="#{movementReportBetweenWarehouseTakings.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmResult" headerText="#{loc.result}" class="#{movementReportBetweenWarehouseTakings.resultStatus==1 ? 'ColumnColorGreen' : movementReportBetweenWarehouseTakings.resultStatus==-1 ? 'ColumnColorRed' : ''}"  visible="#{movementReportBetweenWarehouseTakingsBean.toogleList[8]}" exportable="#{movementReportBetweenWarehouseTakingsBean.toogleList[8]}"><!--((movementReportBetweenWarehouseTakings.stockTaking2Quantity-movementReportBetweenWarehouseTakings.stockTaking1Quantity)-(movementReportBetweenWarehouseTakings.entryAmount-movementReportBetweenWarehouseTakings.exitamount)) ne 0 ? ((movementReportBetweenWarehouseTakings.stockTaking2Quantity-movementReportBetweenWarehouseTakings.stockTaking1Quantity)-(movementReportBetweenWarehouseTakings.entryAmount-movementReportBetweenWarehouseTakings.exitamount)) gt 0 ? 'ColumnColorGreen' :'ColumnColorRed' :''-->
+                        <h:outputText  value="#{movementReportBetweenWarehouseTakings.result}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value="#{movementReportBetweenWarehouseTakings.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmLastPurchasePrice" headerText="#{loc.lastpurchaseprice}"  visible="#{movementReportBetweenWarehouseTakingsBean.toogleList[9]}" exportable="#{movementReportBetweenWarehouseTakingsBean.toogleList[9]}">
+                        <h:outputText  value="#{movementReportBetweenWarehouseTakings.lastPurchasePrice}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{movementReportBetweenWarehouseTakings.lastPurchaseCurrency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmLastPurchaseCost" headerText="#{loc.vatincluded} #{loc.purchasecost}" class="#{movementReportBetweenWarehouseTakings.resultStatus==1 ? 'ColumnColorGreen' : movementReportBetweenWarehouseTakings.resultStatus==-1 ? 'ColumnColorRed' : ''}" visible="#{movementReportBetweenWarehouseTakingsBean.toogleList[10]}" exportable="#{movementReportBetweenWarehouseTakingsBean.toogleList[10]}">
+                        <h:outputText  value="#{movementReportBetweenWarehouseTakingsBean.calculatePurchaseTaxTotal(movementReportBetweenWarehouseTakings.lastPurchasePrice.multiply(movementReportBetweenWarehouseTakings.result),movementReportBetweenWarehouseTakings.purchaseTaxRate)}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{movementReportBetweenWarehouseTakings.lastPurchaseCurrency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmLastPurchaseCost2" headerText="#{loc.vatexcluded} #{loc.purchasecost}" class="#{movementReportBetweenWarehouseTakings.resultStatus==1 ? 'ColumnColorGreen' : movementReportBetweenWarehouseTakings.resultStatus==-1 ? 'ColumnColorRed' : ''}" visible="#{movementReportBetweenWarehouseTakingsBean.toogleList[11]}" exportable="#{movementReportBetweenWarehouseTakingsBean.toogleList[11]}">
+                        <h:outputText  value="#{movementReportBetweenWarehouseTakings.lastPurchasePrice.multiply(movementReportBetweenWarehouseTakings.result)}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{movementReportBetweenWarehouseTakings.lastPurchaseCurrency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmPurchaseTaxRate" headerText="#{loc.purchasetaxrate}" visible="#{movementReportBetweenWarehouseTakingsBean.toogleList[12]}" exportable="#{movementReportBetweenWarehouseTakingsBean.toogleList[12]}">
+                        <h:outputText  value="#{movementReportBetweenWarehouseTakings.purchaseTaxRate}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="percent" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmLastSalePrice" headerText="#{loc.lastsaleprice}" visible="#{movementReportBetweenWarehouseTakingsBean.toogleList[13]}" exportable="#{movementReportBetweenWarehouseTakingsBean.toogleList[13]}">
+                        <h:outputText  value="#{movementReportBetweenWarehouseTakings.lastSalePrice}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{movementReportBetweenWarehouseTakings.lastSaleCurrency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmLastSaleCost" headerText="#{loc.vatincluded} #{loc.salecost}" class="#{movementReportBetweenWarehouseTakings.resultStatus==1 ? 'ColumnColorGreen' : movementReportBetweenWarehouseTakings.resultStatus==-1 ? 'ColumnColorRed' : ''}" visible="#{movementReportBetweenWarehouseTakingsBean.toogleList[14]}" exportable="#{movementReportBetweenWarehouseTakingsBean.toogleList[14]}">
+                        <h:outputText  value="#{movementReportBetweenWarehouseTakings.lastSalePrice.multiply(movementReportBetweenWarehouseTakings.result)}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{movementReportBetweenWarehouseTakings.lastSaleCurrency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmLastSaleCost2" headerText="#{loc.vatexcluded} #{loc.salecost}" class="#{movementReportBetweenWarehouseTakings.resultStatus==1 ? 'ColumnColorGreen' : movementReportBetweenWarehouseTakings.resultStatus==-1 ? 'ColumnColorRed' : ''}" visible="#{movementReportBetweenWarehouseTakingsBean.toogleList[15]}" exportable="#{movementReportBetweenWarehouseTakingsBean.toogleList[15]}">
+                        <h:outputText  value="#{movementReportBetweenWarehouseTakingsBean.calculateSaleTaxTotal(movementReportBetweenWarehouseTakings.lastSalePrice.multiply(movementReportBetweenWarehouseTakings.result),movementReportBetweenWarehouseTakings.saleTaxRate)}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{movementReportBetweenWarehouseTakings.lastSaleCurrency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmSalesTaxRate" headerText="#{loc.salestaxrate}" visible="#{movementReportBetweenWarehouseTakingsBean.toogleList[16]}" exportable="#{movementReportBetweenWarehouseTakingsBean.toogleList[16]}">
+                        <h:outputText  value="#{movementReportBetweenWarehouseTakings.saleTaxRate}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="percent" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:columnGroup type="footer" class="Fright" >
+                        <p:row>
+                            <p:column colspan="#{movementReportBetweenWarehouseTakingsBean.toogleList.size()-movementReportBetweenWarehouseTakingsBean.countToggle-3}" style="text-align:right; font-weight: bold; " priority="1">
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{loc.totalpurchasecost}:" style="text-align:right; font-weight: bold; font-size: large; " />
+                                </f:facet>
+                            </p:column>
+                            <p:column  colspan="1"  style="text-align:right; font-weight: bold; ">
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{movementReportBetweenWarehouseTakingsBean.calculateTotals(1)}"   style="text-align:right; font-weight: bold; font-size: large; " >
+
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column>
+                            <p:column colspan="1" style="text-align:right; font-weight: bold; " priority="1">
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{loc.totalsalecost}:" style="text-align:right; font-weight: bold; font-size: large; " />
+                                </f:facet>
+                            </p:column>
+                            <p:column  colspan="1"  style="text-align:right; font-weight: bold; ">
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{movementReportBetweenWarehouseTakingsBean.calculateTotals(2)}"   style="text-align:right; font-weight: bold; font-size: large; " >
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column>
+
+                        </p:row>
+                    </p:columnGroup>
+
+                </p:dataTable>  
+            </h:form>
+        </h:panelGroup>
+    </h:panelGroup>
+
+    <p:overlayPanel id="olpCategory" widgetVar="olp_Category" showEvent="none" modal="true" transient="true" for="frmMovementReportBetweenWarehouseTakings:btnCategory"  my="right top" at="left bottom" dismissable="true" hideEffect="blind" showCloseIcon="true" class="Wid30">
+        <ui:include src="/pages/general/common/categorybookcheckbox.xhtml">
+            <ui:param name="updateBean" value='#{movementReportBetweenWarehouseTakingsBean}' />
+            <ui:param name="type" value='movementReportBetweenWarehouseTakings' />
+            <ui:param name="parameters" value='#{[2]}' /> 
+            <ui:param name="form" value='frmCategoryBookFilter' /> 
+        </ui:include>
+    </p:overlayPanel>
+
+
+
+    <!--Kitaptan stok seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/stockbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{movementReportBetweenWarehouseTakingsBean}' />
+        <ui:param name="for" value='frmMovementReportBetweenWarehouseTakings:btnStock' />
+        <ui:param name="type" value='reportcheckbox' />
+        <ui:param name="parameters" value='' /> 
+        <ui:param name="columnsize" value='4' /> 
+        <ui:param name="form" value='frmStockBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_stockcheckbox" />
+    </ui:include>
+
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.movementreportbetweenwarehousetakings}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+</ui:composition>

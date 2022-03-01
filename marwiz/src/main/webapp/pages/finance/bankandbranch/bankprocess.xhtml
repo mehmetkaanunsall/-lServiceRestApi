@@ -1,0 +1,94 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:form id="frmBankProcess">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.bankprocess}"/>
+            <ui:param name="bean" value='#{bean}' />
+            <ui:param name="update" value="pgrBankandbranchProcess " />
+            <ui:param name="btnSaveId" value="#{bean.getRendered(194, 0)}" />     
+            <ui:param name="renderback" value='false'/>
+            <ui:param name="btnDeleteId" value='false' />
+            <c:if test="#{bean.processType==2}">
+                <ui:param name="btnDeleteId" value="#{bean.getRendered(195, 0)}" />
+                <ui:param name="btnTestBeforeDeleteId" value='true' />
+            </c:if>
+        </ui:include>
+
+        <h:panelGroup id="pgrBankandbranchProcess" layout="block">
+            <div class="ui-g divContent">
+                <p:focus for="txtBankCode" />
+                <div class="ui-g-12 ui-md-3">
+                    <p:outputLabel value="#{loc.bankcode}" for="txtBankCode" class="Fs12 FontBold"/>
+                    <p:inputText id="txtBankCode" value="#{bean.selectedObject.code}" required="true"  placeholder="#{loc.bankcode} ">
+                        <p:keyFilter regEx="/[0-9]/" preventPaste="false"/>
+                        <f:validateRegex pattern="[0-9]*" />
+                    </p:inputText>
+                </div>
+
+                <div class="ui-g-12 ui-md-3">
+                    <p:outputLabel value="#{loc.bankname}" for="txtBankName" styleClass="Fs12 FontBold" />
+                    <p:inputText id="txtBankName" value="#{bean.selectedObject.name}" required="true"  placeholder="#{loc.bankname} "/>
+                </div>
+
+                <div class="ui-g-12 ui-md-3">
+                    <p:outputLabel value="#{loc.phone}" for="txtPhone" class="Fs12 FontBold"/>
+                    <p:inputMask id="txtPhone" value="#{bean.selectedObject.phone}" required="true"  placeholder="#{loc.phone}" mask="(999) 999-99-99"/>
+                </div>
+
+                <div class="ui-g-12 ui-md-3">
+                    <p:outputLabel value="#{loc.mail}" for="txtMail" class="Fs12 FontBold"/>
+                    <p:inputText id="txtMail" value="#{bean.selectedObject.email}" required="true"  placeholder="#{loc.mail} ">
+                        <f:validator validatorId="emailValidator"/>
+                    </p:inputText>
+                </div>
+
+                <div class="ui-g-12 ui-md-3">
+                    <p:outputLabel value="#{loc.country}" for="slcCountry" class="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcCountry" value="#{bean.selectedObject.country.id}" filter="true" filterMatchMode="contains" required="true" >
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="" itemDisabled="true" />
+                        <f:selectItems value="#{sessionBean.countries}" var="country" itemLabel="#{country.getName(sessionBean.langId)}" itemValue="#{country.id}" /> 
+                        <p:ajax listener="#{citiesAndCountiesBean.updateCity(bean.selectedObject.country,bean.selectedObject.city,bean.selectedObject.county)}" update="slcCity slcCounty" global="false"/>
+                    </p:selectOneMenu>
+                </div>
+
+                <div class="ui-g-12 ui-md-3">
+                    <p:outputLabel value="#{loc.city}" for="slcCity" class="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcCity" value="#{bean.selectedObject.city.id}" filter="true" filterMatchMode="contains" required="true">
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="" itemDisabled="true" />
+                        <f:selectItems value="#{citiesAndCountiesBean.cities}" itemLabel="#{city.getName(sessionBean.langId)}" itemValue="#{city.id}" var="city"/>
+                        <p:ajax listener="#{citiesAndCountiesBean.updateCounty(bean.selectedObject.city.country,bean.selectedObject.city,bean.selectedObject.county)}" update="slcCounty" global="false"/>
+                    </p:selectOneMenu>
+                </div>
+
+                  <div class="ui-g-12 ui-md-3">
+                      <p:outputLabel value="#{loc.county}" for="slcCounty" class="Fs12 FontBold"/>
+                      <p:selectOneMenu id="slcCounty" value="#{bean.selectedObject.county.id}" filter="true" filterMatchMode="contains" required="true">
+                          <f:selectItem itemLabel="#{loc.choose}" itemValue="" itemDisabled="true" />
+                          <f:selectItems value="#{citiesAndCountiesBean.counties}" itemLabel="#{county.name}" itemValue="#{county.id}" var="county" />
+                      </p:selectOneMenu>
+                  </div>
+
+                <div class="ui-g-12 ui-md-3">
+                    <p:outputLabel value="#{loc.statu}" for="slcStatu" class="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcStatu" value="#{bean.selectedObject.status.id}" required="true">
+                        <f:selectItems value="#{sessionBean.getStatus(11)}" itemLabel="#{statu.nameMap.get(sessionBean.langId).name}" itemValue="#{statu.id}" var="statu"/>
+                    </p:selectOneMenu>
+                </div>
+
+                <div class="ui-g-12 ui-md-12">
+                    <p:outputLabel value="#{loc.address}" for="txtAddress" class="Fs12 FontBold"/>
+                    <p:inputText id="txtAddress" value="#{bean.selectedObject.address}" styleClass="Wid99" required="true" placeholder="#{loc.address} "/>
+                </div>
+
+
+            </div>
+        </h:panelGroup>
+    </h:form>
+
+</ui:composition>
+

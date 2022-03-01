@@ -1,0 +1,186 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+
+    <h:form id="frmNewPos" >  
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="bean" value='#{pointOfSaleBean}' />
+            <ui:param name="outputtext" value="#{loc.posprocesses}"/>
+            <ui:param name="update" value="pgrNewPos" />
+            <ui:param name="btnSaveId" value="#{pointOfSaleBean.getRendered(199, 0)}" />
+            <ui:param name="btnDeleteId" value='false' /> 
+            <c:if test="#{pointOfSaleBean.processType==2}">
+                <ui:param name="btnDeleteId" value='#{pointOfSaleBean.getRendered(200, 0)}' /> 
+            </c:if>
+        </ui:include>
+
+        <h:panelGroup id="pgrNewPos" layout="block">
+            <div class="ui-g divContent">    
+                <p:focus for="txtCode"/>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.code}" for="txtCode" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtCode" value="#{pointOfSaleBean.selectedObject.code}" required="true" placeholder="#{loc.code} "/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.name}" for="txtName" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtName" value="#{pointOfSaleBean.selectedObject.name}" required="true" placeholder="#{loc.name} "/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.port}" for="txtPort" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtPort" value="#{pointOfSaleBean.selectedObject.port}" placeholder="#{loc.port}"/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.serialno}" for="txtSerialNo" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtSerialNo" value="#{pointOfSaleBean.selectedObject.serialNumber}" required="true" placeholder="#{loc.serialno} "/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.brand}" for="txtBrand" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtBrand" value="#{pointOfSaleBean.selectedObject.brand}" required="true" placeholder="#{loc.brand}"/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.model}" for="txtModel" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtModel" value="#{pointOfSaleBean.selectedObject.model}" required="true" placeholder="#{loc.model} "/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.version}" for="txtVersion" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtVersion" value="#{pointOfSaleBean.selectedObject.version}" required="true" placeholder="#{loc.version} "/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.softwareversion}" for="txtSoftwareVersion" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtSoftwareVersion" value="#{pointOfSaleBean.selectedObject.softwareVersion}" required="true" placeholder="#{loc.softwareversion} "/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.defaultsafe}" for="slcDefaultSafe" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcDefaultSafe" value="#{pointOfSaleBean.selectedObject.safe.id}" required="true" >
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}" itemDisabled="true" />
+                        <f:selectItems value="#{pointOfSaleBean.defaultSafeList}"  var="safe" itemLabel="#{safe.name}" itemValue="#{safe.id}" />
+                    </p:selectOneMenu>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.macaddress}" for="txtMac" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtMac" value="#{pointOfSaleBean.selectedObject.macAddress}" required="true" placeholder="#{loc.macaddress} "/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.ip} #{loc.address}" for="txtIpAdd" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtIpAdd" value="#{pointOfSaleBean.selectedObject.ipAddress}" required="true" placeholder="#{loc.ip} #{loc.address}"/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.localipaddress}" for="txtLocalIpAddress" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtLocalIpAddress" value="#{pointOfSaleBean.selectedObject.localIpAddress}" required="true" placeholder="#{loc.localipaddress}"/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.cashregister}" for="slcCashRegister" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcCashRegister" value="#{pointOfSaleBean.selectedObject.cashRegister.id}" >
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="0"/>
+                        <f:selectItems value="#{pointOfSaleBean.cashRegisterList}"  var="cashRegister" itemLabel="#{cashRegister.name}" itemValue="#{cashRegister.id}" />
+                    </p:selectOneMenu>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.warehouse}" for="slcWareHouse" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcWareHouse" value="#{pointOfSaleBean.selectedObject.wareHouse.id}" required="true" >
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}" itemDisabled="true" />
+                        <f:selectItems value="#{pointOfSaleBean.warehouseList}"  var="wareHouse" itemLabel="#{wareHouse.name}" itemValue="#{wareHouse.id}" />
+                    </p:selectOneMenu>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.statu}" for="slcStatu" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcStatu" value="#{pointOfSaleBean.selectedObject.status.id}" required="true" >
+                        <f:selectItems value="#{sessionBean.getStatus(5)}"  var="status" itemLabel="#{status.nameMap.get(sessionBean.langId).name}" itemValue="#{status.id}" />
+                    </p:selectOneMenu>
+                </div>
+                <h:panelGroup>
+                    <h:panelGroup rendered="#{sessionBean.lastBranchSetting.paroUrl.length() gt 0 ? true:false}">
+                        <div class="ui-g-12 ui-md-6 ui-lg-3"  > 
+                            <p:outputLabel value="#{loc.integrationcode}" for="txtIntegrationCode" styleClass="Fs12 FontBold"/>
+                            <p:inputText id="txtIntegrationCode" value="#{pointOfSaleBean.selectedObject.integrationCode}"  placeholder="#{loc.integrationcode} "/>
+                        </div>
+                    </h:panelGroup>
+                </h:panelGroup>
+
+                <div class="ui-g-12 ui-md-6 ui-lg-3"  > 
+                    <p:outputLabel value="#{loc.washingmachicneintegrationcode}" for="txtWashingMachicneIntegrationCode" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtWashingMachicneIntegrationCode" value="#{pointOfSaleBean.selectedObject.washingMachicneIntegrationCode}"  placeholder="#{loc.washingmachicneintegrationcode} "/>
+                </div>
+
+                <div class="EmptyBox10"/>
+                <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                    <p:outputLabel value="#{loc.offline}" styleClass="Fs12 FontBold"/>
+                    <p:panelGrid layout="grid" columns="1" class="pngCheckBox" >  
+                        <p:selectBooleanCheckbox value="#{pointOfSaleBean.selectedObject.isOffline}" disabled="#{!sessionBean.user.isAuthorized}" itemLabel="#{loc.isitworksoffline}" class="Fleft">
+                            <p:ajax global="false" update="pngOfflineTime" listener="#{pointOfSaleBean.bringDefaultTime()}"/>
+                        </p:selectBooleanCheckbox>
+                    </p:panelGrid>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-8" >
+                    <p:outputLabel value="#{loc.offline}" styleClass="Fs12 FontBold" style="visibility: hidden;"/>
+                    <p:panelGrid layout="grid" columns="1" class="pngCheckBox" > 
+                        <p:outputLabel value="#{loc.posdevicemustberestartwhenofflineparameterischanged}" styleClass="Fs12" style="color:#D76666 !important"/>
+                    </p:panelGrid>
+                </div>
+
+
+
+                <h:panelGroup id="pngOfflineTime">
+                    <h:panelGroup rendered="#{pointOfSaleBean.selectedObject.isOffline}">
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+                            <h:outputText value="#{loc.timeofdatatransferforoffline}" styleClass="outputTextFont FontBold"/>
+                            <p:separator style="border-bottom-color: #c0c5c7 !important"/>
+                        </div>
+                        <div class="ui-g-12 ui-md-6 ui-lg-3">
+                            <p:outputLabel value="#{loc.stocktime}" for="txtStockTime" class="FontBold Fs12"/>
+                            <p:inputNumber  id="txtStockTime" disabled="#{!sessionBean.user.isAuthorized}" symbol=" #{loc.hours}" symbolPosition="s" emptyValue="sign" value="#{pointOfSaleBean.selectedObject.stockTime}" required="true" styleClass="Wid100 TexAlRight" />
+                        </div>
+                        <div class="ui-g-12 ui-md-6 ui-lg-3">
+                            <p:outputLabel value="#{loc.unittax}" for="txtUnitTaxTime" class="FontBold Fs12"/>
+                            <p:inputNumber  id="txtUnitTaxTime" disabled="#{!sessionBean.user.isAuthorized}" symbol=" #{loc.hours}" symbolPosition="s" emptyValue="sign" value="#{pointOfSaleBean.selectedObject.unitTaxTime}" required="true" styleClass="Wid100 TexAlRight" />
+                        </div>
+                        <div class="ui-g-12 ui-md-6 ui-lg-3">
+                            <p:outputLabel value="#{loc.user}" for="txtUserTime" class="FontBold Fs12"/>
+                            <p:inputNumber  id="txtUserTime" disabled="#{!sessionBean.user.isAuthorized}" symbol=" #{loc.hours}" symbolPosition="s" emptyValue="sign" value="#{pointOfSaleBean.selectedObject.userTime}" required="true" styleClass="Wid100 TexAlRight" />
+                        </div>
+                        <div class="ui-g-12 ui-md-6 ui-lg-3">
+                            <p:outputLabel value="#{loc.categorization}" for="txtCategorizationTime" class="FontBold Fs12"/>
+                            <p:inputNumber  id="txtCategorizationTime" disabled="#{!sessionBean.user.isAuthorized}" symbol=" #{loc.hours}" symbolPosition="s" emptyValue="sign" value="#{pointOfSaleBean.selectedObject.categorizationTime}" required="true" styleClass="Wid100 TexAlRight" />
+                        </div>
+                        <div class="ui-g-12 ui-md-6 ui-lg-3">
+                            <p:outputLabel value="#{loc.bankaccount}" for="txtBankAccountTime" class="FontBold Fs12"/>
+                            <p:inputNumber  id="txtBankAccountTime" disabled="#{!sessionBean.user.isAuthorized}" symbol=" #{loc.hours}" symbolPosition="s" emptyValue="sign" value="#{pointOfSaleBean.selectedObject.bankAccountTime}" required="true" styleClass="Wid100 TexAlRight" />
+                        </div>
+                        <div class="ui-g-12 ui-md-6 ui-lg-3">
+                            <p:outputLabel value="#{loc.pos}" for="txtPointOfSaleTime" class="FontBold Fs12"/>
+                            <p:inputNumber  id="txtPointOfSaleTime" disabled="#{!sessionBean.user.isAuthorized}" symbol=" #{loc.hours}" symbolPosition="s" emptyValue="sign" value="#{pointOfSaleBean.selectedObject.pointOfSaleTime}" required="true" styleClass="Wid100 TexAlRight" />
+                        </div>
+                        <div class="ui-g-12 ui-md-6 ui-lg-3">
+                            <p:outputLabel value="#{loc.automationdevice}" for="txtVendingMachineTime" class="FontBold Fs12"/>
+                            <p:inputNumber  id="txtVendingMachineTime" disabled="#{!sessionBean.user.isAuthorized or pointOfSaleBean.availableAutomatDevice!=1}" symbol=" #{loc.hours}" symbolPosition="s" emptyValue="sign" value="#{pointOfSaleBean.selectedObject.vendingMachineTime}" required="true" styleClass="Wid100 TexAlRight" />
+                        </div>
+                    </h:panelGroup>
+                </h:panelGroup>
+
+            </div>
+        </h:panelGroup>
+    </h:form>    
+    <div class="EmptyBox10"/>
+    <h:panelGroup id="pngPOSTab">
+        <p:tabView id="tbvPOSProcess" rendered="#{pointOfSaleBean.processType==2 and pointOfSaleBean.getRendered(53, 1)}" scrollable="true" dynamic="true" cache="true">
+            <p:ajax event="tabChange" listener="#{pointOfSaleBean.onTabChange}" />
+            <p:tab id="tab53" title="#{loc.safes}" rendered="#{pointOfSaleBean.getRendered(53, 1)}">
+                <c:if test="#{pointOfSaleBean.activeIndex==53}"> 
+                    <ui:include src="/pages/general/pointofsale/pointofsalesafetab.xhtml"/>
+                </c:if>
+            </p:tab>
+        </p:tabView>
+    </h:panelGroup>
+
+
+
+
+</ui:composition> 
+

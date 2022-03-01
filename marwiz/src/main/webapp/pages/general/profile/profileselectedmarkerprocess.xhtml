@@ -1,0 +1,50 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+
+    <p:dataTable id="dtbSelectedMarker" var="loginData" class="tabDatatable"  value="#{bean.selectedMapList}" selection="#{bean.userDataLogin}" selectionMode="single"  emptyMessage="#{loc.norecordsfound}"
+                 rows="#{sessionBean.user.userConfig.defaultGridSize}" rowKey="#{loginData.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                 rowsPerPageTemplate="#{sessionBean.user.userConfig.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                 >
+
+        <p:column headerText="#{loc.ip}" sortBy="#{loginData.ipAddress}">
+            <h:outputText value="#{loginData.ipAddress}" />
+        </p:column> 
+
+        <p:column headerText="#{loc.devicetype}" sortBy="#{loginData.deviceType}">
+            <h:outputText value="#{loginData.deviceType}" >
+            </h:outputText>
+        </p:column> 
+
+        <p:column headerText="#{loc.browsertype}" sortBy="#{loginData.browser}">
+            <h:outputText value="#{loginData.browser.substring(0,loginData.browser.lastIndexOf(45))}" />
+        </p:column> 
+
+        <p:column headerText="#{loc.datetime}">
+            <h:outputText value="#{loginData.loginTime}" >
+                <f:convertDateTime pattern="#{sessionBean.user.groupBranch.dateFormat} HH:mm:ss" timeZone="GMT+3"/>
+            </h:outputText>
+        </p:column>     
+
+        <p:column headerText="#{loc.location}" sortBy="#{loginData.location}">
+            <p:column>
+                <h:outputText value="#{Double(loginData.location.substring(0,loginData.location.lastIndexOf(45)))}">
+                    <f:convertNumber maxFractionDigits="2" pattern="##0.00"/>
+                </h:outputText>
+            </p:column> 
+
+            <p:column>
+                <h:outputText value="#{Double(loginData.location.substring(loginData.location.lastIndexOf(45)))}">
+                    <f:convertNumber maxFractionDigits="2" pattern="##0.00"/>
+                </h:outputText>
+            </p:column> 
+
+        </p:column> 
+
+
+    </p:dataTable>
+
+</ui:composition>

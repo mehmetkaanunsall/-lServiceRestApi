@@ -1,0 +1,46 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <!-- Sayfalardaki kategorizasyon tabı için açılan xhtml
+    PARAMETRELER
+    bean: Hangi sayfada kullanılcaksa o sayfanın bean i
+    updateTreeandDataList: Update edilecek tree ve datalistin yolu
+    updateDataList: Update edilecek datalistin yolu
+    updateDialog: Update edilecek dialoğun yolu
+    item: Kategori clasının item objesi
+    renderBtnParent:Parent ekleme butonunun görünürlüğü
+    renderBtnChild: Child ekleme butonunun görünürlüğü
+    renderBtnEdit: Düzenleme butonunun görünürlüğü
+    renderBtnDelete: Çarpı butonunun görünürlüğü
+
+    -->
+
+    <h:form id="frmCategorizationn">
+        <div class="ContainerIndent">
+            <p:panelGrid columns="2" layout="grid" class="panelGridNoBorder" columnClasses="ui-grid-col-4,ui-grid-col-8">
+                <p:panel class="categoryPanelSize">
+                    <f:facet name="header">
+                        #{loc.categorytree}   
+                    </f:facet>
+                    <p:treeTable id="treCategoryy" value="#{bean.root}"  var="data" selectionMode="checkbox" showUnselectableCheckbox="true" selection="#{bean.selectedCategories}" class="categoryTreeSize treeHoverIcon" emptyMessage="#{loc.norecordsfound}">                     
+                        <p:column>
+                            <h:outputText value="#{data.name}"/>
+                        </p:column>
+                    </p:treeTable>
+                </p:panel>
+                <p:panel header="#{loc.categorylist}" class="categoryPanelSize">
+                    <p:dataList id="dtlCategoryListt" emptyMessage="" value="#{bean.selectedCategoryList}" var="data" type="definition" class="categoryDataList" >
+
+                        <h:panelGroup class="categoryOutputText">
+                            <h:outputText value="#{data.categorization.name}" />
+                        </h:panelGroup>
+                    </p:dataList>
+                </p:panel>
+                <div class="EmptyBox20"></div>
+            </p:panelGrid>
+        </div>
+    </h:form>
+</ui:composition>

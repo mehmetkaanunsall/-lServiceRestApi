@@ -1,0 +1,29 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions" 
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:form id="frmVehicleProcess">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.vehicleprocesses}"/>
+            <ui:param name="bean" value='#{accountVehicleTabBean}' />
+            <ui:param name="update" value="pgrVehicleProcess" />
+            <ui:param name="btnSaveId" value="#{accountVehicleTabBean.getRendered(79, 0)}" />     
+            <ui:param name="renderback" value='false'/>
+            <ui:param name="btnDeleteId" value='#{accountVehicleTabBean.processType==2 and accountVehicleTabBean.getRendered(80, 0)}' />
+        </ui:include>
+
+        <h:panelGroup id="pgrVehicleProcess" layout="block">
+            <div class="ui-g divContent">
+                <p:focus for="txtPlate"/>
+                <div class="ui-g-12 ui-md-12 ui-lg-12">
+                    <p:outputLabel value="#{loc.plate}" for="txtPlate" class="FontBold Fs12"/>
+                    <p:inputText id="txtPlate" value="#{accountVehicleTabBean.selectedObject.plate}" required="true" placeholder="#{loc.plate}"/>  
+                </div>
+            </div>
+        </h:panelGroup>
+    </h:form>
+</ui:composition>

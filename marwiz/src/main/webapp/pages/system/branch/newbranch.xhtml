@@ -1,0 +1,247 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets" 
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <div class="ui-g">  
+        <p:focus for="txtName"/>   
+
+        <div class="#{bean.processType==1 ? 'ui-g-12 ui-md-6 ui-lg-4' : 'ui-g-12 ui-md-6 ui-lg-3'}">
+            <p:outputLabel value="#{loc.mainbranch}" styleClass="Fs12 FontBold"/>
+            <p:panelGrid layout="grid" columns="1" class="pngCheckBox" >  
+                <p:selectBooleanCheckbox id="sbcIsCentralBranch"  value="#{bean.selectedObject.isCentral}"   class="Fleft" disabled="#{bean.selectedObject.isCentral}" >
+                    <p:ajax global="false" />
+                    <p:outputLabel value="#{loc.iscentralbranch}"  style="margin-left: 2px;"  class="FontNormal"/>
+                </p:selectBooleanCheckbox>
+
+            </p:panelGrid> 
+        </div> 
+
+
+
+        <div class="#{bean.processType==1 ? 'ui-g-12 ui-md-6 ui-lg-4' : 'ui-g-12 ui-md-6 ui-lg-3'}">
+            <p:outputLabel value="#{loc.name}" for="txtName" class="Fs12 FontBold"/>
+            <p:inputText id="txtName" value="#{bean.selectedObject.name}" styleClass="Wid98" required="true" placeholder="#{loc.name}">
+                <p:keyFilter regEx="/[^\\\{\}\[\]\,\:\u0022]/" preventPaste="false" />
+                <f:validateRegex pattern="[^\\\{\}\[\]\,\:\u0022]*" />
+            </p:inputText>
+        </div>
+        <div class="#{bean.processType==1 ? 'ui-g-12 ui-md-6 ui-lg-4' : 'ui-g-12 ui-md-6 ui-lg-3'}">
+            <p:outputLabel value="#{loc.shortname}" for="txtShortName" class="Fs12 FontBold"/>
+            <p:inputText id="txtShortName" value="#{bean.selectedObject.title}" required="true" placeholder="#{loc.shortname}" class="Wid95"> 
+                <p:keyFilter regEx="/[^\\\{\}\[\]\,\:\u0022]/" preventPaste="false" />
+                <f:validateRegex pattern="[^\\\{\}\[\]\,\:\u0022]*" />
+            </p:inputText>
+        </div>
+        <div class="#{bean.processType==1 ? 'ui-g-12 ui-md-6 ui-lg-3' : 'ui-g-12 ui-md-6 ui-lg-2'}">
+            <p:outputLabel value="#{loc.licensecode}" for="txtLicenceCode" class="Fs12 FontBold"/>
+            <h:panelGroup rendered="#{bean.isCentralIntegration}">
+                <p:commandLink process="@this" title="#{loc.licencecodeisconfirmed}" rendered="#{bean.processType==2 and bean.selectedObject.isLicenceCodeCheck}" global="false">
+                    <i class="fa fa-check Fs14" style="color:green !important;"/>                 
+                </p:commandLink>
+                <p:commandLink process="@this" title="#{loc.licencecodeisnotconfirmed}" rendered="#{bean.processType==2 and !bean.selectedObject.isLicenceCodeCheck}" global="false">
+                    <i class="fa fa-times Fs14" style="color:red !important;"/>                 
+                </p:commandLink>
+                <p:commandLink resetValues="true" process="@this" title="#{loc.checklicencecode}" actionListener="#{bean.checkLicenceCode()}" rendered="#{bean.processType==2}" >
+                    <i class="fa fa-share-square-o Fs14 tlbrAddBtn MarLeft2"/>                 
+                </p:commandLink>
+            </h:panelGroup>
+            <p:inputText id="txtLicenceCode" value="#{bean.selectedObject.licenceCode}" required="true" placeholder="#{loc.licensecode}" class="Wid95" disabled="#{bean.selectedObject.isLicenceCodeCheck}">
+                <p:ajax global="false"/>
+            </p:inputText>
+        </div>
+        <h:panelGroup rendered="#{bean.processType==1}">
+            <div class="ui-g-12 ui-md-6 ui-lg-3">     
+                <p:outputLabel value="#{loc.authorizationgroup}" for="txtAuthorizationGroup" class="Fs12 FontBold"/>
+                <p:inputText id="txtAuthorizationGroup" value="#{bean.authorize.name}" styleClass="Wid95" placeholder="#{loc.authorizationgroup}" required="true"/>                                    
+            </div>
+        </h:panelGroup>
+        <div class="#{bean.processType==1 ? 'ui-g-12 ui-md-6 ui-lg-3' : 'ui-g-12 ui-md-6 ui-lg-1'}">
+            <p:outputLabel value="#{loc.statu}" for="slcStatu" class="Fs12 FontBold"/>
+            <p:selectOneMenu id="slcStatu" required="true" value="#{bean.selectedObject.status.id}" class="Wid95">
+                <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}" noSelectionOption="true" />
+                <f:selectItems value="#{sessionBean.getStatus(23)}" itemLabel="#{status.nameMap.get(sessionBean.langId).name}"  itemValue="#{status.id}" var="status"/>   
+            </p:selectOneMenu>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+            <p:outputLabel value="#{loc.type}" for="slcType" class="Fs12 FontBold"/>
+            <p:selectOneMenu id="slcType" required="true" value="#{bean.selectedObject.type.id}" class="Wid95">
+                <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}" noSelectionOption="true" />
+                <f:selectItems value="#{sessionBean.getTypes(23)}"  var="type" itemLabel="#{type.nameMap.get(sessionBean.langId).name}" itemValue="#{type.id}" />
+            </p:selectOneMenu>
+        </div>  
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+            <p:outputLabel value="#{loc.language}" for="slcLanguage" styleClass="Fs12 FontBold"/>
+            <p:selectOneMenu id="slcLanguage" value="#{bean.selectedObject.language.id}" required="true">
+                <f:selectItem itemLabel="#{loc.choose}" itemValue="" itemDisabled="true"/>
+                <f:selectItems value="#{sessionBean.getLangList()}" var="language" itemLabel="#{language.nameMap.get(sessionBean.langId).name}" itemValue="#{language.id}"/>
+            </p:selectOneMenu>     
+        </div>
+        <div class="#{bean.processType==1 ? 'ui-g-12 ui-md-6 ui-lg-2' : 'ui-g-12 ui-md-6 ui-lg-1'}">
+            <p:outputLabel value="#{loc.taxno}" for="txtTaxNo" class="Fs12 FontBold"/>
+            <p:inputText id="txtTaxNo" value="#{bean.selectedObject.taxNo}" styleClass="Wid95" required="true" placeholder="#{loc.taxno}" >
+                <p:keyFilter regEx="/[0-9]/"/>
+            </p:inputText>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-2">
+            <p:outputLabel value="#{loc.taxoffice}" for="txtTaxOffice" class="Fs12 FontBold"/>
+            <p:inputText id="txtTaxOffice" value="#{bean.selectedObject.taxOffice}" styleClass="Wid98" required="true" placeholder="#{loc.taxoffice}" />
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+            <p:outputLabel value="#{loc.mersisno}" for="txtMersisNo" class="Fs12 FontBold"/>
+            <p:inputText id="txtMersisNo" value="#{bean.selectedObject.mersisNo}" styleClass="Wid98" required="true" placeholder="#{loc.mersisno}" >
+                <p:keyFilter regEx="/[0-9]/"/>
+            </p:inputText>
+        </div>
+        <div class="#{bean.processType==1 ? 'ui-g-12 ui-md-6 ui-lg-2' : 'ui-g-12 ui-md-6 ui-lg-3'}">
+            <p:outputLabel value="#{loc.traderegisternumber}" for="txtTradeRegisterNumber" class="Fs12 FontBold"/>
+            <p:inputText id="txtTradeRegisterNumber" value="#{bean.selectedObject.tradeRegisterNo}" styleClass="Wid98" required="true" placeholder="#{loc.traderegisternumber}" >
+                <p:keyFilter regEx="/[0-9]/"/>
+            </p:inputText>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">   
+            <p:outputLabel value="#{loc.currency}" for="slcCurrency" class="Fs12 FontBold"/>
+            <p:selectOneMenu id="slcCurrency" value="#{bean.selectedObject.currency.id}" required="true" class="Wid95">
+                <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}" noSelectionOption="true"/>
+                <f:selectItems value="#{sessionBean.currencies}" var="currency" itemLabel="#{currency.nameMap.get(sessionBean.langId).name}" itemValue="#{currency.id}" /> 
+            </p:selectOneMenu>
+        </div>
+        <div class="#{bean.processType==1 ? 'ui-g-12 ui-md-6 ui-lg-2' : 'ui-g-12 ui-md-6 ui-lg-1'}">
+            <p:outputLabel value="#{loc.roundingvalue}" for="txtRoundingValue" class="Fs12 FontBold"/>
+            <p:inputText id="txtRoundingValue" value="#{bean.selectedObject.currencyrounding}" required="true" styleClass="Wid95" placeholder="#{loc.roundingvalue}">
+                <p:keyFilter regEx="/[0-9]/"/>
+            </p:inputText>
+        </div>
+        <div class="ui-g-12 ui-md-4 ui-lg-2">   
+            <p:outputLabel value="#{loc.decimalsymbol}" for="slcDecimalSymbol" class="Fs12 FontBold" />
+            <p:selectOneMenu id="slcDecimalSymbol" value="#{bean.selectedObject.decimalsymbol}" required="true" class="Wid95">
+                <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}" noSelectionOption="true"/>
+                <f:selectItem itemLabel="9.999,99" itemValue="0" />
+                <f:selectItem itemLabel="9,999.99" itemValue="1" />
+            </p:selectOneMenu>
+        </div> 
+
+        <div class="ui-g-12 ui-md-6 ui-lg-3">   
+            <p:outputLabel value="#{loc.dateformat}" for="slcDateFormat" class="Fs12 FontBold"/>
+            <p:selectOneMenu id="slcDateFormat" value="#{bean.selectedObject.dateFormat}" required="true" class="Wid95">
+                <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}" noSelectionOption="true"/>
+                <f:selectItems value="#{bean.listOfDateFormat}" /> 
+            </p:selectOneMenu>
+        </div>
+        <h:panelGroup rendered="#{bean.isCentralIntegration}">
+            <div class="ui-g-12 ui-md-6 ui-lg-3">
+                <p:outputLabel  value="#{loc.concepttype}" for="txtConceptType" class="Fs12 FontBold"/>
+                <p:inputText readonly="true" id="txtConceptType"  value="#{bean.selectedObject.conceptType == 1 ? loc.ultramarket : bean.selectedObject.conceptType==2 ? loc.fullmarketextra : bean.selectedObject.conceptType==3 ? loc.fullmarket : null}" styleClass="Wid98" placeholder="#{loc.concepttype}" />
+            </div>
+        </h:panelGroup>
+        <h:panelGroup rendered="#{bean.isCentralIntegration}">
+            <div class="ui-g-12 ui-md-6 ui-lg-2">
+                <p:outputLabel value="#{loc.agent}" styleClass="Fs12 FontBold"/>
+                <p:panelGrid layout="grid" columns="1" class="pngCheckBox" >  
+                    <p:selectBooleanCheckbox id="sbcIsAgency"  value="#{bean.selectedObject.isAgency}"   class="Fleft" disabled="true" >
+                        <p:ajax global="false" />
+                        <p:outputLabel value="#{loc.agentstation}"  style="margin-left: 2px;"  class="FontNormal"/>
+                    </p:selectBooleanCheckbox>
+
+                </p:panelGrid> 
+            </div> 
+        </h:panelGroup>
+        <h:panelGroup rendered="#{bean.selectedObject.isCentralIntegration and bean.selectedObject.specialItem == 1 }">
+            <div class="ui-g-12 ui-md-6 ui-lg-4">
+                <p:outputLabel value="#{loc.deliverytovehicle}" styleClass="Fs12 FontBold"/>
+                <p:panelGrid layout="grid" columns="2" class="pngCheckBox" >  
+                    <p:selectBooleanCheckbox id="sbcDeliveryToVehicle"  value="#{bean.selectedObject.isVehicleDelivery}"   class="Fleft" disabled="true" >
+                        <p:ajax global="false" />
+                        <p:outputLabel value="#{loc.deliverytovehicle}"  style="margin-left: 2px;"  class="FontNormal"/>
+                    </p:selectBooleanCheckbox>
+                    <p:selectBooleanCheckbox id="sbcComeGetIt"  value="#{bean.selectedObject.isTakeAway}"   class="Fleft" disabled="true" >
+                        <p:ajax global="false" />
+                        <p:outputLabel value="#{loc.takeaway}"  style="margin-left: 2px;"  class="FontNormal"/>
+                    </p:selectBooleanCheckbox>
+                </p:panelGrid> 
+            </div> 
+        </h:panelGroup>
+
+
+
+        <h:panelGroup rendered="#{bean.processType == 1}">
+            <div class="ui-g-12 ui-md-6 ui-lg-5">
+                <p:outputLabel value="#{loc.integration}" styleClass="Fs12 FontBold"/>
+                <p:panelGrid layout="grid" columns="1" class="pngCheckBox" >  
+                    <p:selectBooleanCheckbox id="sbcCentralIntegration"  value="#{bean.selectedObject.isCenterInteg}"   class="Fleft" >
+                        <p:ajax global="false" />
+                        <p:outputLabel value="#{loc.istherecentralintegrationofbranch}"  style="margin-left: 2px;"  class="FontNormal"/>
+                    </p:selectBooleanCheckbox>
+                </p:panelGrid> 
+            </div> 
+        </h:panelGroup>
+
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <h:outputText value="#{loc.communicationinformation}" styleClass="outputTextFont FontBold"/>
+            <p:separator style="border-bottom-color: #c0c5c7 !important"/>
+        </div>
+
+        <div class="ui-g-12 ui-md-4 ui-lg-3"> 
+            <p:outputLabel value="#{loc.mail}" for="txtMail" class="Fs12 FontBold"/>
+            <p:inputText id="txtMail" value="#{bean.selectedObject.mail}" styleClass="Wid98" placeholder="#{loc.mail}" >
+                <f:validator validatorId="emailValidator"/>
+            </p:inputText>
+        </div>
+        <div class="ui-g-12 ui-md-8 ui-lg-9" style="padding: 0px !important">
+            <div class="ui-g-12 ui-md-2 ui-lg-2"> 
+                <p:outputLabel value="#{loc.phone}" for="txtPhone"  class="Fs12 FontBold"/>
+                <p:inputMask id="txtPhone" value="#{bean.selectedObject.phone}" placeholder="#{loc.phone} " mask="(999) 999-99-99"/>
+            </div>
+            <div class="ui-g-12 ui-md-2 ui-lg-2"> 
+                <p:outputLabel value="#{loc.mobile}" for="txtMobile"  class="Fs12 FontBold"/>
+                <p:inputMask id="txtMobile" value="#{bean.selectedObject.mobile}" placeholder="#{loc.mobile} " mask="(999) 999-99-99"/>
+            </div>
+            <div class="ui-g-12 ui-md-4 ui-lg-4">
+                <p:outputLabel value="#{loc.webaddress}" for="txtWebAddress" class="Fs12 FontBold"/>
+                <p:inputText id="txtWebAddress" value="#{bean.selectedObject.webAddress}" styleClass="Wid95" placeholder="#{loc.webaddress}" />
+            </div>
+            <div class="ui-g-12 ui-md-2 ui-lg-2"> 
+                <p:outputLabel value="#{loc.latitude}" for="txtLatitude"  class="Fs12 FontBold"/>
+                <p:inputNumber id="txtLatitude" value="#{bean.selectedObject.latitude}"  styleClass="Wid95" placeholder="#{loc.latitude}"/>
+            </div>
+            <div class="ui-g-12 ui-md-2 ui-lg-2"> 
+                <p:outputLabel value="#{loc.longitude}" for="txtLongitude"  class="Fs12 FontBold"/>
+                <p:inputNumber id="txtLongitude" value="#{bean.selectedObject.longitude}"  styleClass="Wid95" placeholder="#{loc.longitude}"/>
+            </div>
+
+        </div>
+        <div class="ui-g-12 ui-md-4 ui-lg-4"> 
+            <p:outputLabel value="#{loc.address}" for="txtAddress" class="Fs12 FontBold"/>
+            <p:inputText id="txtAddress" value="#{bean.selectedObject.address}"  placeholder="#{loc.address}" class="Wid99"/>                                    
+        </div>
+        <div class="ui-g-12 ui-md-8 ui-lg-8" style="padding: 0px !important">
+            <div class="ui-g-12 ui-md-4 ui-lg-4"> 
+                <p:outputLabel value="#{loc.country}" for="slcCountry" class="Fs12 FontBold" />
+                <p:selectOneMenu   id="slcCountry" filter="true" filterMatchMode="contains"  value="#{bean.selectedObject.country.id}"  class="Wid95" required="true">
+                    <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}" /> 
+                    <f:selectItems value="#{sessionBean.countries}" var="country" itemLabel="#{country.getName(sessionBean.langId)}" itemValue="#{country.id}"  />
+                    <p:ajax  global="false" listener="#{citiesAndCountiesBean.updateCity(bean.selectedObject.country,bean.selectedObject.city,bean.selectedObject.county)}" update="slcCity,slcCounty" />
+                </p:selectOneMenu>
+            </div>
+            <div class="ui-g-12 ui-md-4 ui-lg-4"> 
+                <p:outputLabel value="#{loc.city}" for="slcCity" class="Fs12 FontBold"/>
+                <p:selectOneMenu  id="slcCity" filter="true" filterMatchMode="contains"  value="#{bean.selectedObject.city.id}" class="Wid95" required="true">
+                    <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}" />
+                    <f:selectItems value="#{citiesAndCountiesBean.cities}" itemLabel="#{city.getName(sessionBean.langId)}" itemValue="#{city.id}" var="city" />
+                    <p:ajax  global="false" listener="#{citiesAndCountiesBean.updateCounty(bean.selectedObject.country,bean.selectedObject.city,bean.selectedObject.county)}"   update="slcCounty" />
+                </p:selectOneMenu>
+            </div>
+            <div class="ui-g-12 ui-md-4 ui-lg-4"> 
+                <p:outputLabel value="#{loc.county}" for="slcCounty"  class="Fs12 FontBold" />
+                <p:selectOneMenu id="slcCounty" filter="true" filterMatchMode="contains"  value="#{bean.selectedObject.county.id}" class="Wid95" required="true">
+                    <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}" />
+                    <f:selectItems value="#{citiesAndCountiesBean.counties}" itemLabel="#{county.name}" itemValue="#{county.id}" var="county" />
+                </p:selectOneMenu>
+            </div>
+        </div>
+
+    </div>
+</ui:composition>
+

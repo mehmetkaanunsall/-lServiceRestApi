@@ -1,0 +1,146 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmInvoicePriceDifferenceProcess">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.transferstock}"/>
+            <ui:param name="bean" value='#{invoicePriceDifferenceStockTabBean}' />
+            <ui:param name="update" value="" />
+            <ui:param name="btnSaveId" value="#{invoicePriceDifferenceStockTabBean.selectedInvoice.status.id==28 and invoicePriceDifferenceStockTabBean.selectedInvoice.posId==0 and invoicePriceDifferenceStockTabBean.getRendered(6, 0)}" />      
+            <ui:param name="btnDeleteId" value='false' />
+        </ui:include>
+        <p:remoteCommand name="saveItem1"  delay="100"  resetValues="false" global="false" action="#{invoicePriceDifferenceStockTabBean.saveItem()}" update="frmInvoicePriceDifferenceProcess" />
+        <p:commandButton id="updateDatatable"   process="@this" ajax="true" global="false" style="display: none;" update="frmInvoicePriceDifferenceProcess"></p:commandButton>
+        <p:dataTable  id="dtbPriceDifference" var="item" widgetVar="priceDifferencePF" editable="true" editMode="cell" emptyMessage="#{loc.norecordsfound}" 
+                      value="#{invoicePriceDifferenceStockTabBean.listOfPriceDifference}" selection="#{invoicePriceDifferenceStockTabBean.selectedPriceDifference}" selectionMode="single"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{item.id}" paginator="true" sortBy="#{item.invoice.id}"
+                      paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" >
+
+
+
+            <p:ajax event="cellEdit" listener="#{invoicePriceDifferenceStockTabBean.onCellEditPriceDifference}"/>
+
+            <p:column id="clmStockName" headerText="#{loc.stock}" >
+                <h:outputText value="#{item.stock.barcode} - #{item.stock.name}" />
+            </p:column>
+
+            <p:column id="clmAmount" headerText="#{loc.amount}"  width="100"  >
+                <h:outputText value="#{item.quantity}" rendered="#{item.quantity>0}" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="unit" value="#{item.unit}"/>
+                    <f:attribute name="type" value="unit" />
+                </h:outputText>
+                <h:outputText value="-" rendered="#{item.quantity==0}"/>
+            </p:column>
+
+
+            <p:column id="clmOldUnitPrice" headerText="#{loc.oldunitprice}"  width="100"  >
+                <h:outputText value="#{item.unitPrice}" style="float: right;" rendered="#{item.unitPrice>0}">
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{item.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+                <h:outputText value="-" style="float: right;" rendered="#{item.unitPrice==0}"/>
+            </p:column>
+
+
+            <p:column id="clmNewUnitPrice" headerText=" #{invoicePriceDifferenceStockTabBean.selectedInvoice.isDifferenceDirection ? loc.unitpricetobeincreased : loc.unitpricetobereduced}"  width="100"  >
+                <p:cellEditor>
+                    <f:facet name="output">
+                        <h:outputText value="#{item.newUnitPrice}" style="float: right;" rendered="#{item.newUnitPrice>0}">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{item.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                        <h:outputText value="-" style="float: right;" rendered="#{item.newUnitPrice==0}"/>
+                    </f:facet>
+
+
+                    <f:facet name="input">
+                        <p:inputNumber value="#{item.newUnitPrice}" class="editableinput" onclick="this.setSelectionRange(0, this.value.length)"
+                                       decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? '.': ','}"  minValue="0"
+                                       thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}"
+                                       decimalPlaces="4"
+                                        emptyValue=""/>  
+                    </f:facet>
+                </p:cellEditor>
+            </p:column>
+
+
+            <p:column id="clmTaxRate"  width="100" headerText="#{loc.taxrate}"  >
+
+                <h:outputText value="#{item.taxRate}" style="float: right;" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="type" value="percent" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmTaxPrice" headerText="#{loc.taxprice}"  width="100" >
+
+                <h:outputText value="#{item.totalTax}" style="float: right;" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{item.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+
+
+
+            <p:column id="clmInterimPrice"  width="100" headerText="#{loc.taxfreeamount}"  >
+
+                <h:outputText value="#{item.totalPrice}" style="float: right;" rendered="#{item.totalPrice>0}">
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{item.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+                <h:outputText value="-" style="float: right;" rendered="#{item.totalPrice==0}"/>
+            </p:column>
+
+
+            <p:column id="clmPrice" headerText="#{loc.totalprice}"  width="100"  >
+
+                <h:outputText value="#{item.totalMoney}" style="float: right;">
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{item.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+
+          <!--  <p:column id="clmMoney" headerText="#{loc.pricedifferencemoney}" >
+                <p:cellEditor>
+                    <f:facet name="output">
+                        <h:outputText value="#{item.priceDifferentTotalMoney}" style="float: right;" >
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{item.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </f:facet>
+                    <f:facet name="input">
+                        <p:inputNumber value="#{item.priceDifferentTotalMoney}" class="editableinput" onclick="this.setSelectionRange(0, this.value.length)"
+                                       decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1? '.': ','}"  
+                                       thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1? ',': '.'}"
+                                       decimalPlaces="3" roundMethod="D" emptyValue="" minValue="0"/>  
+                    </f:facet>
+                </p:cellEditor>
+            </p:column> -->
+        </p:dataTable>
+    </h:form>
+
+    <script>
+
+        function updateDatatablePriceDifference() {
+            document.getElementById("frmInvoicePriceDifferenceProcess:updateDatatable").click();
+        }
+    </script>
+
+
+</ui:composition>

@@ -1,0 +1,111 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+        <ui:param name="bean" value="#{cashRegisterBean}"/> 
+        <ui:param name="update" value="dlgCashProcess"/>
+        <ui:param name="btnNewId" value='#{cashRegisterBean.getRendered(204, 0)}'/>
+        <ui:param name="datatable" value="frmCashRegister:dtbCashRegister" />
+        <ui:param name="widgetvar" value="cashRegisterPF" />
+        <ui:param name="form" value='frmToolbarPCashRegister' />
+        <ui:param name="fileName" value="#{loc.prdcashregisterdefinitions}"/> 
+        <ui:param name="renderedToggler" value='true'/>
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+    </ui:include>
+
+
+    <h:form id="frmCashRegister">
+
+        <p:dataTable  id="dtbCashRegister" var="cashRegister"  value="#{cashRegisterBean.listOfObjects}" filteredValue="#{cashRegisterBean.listOfFilteredObjects}" widgetVar="cashRegisterPF" selection="#{cashRegisterBean.selectedObject}"  selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{cashRegister.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                      reflow="true"  >
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{cashRegisterBean.update()}" update="dlgCashProcess" global="false" /> 
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false"/>
+            <p:ajax event="colReorder" listener="#{cashRegisterBean.reorder}" update="frmToolbarPCashRegister:toggle" />     
+            <p:ajax event="colResize"  listener="#{cashRegisterBean.onResize}" />    
+
+            <f:facet name="footer" rendered="false" >
+                <p:inputText id="globalFilter" value="#{cashRegisterBean.autoCompleteValue}"  style="display: none"  />
+            </f:facet>
+
+
+            <p:column id="clmName" headerText="#{loc.name}" sortable="true" sortBy="#{cashRegister.name}" filterable="true"  filterBy="#{cashRegister.name}" filterMatchMode="contains" visible="#{cashRegisterBean.toogleList[0]}" exportable="#{cashRegisterBean.toogleList[0]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{cashRegister.name}" />
+            </p:column >
+            <p:column id="clmBrand" headerText="#{loc.brand}" sortable="true" sortBy="#{cashRegister.brand.name}" filterable="true"  filterBy="#{cashRegister.brand.name}" filterMatchMode="contains" visible="#{cashRegisterBean.toogleList[1]}" exportable="#{cashRegisterBean.toogleList[1]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{cashRegister.brand.name}" />
+            </p:column >
+            <p:column id="clmSerialNumber" headerText="#{loc.serialno}" sortable="true" sortBy="#{cashRegister.serialNumber}" filterable="true"  filterBy="#{cashRegister.serialNumber}" filterMatchMode="contains" visible="#{cashRegisterBean.toogleList[2]}" exportable="#{cashRegisterBean.toogleList[2]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{cashRegister.serialNumber}" />
+            </p:column >
+            <p:column id="clmMacAddress" headerText="#{loc.macaddress}" sortable="true" sortBy="#{cashRegister.macAddress}" filterable="true"  filterBy="#{cashRegister.macAddress}" filterMatchMode="contains" visible="#{cashRegisterBean.toogleList[3]}" exportable="#{cashRegisterBean.toogleList[3]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{cashRegister.macAddress}" />
+            </p:column >
+            <p:column id="clmIpAddress" headerText="#{loc.ip} #{loc.address}" sortable="true" sortBy="#{cashRegister.ipAddress}" filterable="true"  filterBy="#{cashRegister.ipAddress}" filterMatchMode="contains" visible="#{cashRegisterBean.toogleList[4]}" exportable="#{cashRegisterBean.toogleList[4]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{cashRegister.ipAddress}" />
+            </p:column >
+
+            <p:column id="clmExternalEftPos" headerText="#{loc.doyouhaveexternaleftposmachine}" sortable="true" sortBy="#{cashRegister.isExternalEftPos}" filterable="true"  filterBy="#{cashRegister.isExternalEftPos}" filterMatchMode="contains" visible="#{cashRegisterBean.toogleList[5]}" exportable="#{cashRegisterBean.toogleList[5]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{cashRegister.isExternalEftPos ? loc.yes :loc.no}" />
+            </p:column >
+
+
+
+        </p:dataTable>  
+    </h:form>
+
+    <p:dialog id="dlgCashProcess" widgetVar="dlg_CashProcess" resizable="false" transient="true" focus="dlgCashProcess" responsive="true" dynamic="true" modal="true" closeOnEscape="true" width="40%">
+        <ui:include src="/pages/general/cashregister/cashregisterprocess.xhtml" />
+    </p:dialog>
+
+    <!-- Hızlı marka eklemek için-->
+    <c:set var="itemId" value="#{24}" scope="request" />
+    <c:set var="btnRenderedNew" value="#{207}" scope="request" />
+    <c:set var="btnRenderedSave" value="#{208}" scope="request" />
+    <p:dialog id="dlgBrandProc" widgetVar="dlg_brandproc" resizable="false" width="30%" focus="dlgBrandProc" responsive="true" dynamic="true" modal="true" closeOnEscape="true">
+
+        <h:form id="frmBrandProcess">
+            <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+                <ui:param name="outputtext" value="#{loc.brandprocess}"/>
+                <ui:param name="bean" value='#{newBrandBean}' />
+                <ui:param name="update" value="pgrBrandProcess" />
+                <ui:param name="btnSaveId" value="#{newBrandBean.getRendered(208, 0)}" />     
+                <ui:param name="renderback" value='false'/>
+                <ui:param name="btnDeleteId" value='false' />
+            </ui:include>
+
+            <ui:include src="/pages/inventory/stockbrand/stockbrandprocess.xhtml">
+                <ui:param name="bean" value='#{newBrandBean}' />
+                <c:set var="whichPage" value="cashRegisterBean" scope="request" />
+            </ui:include>    
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+
+

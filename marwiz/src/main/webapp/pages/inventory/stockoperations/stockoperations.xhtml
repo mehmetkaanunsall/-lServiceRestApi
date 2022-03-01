@@ -1,0 +1,461 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+
+
+    <h:form id="frmStockOperations">
+
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.stockprocess}"/>
+            <ui:param name="bean" value='#{stockOperationsBean}' />
+            <ui:param name="update" value="frmStockOperations:dtbStockOperations pgrStockOperationsDatatable pgrStockOperations" />
+            <ui:param name="renderedDefaultComand" value="true" />
+        </ui:include>
+
+        <h:panelGroup id="pgrStockOperations" layout="block" transient="true">  
+            <div class="ui-g divContent">
+                <div class="panelToggle ui-g-12">
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldStartDate" value="#{stockOperationsBean.beginDate}" class="datepicker" timeControlType="select"  required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldEndDate" value="#{stockOperationsBean.endDate}" class="datepicker" timeControlType="select" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.stock}" for="txtStock" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtStock" value="#{stockBookCheckboxFilterBean.selectedCount}" onclick="showStockBook()" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}" >
+
+                        </p:inputText>
+                        <p:commandLink id="btnStock" process="@this" update="frmStockBookFilterCheckbox" actionListener="#{stockOperationsBean.openDialog(1)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_stockcheckbox').show();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax   listener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckbox')}" />
+                        </p:commandLink>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6  ui-lg-2">
+                        <p:outputLabel value="#{loc.stock} #{loc.category}" for="txtCategory"  styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtCategory" onclick="showCategoryBook()"  value="#{categoryBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter"  readonly="#{facesContext.currentPhaseId.ordinal ge 4}"  placeholder="#{loc.all}" >
+                        </p:inputText>
+                        <p:commandLink id="btnCategory"   process="@this" update="frmCategoryBookFilter" action="#{stockOperationsBean.openDialog(2)}" class="commandLinkPositionForBookFilter btnDisableButton" oncomplete="PF('olp_Category').loadContents();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax   listener="#{categoryBookCheckboxFilterBean.findFilterList([2, sessionBean.user.lastBranchSetting.branch.id],'frmCategoryBookFilter','olp_Category','stockOperationCategoryCheckbox')}" />
+                        </p:commandLink>
+
+                    </div>
+
+                    <h:panelGroup id="pngSupplier" >
+                        <h:panelGroup  rendered="#{stockOperationsBean.isCentralSupplier}">
+                            <div class="ui-g-12 ui-md-6 ui-lg-2">
+                                <p:outputLabel value="#{loc.centralsupplier}" for="txtCentralSupplier"  styleClass="Fs12 FontBold"/>
+                                <p:commandLink id="cmdCentralSupplier" resetValues="true" process="@this" rendered="#{stockOperationsBean.isCentralSupplierIconView}"  global="false" title="#{loc.centralsupplier}" actionListener="#{stockOperationsBean.centralOrLocalSupplier(0)}" update="pgrStockOperations"  >
+                                    <i class="fa fa-refresh Fs14 tlbrAddBtn"/>                 
+                                </p:commandLink>
+
+                                <p:inputText  id="txtCentralSupplier" onclick="showCentralSupplierBook()" value="#{centralSupplierBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+
+                                </p:inputText>
+                                <p:commandLink id="btnCentralSupplier" process="@this" actionListener="#{stockOperationsBean.openDialog(3)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_centralsuppliercheckbox').loadContents();">
+                                    <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                    <p:ajax listener="#{centralSupplierBookCheckboxFilterBean.findFilterListLazyLoading([stockOperationsBean.selectedBranchList],'frmCentralSupplierBookFilterCheckbox','olp_centralsuppliercheckbox', 'reportcheckbox')}" />
+                                </p:commandLink>
+                            </div>
+                        </h:panelGroup>
+                        <h:panelGroup  rendered="#{!stockOperationsBean.isCentralSupplier}">
+                            <div class="ui-g-12 ui-md-6 ui-lg-2">
+                                <p:outputLabel value="#{loc.supplier}" for="txtSupplier"  styleClass="Fs12 FontBold"/>
+                                <p:commandLink id="clmSupplier" resetValues="true" process="@this" rendered="#{stockOperationsBean.isCentralSupplierIconView}" global="false" title="#{loc.supplier}" actionListener="#{stockOperationsBean.centralOrLocalSupplier(1)}" update="pgrStockOperations"  >
+                                    <i class="fa fa-refresh Fs14 tlbrAddBtn"/>                 
+                                </p:commandLink>
+
+                                <p:inputText  id="txtSupplier" onclick="showAccountBook()" value="#{accountBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+
+                                </p:inputText>
+                                <p:commandLink id="btnSupplier" process="@this" actionListener="#{stockOperationsBean.openDialog(4)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_accountcheckbox').loadContents();">
+                                    <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                    <p:ajax listener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([stockOperationsBean.selectedBranchList],'frmAccountBookFilterCheckbox','olp_accountcheckbox', 'supplierCheckboxReport')}" />
+                                </p:commandLink>
+                            </div>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <h:panelGroup id="pgrPrpcess" > 
+                        <h:panelGroup   rendered="#{sessionBean.lastBranchSetting.isCentralIntegration == true ? 'true':'false'}" >
+                            <div class="ui-g-12 ui-md-6 ui-lg-2">   
+                                <p:outputLabel value="#{loc.process}" for="slcProcess" class="Fs12 FontBold" />
+                                <p:selectOneMenu id="slcProcess" value="#{stockOperationsBean.process}" required="true" class="Wid95">
+                                    <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}" noSelectionOption="true"/>
+                                    <f:selectItem itemLabel="#{loc.pricechange}" itemValue="1" />
+                                    <f:selectItem itemLabel="#{loc.pricerecommendation}" itemValue="2" />
+                                </p:selectOneMenu>
+                            </div> 
+                        </h:panelGroup> 
+                    </h:panelGroup>
+                </div>
+            </div>
+        </h:panelGroup>
+
+        <p:remoteCommand name="showStockBook" process="@this" update="frmStockBookFilterCheckbox" oncomplete="PF('olp_stockcheckbox').show();" action="#{stockOperationsBean.openDialog(1)}" actionListener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckbox')}" />
+        <p:remoteCommand name="showCategoryBook" process="@this" update="frmCategoryBookFilter" action="#{stockOperationsBean.openDialog(2)}" oncomplete="PF('olp_Category').loadContents();" actionListener="#{categoryBookCheckboxFilterBean.findFilterList([2,sessionBean.user.lastBranchSetting.branch.id],'frmCategoryBookFilter','olp_Category','stockOperationCategoryCheckbox')}" />
+        <p:remoteCommand name="showCentralSupplierBook" process="@this" oncomplete="PF('olp_centralsuppliercheckbox').loadContents();" action="#{stockOperationsBean.openDialog(3)}" actionListener="#{centralSupplierBookCheckboxFilterBean.findFilterListLazyLoading([stockOperationsBean.selectedBranchList],'frmCentralSupplierBookFilterCheckbox','olp_centralsuppliercheckbox', 'reportcheckbox')}" />
+        <p:remoteCommand name="showAccountBook" process="@this" oncomplete="PF('olp_accountcheckbox').loadContents();" action="#{stockOperationsBean.openDialog(4)}" actionListener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([stockOperationsBean.selectedBranchList],'frmAccountBookFilterCheckbox','olp_accountcheckbox', 'supplierCheckboxReport')}" />
+
+
+        <div class="EmptyBox20" />
+        <h:panelGroup id="pgrStockOperationsDatatable" >
+            <h:panelGroup rendered="#{stockOperationsBean.isFind}">
+                <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+                    <ui:param name="bean" value="#{stockOperationsBean}"/>   <!-- Bean -->
+                    <ui:param name="datatable" value="frmStockOperations:dtbStockOperations" />  <!-- datatable  -->       
+                    <ui:param name="widgetvar" value='stockOperationsPF' />
+                    <ui:param name="form" value='frmToolbarStockOperations' />
+                    <ui:param name="btnPrintTicket" value="#{stockOperationsBean.process == 2 ?  'false':'true'}" />
+                    <ui:param name="btnChangePrice" value="#{stockOperationsBean.process == 2 and stockOperationsBean.getRendered(143, 0) ?  'true':'false'}" />
+                </ui:include>
+
+                <h:panelGroup >
+                    <p:panelGrid layout="grid" columns="1" class="allCheckPanelGrid" style="border-radius: 0px !important; border-bottom: 0px !important;">  
+                        <p:selectBooleanCheckbox  value="#{stockOperationsBean.isAll}" itemLabel="#{loc.all}"   class="Fleft allcheck" style="margin-top: 2px; margin-left: 5px;">
+                            <p:ajax global="false" update="frmStockOperations:dtbStockOperations frmStockOperations:frmToolbarStockOperations"  listener="#{stockOperationsBean.setIsAll()}" />
+                        </p:selectBooleanCheckbox>
+                    </p:panelGrid>
+                </h:panelGroup>  
+
+                <p:dataTable id="dtbStockOperations"  value="#{stockOperationsBean.listOfObjects}" selection="#{stockOperationsBean.selectedObjects}" var="stockOperations" 
+                             emptyMessage="#{loc.norecordsfound}"  paginator="true"  widgetVar="stockOperationsPF"  filteredValue="#{stockOperationsBean.listOfFilteredObjects}"
+                             paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                             rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"
+                             rows="#{sessionBean.user.defualtGridSize}"  class="tabDatatable notificationDatatable" rowKey="#{stockOperations.stock.id}" editable="true" editMode="cell" rowSelectMode="checkbox">
+
+                    <p:ajax event="rowSelectCheckbox" listener="#{stockOperationsBean.onRowSelect}" global="false" update="frmStockOperations:frmToolbarStockOperations"/>
+                    <p:ajax event="rowUnselectCheckbox" global="false" update="frmStockOperations:frmToolbarStockOperations"/>
+                    <p:ajax event="rowUnselect" global="false" update="frmStockOperations:frmToolbarStockOperations"/>
+                    <p:ajax event="toggleSelect" global="false"  listener="#{stockOperationsBean.onToggleSelect}" update="frmStockOperations:dtbStockOperations  frmStockOperations:frmToolbarStockOperations"/>
+                    <p:ajax event="filter" global="false"/>
+                    <p:ajax event="page" global="false"/>
+                    <p:column selectionMode="multiple" style="width:26px;text-align:center; margin-top: -1px; margin-left: -2px" selectRow="false"/>
+
+                    <f:facet  name="footer"     >
+                        <p:inputText id="globalFilter" value="#{stockOperationsBean.autoCompleteValue}"  style="display: none" />
+                    </f:facet>
+
+
+                    <p:column id="clmProcessDate"  rendered="#{stockOperationsBean.process==1 ? 'true':'false'}" headerText="#{loc.processdate}" selectRow="false" filterable="true"  filterBy="#{stockOperations.processDate}" filterMatchMode="contains" >
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{stockOperations.processDate}"  >
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmProcessDate2" rendered="#{stockOperationsBean.process==2 ? 'true':'false'}" headerText="#{loc.processdate}" selectRow="false" filterable="true"  filterBy="#{stockOperations.processDate}" filterMatchMode="contains" >
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{stockOperationsBean.formatStringToDate(stockOperations.processdate)}"  >
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmStockCode" headerText="#{loc.stockcode}" selectRow="false" filterable="true"  filterBy="#{stockOperations.stock.code}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText  value="#{stockOperations.stock.code}"/>
+                    </p:column>
+                    <p:column id="clmCenterStockCode" headerText="#{loc.centerstockcode}" selectRow="false" filterable="true"  filterBy="#{stockOperations.stock.centerProductCode}" filterMatchMode="contains" >
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText  value="#{stockOperations.stock.centerProductCode}"/>
+                    </p:column>
+                    <p:column id="clmBarcode" headerText="#{loc.stockbarcode}" selectRow="false" filterable="true"  filterBy="#{stockOperations.stock.barcode}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText  value="#{stockOperations.stock.barcode}" />
+                    </p:column>
+                    <p:column id="clmStock" headerText="#{loc.stock}" selectRow="false" filterable="true"  filterBy="#{stockOperations.stock.name}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{stockOperations.stock.name}" />
+                    </p:column>
+
+                    <p:column  id="clmProcess" rendered="true" headerText="#{loc.process}" selectRow="false" filterable="true"  filterBy="#{stockOperationsBean.process==1 ? loc.pricechange : loc.pricerecommendation}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{stockOperationsBean.process==1 ? loc.pricechange : loc.pricerecommendation}" />
+                    </p:column>
+
+                    <p:column   id="clmOldPrice" headerText="#{loc.oldprice}" rendered="#{stockOperationsBean.process==1 ? 'true' : 'false'}"  selectRow="false"  filterable="true"  filterBy="#{stockOperations.oldPrice}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{stockOperations.oldPrice}"  class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="currency" />
+                            <f:attribute name="currency" value="#{stockOperationsBean.findCurrency(stockOperations.oldCurrency.id)}" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column   id="clmNewPrice"  selectRow="false" headerText="#{stockOperationsBean.process==2 ? loc.price : loc.newprice}"  filterable="true"  filterBy="#{stockOperations.price}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{stockOperations.price}"  class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="currency" />
+                            <f:attribute name="currency" value="#{stockOperationsBean.findCurrency(stockOperations.currency.id)}" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmTicketCount" selectRow="false" headerText="#{loc.ticketcount}">
+
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+
+                        <p:cellEditor id="ceTicketCount">
+                            <f:facet name="output">
+                                <h:outputText value="#{stockOperations.ticketCount}" class="Fright">
+                                </h:outputText>
+                            </f:facet>
+
+                            <f:facet name="input">
+                                <p:inputNumber value="#{stockOperations.ticketCount}"  class="editableinput" 
+                                               decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? '.': ','}" 
+                                               thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}"
+                                               decimalPlaces="0" minValue="0" roundMethod="D" emptyValue="">
+                                </p:inputNumber> 
+                            </f:facet>
+                        </p:cellEditor>                        
+                    </p:column>
+
+
+                </p:dataTable>
+
+                <p:commandButton id="updateDatatable" update="printPanel frmStockOperations:pgrPrpcess frmStockOperations:pgrStockOperationsDatatable frmStockOperations:frmToolbarStockOperations:globalFilter " style="display: none"  process="@this" global="false"/>
+
+            </h:panelGroup>
+        </h:panelGroup>
+    </h:form>
+
+
+
+    <p:overlayPanel id="olpCategory" widgetVar="olp_Category" showEvent="none" modal="true" transient="true" for="frmStockOperations:btnCategory"  my="right top" at="left bottom" dismissable="true" hideEffect="blind" showCloseIcon="true" class="Wid30">
+        <ui:include src="/pages/general/common/categorybookcheckbox.xhtml">
+            <ui:param name="updateBean" value='#{stockOperationsBean}' />
+            <ui:param name="type" value='stockOperationCategoryCheckbox' />
+            <ui:param name="parameters" value='#{[2,sessionBean.user.lastBranchSetting.branch.id]}' /> 
+            <ui:param name="form" value='frmCategoryBookFilter' /> 
+        </ui:include>
+    </p:overlayPanel>
+
+    <!--Kitaptan merkezi tedarikçi seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/centralsupplierbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{stockOperationsBean}' />
+        <ui:param name="for" value='frmStockOperations:btnCentralSupplier' />
+        <ui:param name="type" value='reportcheckbox' />
+        <ui:param name="parameters" value='#{[stockOperationsBean.selectedBranchList]}' /> 
+        <ui:param name="columnsize" value='1' /> 
+        <ui:param name="form" value='frmCentralSupplierBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_centralsuppliercheckbox" />
+    </ui:include>
+    <!--reportcheckbox-->
+    <!--Kitaptan tedarikçi seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/accountbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{stockOperationsBean}' />
+        <ui:param name="for" value='frmStockOperations:btnSupplier' />
+        <ui:param name="type" value='supplierCheckboxReport' />
+        <ui:param name="parameters" value='#{[stockOperationsBean.selectedBranchList]}' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmAccountBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_accountcheckbox" />
+    </ui:include>
+    <!--supplierCheckboxReport-->
+
+    <!--Kitaptan stok seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/stockbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{stockOperationsBean}' />
+        <ui:param name="for" value='frmStockOperations:btnStock' />
+        <ui:param name="type" value='reportcheckbox' />
+        <ui:param name="parameters" value='' /> 
+        <ui:param name="columnsize" value='3' /> 
+        <ui:param name="form" value='frmStockBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_stockcheckbox" />
+    </ui:include>
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+
+    <p:dialog class="deleteConfirm MaxWid500"   id="dlgPriceList" widgetVar="dlgPriceListProcess"    resizable="false" transient="true" focus="dlgPriceList" closeOnEscape="true" responsive="true"  width="20%" modal="true" >
+
+        <h:form id="frmProcessConfirm">
+            <div class="ui-g TexAlCenter" >
+                <div class="ui-g-12 ui-md-12 ui-lg-12 ">
+                    <h:outputText class="Fleft" value="#{loc.areyousurewanttoupdatethesalespricelist}"  style="white-space: pre-wrap;" styleClass="Fs14 FontBold">      </h:outputText>                
+                </div>  
+
+                <div class="ui-g-12 ui-md-12 ui-lg-12" >
+                    <p:selectBooleanCheckbox style="    margin-left: 17px;" id="sbcPrintTag" value="#{stockOperationsBean.isPrintTag}" itemLabel="#{loc.isprinttag}" class="Fleft Fs14 FontBold">
+                        <p:ajax global="false" />
+                    </p:selectBooleanCheckbox>
+                </div>
+
+
+                <div class="ui-g-12 ui-md-12 ui-lg-6 TexAlCenter">
+                    <p:commandButton value="#{loc.yes}" action="#{stockOperationsBean.processPriceList()}" onclick="PF('dlgPriceListProcess').hide()"  process="@this" styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+                </div>
+                <div class="ui-g-12 ui-md-12 ui-lg-6 TexAlLeft">
+                    <p:commandButton value="#{loc.no}" type="button" onclick="PF('dlgPriceListProcess').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+                </div>
+            </div>
+        </h:form>
+    </p:dialog>
+
+
+    <div style="display: none;">
+        <p:outputPanel id="printPanel"  style="width: 22cm;height: 29cm; position: relative;padding: 0; page-break-before: auto; page-break-after: auto; page-break-inside: avoid; float:left;display: inline-block; width: 1000px;">
+            <p:outputPanel id="pricelist" >
+                <style>
+                    @page{
+                        margin:5mm;
+                    }
+                    .pricetaglabel{
+                        color:black!important; 
+                        /*margin:0;
+                        padding:0;*/
+                        position:absolute; 
+                        overflow: hidden;
+                    }
+                    .pricetagcontainer{
+                        position: relative;padding: 0; page-break-before: auto; page-break-after: auto; page-break-inside: avoid; float:left
+                    }
+                    #{stockOperationsBean.pricetagStyle}  
+                </style>
+                <div style="display: block;" class="ui-g">
+                    <p:repeat value="#{stockOperationsBean.tempSelectedObjects}" var="stock">
+                        <p:panel style="position: relative; display: inline-block;width:#{stockOperationsBean.documentTemplate.width.multiply(5)}px;height:#{stockOperationsBean.documentTemplate.height.multiply(5)}px;  margin-bottom:80px;">
+
+                            <p:repeat value="#{stockOperationsBean.jsonDocumentDemplate.listOfObjects}" var="dto">
+                                <p:outputPanel class="#{dto.keyWord}"  style="#{dto.keyWord.contains('container') ? 'position: absolute;':'display:none;'}; border: 1px solid black;width:#{dto.width*(4.5)}px;height:#{dto.height*(4.5)}px;" />
+
+                                <p:graphicImage  class="#{dto.keyWord}"   style="#{!dto.keyWord.contains('domesticproductsimagepnl') and dto.keyWord.contains('imagepnl')  ? 'position: absolute;':'display:none;'};" 
+                                                 url="../upload/template/#{stockOperationsBean.documentTemplate.id}_#{dto.keyWord}.png" >
+                                </p:graphicImage>
+                                <p:graphicImage  class="#{dto.keyWord}"   style="#{dto.keyWord.contains('domesticproductsimagepnl') and ( stock.stock.country.id eq sessionBean.user.lastBranch.country.id ) ? 'position: absolute;':'display:none;'};" 
+                                                 url="../upload/template/#{stockOperationsBean.documentTemplate.id}_#{dto.keyWord}.png" >
+                                </p:graphicImage>
+
+                                <p:outputPanel class="#{dto.keyWord}"  style="#{!dto.keyWord.contains('imagepnl') and !dto.keyWord.contains('container') ? 'position: absolute;':'display:none'}" >
+
+
+                                    <!--labelTitle--><p:outputLabel style="#{dto.keyWord.contains('textpnl')  ? 'position: absolute;':'display:none'};"  class="#{dto.keyWord}" value="#{dto.name}" ></p:outputLabel>
+
+                                    <!--labelTitle--><p:outputLabel style="#{dto.keyWord.contains('productnamepnl') or dto.keyWord.contains('madeinpnl') ? 'position: absolute;':'display:none'}" class="#{dto.keyWord}"  value="#{dto.keyWord.contains('productnamepnl') ? ((stock.stock.name == null ? '':stock.stock.name)):
+
+                                                                             dto.keyWord.contains('madeinpnl') ? ((stock.stock.country.tag == null ? '':stock.stock.country.tag)):
+
+                                                                             ''}"  ></p:outputLabel>
+
+                                    <!--labelDate--><p:outputLabel style="#{dto.keyWord.contains('lastunitpricechangedatepnl') ? 'position: absolute;':'display:none'}" class="#{dto.keyWord}"  value="#{                                                                             
+                                                                            dto.keyWord.contains('lastunitpricechangedatepnl') ? ((stock.stock.stockInfo.lastSalePriceChangeDate == null ? '':stock.stock.stockInfo.lastSalePriceChangeDate )):
+                                                                            ''}"  > <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat}" /></p:outputLabel>
+
+                                    <!--labelNumeric--><p:outputLabel style="#{dto.keyWord.contains('salepricepnl') ? 'position: absolute;':'display:none;'} #{stock.stock.stockInfo.saleMandatoryPrice   gt 0  ? ' text-decoration: line-through; color: red; margin-top:-5px;':'' }  "  class="#{dto.keyWord}" value="#{ dto.keyWord.contains('salepricepnl') 
+                                                                               ?  stock.stock.stockInfo.saleMandatoryPrice   gt 0 ? stock.stock.stockInfo.recommendedPrice :  (stock.price == null ? 0: stock.price ): 0}" >
+
+                                        <f:converter converterId="currencyConverter" /> 
+                                        <f:attribute name="currency" value="#{ stock.stock.stockInfo.saleMandatoryPrice gt 0 ? stock.stock.stockInfo.saleMandatoryCurrency  :  sessionBean.user.lastBranch.currency}"/>
+                                        <f:attribute name="type" value="currency" />
+                                    </p:outputLabel> 
+
+                                    <!--labelNumeric--><p:outputLabel style="#{dto.keyWord.contains('salepricepnl') ? 'position: absolute;':'display:none;'} #{stock.stock.stockInfo.saleMandatoryPrice   gt 0 ? 'margin-top: 15px;' : ' display:none;'} "  class="#{dto.keyWord}" value="#{ dto.keyWord.contains('salepricepnl') 
+                                                                               ? stock.stock.stockInfo.saleMandatoryPrice : 0}"  >
+
+                                        <f:converter converterId="currencyConverter" />
+                                        <f:attribute name="currency" value="#{stock.stock.stockInfo.saleMandatoryCurrency}"/>
+                                        <f:attribute name="type" value="currency" />
+                                    </p:outputLabel> 
+
+                                    <!--labelNumeric--><p:outputLabel style="#{dto.keyWord.contains('lastchangingunitpricepnl') ? 'position: absolute;':'display:none'};"  class="#{dto.keyWord}" value="#{dto.keyWord.contains('lastchangingunitpricepnl') ? stockOperationsBean.calculateUnitPrice(stock) : 0}" >
+                                        <f:converter converterId="currencyConverter" />  
+                                        <f:attribute name="currency" value="#{stock.stock.stockInfo.currentSaleCurrency.id == 0 ? sessionBean.user.lastBranch.currency :stock.stock.stockInfo.currentSaleCurrency}"/>
+                                        <f:attribute name="type" value="currency" />
+                                    </p:outputLabel> 
+                                    <p:outputLabel style="#{dto.keyWord.contains('lastchangingunitpricepnl') and ((stock.stock.stockInfo.weightUnit.mainWeightUnit.id != 0 ? stock.stock.stockInfo.weightUnit.mainWeightUnit.id : stock.stock.stockInfo.weightUnit.id ) gt 0) ? 'position: absolute;     margin-left: 64px; ':'display:none'};"  class="#{dto.keyWord}"  value="  / #{(stock.stock.stockInfo.weightUnit.mainWeightUnit.id != 0 ? stock.stock.stockInfo.weightUnit.mainWeightUnit.sortName : stock.stock.stockInfo.weightUnit.sortName)}"/>
+
+                                    <!--labelNumeric-->
+                                    <p:barcode rendered="#{dto.keyWord.contains('stockbarcode')}" class="#{dto.keyWord}" value="#{stock.stock.barcode  == null ? 0 : stock.stock.barcode}" type="#{stock.stock.barcode.length() gt 8  ? 'ean13' :'ean8' }"/>
+                                </p:outputPanel>
+                            </p:repeat> 
+                        </p:panel>                                                                      
+
+
+                    </p:repeat>
+                </div>
+
+            </p:outputPanel>
+        </p:outputPanel>  
+        <script type="text/javascript">
+
+            function printData()
+            {
+                var divToPrint = document.getElementById("printPanel");
+                newWin = window.open('', '', 'height=500,width=1000');
+                newWin.document.write(divToPrint.outerHTML);
+                newWin.document.close()
+                newWin.focus();
+                newWin.addEventListener('load', function () {
+                    newWin.print();
+                });
+
+
+                //var writtenNumber = require('written-number');
+            }
+            function print_page() {
+                var divContents = $("#printerPanel").html();
+                var printWindow = window.open('', '', 'height=400,width=800');
+                printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.stockprocess}</div>');
+                printWindow.document.write('<div id="printerDiv">');
+                printWindow.document.write(divContents);
+                printWindow.document.write('</div>');
+                printWindow.document.close();
+                printWindow.print();
+            }
+            function updateDatatable() {
+                document.getElementById("frmStockOperations:updateDatatable").click();
+            }
+        </script>
+
+
+        <style>
+            .ui-chkbox .ui-chkbox-box {
+                border-color: #7d7d7d !important;
+            }
+        </style>
+    </div>
+
+
+
+
+
+</ui:composition>

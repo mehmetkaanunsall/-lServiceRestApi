@@ -1,0 +1,116 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+        <ui:param name="bean" value="#{branchBean}"/> 
+        <ui:param name="update" value="dlgBranchProcess"/>
+        <ui:param name="btnNewId" value='#{branchBean.getRendered(170, 0)}'/>
+        <ui:param name="datatable" value="frmBranch:dtbBranch" />
+        <ui:param name="widgetvar" value="branchPF" />
+        <ui:param name="form" value='frmToolbarBranch' />
+        <ui:param name="fileName" value="#{loc.branch}"/> 
+        <ui:param name="renderedToggler" value='true'/>
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+    </ui:include>
+
+
+    <h:form id="frmBranch">
+
+        <p:dataTable  id="dtbBranch" var="branch"  value="#{branchBean.listOfObjects}" widgetVar="branchPF" selection="#{branchBean.selectedObject}" filteredValue="#{branchBean.listOfFilteredObjects}"  selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{branch.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                      reflow="true" rowStyleClass="#{branch.status.id==48 ? 'ColumnColorRed' : null}"  >
+
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{marwiz.goToPage('/pages/system/branch/branchprocess.xhtml', branchBean.selectedObject, 0, 21)}" update="dlgBranchProcess" global="false" resetValues="true"/> 
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false"/>
+            <p:ajax event="colReorder" listener="#{branchBean.reorder}" update="frmToolbarBranch:toggle" />     
+            <p:ajax event="colResize"  listener="#{branchBean.onResize}" /> 
+
+            <f:facet name="footer" >
+                <p:inputText id="globalFilter" value="#{branchBean.autoCompleteValue}"  style="display: none"  />
+            </f:facet>
+
+            <p:column id="clmName" headerText="#{loc.name}" sortable="true" sortBy="#{branch.name}" filterable="true"  filterBy="#{branch.name}" filterMatchMode="contains" visible="#{branchBean.toogleList[0]}" exportable="#{branchBean.toogleList[0]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{branch.name}" />
+            </p:column>
+            <p:column id="clmTitle" headerText="#{loc.shortname}" sortable="true" sortBy="#{branch.title}" filterable="true"  filterBy="#{branch.title}" filterMatchMode="contains" visible="#{branchBean.toogleList[1]}" exportable="#{branchBean.toogleList[1]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{branch.title}" />
+            </p:column>
+            <p:column id="clmLicenceCode" headerText="#{loc.licensecode}" sortable="true" sortBy="#{branch.licenceCode}" filterable="true"  filterBy="#{branch.licenceCode}" filterMatchMode="contains" visible="#{branchBean.toogleList[2]}" exportable="#{branchBean.toogleList[2]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{branch.licenceCode}" />
+            </p:column>
+            <p:column id="clmType" headerText="#{loc.type}" sortable="true" sortBy="#{branch.type.tag}" filterable="true"  filterBy="#{branch.type.tag}" filterMatchMode="contains" visible="#{branchBean.toogleList[3]}" exportable="#{branchBean.toogleList[3]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{branch.type.tag}" />
+            </p:column>
+            <p:column id="clmTaxNo" headerText="#{loc.taxno}" sortable="true" sortBy="#{branch.taxNo}" filterable="true"  filterBy="#{branch.taxNo}" filterMatchMode="contains" visible="#{branchBean.toogleList[4]}" exportable="#{branchBean.toogleList[4]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{branch.taxNo}" />
+            </p:column>
+            <p:column id="clmTaxOffice" headerText="#{loc.taxoffice}" sortable="true" sortBy="#{branch.taxOffice}" filterable="true"  filterBy="#{branch.taxOffice}" filterMatchMode="contains" visible="#{branchBean.toogleList[5]}" exportable="#{branchBean.toogleList[5]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{branch.taxOffice}" />
+            </p:column>
+            <p:column id="clmCurrency" headerText="#{loc.currency}" sortable="true" sortBy="#{branch.currency.tag}" filterable="true"  filterBy="#{branch.currency.tag}" filterMatchMode="contains" visible="#{branchBean.toogleList[6]}" exportable="#{branchBean.toogleList[6]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{branch.currency.tag}" />
+            </p:column>
+            <p:column id="clmStatus" headerText="#{loc.statu}" sortable="true" sortBy="#{branch.status.tag}" filterable="true"  filterBy="#{branch.status.tag}" filterMatchMode="contains" visible="#{branchBean.toogleList[7]}" exportable="#{branchBean.toogleList[7]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{branch.status.tag}" />
+            </p:column>
+        </p:dataTable>  
+    </h:form>
+
+
+    <p:dialog id="dlgBranchProcess" widgetVar="dlg_BranchProcess" resizable="false" transient="true" focus="dlgBranchProcess" responsive="true" dynamic="true"  closeOnEscape="true" width="55%">
+        <h:form id="frmNewBranch" >  
+            <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+                <ui:param name="bean" value='#{branchBean}' />
+                <ui:param name="outputtext" value="#{loc.branchprocesses}"/>
+                <ui:param name="update" value="pgrNewBranch" />
+                <ui:param name="btnSaveId" value="#{branchBean.getRendered(171, 0)}" />
+                <ui:param name="btnDeleteId" value='false' /> 
+
+            </ui:include>
+
+            <h:panelGroup id="pgrNewBranch" layout="block">
+                <div class="ui-g divContent">   
+                    <ui:include src="/pages/system/branch/newbranch.xhtml" >
+                        <ui:param name="bean" value='#{branchBean}' />
+                    </ui:include>
+                </div>
+            </h:panelGroup>
+        </h:form>
+
+    </p:dialog>
+   
+
+</ui:composition>
+
+

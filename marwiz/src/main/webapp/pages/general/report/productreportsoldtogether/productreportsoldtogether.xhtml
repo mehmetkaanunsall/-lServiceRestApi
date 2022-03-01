@@ -1,0 +1,265 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmProductReportSoldTogether">
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.productreportsoldtogether}"/>
+            <ui:param name="bean" value='#{productReportSoldTogetherBean}' />
+            <ui:param name="update" value="frmProductReportSoldTogetherDatatable:dtbProductReportSoldTogether pgProductReportSoldTogether  pgrProductReportSoldTogetherDatatable " />
+        </ui:include>
+
+        <h:panelGroup id="pgProductReportSoldTogether" class="divContent" layout="block" transient="true">  
+            <div class="panelToggle  ui-g">
+                <div class="#{productReportSoldTogetherBean.selectedObject.timeInterval == 1 ? 'ui-g-12 ui-md-6 ui-lg-3' : 'ui-g-12 ui-md-6 ui-lg-2'}">
+                    <p:outputLabel value="#{loc.timeinterval}" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu value="#{productReportSoldTogetherBean.selectedObject.timeInterval}">
+                        <f:selectItem itemLabel="#{loc.betweentwospecificdays}" itemValue="0" />
+                        <f:selectItem itemLabel="#{loc.hourly}" itemValue="1" />
+                        <f:selectItem itemLabel="#{loc.daily}" itemValue="2"/>
+                        <f:selectItem itemLabel="#{loc.weekly}" itemValue="3"/>
+                        <f:selectItem itemLabel="#{loc.monthly}" itemValue="4"/>
+                        <f:selectItem itemLabel="#{loc.yearly}" itemValue="5"/>
+                        <f:selectItem itemLabel="#{loc.shiftperiod}" itemValue="6"/>       
+                        <p:ajax event="change" update="pgProductReportSoldTogether" listener="#{productReportSoldTogetherBean.changeTimeInterval()}" />
+                    </p:selectOneMenu>
+                </div>
+                <h:panelGroup rendered="#{productReportSoldTogetherBean.selectedObject.timeInterval==0 or productReportSoldTogetherBean.selectedObject.timeInterval==1 or productReportSoldTogetherBean.selectedObject.timeInterval==2 or productReportSoldTogetherBean.selectedObject.timeInterval==3}">
+                    <div class="#{productReportSoldTogetherBean.selectedObject.timeInterval == 1 ? 'ui-g-12 ui-md-6 ui-lg-3' : 'ui-g-12 ui-md-6 ui-lg-2'}">
+                        <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldStartDate" class="datepicker" required="true" value="#{productReportSoldTogetherBean.selectedObject.beginDate}" beforeShow="dpClearButton" timeControlType="select"  pattern="#{sessionBean.user.lastBranch.dateFormat} #{productReportSoldTogetherBean.selectedObject.timeInterval==0 ? 'HH:mm:ss' : ''}" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="#{productReportSoldTogetherBean.selectedObject.timeInterval == 1 ? 'ui-g-12 ui-md-6 ui-lg-3' : 'ui-g-12 ui-md-6 ui-lg-2'}">
+                        <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldEndDate" class="datepicker" required="true" value="#{productReportSoldTogetherBean.selectedObject.endDate}" beforeShow="dpClearButton" timeControlType="select" pattern="#{sessionBean.user.lastBranch.dateFormat} #{productReportSoldTogetherBean.selectedObject.timeInterval==0 ? 'HH:mm:ss' : ''}" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                </h:panelGroup>
+                <h:panelGroup rendered="#{productReportSoldTogetherBean.selectedObject.timeInterval==1}">
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.timezone}" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu value="#{productReportSoldTogetherBean.selectedObject.timezone}">
+                            <f:selectItem itemLabel="#{loc.all}" itemValue="0" />
+                            <f:selectItem itemLabel="3" itemValue="3" />
+                            <f:selectItem itemLabel="6" itemValue="6" />    
+                            <f:selectItem itemLabel="8" itemValue="8" />
+                            <p:ajax event="change" update="pgProductReportSoldTogether" listener="#{productReportSoldTogetherBean.changeTimezone()}" />
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="#{productReportSoldTogetherBean.selectedObject.timeInterval == 1 ? 'ui-g-12 ui-md-6 ui-lg-3' : 'ui-g-12 ui-md-6 ui-lg-2'}">
+                        <p:outputLabel value="#{loc.hourinterval}" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu value="#{productReportSoldTogetherBean.selectedObject.hourInterval.id}">
+                            <f:selectItem itemLabel="#{loc.all}" itemValue="0" />
+                            <f:selectItems value="#{productReportSoldTogetherBean.listOfHourInterval}" var="hour" itemLabel="#{hour.name}" itemValue="#{hour.id}" />
+                        </p:selectOneMenu>
+                    </div>
+                </h:panelGroup>
+                <h:panelGroup rendered="#{productReportSoldTogetherBean.selectedObject.timeInterval==3}">
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.week}" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu value="#{productReportSoldTogetherBean.selectedObject.weekDay}">
+                            <f:selectItem itemLabel="#{loc.all}" itemValue="0" />
+                            <f:selectItem itemLabel="#{loc.weeekdays}" itemValue="1" />
+                            <f:selectItem itemLabel="#{loc.weekends}" itemValue="2" />                           
+                        </p:selectOneMenu>
+                    </div>
+                </h:panelGroup>
+                <h:panelGroup rendered="#{productReportSoldTogetherBean.selectedObject.timeInterval==4}">
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.year}" for="slcYear" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcYear" value="#{productReportSoldTogetherBean.selectedObject.selectedYear}">
+                            <f:selectItem itemLabel="#{loc.all}" itemValue="0" />
+                            <f:selectItem itemLabel="#{productReportSoldTogetherBean.currentYear}" itemValue="#{productReportSoldTogetherBean.currentYear}" />
+                            <f:selectItem itemLabel="#{productReportSoldTogetherBean.currentYear-1}" itemValue="#{productReportSoldTogetherBean.currentYear-1}" />
+                            <f:selectItem itemLabel="#{productReportSoldTogetherBean.currentYear-2}" itemValue="#{productReportSoldTogetherBean.currentYear-2}" />
+                            <f:selectItem itemLabel="#{productReportSoldTogetherBean.currentYear-3}" itemValue="#{productReportSoldTogetherBean.currentYear-3}" />
+                            <f:selectItem itemLabel="#{productReportSoldTogetherBean.currentYear-4}" itemValue="#{productReportSoldTogetherBean.currentYear-4}" />
+                            <f:selectItem itemLabel="#{productReportSoldTogetherBean.currentYear-5}" itemValue="#{productReportSoldTogetherBean.currentYear-5}" />
+                            <f:selectItem itemLabel="#{productReportSoldTogetherBean.currentYear-6}" itemValue="#{productReportSoldTogetherBean.currentYear-6}" /> 
+                            <f:selectItem itemLabel="#{productReportSoldTogetherBean.currentYear-7}" itemValue="#{productReportSoldTogetherBean.currentYear-7}" />
+                            <f:selectItem itemLabel="#{productReportSoldTogetherBean.currentYear-8}" itemValue="#{productReportSoldTogetherBean.currentYear-8}" />
+                            <f:selectItem itemLabel="#{productReportSoldTogetherBean.currentYear-9}" itemValue="#{productReportSoldTogetherBean.currentYear-9}" />
+                            <f:selectItem itemLabel="#{productReportSoldTogetherBean.currentYear-10}" itemValue="#{productReportSoldTogetherBean.currentYear-10}" />
+                        </p:selectOneMenu>
+                    </div>
+                </h:panelGroup>
+                <h:panelGroup rendered="#{productReportSoldTogetherBean.selectedObject.timeInterval==6}">
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.shiftno}" for="txtShiftNo" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtShiftNo" value="#{productReportSoldTogetherBean.selectedObject.shiftNo}" styleClass="Wid95" required="true" placeholder="#{loc.shiftno}">
+                            <p:keyFilter regEx="/^[\u0621-\u064A0-9A-Za-z/ ]+$/" />
+                        </p:inputText>
+                    </div>
+
+                </h:panelGroup>
+ 
+
+
+                <div class="#{productReportSoldTogetherBean.selectedObject.timeInterval == 1 ? 'ui-g-12 ui-md-6 ui-lg-3' : 'ui-g-12 ui-md-6 ui-lg-2'}">
+                    <p:outputLabel value="#{loc.branch}" for="slcBranch" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcBranch" required="true" value="#{productReportSoldTogetherBean.selectedBranch.branch.id}">
+                        <f:selectItem itemValue="0"  itemLabel="#{loc.choose}" />
+                        <f:selectItems value="#{productReportSoldTogetherBean.listOfBranch}" var="branchSetting" itemLabel="#{branchSetting.branch.name}" itemValue="#{branchSetting.branch.id}"  />
+                        <p:ajax listener="#{productReportSoldTogetherBean.updateBranch()}" global="false" update="pgProductReportSoldTogether"/>
+
+                    </p:selectOneMenu> 
+                </div>
+
+                <div class="#{productReportSoldTogetherBean.selectedObject.timeInterval == 1 ? 'ui-g-12 ui-md-6 ui-lg-3' : 'ui-g-12 ui-md-6 ui-lg-2'}"  >
+                    <p:outputLabel value="#{loc.stockname}"  styleClass="Fs12 FontBold" for="txtStock"/>
+                    <p:inputText id="txtStock" value="#{productReportSoldTogetherBean.selectedObject.stock1.name}" onclick="showStockBook()" class="inputPositionForBookFilter" required="true" readonly="#{facesContext.currentPhaseId.ordinal ge 4}"  placeholder="#{loc.stockname}" >
+                    </p:inputText>
+                    <p:commandLink id="btnStock" process="@this" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_stock').loadContents();">
+                        <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                        <p:ajax listener="#{stockBookFilterBean.findFilterListLazyLoading([productReportSoldTogetherBean.selectedBranch],'frmStockBookFilter','olp_stock','reportproductsoldtogether')}" />
+                    </p:commandLink>
+                </div>
+
+            </div>
+        </h:panelGroup>     
+        <p:remoteCommand name="showStockBook" process="@this" oncomplete="PF('olp_stock').loadContents()" actionListener="#{stockBookFilterBean.findFilterListLazyLoading([productReportSoldTogetherBean.selectedBranch],'frmStockBookFilter','olp_stock','reportproductsoldtogether')}" />
+
+    </h:form>
+    <div class="EmptyBox20" />
+
+    <h:panelGroup id="pgrProductReportSoldTogetherDatatable" >
+        <h:panelGroup rendered="#{productReportSoldTogetherBean.isFind}">
+            <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                <ui:param name="bean" value="#{productReportSoldTogetherBean}"/>
+                <ui:param name="datatable" value="frmProductReportSoldTogetherDatatable:dtbProductReportSoldTogether" />
+                <ui:param name="fileName" value="#{loc.productreportsoldtogether}"/>
+                <ui:param name="renderedToggler" value='true'/>
+                <ui:param name="renderedExcel" value='true'/>
+                <ui:param name="renderedPdf" value='true'/>
+                <ui:param name="renderedPrint" value='true'/>
+                <ui:param name="renderedGraphic" value='false'/>
+            </ui:include>
+
+            <h:form id="frmProductReportSoldTogetherDatatable">
+
+                <p:dataTable  id="dtbProductReportSoldTogether" class="dtbReport"  var="ProductReportSoldTogether"  value="#{productReportSoldTogetherBean.listOfObjects}" selectionMode="single"  widgetVar="productReportSoldTogetherPF" emptyMessage="#{loc.norecordsfound}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{ProductReportSoldTogether.stock2.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" reflow="true" lazy="true" >
+
+
+                    <p:column id="clmBranch"  headerText="#{loc.branch}"  visible="#{productReportSoldTogetherBean.toogleList[0]}" exportable="#{productReportSoldTogetherBean.toogleList[0]}">
+                        <h:outputText value="#{productReportSoldTogetherBean.selectedBranch.branch.name}" />
+                    </p:column>
+                    <p:column id="clmDealerCode" rendered="#{productReportSoldTogetherBean.selectedObject.reportType==5}" headerText="#{loc.dealercode}"  visible="#{productReportSoldTogetherBean.toogleList[1]}" exportable="#{productReportSoldTogetherBean.toogleList[1]}">
+                        <h:outputText value="#{ProductReportSoldTogether.station.account.integrationCode}" />
+                    </p:column>
+                    <p:column id="clmStationCode" rendered="#{productReportSoldTogetherBean.selectedObject.reportType==5}" headerText="#{loc.uhk}"  visible="#{productReportSoldTogetherBean.toogleList[2]}" exportable="#{productReportSoldTogetherBean.toogleList[2]}">
+                        <h:outputText value="#{ProductReportSoldTogether.stationIntegrationCode}" />
+                    </p:column>
+                    <p:column id="clmReportType" rendered="#{productReportSoldTogetherBean.selectedObject.reportType!=0}" headerText="#{productReportSoldTogetherBean.selectedObject.reportType==2 ? loc.city : productReportSoldTogetherBean.selectedObject.reportType==3 ? loc.district : productReportSoldTogetherBean.selectedObject.reportType==4 ? loc.region : productReportSoldTogetherBean.selectedObject.reportType==5 ? loc.station : ''}"  visible="#{productReportSoldTogetherBean.toogleList[3]}" exportable="#{productReportSoldTogetherBean.toogleList[3]}">
+                        <h:outputText value="#{productReportSoldTogetherBean.selectedObject.reportType==2 ? ProductReportSoldTogether.city.tag : productReportSoldTogetherBean.selectedObject.reportType==3 ? ProductReportSoldTogether.district.name : productReportSoldTogetherBean.selectedObject.reportType==4 ? ProductReportSoldTogether.region.name : productReportSoldTogetherBean.selectedObject.reportType==5 ? ProductReportSoldTogether.station.name : ''}" />
+                    </p:column>
+                    <p:column id="clmTime" rendered="#{productReportSoldTogetherBean.selectedObject.timeInterval!=0}" headerText="#{productReportSoldTogetherBean.selectedObject.timeInterval==1 ? loc.hourly : productReportSoldTogetherBean.selectedObject.timeInterval==2 ? loc.daily : productReportSoldTogetherBean.selectedObject.timeInterval==3 ? loc.weekly : productReportSoldTogetherBean.selectedObject.timeInterval==4 ? loc.monthly : productReportSoldTogetherBean.selectedObject.timeInterval==5 ? loc.yearly : productReportSoldTogetherBean.selectedObject.timeInterval==6 ? loc.shiftno : '' }" visible="#{productReportSoldTogetherBean.toogleList[4]}" exportable="#{productReportSoldTogetherBean.toogleList[4]}">
+                        <h:outputText rendered="#{productReportSoldTogetherBean.selectedObject.timeInterval==1}" value="#{ProductReportSoldTogether.quantity==0 ? ' - ' : ProductReportSoldTogether.hour}" />
+                        <h:outputText rendered="#{productReportSoldTogetherBean.selectedObject.timeInterval==2}" value="#{ProductReportSoldTogether.quantity==0 ? ' - ' : ProductReportSoldTogether.processDate}" >
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat}" />
+                        </h:outputText>
+                        <h:outputText rendered="#{productReportSoldTogetherBean.selectedObject.timeInterval==3}" value="#{ProductReportSoldTogether.firstWeekDay}" >
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat}" />
+                        </h:outputText>
+                        <h:outputText rendered="#{productReportSoldTogetherBean.selectedObject.timeInterval==3}" value=" - " />
+                        <h:outputText rendered="#{productReportSoldTogetherBean.selectedObject.timeInterval==3}" value="#{ProductReportSoldTogether.endWeekDay}" >
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat}" />
+                        </h:outputText>
+                        <h:outputText rendered="#{productReportSoldTogetherBean.selectedObject.timeInterval==4}" value="#{ProductReportSoldTogether.quantity==0 ? ' - ' : productReportSoldTogetherBean.bringSaleMonthName(ProductReportSoldTogether.month)}" />
+                        <h:outputText rendered="#{productReportSoldTogetherBean.selectedObject.timeInterval==5}" value="#{ProductReportSoldTogether.quantity==0 ? ' - ' : ProductReportSoldTogether.year}" />
+                        <h:outputText rendered="#{productReportSoldTogetherBean.selectedObject.timeInterval==6}" value="#{ProductReportSoldTogether.quantity==0 ? ' - ' : ProductReportSoldTogether.shiftNo}" />
+                    </p:column>
+                    <p:column id="clmCode1" headerText="#{loc.stockcode} 1"  visible="#{productReportSoldTogetherBean.toogleList[5]}" exportable="#{productReportSoldTogetherBean.toogleList[5]}">
+                        <h:outputText value="#{productReportSoldTogetherBean.selectedObject.stock1.code}"  />
+                    </p:column>
+                    <p:column id="clmSupplierProductCode1" headerText="#{loc.supplierproductcode} 1"  visible="#{productReportSoldTogetherBean.toogleList[6]}" exportable="#{productReportSoldTogetherBean.toogleList[6]}">
+                        <h:outputText value="#{productReportSoldTogetherBean.selectedObject.stock1.supplierProductCode}"  />
+                    </p:column>
+                    <p:column id="clmStockBarcode1" headerText="#{loc.stockbarcode} 1"  visible="#{productReportSoldTogetherBean.toogleList[7]}" exportable="#{productReportSoldTogetherBean.toogleList[7]}">
+                        <h:outputText value="#{productReportSoldTogetherBean.selectedObject.stock1.barcode}"  />
+                    </p:column>
+                    <p:column id="clmStockName1" headerText="#{loc.stockname} 1"  visible="#{productReportSoldTogetherBean.toogleList[8]}" exportable="#{productReportSoldTogetherBean.toogleList[8]}">
+                        <h:outputText value="#{productReportSoldTogetherBean.selectedObject.stock1.name}"  />
+                    </p:column>
+                    <p:column id="clmCentralSupplier1" headerText="#{loc.centralsupplier} 1" rendered="#{productReportSoldTogetherBean.selectedBranch.isCentralIntegration and productReportSoldTogetherBean.selectedBranch.branch.conceptType ==1}"  visible="#{productReportSoldTogetherBean.toogleList[9]}" exportable="#{productReportSoldTogetherBean.toogleList[9]}">
+                        <h:outputText  value="#{productReportSoldTogetherBean.selectedObject.stock1.centralSupplier.name}"/>
+                    </p:column>
+                    <p:column id="clStockSupplier1" headerText="#{loc.supplier} 1"  visible="#{productReportSoldTogetherBean.toogleList[10]}" exportable="#{productReportSoldTogetherBean.toogleList[10]}">
+                        <h:outputText  value="#{productReportSoldTogetherBean.selectedObject.stock1.supplier.name}"/>
+                    </p:column>
+                    <p:column id="clmCode2" headerText="#{loc.stockcode} 2"  visible="#{productReportSoldTogetherBean.toogleList[11]}" exportable="#{productReportSoldTogetherBean.toogleList[11]}">
+                        <h:outputText value="#{ProductReportSoldTogether.stock2.code}"  />
+                    </p:column>
+                    <p:column id="clmSupplierProductCode2" headerText="#{loc.supplierproductcode} 2"  visible="#{productReportSoldTogetherBean.toogleList[12]}" exportable="#{productReportSoldTogetherBean.toogleList[12]}">
+                        <h:outputText value="#{ProductReportSoldTogether.stock2.supplierProductCode}"  />
+                    </p:column>
+                    <p:column id="clmStockBarcode2" headerText="#{loc.stockbarcode} 2"  visible="#{productReportSoldTogetherBean.toogleList[13]}" exportable="#{productReportSoldTogetherBean.toogleList[13]}">
+                        <h:outputText value="#{ProductReportSoldTogether.stock2.barcode}"  />
+                    </p:column>
+                    <p:column id="clmStockName2" headerText="#{loc.stockname} 2"  visible="#{productReportSoldTogetherBean.toogleList[14]}" exportable="#{productReportSoldTogetherBean.toogleList[14]}">
+                        <h:outputText value="#{ProductReportSoldTogether.stock2.name}"  />
+                    </p:column>
+                    <p:column id="clmCentralSupplier2" headerText="#{loc.centralsupplier} 2" rendered="#{productReportSoldTogetherBean.selectedBranch.isCentralIntegration and productReportSoldTogetherBean.selectedBranch.branch.conceptType ==1}"  visible="#{productReportSoldTogetherBean.toogleList[15]}" exportable="#{productReportSoldTogetherBean.toogleList[15]}">
+                        <h:outputText  value="#{ProductReportSoldTogether.stock2.centralSupplier.name}"/>
+                    </p:column>
+                    <p:column id="clStockSupplier2" headerText="#{loc.supplier} 2"  visible="#{productReportSoldTogetherBean.toogleList[16]}" exportable="#{productReportSoldTogetherBean.toogleList[16]}">
+                        <h:outputText  value="#{ProductReportSoldTogether.stock2.supplier.name}"/>
+                    </p:column>
+
+                    <p:column id="clmSalesAmount" headerText="#{loc.salesamount}"  visible="#{productReportSoldTogetherBean.toogleList[17]}" exportable="#{productReportSoldTogetherBean.toogleList[17]}">
+                        <h:outputText value="#{ProductReportSoldTogether.quantity}" class="Fright" >
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+
+
+                </p:dataTable>  
+            </h:form>
+        </h:panelGroup>
+    </h:panelGroup>
+
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+    <!--Kitaptan stok seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/stockbook.xhtml" >
+        <ui:param name="updateBean" value='#{productReportSoldTogetherBean}' />
+        <ui:param name="for" value='frmProductReportSoldTogether:btnStock' />
+        <ui:param name="type" value='reportproductsoldtogether' />
+        <ui:param name="parameters" value='#{[productReportSoldTogetherBean.selectedBranch]}' /> 
+        <ui:param name="columnsize" value='3' /> 
+        <ui:param name="form" value='frmStockBookFilter' /> 
+        <ui:param name="overlay" value="olp_stock" />
+    </ui:include>
+
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.productreportsoldtogether}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+
+</ui:composition>

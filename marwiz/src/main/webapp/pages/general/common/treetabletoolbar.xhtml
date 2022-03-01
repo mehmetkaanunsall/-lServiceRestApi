@@ -1,0 +1,88 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+    <!--
+    bean:Hangi sayfada kullanılcaksa o sayfanın Bean i
+    update: Yeni butonuna basınca açılacak dialog  
+    btnNewId: buton id yetki kontrolü için 
+    datatable: kullanılan sayfadaki datatable in id si
+    detailFilterXhtmlPath: detaylı filtre için açılan xhtml yolu
+    filterBean: detaylı filtre için açılan bean
+    fileName: excel pdf için oluşturulacak dosyanın adı
+    renderedFilter: Filtre butonunun yetki kontrolü
+    renderedToggler: Grid kolonları açıp kapatma butonunun yetki kontrolü
+    renderedExel:excel butonunun yetki kontrolü
+    renderedPdf: pdf butonunun yetki kontrolü
+    gridId: kullanılan sayfadaki gridin veri tabanındaki id si
+    renderExpanded: Treenin childlerini göster/gizle işlemi için kullanılır.
+    form : Tree toolbar form id
+    -->
+    <h:form id="#{form}"  >
+        <p:defaultCommand  target="test" />
+        <p:commandLink  id="test" actionListener="#{bean.generalFilter}"  style="display: none" update="#{datatable}"/>
+
+        <p:toolbar>
+            <f:facet name="right">
+
+                <h:panelGroup id="pgrExporter" class="panelGridNoBorder">
+                    <h:commandLink id="btnExcel" title="#{loc.transfertoexcel}"  class ="Fleft tlbrIcon" rendered="#{renderedExel and bean.renderExportButton}">
+                        <i class="icon-file-excel tlbrExcelBtn Fs23"  />
+                        <p:dataExporter type="xls" target="#{datatable}" fileName="#{bean.encodeFileNameForExportData(fileName)}" postProcessor="#{bean.postProcessXLS}"/>  
+                    </h:commandLink>  
+                    <h:commandLink id="btnPdf" title="#{loc.transfertopdf}"  class ="Fleft tlbrIcon "  rendered="#{renderedPdf and bean.renderExportButton}">
+                        <i class="icon-file-pdf tlbrPdfBtn Fs23"  />
+                        <p:dataExporter type="pdf" target="#{datatable}" fileName="#{bean.encodeFileNameForExportData(fileName)}" preProcessor="#{bean.preProcessPDF}" encoding="Cp1254" />
+                    </h:commandLink>
+                </h:panelGroup>
+                <p:commandLink id="btnExpand" title="#{loc.expandcollapse}" global="false" rendered="#{renderedExpanded}" class="Fright tlbrIcon MarTop5">
+                    <i class="icon-sort-alt-up Fs16" style="color: #205c90"  />
+                    <p:ajax event="click" listener="#{bean.expanded()}" update="#{datatable}" global="false"/>
+                </p:commandLink>
+                <p:commandLink id="btnToggler" title="#{loc.editcolumns}" global="false" rendered="#{renderedToggler}"   class="Fright tlbrIcon">
+                    <i class="icon-list tlbrColumnBtn Fs23"  />
+                </p:commandLink>
+
+                <p:columnToggler datasource="#{datatable}" trigger="btnToggler" >
+                    <p:ajax event="toggle" listener="#{bean.onToggle}"  update="#{datatable} pgrExporter "/>
+                    <p:ajax event="toggle" listener="#{gridToggleColumnBean.update(bean.userDataGridColumnVisible)}" />
+                </p:columnToggler>
+
+                <p:commandLink id="toolbarIconMenu"   title="#{loc.processes}" class="Fright tlbrIconMenu">
+                    <i class="icon-th-1 Fs23"></i>
+                </p:commandLink>
+                <p:menu overlay="true" trigger="toolbarIconMenu" class="Wid20 tlbrResponsiveMenu" my="right top" at="right bottom">
+
+
+                    <p:menuitem rendered="#{btnNewId}" onclick="$('#{form}\\:btnAdd').click();"><i class="icon-plus Fs23 marginLevel-1 tlbrAddBtn"/></p:menuitem>
+                    <p:menuitem rendered="#{renderedExel and bean.renderExportButton}" onclick="$('#{form}\\:btnExcel').click();"><i class="icon-file-excel Fs23 marginLevel-1 tlbrExcelBtn"/></p:menuitem>
+                    <p:menuitem rendered="#{renderedPdf and bean.renderExportButton}" onclick="$('#{form}\\:btnPdf').click();"><i class="icon-file-pdf Fs23 marginLevel-1 tlbrPdfBtn "/></p:menuitem>
+
+                </p:menu>  
+            </f:facet>
+            <f:facet name="left"  >
+                <p:commandLink id="btnAdd" actionListener="#{bean.create}" resetValues="true" rendered="#{btnNewId}" title="#{loc.new}"  update="#{update}" class="Fleft tlbrIcon" process="@this" >
+                    <i class="icon-plus tlbrAddBtn Fs23" />
+                </p:commandLink>  
+
+                <div class="Fleft">
+                    <p:autoComplete id="autToolbarSearch" active="false"  value="#{bean.autoCompleteValue}" size="2" queryEvent="keyup" forceSelection="false"   completeMethod="#{bean.autoComplete}"   minQueryLength="1" maxResults="7"  emptyMessage="#{loc.norecordsfoundamatchingyoursearch}"  inputStyleClass="tlbrSearchInputBook"  >                                                                              
+                        <p:ajax  event="itemSelect" listener="#{bean.generalFilter}" update="#{datatable},@this" />                                   
+                    </p:autoComplete> 
+
+                    <p:watermark for="autToolbarSearch" value="#{loc.enteratleastonecharacter}" id="watermark"/>
+
+                 <!--   <p:commandLink title="#{loc.clear}" id="detailFilterClear" process="@this" class="tlbrSearchInputClear"  update="#{datatable},dlgDetailFilter,autToolbarSearch" resetValues="true"  actionListener="">
+                        <i class="icon-cancel-alt Fs16 tlbrSearchClear"/>
+                    </p:commandLink> -->
+                </div>
+            </f:facet>
+        </p:toolbar>
+    </h:form>
+
+    <p:focus context="#{form}:autToolbarSearch"/>     
+    
+
+</ui:composition> 

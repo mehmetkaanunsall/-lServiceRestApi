@@ -1,0 +1,261 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:panelGroup rendered="#{creditBean.listOfBranch.size()>1}">
+        <h:form id="frmCriterTab">
+
+            <h:panelGroup id="pgrCreditCriter" layout="block" transient="true">
+                <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+                    <ui:param name="outputtext" value="#{loc.credits}"/>
+                    <ui:param name="bean" value='#{creditBean}' />
+                    <ui:param name="update" value="pgrCriter" />
+                </ui:include>
+
+                <h:panelGroup id="pgrCriter" layout="block" transient="true">  
+                    <div class="ui-g divContent">
+                        <div class="panelToggle ui-g-12">
+                            <div class="ui-g-12 ui-md-6 ui-lg-2">
+                                <p:outputLabel value="#{loc.branch}" for="slcBranch" styleClass="Fs12 FontBold"/>
+                                <p:selectOneMenu id="slcBranch" value="#{creditBean.searchObject.branch.id}">
+                                    <f:selectItem itemValue="#{null}" itemLabel="#{loc.choose}" itemDisabled="true"/>
+                                    <f:selectItems value="#{creditBean.listOfBranch}" var="branch" itemValue="#{branch.id}" itemLabel="#{branch.name}" />
+                                </p:selectOneMenu>
+                            </div>
+                        </div>
+                    </div>
+                </h:panelGroup>
+            </h:panelGroup>
+        </h:form>
+        <div class="EmptyBox10"/>
+    </h:panelGroup>
+
+
+    <ui:include src="/pages/general/common/datagridtoolbar.xhtml" >
+        <ui:param name="bean" value="#{creditBean}"/>   <!-- Bean -->
+        <ui:param name="update" value=""/>  <!-- Yeni butonuna basınca açılacak sayfa  -->
+        <ui:param name="btnNewId" value="false"/>  <!-- buton id yetki kontrolü için  -->
+        <ui:param name="datatable" value="frmCredit:dtbCredit" />  <!-- datatable  -->
+        <ui:param name="dtbWidgetVar" value="creditPF" />  <!--   datatable WidgetVar  -->
+        <ui:param name="fileName" value="#{loc.credits}"/>
+        <ui:param name="renderedFilter" value='true'/>
+        <ui:param name="renderedToggler" value='true'/>
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+        <ui:param name="renderedAdd" value='true'/>
+        <ui:param name="renderedIsPurchase" value='false'/>
+        <ui:param name="renderedCredit" value='true'/>
+    </ui:include>
+
+
+    <h:form id="frmCredit">
+
+
+        <p:remoteCommand name="pageLoad" process="@this" update="frmCredit:dtbCredit" />
+
+        <p:dataTable  id="dtbCredit" var="Credit"  value="#{creditBean.listOfObjects}" widgetVar="creditPF" selection="#{creditBean.selectedObject}" selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{credit.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true" lazy="true"
+                      expandableRowGroups="#{creditBean.selectedObject.money!=0 ? 'true' : 'false'}"  >
+
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{creditBean.goToProcess()}"  />
+            <p:ajax event="sort" listener="#{creditBean.sortListener}" />
+            <p:ajax event="page" oncomplete="pageLoad()" global="false"/>
+           <!-- <p:ajax event="colReorder" listener="#{creditBean.reorder}" update="frmGridToolbar:toggle" />     -->
+            <p:ajax event="colResize"  listener="#{creditBean.onResize}" />
+
+            <p:column id="clmProcessDate" headerText="#{loc.creditdate}" sortable="true" sortBy="#{Credit.crdt.processdate}"  visible="#{creditBean.toogleList[0]}" exportable="#{creditBean.toogleList[0]}">               
+                <h:outputText value="#{Credit.processDate}"  >
+                    <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                </h:outputText>
+            </p:column>
+
+            <p:column id="cmlType" headerText="#{loc.type}" sortable="true" sortBy="#{Credit.crdt.is_customer}"  visible="#{creditBean.toogleList[1]}" exportable="#{creditBean.toogleList[1]}">
+                <h:outputText value="#{Credit.isCustomer ? loc.collection:loc.payment}" />
+            </p:column>
+
+            <p:column id="cmlAccount" headerText="#{loc.customername}" sortable="true" sortBy="#{Credit.acc.name}"  visible="#{creditBean.toogleList[2]}" exportable="#{creditBean.toogleList[2]}">
+                <h:outputText value="#{Credit.account.name}" />
+            </p:column>
+
+            <p:column id="clmPaymentDate" headerText="#{loc.paymentdate}" sortable="true" sortBy="#{Credit.crdt.duedate}" visible="#{creditBean.toogleList[3]}" exportable="#{creditBean.toogleList[3]}">
+                <h:outputText value="#{Credit.dueDate}" >
+                    <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmCreditCount" headerText="#{loc.creditamount}" sortable="true" sortBy="#{Credit.crdt.money}"   visible="#{creditBean.toogleList[4]}" exportable="false">
+                <h:outputText  style="float:right;" value="#{Credit.money}" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{Credit.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmPaymentMoney" headerText="#{loc.amountpaid}" sortable="true" sortBy="#{Credit.crdt.money}"   visible="#{creditBean.toogleList[5]}" exportable="false">
+                <h:outputText  style="float:right;" value="#{Credit.money.subtract(Credit.remainingMoney)}" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{Credit.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmRemainingMoney" headerText="#{loc.remainingamountt}" sortable="true" sortBy="#{Credit.crdt.remainingmoney}"   visible="#{creditBean.toogleList[6]}" exportable="false">
+                <h:outputText  style="float:right;" value="#{Credit.remainingMoney}" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{Credit.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmStatu" colspan="2" headerText="#{loc.statu}"  sortBy="#{Credit.crdt.is_paid}" style="text-align: center" visible="#{creditBean.toogleList[7]}" exportable="false">
+                <i class="#{Credit.isCancel ==false? (Credit.isPaid==true ? ' fa fa-check green' :'fa fa-close red'):''} Fs16"  title="#{Credit.isPaid==true ? loc.itwaspaid :loc.unpaid}"  ></i>
+                <h:outputText value="#{Credit.isCancel ==true ? loc.canceled:''} " style="margin-left:10px;" />
+
+            </p:column> 
+             <!--excel pdf çıktısı için-->
+            <p:column id="clmCreditCount2" headerText="#{loc.creditamount}"  visible="false" exportable="#{creditBean.toogleList[4]}" toggleable="false" >
+                <h:outputText  value="#{Credit.money}" >
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="type" value="" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmPaymentMoney2" headerText="#{loc.amountpaid}"  visible="false" exportable="#{creditBean.toogleList[5]}" toggleable="false">
+                <h:outputText   value="#{Credit.money.subtract(Credit.remainingMoney)}" >
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="type" value="" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmRemainingMoney2" headerText="#{loc.remainingamountt}"  visible="false" exportable="#{creditBean.toogleList[6]}" toggleable="false">
+                <h:outputText  style="float:right;" value="#{Credit.remainingMoney}" >
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="type" value="" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmStatu1" headerText="#{loc.statu}"  sortBy="#{Credit.crdt.is_paid}" style="text-align: center" visible="false"  exportable="#{creditBean.toogleList[7]}" toggleable="false">
+                <h:outputText value="#{Credit.isCancel ==false?(Credit.isPaid==true ? loc.itwaspaid : loc.unpaid) : loc.canceled}" />
+            </p:column>
+
+
+
+            <p:columnGroup type="footer" class="Fright">
+                <p:row>
+                    <p:column colspan="#{creditBean.toogleList.size()-creditBean.countToggle-1}" rendered="#{creditBean.creditType==2 or creditBean.creditType==0}"  style="text-align:right; font-weight: bold; " priority="1">
+                        <f:facet name="footer"  >
+                            <h:outputText value="#{loc.totalcreditamount} : " style="text-align:right; font-weight: bold; font-size: 16px; " />
+                        </f:facet>
+                    </p:column>
+                    <p:column colspan="1" style="text-align:right; font-weight: bold; " rendered="#{creditBean.creditType==2 or creditBean.creditType==0}">
+                        <f:facet name="footer"  >
+                            <h:outputText style="text-align:right; font-weight: bold; font-size: large;color:#b54d4d " value="#{creditBean.paymentTotalMoney}" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{creditBean.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+                </p:row>
+
+                <p:row>
+                    <p:column  colspan="#{creditBean.toogleList.size()-creditBean.countToggle-1}" rendered="#{creditBean.creditType==2 or creditBean.creditType==0}" style="text-align:right; font-weight: bold; " priority="1">
+                        <f:facet name="footer"  >
+                            <h:outputText value="#{loc.totalpaidamount} :" style="text-align:right; font-weight: bold; font-size: 16px; " />
+                        </f:facet>
+                    </p:column>
+                    <p:column colspan="1" style="text-align:right; font-weight: bold; " rendered="#{creditBean.creditType==2 or creditBean.creditType==0}">
+                        <f:facet name="footer"  >
+                            <h:outputText  style="text-align:right; font-weight: bold; font-size: large;color:#b54d4d " value="#{creditBean.paymentPaidMoney}" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{creditBean.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+                </p:row>
+
+                <p:row>
+                    <p:column colspan="#{creditBean.toogleList.size()-creditBean.countToggle-1}" rendered="#{creditBean.creditType==2 or creditBean.creditType==0}" style="text-align:right; font-weight: bold; " priority="1">
+                        <f:facet name="footer"  >
+                            <h:outputText value="#{loc.totalremainingamount} :" style="text-align:right; font-weight: bold; font-size: 16px; " />
+                        </f:facet>
+                    </p:column>
+                    <p:column colspan="1" style="text-align:right; font-weight: bold; " rendered="#{creditBean.creditType==2 or creditBean.creditType==0}">
+                        <f:facet name="footer">
+                            <h:outputText style="text-align:right; font-weight: bold; font-size: large;color:#b54d4d" value="#{creditBean.paymentRemainingMoney}" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{creditBean.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+                </p:row>
+
+                <p:row>
+                    <p:column colspan="#{creditBean.toogleList.size()-creditBean.countToggle-1}" rendered="#{creditBean.creditType==1 or creditBean.creditType==0}" style="text-align:right; font-weight: bold; " priority="1">
+                        <f:facet name="footer"  >
+                            <h:outputText value="#{loc.totalcollectionamount} : " style="text-align:right; font-weight: bold; font-size: 16px; " />
+                        </f:facet>
+                    </p:column>
+                    <p:column colspan="1" style="text-align:right; font-weight: bold; "  rendered="#{creditBean.creditType==1 or creditBean.creditType==0}" >
+                        <f:facet name="footer"  >
+                            <h:outputText style="text-align:right; font-weight: bold; font-size: large;color: #488e48; " value="#{creditBean.totalMoney}" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{creditBean.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+                </p:row>
+
+                <p:row>
+                    <p:column  colspan="#{creditBean.toogleList.size()-creditBean.countToggle-1}"  rendered="#{creditBean.creditType==1 or creditBean.creditType==0}"  style="text-align:right; font-weight: bold; " priority="1">
+                        <f:facet name="footer"  >
+                            <h:outputText value="#{loc.amountcollectedontheball} :" style="text-align:right; font-weight: bold; font-size: 16px; " />
+                        </f:facet>
+                    </p:column>
+                    <p:column colspan="1" style="text-align:right; font-weight: bold; "  rendered="#{creditBean.creditType==1 or creditBean.creditType==0}" >
+                        <f:facet name="footer"  >
+                            <h:outputText  style="text-align:right; font-weight: bold; font-size: large;color: #488e48; " value="#{creditBean.paidMoney}" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{creditBean.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+                </p:row>
+
+                <p:row>
+                    <p:column colspan="#{creditBean.toogleList.size()-creditBean.countToggle-1}"  rendered="#{creditBean.creditType==1 or creditBean.creditType==0}" style="text-align:right; font-weight: bold; " priority="1">
+                        <f:facet name="footer"  >
+                            <h:outputText value="#{loc.remainingcollectionamount} :" style="text-align:right; font-weight: bold; font-size: 16px; " />
+                        </f:facet>
+                    </p:column>
+                    <p:column colspan="1" style="text-align:right; font-weight: bold; "  rendered="#{creditBean.creditType==1 or creditBean.creditType==0}" >
+                        <f:facet name="footer">
+                            <h:outputText style="text-align:right; font-weight: bold; font-size: large;color: #488e48; " value="#{creditBean.remainingMoney}" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{creditBean.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+                </p:row>
+
+
+            </p:columnGroup> 
+
+
+        </p:dataTable>  
+    </h:form>
+
+
+</ui:composition>
+
+
+

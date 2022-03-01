@@ -1,0 +1,85 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions" 
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmShelfTabProcess">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.shelfprocesses}"/>
+            <ui:param name="bean" value='#{warehouseShelfTabBean}' />
+            <ui:param name="update" value="pgrWarehouseShelfProcess" />
+            <ui:param name="btnSaveId" value="#{warehouseShelfTabBean.wareHouse.isAutomat ? 'false' : warehouseShelfTabBean.getRendered(153, 0)}" />     
+            <ui:param name="renderback" value='false'/>
+            <c:if test="#{warehouseShelfTabBean.processType==2}">
+                <ui:param name="btnDeleteId" value="#{warehouseShelfTabBean.wareHouse.isAutomat ? 'false' : warehouseShelfTabBean.getRendered(154, 0)}" />
+            </c:if>
+        </ui:include>
+
+        <h:panelGroup id="pgrWarehouseShelfProcess" layout="block">
+            <div class="ui-g divContent">
+                <div class="ui-g-12 panelToggle">
+
+                    
+                    <div class="ui-g-12  ui-md-6">
+                        <p:outputLabel value="#{loc.shelfname}" for="txtShelfName" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtShelfName" value="#{warehouseShelfTabBean.selectedObject.name}" required="true"  placeholder="#{loc.shelfname} " />
+                    </div>
+
+                    <div class="ui-g-12  ui-md-6">
+                        <p:outputLabel value="#{loc.shelfcode}" for="txtShelfCode" class="FontBold Fs12"/>
+                        <p:inputText id="txtShelfCode" value="#{warehouseShelfTabBean.selectedObject.code}" required="true" placeholder="#{loc.shelfcode}" />
+                    </div>
+
+                </div>
+            </div>
+        </h:panelGroup>
+
+    
+    
+     <div class="EmptyBox10" />
+    
+     <p:tabView id="tbvWarehouseShelfTabStockProc" rendered="#{warehouseShelfTabBean.processType==2 and warehouseShelfTabBean.getRendered(44, 1)}" scrollable="true" dynamic="true" cache="true">
+         <p:ajax event="tabChange" listener="#{warehouseShelfTabBean.onTabChange}" />
+
+         <p:tab id="tab44" title="#{loc.stocks}" rendered="#{warehouseShelfTabBean.getRendered(44, 1)}">
+            <c:if test="#{warehouseShelfTabBean.activeIndex==44}" >
+                <h:form id="frmShelfTabStockTab" >
+                    <div class="ContainerIndent"> 
+
+
+                        <ui:include src="/pages/general/common/tabgridtoolbar.xhtml">
+
+                            <ui:param name="bean" value="#{warehouseShelfTabStockTabBean}"/>
+                            <ui:param name="btnNewId" value="#{warehouseShelfTabStockTabBean.warehouse.isAutomat ? 'false' : warehouseShelfTabStockTabBean.getRendered(155, 0)}"/>
+                            <ui:param name="update" value="frmShelfStockTabProcess dlgWarehouseShelfStockTabProc" />
+                            <ui:param name="outputtext" value="#{loc.stocks}" />
+
+                        </ui:include>
+                        <p:dataTable id="dtbShelf"  var="ShelfStockCon" value="#{warehouseShelfTabStockTabBean.listOfWarehouseShelfStockCon}" selection="#{warehouseShelfTabStockTabBean.selectedObject}" selectionMode="single" rowKey="#{ShelfStockCon.id}"
+                                     emptyMessage="#{loc.norecordsfound}" class="tabDatatable" resizableColumns="true" >
+                            <p:ajax event="#{sessionBean.user.gridRowSelect}" resetValues="true" listener="#{warehouseShelfTabStockTabBean.createDialog(2)}" update="frmShelfStockTabProcess dlgWarehouseShelfStockTabProc"/>
+
+                            <p:column headerText="#{loc.stockname}" sortBy="#{ShelfStockCon.stock.name}" sortable="true">
+                                <h:outputText value="#{ShelfStockCon.stock.name}" />
+                            </p:column>
+                            <p:column headerText="#{loc.stockcode}" sortBy="#{ShelfStockCon.stock.code}" sortable="true">
+                                <h:outputText value="#{ShelfStockCon.stock.code}" />
+                            </p:column>
+                            <p:column headerText="#{loc.centerstockcode}" sortBy="#{ShelfStockCon.stock.centerProductCode}" sortable="true">
+                                <h:outputText value="#{ShelfStockCon.stock.centerProductCode}" />
+                            </p:column>
+                        </p:dataTable>
+
+                    </div>
+                </h:form>
+            </c:if>
+            </p:tab>
+
+        </p:tabView>
+     </h:form>
+    
+</ui:composition>

@@ -1,0 +1,46 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmResponsibleTab">
+        <div class="ContainerIndent">
+            <ui:include src="/pages/general/common/tabgridtoolbar.xhtml">
+                <ui:param name="bean" value="#{responsibleBean}"/>
+                <ui:param name="btnNewId" value="#{btnNewId}"/>
+                <ui:param name="update" value="dlgResponsibleProc pngResponsibleTab" />
+                <ui:param name="outputtext" value="#{loc.responsibles}" />
+            </ui:include>
+
+            <p:dataTable id="dtbResponsible"  var="responsible" selectionMode="single" value="#{responsibleBean.listOfObjects}" widgetVar="responsiblePF" selection="#{responsibleBean.selectedObject}"
+                         rowKey="#{responsible.id}" emptyMessage="#{loc.norecordsfound}" class="tabDatatable" resizableColumns="true" >
+
+                <p:ajax event="#{sessionBean.user.gridRowSelect}" resetValues="true" listener="#{responsibleBean.createDialog(2)}" update="dlgResponsibleProc pngResponsibleTab"  />  
+
+                <p:column id="clmNameSurname" headerText="#{loc.namesurname}" sortBy="#{responsible.name}">
+                    <h:outputText value="#{responsible.name} #{responsible.surname}" />
+                </p:column>
+                <p:column id="clmPosition" headerText="#{loc.position}" sortBy="#{responsible.position}">
+                    <h:outputText value="#{responsible.position}" />
+                </p:column>
+                <p:column id="clmDefaultMail" headerText="#{loc.mail}" class="TexOvFlowEllipsis" sortBy="#{responsible.listOfinternet.size()!=0 and responsible.listOfinternet.get(0).tag!=null ? responsible.listOfinternet.get(0).tag : '-'}">
+                    <h:outputText value="#{responsible.listOfinternet.size()!=0 and responsible.listOfinternet.get(0).tag!=null ? responsible.listOfinternet.get(0).tag : '-'}" />
+                </p:column>
+                <p:column id="clmDefaultMobile" headerText="#{loc.mobile}" sortBy="#{responsible.listOfPhones.size()!=0 and responsible.listOfPhones.get(0).tag!=null ? responsible.listOfPhones.get(0).tag : '-'}">
+                    <h:outputText value="#{responsible.listOfPhones.size()!=0 and responsible.listOfPhones.get(0).tag!=null ? responsible.listOfPhones.get(0).tag : '-'}" />
+                </p:column>
+                <p:column id="clmDefaultAddress" headerText="#{loc.address}" class="TexOvFlowEllipsis" sortBy="#{responsible.listOfAddresses.size()!=0 and responsible.listOfAddresses.get(0).fulladdress!=null ? responsible.listOfAddresses.get(0).fulladdress : '-'}">
+                    <h:outputText  value="#{responsible.listOfAddresses.size()!=0 and responsible.listOfAddresses.get(0).fulladdress!=null ? responsible.listOfAddresses.get(0).fulladdress : '-'}"/>
+
+                </p:column>
+
+
+            </p:dataTable>
+        </div>
+    </h:form>
+
+
+</ui:composition>

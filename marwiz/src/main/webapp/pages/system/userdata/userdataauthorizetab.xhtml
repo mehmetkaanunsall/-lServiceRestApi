@@ -1,0 +1,35 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+   
+
+        <h:form id="frmUserAuthorizeTab">
+            <div class="ContainerIndent">
+            <ui:include src="/pages/general/common/tabgridtoolbar.xhtml">
+
+                <ui:param name="bean" value="#{userDataAuthorizeTabBean}"/>
+                <ui:param name="btnNewId" value="#{userDataAuthorizeTabBean.getRendered(177, 0)}"/>
+                <ui:param name="update" value="dlgAuthorizeProcess" />
+                <ui:param name="outputtext" value="#{loc.authorizations}" />
+
+            </ui:include>
+                <p:dataTable  id="dtbAuthorizations" var="authorizeUserDataConnection" class="tabDatatable"   value="#{userDataAuthorizeTabBean.userDataAuthorizeConnectionList}"  selection="#{userDataAuthorizeTabBean.selectedObject}"  selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                        rowKey="#{authorizeUserDataConnection.authorize.id}">
+                <p:ajax event="#{sessionBean.user.gridRowSelect}" resetValues="true" listener="#{userDataAuthorizeTabBean.createDialog(2)}" update="dlgAuthorizeProcess"  /> 
+
+                <p:column headerText="#{loc.branch}" sortBy="#{authorizeUserDataConnection.authorize.branch.name}">
+                    <h:outputText value="#{authorizeUserDataConnection.authorize.branch.name}" />
+                </p:column> 
+
+                <p:column headerText="#{loc.authorization}" sortBy="#{authorizeUserDataConnection.authorize.name}">
+                    <h:outputText  value="#{authorizeUserDataConnection.authorize.name}" />
+                </p:column> 
+
+            </p:dataTable>
+            </div>
+        </h:form>
+ 
+</ui:composition>

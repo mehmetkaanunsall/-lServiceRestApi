@@ -1,0 +1,75 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmDetail">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="bean" value='#{hepsiburadaIntegrationBean}' />
+            <ui:param name="outputtext" value="#{loc.hepsiburadadetail}"/>
+            <ui:param name="update" value="" />
+            <ui:param name="btnSaveId" value="false" />
+            <ui:param name="btnDeleteId" value='false' /> 
+        </ui:include>
+
+        <p:panelGrid  columns="1" class="Wid100 reportPanelGrid bottomBorderPanelGrid TexAlCenter">
+           
+            <div class="EmptyBox5" />
+                <img  src="#{ftpConnectionBean.path}"  alt=" " onError="this.onerror = null; this.src = 'resources/primefaces-sentinel/images/add_photo.png';" style=" width: 120px; 
+                  height: 100px; 
+                  left: 50%;
+                  top:50%;"/>
+        </p:panelGrid>
+       
+        <p:panelGrid columns="2" class="Wid100 reportPanelGrid">
+
+            <h:outputText value="#{loc.hepsiburadacode}" />
+            <h:outputText value="#{hepsiburadaIntegrationBean.selectedEcommerceStock.hepsiburadaSku}" />
+            <h:outputText value="#{loc.merchantcode}" />
+            <h:outputText value="#{hepsiburadaIntegrationBean.selectedEcommerceStock.merchantSku}" />
+            <h:outputText value="#{loc.stockbarcode}" />
+            <h:outputText value="#{hepsiburadaIntegrationBean.selectedEcommerceStock.stock.barcode}" />
+            <h:outputText value="#{loc.stock}" />
+            <h:outputText value="#{hepsiburadaIntegrationBean.selectedEcommerceStock.stock.name}" />
+            <h:outputText value="Hepsiburada #{loc.price}" />
+            <h:outputText value="#{hepsiburadaIntegrationBean.selectedEcommerceStock.price}" class="Fright">
+                <f:converter converterId="currencyConverter"  />
+                <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                <f:attribute name="type" value="currency" />
+            </h:outputText>
+            <h:outputText value="Hepsiburada #{loc.availablequantity}" />
+            <h:outputText value="#{hepsiburadaIntegrationBean.selectedEcommerceStock.availableStock}" class="Fright">
+                <f:converter converterId="currencyConverter"  />
+                <f:attribute name="unit"  value="#{hepsiburadaIntegrationBean.selectedEcommerceStock.stock.unit}"/>
+                <f:attribute name="type" value="unit" />
+            </h:outputText>
+            <h:outputText value="#{loc.dispatchtime}" />
+            <h:outputText value="#{hepsiburadaIntegrationBean.selectedEcommerceStock.dispatchTime}" />
+            <h:outputText value="#{loc.couriercompany}1" />
+            <h:outputText value="#{hepsiburadaIntegrationBean.selectedEcommerceStock.cargoCompany1}" />
+            <h:outputText value="#{loc.couriercompany}2" />
+            <h:outputText value="#{hepsiburadaIntegrationBean.selectedEcommerceStock.cargoCompany2}" />
+            <h:outputText value="#{loc.couriercompany}3" />
+            <h:outputText value="#{hepsiburadaIntegrationBean.selectedEcommerceStock.cargoCompany3}" />
+            <h:outputText value="#{loc.maxpurchasequantity}" />
+            <h:outputText value="#{hepsiburadaIntegrationBean.selectedEcommerceStock.maximumPurchasableQuantity}" />
+            <h:outputText value="#{loc.salesstatus}" />
+            <h:outputText value="#{hepsiburadaIntegrationBean.selectedEcommerceStock.isSalableHepsiburada ? loc.insale : loc.notinsale}" />
+
+        </p:panelGrid>
+
+
+    </h:form>
+
+
+
+
+
+
+
+
+
+</ui:composition>

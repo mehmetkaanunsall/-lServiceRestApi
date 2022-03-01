@@ -1,0 +1,189 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:form id="frmDiscountProcess">
+        <p:confirmDialog global="true" class="deleteConfirm MaxWid450" widgetVar="dlg_ControlAllCustomer" showEffect="fade" hideEffect="fade"  closeOnEscape="true" responsive="true">
+            <f:facet name="message">
+                <h:outputText value="#{loc.thisdiscountisappliedallcustomerandloyalty} #{loc.areyousure}" style="white-space: pre-wrap;">
+                    <i class="icon-trash Fs20 tlbrDeleteBtn" /> 
+                </h:outputText>
+
+            </f:facet>
+            <p:commandButton actionListener="#{discountProcessBean.saveDiscount()}" onclick="PF('dlg_ControlAllCustomer').hide()"    process="@this" value="#{loc.yes}"   styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+            <p:commandButton value="#{loc.no}"  type="button" onclick="PF('dlg_ControlAllCustomer').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+        </p:confirmDialog>
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.campaignprocesses}"/>
+            <ui:param name="bean" value='#{discountProcessBean}' />
+            <ui:param name="update" value="pgrDiscountProcess" />
+            <ui:param name="btnSaveId" value="#{discountProcessBean.selectedObject.centercampaign_id == 0 and discountProcessBean.getRendered(96, 0)}" />
+            <ui:param name="renderback" value='true'/>
+            <ui:param name="btnDeleteId" value='false' />
+            <ui:param name="renderSelectedObject" value="#{discountProcessBean.processType==2 ? 'true':'false'}"/>
+            <ui:param name="selectedObjectName" value="#{discountProcessBean.processType==2 ? discountProcessBean.selectedObject.name:''}"/>
+            <ui:param name="btnDeleteId" value="#{discountProcessBean.processType==2 and discountProcessBean.selectedObject.centercampaign_id == 0 and discountProcessBean.getRendered(97, 0)}" />
+            <ui:param name="btnTestBeforeDeleteId" value="#{discountProcessBean.processType==2}" />
+
+        </ui:include>
+
+        <h:panelGroup id="pgrDiscountProcess" layout="block">
+            <div class="ui-g divContent">
+                <div class="panelToggle ui-g-12">
+                    <p:focus for="txtGroupName"/>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.name}" for="txtGroupName" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtGroupName" value="#{discountProcessBean.selectedObject.name}" styleClass="Wid95" required="true" placeholder="#{loc.discount} #{loc.groupname} "/>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldStartDate" value="#{discountProcessBean.selectedObject.beginDate}" required="true"  beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                            <p:ajax event="dateSelect" update="cldEndDate" global="false" />
+                        </p:calendar>     
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldEndDate" value="#{discountProcessBean.selectedObject.endDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                            <f:validator validatorId="dateRangeValidator" />
+                            <f:attribute name="startDate" value="#{discountProcessBean.selectedObject.beginDate}" />
+                        </p:calendar>     
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.statu}" for="slcStatus" class="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcStatus" required="true" value="#{discountProcessBean.selectedObject.status.id}" class="Wid95"> 
+                            <f:selectItems value="#{sessionBean.getStatus(22)}"  var="status" itemLabel="#{status.nameMap.get(sessionBean.langId).name}" itemValue="#{status.id}" />
+                        </p:selectOneMenu>
+                    </div> 
+                    <div class="ui-g-12 ui-md-6 ui-lg-6 " >
+                        <p:outputLabel value="#{loc.validityofcampaign}" styleClass="Fs12 FontBold"/>
+                        <p:panelGrid layout="grid" columns="3" class="pngCheckBox" >  
+                            <p:selectBooleanCheckbox value="#{discountProcessBean.selectedObject.isAllCustomer}" itemLabel="#{loc.allcustomers}" class="Fleft">
+                                <p:ajax global="false" />
+                            </p:selectBooleanCheckbox>
+                            <p:selectBooleanCheckbox value="#{discountProcessBean.selectedObject.isAllBranch}" itemLabel="#{loc.allbranches}" class="Fleft">
+                                <p:ajax global="false" />
+                            </p:selectBooleanCheckbox>
+
+                            <p:selectBooleanCheckbox value="#{discountProcessBean.selectedObject.isRetailCustomer}" itemLabel="#{loc.retailsalecustomer}" class="Fleft">
+                                <p:ajax global="false" />
+                            </p:selectBooleanCheckbox>
+                        </p:panelGrid>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-3 " >
+                        <p:outputLabel value="#{loc.invoice}" styleClass="Fs12 FontBold"/>
+                        <p:panelGrid layout="grid" columns="1" class="pngCheckBox" >  
+                            <p:selectBooleanCheckbox id="sbcInvoice" value="#{discountProcessBean.selectedObject.isInvoice}" itemLabel="#{loc.isitoninvoicebasis}" class="Fleft">
+                                <p:ajax global="false" />
+                            </p:selectBooleanCheckbox>
+                        </p:panelGrid>
+                    </div>
+              
+                    
+                   
+                    <div class="ui-g-12 ui-md-12 ui-lg-12">
+                        <p:outputLabel value="#{loc.description}" for="txtDescription" styleClass="Fs12 FontBold"/>
+                        <p:inputTextarea id="txtDescription" value="#{discountProcessBean.selectedObject.description}" rows="3" cols="5" autoResize="false" style="resize: none;" placeholder="#{loc.description}"/>
+                    </div>
+
+
+                </div>
+            </div>
+
+        </h:panelGroup>
+
+    </h:form>
+    <div class="EmptyBox10"></div>
+
+    <p:tabView id="tbvDiscount" activeIndex="#{marwiz.tabIndex}" scrollable="true" dynamic="true" cache="true" rendered="#{discountProcessBean.processType==2 and (discountProcessBean.getRendered(24, 1) or discountProcessBean.getRendered(25, 1)
+                                               or discountProcessBean.getRendered(26, 1) or discountProcessBean.getRendered(27, 1)) ? 'true':'false'}">
+        <p:ajax event="tabChange" listener="#{discountProcessBean.onTabChange}" update="pgrStationCheckBox"/>
+
+        <p:tab id="tab24" title="#{loc.campaigndetails}" rendered="#{discountProcessBean.getRendered(24, 1)}">
+            <c:if test="#{discountProcessBean.activeIndex==24}" >
+                <ui:include src="/pages/finance/discount/discountdiscounttab.xhtml"/>
+            </c:if>
+        </p:tab>
+
+        <p:tab id="tab25" title="#{loc.customers}" rendered="#{discountProcessBean.getRendered(25, 1)}">
+            <c:if test="#{discountProcessBean.activeIndex==25}" >
+                <ui:include src="/pages/finance/discount/discountaccounttab.xhtml"/>
+            </c:if>
+        </p:tab>
+
+        <p:tab id="tab26" title="#{loc.branches}" rendered="#{discountProcessBean.getRendered(26, 1)}">
+            <c:if test="#{discountProcessBean.activeIndex==26}" >
+                <ui:include src="/pages/finance/discount/discountbranchtab.xhtml"/>
+            </c:if>
+        </p:tab>
+
+        <p:tab id="tab27" title="#{loc.history}" rendered="#{discountProcessBean.getRendered(27, 1)}">
+            <c:if test="#{discountProcessBean.activeIndex==27}">
+                <ui:include src="/pages/general/common/historydatatable.xhtml" >
+                    <ui:param name="bean" value='#{historyTabBean}' />
+                    <c:set var="createdPerson" value='#{discountProcessBean.selectedObject.userCreated.fullName}- #{discountProcessBean.selectedObject.userCreated.username }' scope="request"/>
+                    <c:set var="createdTime" value='#{sessionBean.convertDateTime(discountProcessBean.selectedObject.dateCreated)}'  scope="request"/>
+                    <c:set var="rowId" value="#{discountProcessBean.selectedObject.id}" scope="request" /> 
+                    <c:set var="tableName" value="finance.discount" scope="request"/>                      
+                </ui:include>
+            </c:if>
+        </p:tab>
+    </p:tabView>
+
+
+
+    <!--İskontolar tabında process için açılan dialog-->
+    <p:dialog  id="dlgDiscountTabProcess" widgetVar="dlg_DiscountTabProcess" style="max-height: 85%; overflow-y: auto;" width="30%"  resizable="false" transient="true" focus="dlgDiscountTabProcess" dynamic="true"  responsive="true"  modal="true" closeOnEscape="true">
+        <c:if test="#{discountProcessBean.activeIndex==24}">
+            <ui:include src="discountdiscounttabprocess.xhtml"/>
+        </c:if>
+    </p:dialog>
+
+
+    <!--Müşteri tabında process için açılan dialog-->
+    <p:dialog  id="dlgCustomerProcess" widgetVar="dlg_CustomerProcess" width="20%" resizable="false" transient="true" focus="dlgCustomerProcess" dynamic="true"  responsive="true"  modal="true" closeOnEscape="true">
+        <c:if test="#{ discountProcessBean.activeIndex==25}">
+            <ui:include src="discountaccounttabprocess.xhtml"/> 
+        </c:if> 
+    </p:dialog>
+
+    <!--Müiteri tabında Kategori process için açılan dialog-->
+    <p:dialog  id="dlgCategoryProcess" widgetVar="dlg_CategoryProcess" width="20%" resizable="false" transient="true" focus="dlgCategoryProcess" dynamic="true"  responsive="true"  modal="true" closeOnEscape="true">
+        <c:if test="#{ discountProcessBean.activeIndex==25}">
+            <ui:include src="discountaccounttabcategoryprocess.xhtml"/> 
+        </c:if> 
+    </p:dialog>
+
+
+    <!--Şubeler process için açılan dialog-->
+    <p:dialog  id="dlgBranchProcess" widgetVar="dlg_BranchProcess" width="20%" resizable="false" transient="true" focus="dlgBranchProcess" dynamic="true"  responsive="true"  modal="true" closeOnEscape="true">
+        <c:if test="#{ discountProcessBean.activeIndex==26}">
+            <ui:include src="discountbranchtabprocess.xhtml"/> 
+        </c:if> 
+    </p:dialog>
+
+    <!--Kitaptan stok seçtirmek için açılan overlay panel-->
+    <h:panelGroup id="pgrStationCheckBox">
+        <c:if test="#{discountProcessBean.activeIndex==24}">
+            <ui:include src="/pages/general/common/stockbookcheckbox.xhtml" >
+                <ui:param name="updateBean" value='#{discountDiscountTabBean}' />
+                <ui:param name="for" value='frmDiscountDiscountTabProcess:sbbAmount' />
+                <ui:param name="type" value='discountitem' />
+                <ui:param name="parameters" value='' /> 
+                <ui:param name="columnsize" value='4' /> 
+                <ui:param name="form" value='frmStockBookFilterCheckbox' /> 
+                <ui:param name="overlay" value="olp_stockcheckbox" />
+            </ui:include>
+        </c:if> 
+    </h:panelGroup>
+
+
+</ui:composition>
+

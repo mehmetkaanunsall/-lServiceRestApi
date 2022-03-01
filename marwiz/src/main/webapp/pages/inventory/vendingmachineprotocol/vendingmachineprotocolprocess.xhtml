@@ -1,0 +1,27 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:form id="frmProtocolProcess">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.protocolprocesses}"/>
+            <ui:param name="bean" value='#{protocolBean}' />
+            <ui:param name="update" value="pgrProtocolProcess grwProtocol" />
+            <ui:param name="btnSaveId" value="#{protocolBean.getRendered(296, 0)}" />     
+            <ui:param name="renderback" value='false'/>
+            <ui:param name="btnDeleteId" value='false' />
+            <ui:param name="dtbWidgetVar" value="protocolPF" />
+            <c:if test="#{protocolBean.processType==2}">
+                <ui:param name="btnDeleteId" value="#{protocolBean.getRendered(297, 0)}" />
+                <ui:param name="btnTestBeforeDeleteId" value="true" />
+            </c:if>
+        </ui:include>
+        <ui:include src="/pages/general/common/protocolprocess.xhtml">
+
+        </ui:include>
+
+    </h:form>
+</ui:composition>

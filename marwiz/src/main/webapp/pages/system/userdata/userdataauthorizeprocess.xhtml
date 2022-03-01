@@ -1,0 +1,54 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:form id="frmUserAuthorizeProcess" >
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.authorizationprocesses}"/>
+            <ui:param name="bean" value='#{userDataAuthorizeTabBean}' />
+            <ui:param name="update" value="tbvUserDataProc:frmUserAuthorizeTab:dtbAuthorizations grdUserAuthorizeProcess" />
+            <c:if test="#{sessionBean.user.isAdmin or (!sessionBean.user.isAdmin and !userDataProcessBean.selectedObject.isAdmin)}">
+                <ui:param name="btnSaveId" value="#{userDataAuthorizeTabBean.getRendered(178, 0)}" />  
+            </c:if>
+            <ui:param name="btnDeleteId" value='false' /> 
+            <ui:param name="pageId" value='73'/>
+            <ui:param name="privateDelete" value="true"/>
+            <c:if test="#{userDataAuthorizeTabBean.processType==2 and ((sessionBean.user.isAdmin) or (!sessionBean.user.isAdmin and !userDataProcessBean.selectedObject.isAdmin))}">
+                <ui:param name="btnDeleteId" value="#{userDataAuthorizeTabBean.getRendered(179, 0)}" />
+            </c:if>           
+        </ui:include>
+
+
+        <h:panelGroup id="grdUserAuthorizeProcess" layout="block">
+
+            <div class="ui-g divContent">
+                <div class="ui-g-12">                  
+                    
+                    <div class="ui-g-12 ui-md-6 ui-lg-6">
+                        <p:outputLabel value="#{loc.branch}" for="slcBranchs" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcBranchs" value="#{userDataAuthorizeTabBean.selectedObject.authorize.branch.id}" filter="true" filterMatchMode="contains" disabled="#{userDataAuthorizeTabBean.processType==2}" required="true" >
+                            <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}"  />
+                            <f:selectItems value="#{userDataAuthorizeTabBean.branchList}" itemLabel="#{branchs.name}" itemValue="#{branchs.id}" var="branchs" />
+                            <p:ajax event="change" listener="#{userDataAuthorizeTabBean.changeBranch()}" update="frmUserAuthorizeProcess:pngAuth"  global="false"/>
+                        </p:selectOneMenu>
+                    </div> 
+                    
+                    <h:panelGroup id="pngAuth">
+                    <div class="ui-g-12 ui-md-6 ui-lg-6">
+                        <p:outputLabel value="#{loc.authorization}"  for="slcAuthorize" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcAuthorize" value="#{userDataAuthorizeTabBean.selectedObject.authorize.id}" required="true" disabled="#{userDataAuthorizeTabBean.isDisableAuthorize}" >
+                            <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}"  />
+                            <f:selectItems value="#{userDataAuthorizeTabBean.authorizeList}"  var="authorize" itemLabel="#{authorize.name}" itemValue="#{authorize.id}" />
+                        </p:selectOneMenu>
+                    </div>
+                    </h:panelGroup>
+                </div>
+            </div>   
+        </h:panelGroup>
+    </h:form>
+    
+</ui:composition>

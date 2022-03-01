@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                            http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://www.springframework.org/schema/context
+                            http://www.springframework.org/schema/context/spring-context.xsd
+                            http://www.springframework.org/schema/tx 
+                            http://www.springframework.org/schema/tx/spring-tx.xsd">
+    
+    
+    <bean id="fuelShiftDao" class="com.mepsan.marwiz.automation.report.fuelshiftreport.dao.FuelShiftDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="fuelShiftService" class="com.mepsan.marwiz.automation.report.fuelshiftreport.business.FuelShiftService" lazy-init="true" scope="request" >
+    </bean> 
+    
+    <bean id="fuelShiftSaleDao" class="com.mepsan.marwiz.automation.report.fuelshiftreport.dao.FuelShiftSaleDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="fuelShiftSaleService" class="com.mepsan.marwiz.automation.report.fuelshiftreport.business.FuelShiftSaleService" lazy-init="true" scope="request" >
+    </bean> 
+    
+    <bean id="fuelSalesReportDao" class="com.mepsan.marwiz.automation.report.fuelsalesreport.dao.FuelSalesReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="fuelSalesReportService" class="com.mepsan.marwiz.automation.report.fuelsalesreport.business.FuelSalesReportService" lazy-init="true" scope="request" >
+    </bean> 
+
+</beans>

@@ -1,0 +1,40 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+
+
+    <h:form id="frmDiscountBranchTab">
+            <p:growl id="grwDiscountBranchTab" showDetail="true" life="5000" globalOnly="true" />
+        <div class="ContainerIndent">
+            <ui:include src="/pages/general/common/tabgridtoolbar.xhtml">
+                <ui:param name="bean" value="#{discountBranchTabBean}"/>
+                <ui:param name="btnNewId" value="#{discountBranchTabBean.selectedDiscount.centercampaign_id == 0 and discountBranchTabBean.getRendered(107, 0)}"/> <!---->
+                <ui:param name="update" value="dlgBranchProcess" />
+                <ui:param name="outputtext" value="#{loc.branches}" />
+            </ui:include>
+
+            <p:dataTable  id="dtbDiscountBranchTab" var="discountBranch" class="tabDatatable"   value="#{discountBranchTabBean.listOfObject}"  selection="#{discountBranchTabBean.selectedObject}"  selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                          rowKey="#{discountBranch.id}">
+                <p:ajax event="#{sessionBean.user.gridRowSelect}" resetValues="true" listener="#{discountBranchTabBean.createDialog(2)}" update="dlgBranchProcess"  /> 
+
+                <p:column headerText="#{loc.branchname}" sortBy="#{discountBranch.branch.name}">
+                    <h:outputText  value="#{discountBranch.branch.name}" />
+                </p:column> 
+
+             
+
+            </p:dataTable>
+        </div>
+    </h:form>
+    
+         <p:overlayPanel id="ovlHistory" widgetVar="ovlHistory" dynamic="true" for="frmDiscountBranchProcess:btnHistoryProcess"  appendToBody="false" dismissable="true" modal="true" hideEffect="blind" class="Wid50" showCloseIcon="true" transient="true" >  
+         <ui:include src="/pages/general/common/historydatatabledlg.xhtml">
+             <ui:param name="bean" value='#{discountBranchTabBean}' />
+         </ui:include>
+     </p:overlayPanel> 
+
+
+</ui:composition>

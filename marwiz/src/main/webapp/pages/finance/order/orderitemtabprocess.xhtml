@@ -1,0 +1,64 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmManuelOrderItem"> 
+        <p:toolbar >
+
+            <f:facet name="left">
+                <h:outputText value="#{loc.orderprocesses}" class="outputTextFont Fleft MarRight8" />
+            </f:facet>
+            <f:facet name="right">  
+                <p:commandLink id="btnSave" title="#{loc.save}" process="@form"  class="Fright MarLeft3"  actionListener="#{orderItemTabBean.saveManuelOrderItem()}"  >
+                    <i class="fa fa-save Fs20 MarTop5 tlbrSaveBtn"/>                 
+                </p:commandLink> 
+            </f:facet>
+
+        </p:toolbar> 
+
+        <h:panelGroup id="grdStokProcess" layout="block" class="divContent">
+            <div class="ui-g">
+
+            <div class="ui-g-12 ui-md-4 ui-lg-4">
+
+                <p:outputLabel value="#{loc.stock}" for="txtStockName" styleClass="Fs12 FontBold"/>
+                <p:inputText id="txtStockName" value="#{orderItemTabBean.manuelOrderItem.stock.name}" onclick="showBook()" class="inputPositionForBookFilter" required="true" 
+                             readonly="#{facesContext.currentPhaseId.ordinal ge 4}"  placeholder="#{loc.stockname}" >
+
+                </p:inputText>
+                <p:commandLink id="btnStock" process="@this" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_stock').loadContents()" >
+                    <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                    <p:ajax listener="#{stockBookFilterBean.findFilterListLazyLoading([orderItemTabBean.selectedOrder,orderItemTabBean.listOfObjects],'frmStockBookFilter','olp_stock', 'ordermanuel')}" />
+                </p:commandLink>
+            </div>
+                
+           <div class="ui-g-12 ui-md-4 ui-lg-4">
+               <p:outputLabel value="#{loc.maxorderquantity}" for="txtMaxOrderQuantity" styleClass="Fs12 FontBold"/>
+               <p:inputNumber id="txtMaxOrderQuantity" value="#{orderItemTabBean.manuelOrderItem.maxQuantity}" emptyValue="#{null}"
+                               decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}" minValue="0"
+                               class="Wid95 TexAlRight" readonly="true"  placeholder="#{loc.maxorderquantity}" >
+                </p:inputNumber> 
+            </div>
+
+            <div class="ui-g-12 ui-md-4 ui-lg-4">
+                <p:outputLabel value="#{loc.orderquantity}" for="txtStockAmount" styleClass="Fs12 FontBold"/>
+                <p:inputNumber id="txtStockAmount" value="#{orderItemTabBean.manuelOrderItem.quantity}" emptyValue="#{null}"
+                               decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}" minValue="0"
+                               class="Wid95 TexAlRight" required="true"  placeholder="#{loc.amount}" >
+                </p:inputNumber> 
+            </div>
+
+
+
+        </div>
+        </h:panelGroup>
+
+        <p:remoteCommand name="showBook" process="@this" oncomplete="PF('olp_stock').loadContents()" actionListener="#{stockBookFilterBean.findFilterListLazyLoading([orderItemTabBean.selectedOrder,orderItemTabBean.listOfObjects],'frmStockBookFilter','olp_stock','ordermanuel')}" />
+
+    </h:form> 
+
+</ui:composition>

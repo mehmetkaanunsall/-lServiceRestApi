@@ -1,0 +1,48 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions" 
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmNewAuthorization">
+
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.authorizationprocesses}"/>  
+            <ui:param name="btnSaveId" value="#{bean.getRendered(181, 0)}" />
+            <ui:param name="btnDeleteId" value='false' />
+            <ui:param name="update" value="grdAuthorizationName" />
+            <c:if test="#{bean.selectedObject.id>0}">               
+                <ui:param name="btnDeleteId" value="#{bean.getRendered(182, 0) and bean.selectedObject.id!=1}" />
+                <ui:param name="btnTestBeforeDeleteId" value="true" />
+                <ui:param name="renderback" value='true'/>
+                <ui:param name="renderSelectedObject" value='true'/>
+                <ui:param name="selectedObjectName" value="#{bean.selectedObject.name}"/>
+               
+            </c:if>
+           
+        </ui:include>
+
+        <p:focus for="txtAuthorizationName"/>
+        
+
+        <h:panelGroup id="grdAuthorizationName" layout="block">
+            <div class="ui-g divContent">
+                <div class="panelToggle ui-g-12">
+                    <div class="#{bean.selectedObject.id==0 ? 'ui-g-12  ui-md-12' : 'ui-g-12  ui-md-2'}">
+                        <p:outputLabel value="#{loc.authorizationname}" for="txtAuthorizationName" class="FontBold Fs12"/>
+                        <p:inputText id="txtAuthorizationName" value="#{bean.selectedObject.name}" styleClass="Wid95" required="true" placeholder="#{loc.authorizationname}"/>  
+                    </div>
+                    
+                </div>
+            </div>
+        </h:panelGroup>
+
+
+       
+
+    </h:form>
+</ui:composition>

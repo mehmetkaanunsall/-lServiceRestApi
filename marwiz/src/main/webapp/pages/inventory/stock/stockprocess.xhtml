@@ -1,0 +1,260 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <!-- 
+Açıklama : Stok işlem sayfası içim xhtml
+Yazan    : Esra ÇABUK
+Bean     : stockProcessBean
+Sayfa    : Stoklar
+    --> 
+    <h:form id="frmStockProcess" prependId="false" enctype="multipart/form-data" >  
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.stockprocess}"/>
+            <ui:param name="bean" value='#{stockProcessBean}' />
+            <ui:param name="update" value="pgrStockProcess" />
+            <ui:param name="btnSaveId" value="#{stockProcessBean.getRendered(123, 0)}" />
+            <ui:param name="isSaveDelay" value='true'/>
+            <ui:param name="renderback" value='true'/>
+            <ui:param name="btnDeleteId" value='false' />
+
+            <c:if test="#{stockProcessBean.processType==2}">
+                <ui:param name="selectedObjectName" value="#{stockProcessBean.selectedObject.name}"/>
+                <ui:param name="renderSelectedObject" value='true'/>
+                <ui:param name="btnDeleteId" value="#{sessionBean.user.lastBranchSetting.isCentralIntegration ? 'false' : stockProcessBean.getRendered(124, 0)}" />
+                <ui:param name="btnTestBeforeDeleteId" value="#{sessionBean.user.lastBranchSetting.isCentralIntegration ? 'false' : 'true'}" />
+            </c:if>
+
+        </ui:include>
+        <h:panelGroup id="pgrStockProcess" layout="block">   
+
+            <div class="Fleft divContent ui-g-12">
+                <div class="ui-g-12 panelToggle">
+                    <ui:include  src="../../general/common/imageupload.xhtml">
+                        <ui:param name="imgid" value="imgStock"/>
+                        <ui:param name="imgDialogid" value="imgDialogStock"/>
+                        <ui:param name="btnAdd" value='#{stockProcessBean.selectedObject.id>0 and stockProcessBean.getRendered(123, 0)}'/>
+                        <ui:param name="btnDelete" value='#{stockProcessBean.selectedObject.id>0 and stockProcessBean.getRendered(123, 0)}'/>
+                    </ui:include>
+                    <div class="divMarLeft"> 
+                        <ui:include src="newstock.xhtml">
+                            <ui:param name="bean" value="#{stockProcessBean}"/>
+                        </ui:include>
+                    </div>
+                </div>
+            </div>
+        </h:panelGroup>
+
+        <p:commandLink id="delayRecording" actionListener="#{stockProcessBean.findStockAccordingToBarcode()}" />     
+
+    </h:form> 
+
+    <p:confirmDialog id="cdgUnit" class="deleteConfirm" message="#{loc.alternativeunitswillbedeletedwhenunitchanges}" closable="false" responsive="true" widgetVar="confirmDialog" global="true" showEffect="fade" hideEffect="fade">
+
+        <p:commandButton value="#{loc.cancel}" class="Fleft" styleClass="ui-confirmdialog-no" process="@this" actionListener="#{stockProcessBean.cancelUnit()}"  oncomplete="PF('confirmDialog').hide()" resetValues="true" />
+        <p:commandButton value="#{loc.okey}" class="Fright" styleClass="ui-confirmdialog-yes" process="@this" actionListener="#{stockProcessBean.updateUnit()}"  oncomplete="PF('confirmDialog').hide()"  />
+
+    </p:confirmDialog>
+
+    <div class="EmptyBox10" />
+    <p:tabView id="tbvStokProc" rendered="#{stockProcessBean.processType==2 and (stockProcessBean.getRendered(30, 1) or stockProcessBean.getRendered(31, 1)
+                                            or stockProcessBean.getRendered(32, 1) or stockProcessBean.getRendered(33, 1) or stockProcessBean.getRendered(34, 1)
+                                            or stockProcessBean.getRendered(35, 1) or stockProcessBean.getRendered(36, 1) or stockProcessBean.getRendered(80, 1))}" activeIndex="#{marwiz.tabIndex}" scrollable="true" dynamic="true" cache="true">
+
+        <p:ajax event="tabChange" listener="#{stockProcessBean.onTabChange}" />
+
+        <p:tab id="tab30" title="#{loc.detail}" rendered="#{stockProcessBean.getRendered(30, 1)}" >
+            <c:if test="#{stockProcessBean.activeIndex==30}">
+                <ui:include src="stockdetailtab.xhtml" />
+            </c:if>
+        </p:tab>
+
+        <p:tab id="tab31" title="#{loc.alternativeunits}" rendered="#{stockProcessBean.getRendered(31, 1)}" >
+            <c:if test="#{stockProcessBean.activeIndex==31}">
+                <ui:include src="stockalternativeunitstab.xhtml" />
+            </c:if>
+        </p:tab>
+
+        <p:tab id="tab32" title="#{loc.alternativebarcodes}" rendered="#{stockProcessBean.getRendered(32, 1)}"  >
+            <c:if test="#{stockProcessBean.activeIndex==32}">
+                <ui:include src="stockalternativebarcodestab.xhtml" />
+            </c:if>
+        </p:tab>
+
+        <p:tab id="tab33"  title="#{loc.categorization}" rendered="#{stockProcessBean.getRendered(33, 1)}">  
+            <c:if test="#{stockProcessBean.activeIndex==33}">
+                <ui:include src="/pages/general/common/categorization.xhtml" >
+                    <ui:param name="bean" value='#{stockCategorizationTabBean}' />
+                    <ui:param name="updateTreeandDataList" value="tbvStokProc:frmCategorization:treCategory tbvStokProc:frmCategorization:dtlCategoryList" />
+                    <ui:param name="updateDataList" value="tbvStokProc:frmCategorization:dtlCategoryList" />
+                    <ui:param name="updateDialog" value="tbvStokProc:dlgCategory" />
+                    <ui:param name="item" value='#{stockCategorizationTabBean.item}'/>
+                    <ui:param name="renderBtnParent" value='#{stockCategorizationTabBean.getRendered(135, 0)}'/>
+                    <ui:param name="renderBtnChild" value='#{stockCategorizationTabBean.getRendered(136, 0)}'/>
+                    <ui:param name="renderBtnEdit" value='#{stockCategorizationTabBean.getRendered(137, 0)}'/>
+                    <ui:param name="renderBtnDelete" value='#{stockCategorizationTabBean.getRendered(138, 0)}'/>
+                </ui:include>
+            </c:if>
+        </p:tab>
+
+        <p:tab id="tab80"  title="#{loc.centralcategorization}" rendered="#{stockProcessBean.getRendered(80, 1) and sessionBean.user.lastBranchSetting.isCentralIntegration}">  
+            <c:if test="#{stockProcessBean.activeIndex==80}">
+                <ui:include src="/pages/general/common/centercategorization.xhtml">
+                    <ui:param name="bean" value='#{stockCentralCategorizationTabBean}' />
+                    <ui:param name="updateTreeandDataList" value="tbvStokProc:frmCategorizationn:treCategoryy tbvStokProc:frmCategorizationn:dtlCategoryListt" />
+                    <ui:param name="updateDataList" value="tbvStokProc:frmCategorizationn:dtlCategoryListt" />
+                    <ui:param name="updateDialog" value="false" />
+                    <ui:param name="item" value='#{stockCentralCategorizationTabBean.item}'/>
+                    <ui:param name="renderBtnParent" value="false"/>
+                    <ui:param name="renderBtnChild" value="false"/>
+                    <ui:param name="renderBtnEdit" value="false"/>
+                    <ui:param name="renderBtnDelete" value="false"/>
+                </ui:include>
+            </c:if>
+        </p:tab>
+
+        <p:tab id="tab34" title="#{loc.analysis}" rendered="#{stockProcessBean.getRendered(34, 1 )}" >
+            <c:if test="#{stockProcessBean.activeIndex==34}">
+                <ui:include src="analysistab.xhtml" />
+            </c:if>
+        </p:tab>
+
+
+
+        <p:tab id="tab35" title="#{loc.movements}" rendered="#{stockProcessBean.getRendered(35, 1)}">
+            <c:if test="#{stockProcessBean.activeIndex==35}">
+                <ui:include src="movementstab.xhtml" />
+            </c:if>
+        </p:tab>
+        <p:tab id="tab36" title="#{loc.history}" rendered="#{stockProcessBean.getRendered(36, 1)}">
+            <c:if test="#{stockProcessBean.activeIndex==36}">
+                <ui:include src="/pages/general/common/historydatatable.xhtml" >
+                    <ui:param name="bean" value='#{historyTabBean}' />
+                    <c:set var="createdPerson" value='#{stockProcessBean.selectedObject.userCreated.fullName}- #{stockProcessBean.selectedObject.userCreated.username }' scope="request"/>
+                    <c:set var="createdTime" value='#{sessionBean.convertDateTime(stockProcessBean.selectedObject.dateCreated)}'  scope="request"/>
+                    <c:set var="rowId" value="#{stockProcessBean.selectedObject.id}" scope="request" /> 
+                    <c:set var="tableName" value="inventory.stock" scope="request" /> 
+                </ui:include>
+            </c:if>
+        </p:tab>
+
+
+    </p:tabView>
+
+
+    <!-- vergi grupları tabında açılan dialog-->
+    <p:dialog id="dlgStockTaxGroupProc" widgetVar="dlg_stocktaxgroupproc" resizable="false" width="20%" focus="dlgStockTaxGroupProc" responsive="true" dynamic="true" modal="true" closeOnEscape="true">
+        <c:if test="#{stockProcessBean.activeIndex==30}">
+            <ui:include src="stocktaxgroupprocess.xhtml"/>
+        </c:if>
+    </p:dialog>
+
+    <!--hızlı birim eklemek için açılan dialog-->
+    <p:dialog id="dlgUnitDefinitionProc" widgetVar="dlg_unitdeffinitionproc" modal="true" resizable="false" width="35%" focus="dlgUnitDefinitionProc" responsive="true" dynamic="true" closeOnEscape="true">
+        <ui:include src="/pages/general/unit/unitprocess.xhtml">
+            <ui:param name="bean" value='#{newUnitBean}' />
+            <c:set var="whichPage" value="stockProcessBean" scope="request" />
+        </ui:include>
+
+    </p:dialog>
+
+    <!-- Hızlı marka eklemek için-->
+    <c:set var="itemId" value="#{2}" scope="request" />
+    <c:set var="btnRenderedNew" value="#{210}" scope="request" />
+    <c:set var="btnRenderedSave" value="#{211}" scope="request" />
+    <p:dialog id="dlgBrandProc" widgetVar="dlg_brandproc" resizable="false" width="30%" focus="dlgBrandProc" responsive="true" dynamic="true" modal="true" closeOnEscape="true">
+
+        <h:form id="frmBrandProcess">
+            <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+                <ui:param name="outputtext" value="#{loc.brandprocess}"/>
+                <ui:param name="bean" value='#{newBrandBean}' />
+                <ui:param name="update" value="pgrBrandProcess" />
+                <ui:param name="btnSaveId" value="#{newBrandBean.getRendered(211, 0)}" />     
+                <ui:param name="renderback" value='false'/>
+                <ui:param name="btnDeleteId" value='false' />
+            </ui:include>
+
+            <ui:include src="/pages/inventory/stockbrand/stockbrandprocess.xhtml">
+                <ui:param name="bean" value='#{newBrandBean}' />
+                <c:set var="whichPage" value="stockProcessBean" scope="request" />
+            </ui:include>    
+        </h:form>
+    </p:dialog>
+
+    <!-- alternatif birimler tabında açılan dialog-->
+    <p:dialog id="dlgAlternativeUnitsProc" widgetVar="dlg_alternativeunitsproc" resizable="false" width="33%" focus="dlgAlternativeUnitsProc" responsive="true" dynamic="true" modal="true" closeOnEscape="true">
+        <c:if test="#{stockProcessBean.activeIndex==31}">
+            <ui:include src="stockalternativeunitsprocess.xhtml"/>
+        </c:if>
+    </p:dialog>
+
+    <!-- alternatif barkodlar tabında açılan dialog-->
+    <p:dialog id="dlgAlternativeBarcodesProc" widgetVar="dlg_alternativebarcodesproc" resizable="false" width="33%" focus="dlgAlternativeBarcodesProc" responsive="true" dynamic="true" modal="true" closeOnEscape="true">
+        <c:if test="#{stockProcessBean.activeIndex==32}">
+            <ui:include src="stockalternativebarcodesprocess.xhtml"/>
+        </c:if>
+    </p:dialog>
+
+    <!--Kitaptan cari seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/accountbook.xhtml" >
+        <ui:param name="updateBean" value='#{stockProcessBean}' />
+        <ui:param name="for" value='frmStockProcess:cmdSupplier' />
+        <ui:param name="type" value='stockprocess' />
+        <ui:param name="parameters" value='' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmAccountBookFilter' /> 
+        <ui:param name="overlay" value="olp_account" />
+    </ui:include>
+
+
+
+
+
+    <p:dialog id="dlgUnitInternationalCode" widgetVar="dlg_unitinternationalcode" modal="true" resizable="false" width="40%" focus="dlgUnitInternationalCode" responsive="true" dynamic="true" closeOnEscape="true">
+        <ui:include src="/pages/general/unit/unitcodeprocess.xhtml">
+            <ui:param name="bean" value="#{newUnitBean}" />
+        </ui:include>
+    </p:dialog>
+
+    <p:confirmDialog id="dlgConfirmOK" global="true"  class="deleteConfirm MaxWid500" widgetVar="dlg_ConfirmOK" showEffect="fade" hideEffect="fade"  closeOnEscape="true" responsive="true">
+        <f:facet name="message">
+            <h:outputText value="#{loc.pleasedonotforgettodefineataxgroup}"  style="white-space: pre-wrap;">
+                <i class="icon-trash Fs20 tlbrDeleteBtn" /> 
+            </h:outputText>
+        </f:facet>
+        <p:commandButton value="#{loc.okey}"  async="true"     onclick="PF('dlg_ConfirmOK').hide()"   styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+    </p:confirmDialog>
+
+    <p:confirmDialog id="dlgChangeTaxDepartment" global="true" class="deleteConfirm controlDelete" severity="alert" widgetVar="dlg_ChangeTaxDepartment" closeOnEscape="true" width="20%" responsive="true">
+        <f:facet name="message">
+            <div class="ui-g-12 ui-md-12 ui-lg-12">
+                <h:outputText value="#{loc.departmentofstockarechangedaccordingtotaxgroupinbranchwhichdoesnthavecentralintegration}"  style="white-space: pre-wrap;">
+                    <i class="icon-trash Fs20 tlbrDeleteBtn" /> 
+                </h:outputText>
+            </div>
+            <div class="ui-g-12 ui-md-12 ui-lg-12">
+                <h:outputText value="#{loc.areyousureyouwanttocontinue}" />
+            </div>
+            <p:commandButton value="#{loc.yes}" actionListener="#{stockProcessBean.changeStockTaxDepartment()}" onclick="PF('dlg_ChangeTaxDepartment').hide()"   styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+            <p:commandButton value="#{loc.no}"  onclick="PF('dlg_ChangeTaxDepartment').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+
+        </f:facet>
+    </p:confirmDialog>
+
+
+    <script>
+        var input = document.getElementById("txtBarcode");
+        input.addEventListener("keyup", function (event) {
+            if (event.keyCode === 13) {
+                document.getElementById("delayRecording").click();
+            }
+        });
+    </script>
+
+
+
+</ui:composition>

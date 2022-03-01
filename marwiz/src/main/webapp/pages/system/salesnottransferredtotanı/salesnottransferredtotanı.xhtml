@@ -1,0 +1,65 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:form id="frmSalesNotTransferredToTanı">  
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{ loc.salesnottransferredtotanı}"/>
+            <ui:param name="bean" value="#{salesNotTransferredToTanıBean}" />
+            <ui:param name="update" value='false' />
+            <ui:param name="btnSaveId" value='false' />
+            <ui:param name="renderSelectedObject" value='false'/>
+            <ui:param name="selectedObjectName" value='false'/>
+            <ui:param name="btnDeleteId" value='false' /> 
+            <ui:param name="renderback" value='false'/>
+            <ui:param name="transferSales" value='true'/>
+        </ui:include>
+
+        <div class="ui-g divContent">
+            <div class="EmptyBox5" ></div>
+            <div class="ui-g-12 ui-md-12 ui-lg-12">
+                <div class="ui-g-12 ui-md-6 ui-lg-6">
+                    <p:panel style="text-align:center; height:100px; " >
+                        <h:outputText  value="#{loc.unsentsalescount} : " class="FontBold Fs20" style="color:#f94144 " />
+                        <div class="EmptyBox20"></div>
+                        <h:outputText  value="#{salesNotTransferredToTanıBean.salesNotTransferredToTanı.unsentSalesCount}" class="FontBold Fs20" style="color : gray !important"/>
+                    </p:panel>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-6">
+                    <p:panel style="text-align:center; height:100px; "  >
+                        <h:outputText  value="#{loc.sentsalescount} : " class="FontBold Fs20" style="color : #90be6d !important"/>
+                        <div class="EmptyBox20"></div>
+                        <h:outputText  value="#{salesNotTransferredToTanıBean.salesNotTransferredToTanı.sentSalesCount}" class="FontBold Fs20" style="color : gray !important"/>
+                    </p:panel>
+                </div>
+            </div>
+
+            <div class="EmptyBox5"></div>
+            <div class="ui-g-12 ui-md-4 ui-lg-3" >
+            </div>
+            <div class="ui-g-12 ui-md-4 ui-lg-6" >
+                <p:panel style="text-align:center; height:100px; " class="TexAlCenter " >
+                    <h:outputText  value="#{loc.totalsalescount} : " class="FontBold Fs20" style="color : #003f88 !important"/>
+                    <div class="EmptyBox20"></div>
+                    <h:outputText  value="#{salesNotTransferredToTanıBean.salesNotTransferredToTanı.unsentSalesCount+salesNotTransferredToTanıBean.salesNotTransferredToTanı.sentSalesCount}" class="FontBold Fs20" style="color : gray !important"/>
+                </p:panel>
+            </div>
+            <div class="ui-g-12 ui-md-4 ui-lg-3" >
+
+            </div>
+
+            <h:panelGroup rendered="#{salesNotTransferredToTanıBean.result == -1 or salesNotTransferredToTanıBean.result ==1}">
+                <div class="ui-g-12" style="text-align: center">
+                    <i class="fa fa-exclamation-triangle Fs30 red">        
+                        <p:outputLabel styleClass="Fs20 FontBold" rendered="#{salesNotTransferredToTanıBean.result == -1 or salesNotTransferredToTanıBean.result ==1}" value="#{loc.salestransactionsstartedtobetransferred200willbetransferredperhour}" style="margin-left: 5px !important;"/>
+                    </i>
+                </div>
+            </h:panelGroup>
+
+
+        </div>
+    </h:form>
+</ui:composition>

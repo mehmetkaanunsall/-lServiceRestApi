@@ -1,0 +1,39 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+
+    <h:form id="frmShelfTab" >
+        <div class="ContainerIndent"> 
+
+
+            <ui:include src="/pages/general/common/tabgridtoolbar.xhtml">
+
+                <ui:param name="bean" value="#{warehouseShelfTabBean}"/>
+                <ui:param name="btnNewId" value="#{warehouseShelfTabBean.wareHouse.isAutomat ? 'false' :  warehouseShelfTabBean.getRendered(152, 0)}"/>
+                <ui:param name="update" value="dlgWarehouseShelfProc" />
+                <ui:param name="outputtext" value="#{loc.shelves}" />
+
+            </ui:include>
+            <p:dataTable id="dtbShelf"  var="Shelf" value="#{warehouseShelfTabBean.listOfWarehouseShelf}" selection="#{warehouseShelfTabBean.selectedObject}" selectionMode="single" rowKey="#{Shelf.id}"
+                         emptyMessage="#{loc.norecordsfound}" class="tabDatatable" resizableColumns="true" >
+                <p:ajax event="#{sessionBean.user.gridRowSelect}" resetValues="true" listener="#{warehouseShelfTabBean.createDialog(2)}" update="dlgWarehouseShelfProc"/>
+
+                <p:column headerText="#{loc.shelfname}" sortBy="#{Shelf.name}" sortable="true">
+                    <h:outputText value="#{Shelf.name}" />
+                </p:column>
+                <p:column headerText="#{loc.shelfcode}" sortBy="#{Shelf.code}" sortable="true">
+                    <h:outputText value="#{Shelf.code}" />
+                </p:column>
+            </p:dataTable>
+            
+        </div>
+    </h:form>
+
+    
+</ui:composition>
+
+
+

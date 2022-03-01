@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration >
+    
+    <appender name="FILE_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender" >
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <file>Log_Folder/errors.log</file>
+        
+        <encoder >
+            <pattern>%-5level [%d{dd-MM-yyyy HH:mm:ss:SSS}] [Class:%logger{36}/%line] - %msg%n</pattern>
+        </encoder>
+        
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>Log_Folder/errors-%i.log</fileNamePattern> <!--%d{dd-MM-yyyy}-->
+            <minIndex>1</minIndex>
+            <maxIndex>10</maxIndex>
+        </rollingPolicy> 
+        
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>512KB</maxFileSize>
+        </triggeringPolicy>
+        
+        <!--<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+          <!- - rollover daily - ->
+          <fileNamePattern>Log_Folder/CentrowizBack-%d{yyyy-MM-dd}.%i.txt</fileNamePattern>
+           <!- - each file should be at most 100MB, keep 60 days worth of history, but at most 20GB - ->
+           <maxFileSize>512KB</maxFileSize>    
+           <maxHistory>30</maxHistory>
+           <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>-->
+    </appender>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%-5level [%d{dd-MM-yyyy HH:mm:ss:SSS}] [Class:%logger{36}/%line] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="ERROR" >  <!-- levels= ALL,OFF / TRACE-DEBUG-INFO-WARN-ERROR -->
+        <appender-ref ref="FILE_ERROR" />
+        <appender-ref ref="STDOUT" />
+    </root>
+
+</configuration>

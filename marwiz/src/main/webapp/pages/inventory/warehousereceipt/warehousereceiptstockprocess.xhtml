@@ -1,0 +1,156 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions" 
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmWarehouseReceiptStockProcess">
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.stockprocess}"/>
+            <ui:param name="bean" value='#{warehouseReceiptStockTabBean}' />
+            <ui:param name="update" value="pgrWarehouseReceiptStockProcess" />
+            <ui:param name="btnSaveId" value='#{sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranchSetting.erpIntegrationId == 1 and warehouseReceiptStockTabBean.warehouseReceipt.id != 0 and (warehouseReceiptProcessBean.selectedObject.type.id ==6 or warehouseReceiptProcessBean.selectedObject.type.id ==9 or warehouseReceiptProcessBean.selectedObject.type.id ==76) ? warehouseReceiptStockTabBean.warehouseReceipt.logSapİsSend ? false : warehouseReceiptStockTabBean.getRendered(35, 0) :
+                                                warehouseReceiptStockTabBean.warehouseReceipt.type.id==7 or warehouseReceiptProcessBean.selectedObject.type.id==8 or warehouseReceiptStockTabBean.warehouseReceipt.type.id==60 or warehouseReceiptStockTabBean.warehouseReceipt.type.id==61 ? false : warehouseReceiptStockTabBean.getRendered(35, 0)}' />     
+            <ui:param name="renderback" value='false'/>
+            <ui:param name="btnDeleteId" value='false' />
+            <c:if test="#{warehouseReceiptStockTabBean.processType==2}">
+                <ui:param name="btnDeleteId" value='#{sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranchSetting.erpIntegrationId == 1 and warehouseReceiptStockTabBean.warehouseReceipt.id != 0 ? warehouseReceiptStockTabBean.warehouseReceipt.logSapİsSend ? false : warehouseReceiptStockTabBean.getRendered(36, 0) :
+                                                      warehouseReceiptStockTabBean.getRendered(36, 0)}' />
+                <ui:param name="btnTestBeforeDeleteId" value="true" />
+            </c:if>
+        </ui:include>
+
+        <h:panelGroup id="pgrWarehouseReceiptStockProcess" layout="block">
+            <p:focus id="focusQuantity" for="txtQuantity"/>
+            <div class="ui-g divContent">
+                <div class="ui-g-12 panelToggle">
+
+
+                    <div class="#{warehouseReceiptStockTabBean.warehouseReceipt.type.id==76 ? 'ui-g-12 ui-md-6 ui-lg-3' : 'ui-g-12 ui-md-4 ui-lg-4'}">
+                        <p:outputLabel value="#{loc.stock}" for="txtStock" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtStock" value="#{warehouseReceiptStockTabBean.selectedObject.stock.name}" onclick="#{warehouseReceiptStockTabBean.processType==1 ? 'showBook()' : ''}" class="inputPositionForBookFilter" required="true"  readonly="#{facesContext.currentPhaseId.ordinal ge 4}" rendered="#{facesContext.currentPhaseId.ordinal ne 4}" placeholder="#{loc.stock} ">
+                        </p:inputText>
+                        <p:commandLink id="btnStockName" class="commandLinkPositionForBookFilter"  process="@this" rendered="#{warehouseReceiptStockTabBean.processType==1}" oncomplete="PF('olp_stock').loadContents()"  >
+                            <i class="fa fa-book Fs16 black iconPositionForBookFilter "/>   
+                            <p:ajax listener="#{stockBookFilterBean.findFilterListLazyLoading([warehouseReceiptStockTabBean.warehouseReceipt],'frmStockBookFilter','olp_stock','warehousereceipt')}" resetValues="true"/>
+                        </p:commandLink>
+                    </div>
+
+                    <div class="#{warehouseReceiptStockTabBean.warehouseReceipt.type.id==76 ? 'ui-g-12 ui-md-6 ui-lg-3' : 'ui-g-12 ui-md-4 ui-lg-4'}">
+                        <p:outputLabel value="#{loc.quantity}" for="txtQuantity" class="FontBold Fs12"/>
+                        <p:inputNumber id="txtQuantity" value="#{warehouseReceiptStockTabBean.selectedObject.quantity}" emptyValue="#{null}"
+                                       decimalPlaces="#{warehouseReceiptStockTabBean.warehouseReceipt.type.id==76 ? warehouseReceiptStockTabBean.selectedObject.wasteItemInfo.unit.unitRounding : warehouseReceiptStockTabBean.selectedObject.stock.unit.unitRounding}" minValue="0"
+                                       class="Wid95 TexAlRight" required="true"  placeholder="#{loc.quantity}" >
+                        </p:inputNumber> 
+                    </div> 
+                    <h:panelGroup rendered="#{warehouseReceiptStockTabBean.warehouseReceipt.type.id != 76}">
+                        <div class="ui-g-12 ui-md-4 ui-lg-4">
+                            <p:outputLabel value="#{loc.unit}" for="txtUnit" class="FontBold Fs12"/>
+                            <p:inputText id="txtUnit" value="#{warehouseReceiptStockTabBean.selectedObject.stock.unit.name}"  placeholder="#{loc.unit}" required="true" readonly="true" />
+                        </div>
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{warehouseReceiptStockTabBean.warehouseReceipt.type.id==76}">
+                        <div class="ui-g-12 ui-md-6 ui-lg-3">
+                            <p:outputLabel value="#{loc.unit}" for="slcUnit" styleClass="Fs12 FontBold"/>
+                            <p:selectOneMenu id="slcUnit" required="true" value="#{warehouseReceiptStockTabBean.selectedObject.wasteItemInfo.unit.id}" 
+                                             styleClass="Wid95" >
+                                <f:selectItems value="#{warehouseReceiptStockTabBean.listOfUnit}" var="unitcon" itemLabel="#{unitcon.unit.name}" itemValue="#{unitcon.unit.id}" />
+                                <p:ajax event="change" listener="#{warehouseReceiptStockTabBean.bringUnit()}" global="false" update="slcUnit txtLastUnitPrice txtTotalMoney pngWasteInformation txtQuantity" />
+                            </p:selectOneMenu>
+                        </div>
+                    </h:panelGroup>
+
+                    <h:panelGroup id="pngWasteInformation" rendered="#{warehouseReceiptStockTabBean.warehouseReceipt.type.id==76}" >
+
+                        <div class="ui-g-12 ui-md-6 ui-lg-3">
+                            <p:outputLabel value="#{loc.unitprice}" for="txtLastUnitPrice" styleClass="Fs12 FontBold"/>                                                                                                      
+                            <p:inputNumber id="txtLastUnitPrice" decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? '.': ','}"  
+                                           thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? ',': '.'}" 
+                                           roundMethod="D" decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}" 
+                                           value="#{warehouseReceiptStockTabBean.selectedObject.wasteItemInfo.currentPurchasePrice}"  class="TexAlRight"  placeholder="#{loc.lastunitprice}" required="false">
+                                <p:ajax event="keyup" process="@this" delay="1" global="false" rendered="#{warehouseReceiptStockTabBean.warehouseReceipt.type.id==76}"  listener="#{warehouseReceiptStockTabBean.totalMoneyUpdate()}" update="txtTotalMoney" />
+                            </p:inputNumber>
+                        </div> 
+                        <div class="ui-g-12 ui-md-12 ui-lg-12"/>
+                        <div class=" ui-g-12 ui-md-6 ui-lg-3">
+                            <p:outputLabel value="#{loc.currency}" for="slcCurrency" styleClass="Fs12 FontBold"/>
+                            <p:selectOneMenu id="slcCurrency" value="#{warehouseReceiptStockTabBean.selectedObject.wasteItemInfo.currency.id }" >
+                                <f:selectItem itemValue="0"  itemLabel="#{loc.choose}" />
+                                <f:selectItems value="#{warehouseReceiptStockTabBean.currencyList}" var="currency" itemLabel="#{currency.code}" itemValue="#{currency.id}"  />
+                                <p:ajax event="change" update="txtTotalMoney" />
+                            </p:selectOneMenu> 
+                        </div>
+
+                        <div class="ui-g-12 ui-md-6 ui-lg-3">
+                            <p:outputLabel value="#{loc.taxrate}" for="txtTaxRate" styleClass="Fs12 FontBold"/>
+                            <p:inputText id="txtTaxRate" value="#{warehouseReceiptStockTabBean.selectedObject.wasteItemInfo.taxRate}"  class="TexAlRight"  readonly="true" placeholder="#{loc.taxrate}" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="percent" />
+                            </p:inputText> 
+                        </div>
+
+                        <div class="ui-g-12 ui-md-6 "/> 
+
+                        <div class="ui-g-12 ui-md-6 ui-lg-3" style="margin-top: -5px">
+                            <p:outputLabel value="#{loc.totalmoney}" for="txtTotalMoney" styleClass="Fs12 FontBold"/>
+                            <p:inputText id="txtTotalMoney" value="#{warehouseReceiptStockTabBean.selectedObject.wasteItemInfo.totalMoney}" readonly="true" placeholder="#{loc.totalmoney}"  >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{warehouseReceiptStockTabBean.selectedObject.wasteItemInfo.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </p:inputText> 
+                        </div>
+
+                        <div class="ui-g-12 ui-md-6 ui-lg-3"  style="margin-top: -5px">
+                            <p:outputLabel value="#{loc.expirationdate}" for="cldExpirationDate" styleClass="Fs12 FontBold"/>
+                            <p:calendar  id="cldExpirationDate" class="datepicker" value="#{warehouseReceiptStockTabBean.selectedObject.wasteItemInfo.expirationDate}" beforeShow="dpClearButton" timeControlType="select"  pattern="#{sessionBean.user.lastBranch.dateFormat}" showOn="button" showButtonPanel="true" placeholder="#{loc.expirationdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                                <p:ajax event="change" update="cldExpirationDate" resetValues="true" global="false"/>
+                            </p:calendar>
+                        </div> 
+
+                        <div class="ui-g-12 ui-md-12 ui-lg-12"/>
+
+
+
+                        <div class=" ui-g-12 ui-md-6 ui-lg-3">
+                            <p:outputLabel value="#{loc.wastereason}" for="slcWasteReason" styleClass="Fs12 FontBold"/>
+                            <p:selectOneMenu id="slcWasteReason" value="#{warehouseReceiptStockTabBean.selectedObject.wasteItemInfo.wasteReason.id}" >
+                                <f:selectItem itemValue="0"  itemLabel="#{loc.choose}" />
+                                <f:selectItems value="#{warehouseReceiptStockTabBean.wasteReasonList}" var="wasteReason" itemLabel="#{wasteReason.name}" itemValue="#{wasteReason.id}"  />
+                            </p:selectOneMenu> 
+                        </div>
+
+                        <div class="ui-g-12 ui-md-6 ui-lg-9">
+                            <p:outputLabel value="#{loc.wastedescription}" for="txtWasteCause" class="FontBold Fs12"/>
+                            <p:inputText id="txtWasteCause" value="#{warehouseReceiptStockTabBean.selectedObject.wasteItemInfo.description}"  placeholder="#{loc.wastedescription}"  />
+                        </div>
+                    </h:panelGroup>
+
+                </div>
+
+            </div>
+
+
+        </h:panelGroup>
+
+
+        <p:remoteCommand name="showBook" process="@this" oncomplete="PF('olp_stock').loadContents();" actionListener="#{stockBookFilterBean.findFilterListLazyLoading([warehouseReceiptStockTabBean.warehouseReceipt],'frmStockBookFilter','olp_stock','warehousereceipt')}" />
+
+
+    </h:form>
+
+    <ui:include src="/pages/general/common/stockbook.xhtml" >
+        <ui:param name="updateBean" value='#{warehouseReceiptStockTabBean}' />
+        <ui:param name="for" value='frmWarehouseReceiptStockProcess:btnStockName' />
+        <ui:param name="type" value='warehousereceipt' />
+        <ui:param name="parameters" value='#{[warehouseReceiptStockTabBean.warehouseReceipt]}' /> 
+        <ui:param name="columnsize" value='4' /> 
+        <ui:param name="form" value='frmStockBookFilter' /> 
+        <ui:param name="overlay" value="olp_stock" />
+    </ui:include>
+
+</ui:composition>

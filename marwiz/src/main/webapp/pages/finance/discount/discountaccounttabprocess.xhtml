@@ -1,0 +1,54 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmCustomerProcess">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.customerprocesses}"/>
+            <ui:param name="bean" value='#{discountAccountTabBean}' />
+            <ui:param name="update" value="grdCustomerProcess" />
+            <ui:param name="btnSaveId" value="#{discountAccountTabBean.selectedDiscount.centercampaign_id == 0 and discountAccountTabBean.getRendered(103, 0)}" />      
+            <ui:param name="btnDeleteId" value="#{discountAccountTabBean.processType==2 and discountAccountTabBean.selectedDiscount.centercampaign_id == 0 and discountAccountTabBean.getRendered(104, 0)}" />
+            <ui:param name="btnTestBeforeDeleteId" value="false" />
+            <c:if test="#{discountAccountTabBean.processType==2}">
+                <ui:param name="renderedHistory" value="true"/>
+            </c:if>
+        </ui:include>
+        <p:growl id="grwAccountControl" showDetail="true" life="5000" globalOnly="true" />
+        <h:panelGroup id="grdCustomerProcess" layout="block">
+
+            <div class="ui-g-12 divContent">
+                <div class="ui-g-12 ui-md-12 ui-lg-12">
+                    <p:outputLabel value="#{loc.customer}" for="txtAccountName" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtAccountName" onclick="showBook()" value="#{discountAccountTabBean.selectedObjectAccount.account.name}" class="inputPositionForBookFilter" required="true" 
+                                 readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.currentname}">
+                    </p:inputText>
+                    <p:commandLink id="btnAccountName" class="commandLinkPositionForBookFilter" process="@this" oncomplete="PF('olp_account').loadContents();" >
+                        <i class="fa fa-book Fs16 softgray iconPositionForBookFilter "/>   
+                        <p:ajax listener="#{accountBookFilterBean.findFilterListLazyLoading([],'frmAccountBookFilter','olp_account','active')}" global="false" />
+                    </p:commandLink>
+                </div>
+
+            </div>
+        </h:panelGroup>
+        <p:remoteCommand name="showBook" process="@this" oncomplete="PF('olp_account').loadContents();" actionListener="#{accountBookFilterBean.findFilterListLazyLoading([],'frmAccountBookFilter','olp_account','active')}" global="false" />
+    </h:form>
+
+
+    <ui:include src="/pages/general/common/accountbook.xhtml" >
+        <ui:param name="updateBean" value='#{discountAccountTabBean}' />
+        <ui:param name="for" value='frmCustomerProcess:btnAccountName' />
+        <ui:param name="type" value='active' />
+        <ui:param name="parameters" value='' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmAccountBookFilter' /> 
+        <ui:param name="overlay" value="olp_account" />
+    </ui:include>
+
+
+
+</ui:composition>

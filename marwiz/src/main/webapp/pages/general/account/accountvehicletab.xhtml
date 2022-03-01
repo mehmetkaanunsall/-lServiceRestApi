@@ -1,0 +1,44 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <div class="ContainerIndent">
+
+        <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+            <ui:param name="bean" value="#{accountVehicleTabBean}"/>
+            <ui:param name="update" value="dlgVehicleProcess"/> 
+            <ui:param name="btnNewId" value="#{(!sessionBean.user.lastBranchSetting.isProcessPassiveAccount and accountVehicleTabBean.selectedAccount.status.id == 6) ? 'false' : accountVehicleTabBean.getRendered(78, 0)}"/>
+            <ui:param name="datatable" value="tbvAccountProc:frmVehicleTab:dtbVehicle" />
+            <ui:param name="widgetvar" value='vehiclePF' />
+            <ui:param name="form" value='frmToolbarVehicle' />
+            <ui:param name="fileName" value="#{loc.vehicles}"/> 
+        </ui:include>
+
+        <h:form id="frmVehicleTab">
+            <p:dataTable  id="dtbVehicle" class="tabDatatable" var="vehicle" value="#{accountVehicleTabBean.listOfObjects}"  selection="#{accountVehicleTabBean.selectedObject}" selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                          rowKey="#{vehicle.id}" filteredValue="#{accountVehicleTabBean.listOfFilteredObjects}" widgetVar="vehiclePF">
+
+                <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{accountVehicleTabBean.update()}" transient="true"  resetValues="true" update="dlgVehicleProcess" global="false"/>
+                <p:ajax event="filter" global="false"/>
+
+                <f:facet  name="footer"     >
+                    <p:inputText id="globalFilter" value="#{accountVehicleTabBean.autoCompleteValue}"  style="display: none" />
+                </f:facet>
+
+
+                <p:column id="clmPlate" headerText="#{loc.plate}" sortable="true" sortBy="#{vehicle.plate}" filterable="true"  filterBy="#{vehicle.plate}" filterMatchMode="contains" >
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet> 
+                    <h:outputText value="#{vehicle.plate}" />
+                </p:column> 
+            </p:dataTable>  
+        </h:form>
+
+    </div>
+
+</ui:composition>

@@ -1,0 +1,117 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+        <ui:param name="bean" value="#{priceListBean}"/>
+        <ui:param name="update" value="dlgPriceList"/> 
+        <ui:param name="btnNewId" value="#{priceListBean.getRendered(139, 0)}"/>
+        <ui:param name="datatable" value="frmPriceList:dtbPriceList" />
+        <ui:param name="widgetvar" value='priceListPF' />
+        <ui:param name="form" value='frmToolbarPriceList' />
+        <ui:param name="fileName" value="#{loc.pricelist}"/> 
+        <ui:param name="renderedToggler" value='true'/>       
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+    </ui:include>
+
+    <h:form id="frmPriceList">
+        <p:dataTable  id="dtbPriceList" var="PriceList"  filteredValue="#{priceListBean.listOfFilteredObjects}" value="#{priceListBean.listOfObjects}"  selection="#{priceListBean.selectedObject}" widgetVar="priceListPF" selectionMode="single"  emptyMessage="#{loc.norecordsfound}"
+                      rowKey="#{PriceList.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                      reflow="true" rowStyleClass="#{PriceList.status.id==12 ? 'ColumnColorRed' : null}"  rowsPerPageTemplate="#{sessionBean.user.gridSize}" rows="#{sessionBean.user.defualtGridSize}">
+
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{marwiz.goToPage('/pages/inventory/pricelist/pricelistprocess.xhtml', priceListBean.selectedObject, 0, 30)}" />
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false"/>
+            <p:ajax event="colReorder" listener="#{priceListBean.reorder}" update="frmToolbarPriceList:toggle" />     
+            <p:ajax event="colResize"  listener="#{priceListBean.onResize}" /> 
+
+            <f:facet  name="footer"     >
+                <p:inputText id="globalFilter" value="#{priceListBean.autoCompleteValue}"  style="display: none" />
+            </f:facet>
+
+
+            <p:column id="clmCode" headerText="#{loc.code}" sortable="true" sortBy="#{PriceList.code}" filterable="true"  filterBy="#{PriceList.code}" filterMatchMode="contains" visible="#{priceListBean.toogleList[0]}" exportable="#{priceListBean.toogleList[0]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{PriceList.code}" />
+            </p:column>
+
+            <p:column id="clmPriceListName" headerText="#{loc.listname}" sortable="true" sortBy="#{PriceList.name}"  filterable="true"  filterBy="#{PriceList.name}" filterMatchMode="contains" visible="#{priceListBean.toogleList[1]}" exportable="#{priceListBean.toogleList[1]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{PriceList.name}" />
+            </p:column>
+            <p:column id="clmSales" headerText="#{loc.type}" sortable="true" sortBy="#{PriceList.isPurchase}"  filterable="true"  filterBy="#{PriceList.isPurchase}" filterMatchMode="contains" visible="#{priceListBean.toogleList[2]}" exportable="#{priceListBean.toogleList[2]}">
+                <f:facet name="filter">
+                    <p:outputLabel rendered="false" />
+                </f:facet>
+                <h:outputText value="#{PriceList.isPurchase ? loc.purchase : loc.sales}" />
+            </p:column>
+            <p:column id="clmDefault" sortable="true" sortBy="#{PriceList.isDefault}"  filterable="true"  filterBy="#{PriceList.isDefault}" filterMatchMode="contains" visible="#{priceListBean.toogleList[3]}" exportable="false">
+                <f:facet name="filter">
+                    <p:outputLabel rendered="false" />
+                </f:facet>
+                <f:facet name="header" class="TexAlCenter">
+                    <h:outputText value="#{loc.isdefault}"/>
+                </f:facet>
+                <h:panelGroup rendered="#{PriceList.isDefault}" >
+                    <li class="Fleft BordRad10 TexAlLeft" >
+                        <i class="fa fa-check green"></i>
+                    </li>
+                </h:panelGroup>
+                <h:panelGroup rendered="#{!PriceList.isDefault}" >
+                    <li  class="Fleft BordRad10 TexAlLeft">
+                        <i class="fa fa-times red"></i>
+                    </li>
+                </h:panelGroup>
+                <h:outputText value="#{PriceList.isDefault ? loc.yes : loc.no}" style="margin-left: 3px"/>
+            </p:column>
+            <p:column id="clmDefaultExport"  visible="false" exportable="#{priceListBean.toogleList[3]}" toggleable="false">
+                <f:facet name="header" class="TexAlCenter">
+                    <h:outputText value="#{loc.isdefault}"/>
+                </f:facet>
+                <h:outputText value="#{PriceList.isDefault ? loc.yes : loc.no}" />
+            </p:column>
+            <p:column id="clmStatus" headerText="#{loc.statu}" sortable="true" sortBy="#{PriceList.status.tag}"  filterable="true"  filterBy="#{PriceList.status.tag}" filterMatchMode="contains" visible="#{priceListBean.toogleList[5]}" exportable="#{priceListBean.toogleList[5]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{PriceList.status.tag}" />
+            </p:column>
+
+        </p:dataTable>  
+    </h:form>
+
+
+    <p:dialog  id="dlgPriceList" widgetVar="dlg_PriceList" transient="true" width="30%" resizable="false" focus="dlgPriceList" dynamic="true"  responsive="true" closeOnEscape="true">
+        <h:form id="frmNewPriceList">  
+            <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+                <ui:param name="bean" value='#{priceListBean}' />
+                <ui:param name="outputtext" value="#{loc.pricelistprocesses}"/>
+                <ui:param name="update" value="pgrNewPriceList" />
+                <ui:param name="btnSaveId" value="#{priceListBean.getRendered(140, 0)}" />
+                <ui:param name="btnDeleteId" value='false' /> 
+            </ui:include>
+
+            <h:panelGroup id="pgrNewPriceList" layout="block">
+                <div class="ui-g-12 divContent">    
+                    <ui:include  src="newpricelist.xhtml">
+                        <ui:param name="bean" value='#{priceListBean}' />
+                    </ui:include>
+                </div>
+            </h:panelGroup>
+        </h:form> 
+    </p:dialog>
+
+
+  
+
+
+</ui:composition>

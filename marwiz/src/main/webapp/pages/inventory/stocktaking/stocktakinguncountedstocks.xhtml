@@ -1,0 +1,109 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions" 
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <div class="ContainerIndent"> 
+        <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+            <ui:param name="bean" value="#{stockTakingUncountedStocksBean}"/>  
+            <ui:param name="update" value=""/> 
+            <ui:param name="btnNewId" value="false"/> 
+            <ui:param name="datatable" value="frmUncountedStocks:dtbUncountedStocks" />      
+            <ui:param name="widgetvar" value='uncountedStocksPF' />
+            <ui:param name="form" value='frmToolbarUncountedStocks' />
+            <ui:param name="fileName" value='#{loc.uncountedstocks}' />
+            <ui:param name="renderedToggler" value='false'/>       
+            <ui:param name="renderedExel" value='true'/>
+            <ui:param name="renderedPdf" value='true'/>
+        </ui:include>
+
+        <h:form id="frmUncountedStocks" >
+            <h:panelGroup >
+                <p:panelGrid layout="grid" columns="1" class="allCheckPanelGrid" style="border-radius: 0px !important; border-bottom: 0px !important;">  
+                    <p:selectBooleanCheckbox  value="#{stockTakingUncountedStocksBean.isAll}" itemLabel="#{loc.all}"   class="Fleft allcheck" style="margin-top: 2px; margin-left: 5px;">
+                        <p:ajax global="false" update="frmUncountedStocks:btnReset" listener="#{stockTakingUncountedStocksBean.setIsAll()}" />
+                    </p:selectBooleanCheckbox>
+                </p:panelGrid>
+            </h:panelGroup>
+
+            <p:dataTable id="dtbUncountedStocks" editable="true" editMode="cell" widgetVar="uncountedStocksPF"  var="UncountedStocks" value="#{stockTakingUncountedStocksBean.listOfObjects}" filteredValue="#{stockTakingUncountedStocksBean.listOfFilteredObjects}"  
+                         selection="#{stockTakingUncountedStocksBean.listOfSelectedObjects}"
+                         rowKey="#{UncountedStocks.stock.id}" rows="#{sessionBean.user.defualtGridSize}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                         rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"
+                         emptyMessage="#{loc.norecordsfound}" class="tabDatatable uncountedStocksDatatable"  >
+
+
+
+                <p:ajax event="page" global="false"/>
+                <p:ajax event="filter" global="false"/>
+                <p:ajax event="rowSelectCheckbox" global="false" update="frmUncountedStocks:btnReset" />
+                <p:ajax event="rowUnselectCheckbox" global="false" update="frmUncountedStocks:btnReset" />
+                <p:ajax event="toggleSelect" global="false" update="frmUncountedStocks:btnReset" />
+                <p:column selectionMode="multiple" style="text-align:center;" selectRow="false"/>
+
+
+                <f:facet  name="footer"     >
+                    <p:inputText id="globalFilter" value="#{stockTakingUncountedStocksBean.autoCompleteValue}"  style="display: none" />
+                </f:facet>
+
+                <p:column headerText="#{loc.stockcode}" selectRow="false" sortBy="#{UncountedStocks.stock.code}" sortable="true" filterable="true"  filterBy="#{UncountedStocks.stock.code}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet> 
+                    <h:outputText value="#{UncountedStocks.stock.code}" />
+                </p:column>
+                <p:column headerText="#{loc.centerstockcode}" selectRow="false" sortBy="#{UncountedStocks.stock.centerProductCode}" sortable="true" filterable="true"  filterBy="#{UncountedStocks.stock.centerProductCode}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet> 
+                    <h:outputText value="#{UncountedStocks.stock.centerProductCode}" />
+                </p:column>
+                <p:column headerText="#{loc.barcode}" selectRow="false" sortBy="#{UncountedStocks.stock.barcode}" sortable="true" filterable="true"  filterBy="#{UncountedStocks.stock.barcode}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet> 
+                    <h:outputText value="#{UncountedStocks.stock.barcode}" />
+                </p:column>
+                <p:column headerText="#{loc.stockname}" selectRow="false" sortBy="#{UncountedStocks.stock.name}" sortable="true" filterable="true"  filterBy="#{UncountedStocks.stock.name}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet> 
+                    <h:outputText value="#{UncountedStocks.stock.name}" />
+                </p:column>
+                <p:column headerText="#{loc.systemquantity}" selectRow="false" sortBy="#{UncountedStocks.systemQuantity}" sortable="true" filterable="true"  filterBy="#{UncountedStocks.systemQuantity}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet> 
+                    <h:outputText value="#{UncountedStocks.systemQuantity}" class="Fright">
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="unit" value="#{UncountedStocks.stock.unit}"/>
+                        <f:attribute name="type" value="unit" />
+                    </h:outputText>
+                </p:column>     
+                <p:column headerText="#{loc.systemquantity}" visible="false" exportable="true">
+
+                    <h:outputText value="#{stockTakingUncountedStocksBean.unitNumberFormat(UncountedStocks.stock.unit.unitRounding).format(UncountedStocks.systemQuantity)}" class="Fright">
+
+                    </h:outputText>
+
+                </p:column>                      
+                <p:column id="clmUnit" headerText="#{loc.unit}" visible="false" exportable="true">
+
+                    <h:outputText  value="#{UncountedStocks.stock.unit.sortName}" class="Fright" />
+
+                </p:column>
+
+
+            </p:dataTable>
+            <div class="EmptyBox10" />
+            <p:commandButton class="btnStockTaking Fright" value="#{loc.goon}" process="@this" actionListener="#{stockTakingUncountedStocksBean.goon()}" oncomplete="PF('dlg_UncountedStocks').hide();"  />
+            <p:commandButton id="btnReset" class="btnStockTaking Fleft" value="#{loc.reset}" disabled="#{stockTakingUncountedStocksBean.listOfSelectedObjects.size()==0}" process="@this" oncomplete="PF('dlg_ConfirmReset').show();" />
+
+        </h:form>
+    </div>
+
+
+</ui:composition>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                            http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://www.springframework.org/schema/context
+                            http://www.springframework.org/schema/context/spring-context.xsd
+                            http://www.springframework.org/schema/tx 
+                            http://www.springframework.org/schema/tx/spring-tx.xsd">
+    
+    <bean id="discountDao" class="com.mepsan.marwiz.finance.discount.dao.DiscountDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <bean id="discountService" class="com.mepsan.marwiz.finance.discount.business.DiscountService" lazy-init="true" scope="prototype">
+    </bean> 
+    <bean id="gfDiscountService" class="com.mepsan.marwiz.finance.discount.business.GFDiscountService" lazy-init="true" scope="prototype">
+    </bean> 
+    
+    <bean id="discountItemDao" class="com.mepsan.marwiz.finance.discount.dao.DiscountItemDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="discountItemService" class="com.mepsan.marwiz.finance.discount.business.DiscountItemService" lazy-init="true" scope="prototype">
+    </bean> 
+    
+    <bean id="discountAccountTabDao" class="com.mepsan.marwiz.finance.discount.dao.DiscountAccountTabDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="discountAccountTabService" class="com.mepsan.marwiz.finance.discount.business.DiscountAccountTabService" lazy-init="true" scope="prototype">
+    </bean> 
+    
+    <bean id="discountBranchTabDao" class="com.mepsan.marwiz.finance.discount.dao.DiscountBranchTabDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="discountBranchTabService" class="com.mepsan.marwiz.finance.discount.business.DiscountBranchTabService" lazy-init="true" scope="prototype">
+    </bean> 
+    
+</beans>

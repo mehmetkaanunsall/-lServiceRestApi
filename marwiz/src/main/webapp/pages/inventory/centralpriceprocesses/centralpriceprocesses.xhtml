@@ -1,0 +1,153 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+
+
+    <h:form id="frmCentralPriceProcess">
+
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.centralpriceprocesses}"/>
+            <ui:param name="bean" value='#{centralPriceProcessesBean}' />
+            <ui:param name="update" value="frmCentralPriceProcessDatatable:dtbCentralPriceProcess pgrCentralPriceProcessDatatable pgrCentralPriceProcess" />
+        </ui:include>
+
+        <h:panelGroup id="pgrCentralPriceProcess" layout="block" transient="true">  
+            <div class="ui-g divContent">
+                <div class="panelToggle ui-g-12">
+                    <div class="ui-g-12 ui-md-6 ui-lg-2 ">
+                        <p:outputLabel value="#{loc.branch}" for="slcBranch" class="FontBold Fs12"/>
+                        <p:selectCheckboxMenu  id="slcBranch" value="#{centralPriceProcessesBean.selectedBranchList}" 
+                                               filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                               label="#{centralPriceProcessesBean.selectedBranchList.size()!=0 ? centralPriceProcessesBean.selectedBranchList.size() :loc.all} #{centralPriceProcessesBean.selectedBranchList.size()!=0 ? loc.branch : ''} #{centralPriceProcessesBean.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                            <f:selectItems value="#{centralPriceProcessesBean.listOfBranch}" itemLabel="#{branchSetting.branch.name}" itemValue="#{branchSetting}" var="branchSetting" />       
+                            <p:ajax oncomplete="PF('slcBranchCheckBox').show()" global="false" update="frmCentralPriceProcess:slcBranch frmCentralPriceProcess:slcType" listener="#{centralPriceProcessesBean.changeBranch()}"/>
+                            <p:ajax event="toggleSelect" update="frmCentralPriceProcess:slcBranch frmCentralPriceProcess:slcType" oncomplete="PF('slcBranchCheckBox').show()" global="false" listener="#{centralPriceProcessesBean.changeBranch()}"/>
+                        </p:selectCheckboxMenu>
+                    </div>   
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">     
+                        <p:outputLabel value="#{loc.type}" for="slcType" class="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcType" value="#{centralPriceProcessesBean.isPurchase}" required="true">
+                            <f:selectItem itemLabel="#{loc.sales}" itemValue="false" />
+                            <c:if test="#{centralPriceProcessesBean.isBranchAuth}">
+                                <f:selectItem itemLabel="#{loc.purchase}" itemValue="true"/>
+                            </c:if>
+                        </p:selectOneMenu>
+                    </div> 
+
+                </div>
+            </div>
+        </h:panelGroup>
+
+    </h:form>
+    <div class="EmptyBox20" />
+    <h:panelGroup id="pgrCentralPriceProcessDatatable" >
+        <h:panelGroup rendered="#{centralPriceProcessesBean.isFind}">
+            <ui:include src="/pages/general/common/datagridtoolbar.xhtml" >
+                <ui:param name="bean" value="#{centralPriceProcessesBean}"/>  
+                <ui:param name="update" value=""/> 
+                <ui:param name="btnNewId" value="false"/>  
+                <ui:param name="datatable" value="frmCentralPriceProcessDatatable:dtbCentralPriceProcess" /> 
+                <ui:param name="dtbWidgetVar" value="centralPriceProcessPF" /> 
+                <ui:param name="fileName" value="#{loc.centralpriceprocesses}"/>
+                <ui:param name="renderedFilter" value='true'/>
+                <ui:param name="renderedSaveProcess" value="true"/>
+                <ui:param name="renderedCheckBox" value="true"/>
+                <ui:param name="labelForCheckBox" value="#{loc.showenteredstocks}"/>
+            </ui:include>
+            <h:form id="frmCentralPriceProcessDatatable" >
+                <p:commandButton id="updateDatatable"   process="@this" ajax="true" global="false" style="display: none;" update="frmCentralPriceProcessDatatable:dtbCentralPriceProcess"></p:commandButton>
+
+                <p:dataTable  id="dtbCentralPriceProcess" var="centralPriceProcess" editable="true" editMode="cell" widgetVar="centralPriceProcessPF" emptyMessage="#{loc.norecordsfound}" value="#{centralPriceProcessesBean.isCheck ? centralPriceProcessesBean.selectedCentralPriceList : centralPriceProcessesBean.listOfObjects}" selectionMode="single"  selection="#{centralPriceProcessesBean.selectedObject}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{centralPriceProcess.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true" lazy="true"
+                              >
+
+                    <p:ajax event="cellEdit" listener="#{centralPriceProcessesBean.onCellEdit}" />
+
+                    <p:column id="clmBarcode" headerText="#{loc.barcode}" >
+                        <h:outputText value="#{centralPriceProcess.priceListItem.stock.barcode}" />
+                    </p:column>
+                    <p:column id="clmStockName" headerText="#{loc.stockname}" >
+                        <h:outputText value="#{centralPriceProcess.priceListItem.stock.name}" />
+                    </p:column>
+
+                    <p:column id="clmPrice" headerText="#{loc.price}">
+                        <p:cellEditor>
+                            <f:facet name="output">
+                                <h:outputText value="#{centralPriceProcess.priceListItem.price}" style="float: right" >
+                                    <f:converter converterId="currencyConverter" />
+                                    <f:attribute name="type" value="" />
+                                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                </h:outputText>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputNumber value="#{centralPriceProcess.priceListItem.price}" class="editableinput" onclick="this.setSelectionRange(0, this.value.length)"
+                                               decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? '.': ','}" 
+                                               thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}"
+                                               decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}"
+                                               roundMethod="D" emptyValue=""/>  
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+                    <p:column id="clmCurrency" headerText="#{loc.currency}">
+                        <p:cellEditor>
+                            <f:facet name="output"><h:outputText value="#{centralPriceProcess.priceListItem.currency.tag}" /></f:facet>
+                            <f:facet name="input">
+                                <h:selectOneMenu value="#{centralPriceProcess.priceListItem.currency.id}" style="width:50%">
+                                    <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}" />
+                                    <f:selectItems value="#{sessionBean.currencies}" var="currency" itemLabel="#{currency.nameMap.get(sessionBean.langId).name}" itemValue="#{currency.id}" />
+                                </h:selectOneMenu>
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+                    <p:column id="clmIsTaxIncluded" headerText="#{loc.istaxincluded}">
+                        <p:cellEditor>
+                            <f:facet name="output"><h:outputText value="#{centralPriceProcess.priceListItem.is_taxIncluded ? loc.yes : loc.no}" /></f:facet>
+                            <f:facet name="input">
+                                <h:selectOneMenu value="#{centralPriceProcess.priceListItem.is_taxIncluded}" style="width:50%">
+                                    <f:selectItem itemLabel="#{loc.no}" itemValue="false" />
+                                    <f:selectItem itemLabel="#{loc.yes}" itemValue="true" />
+                                </h:selectOneMenu>
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+                </p:dataTable> 
+                <p:remoteCommand name="priceChangeSave" actionListener="#{centralPriceProcessesBean.remoteSave()}" delay="50"/>
+            </h:form>
+        </h:panelGroup>
+    </h:panelGroup>
+    
+    <p:confirmDialog global="true" class="deleteConfirm"  widgetVar="dlgConfirmSavePrice" showEffect="fade" hideEffect="fade" width="20%" closeOnEscape="true" responsive="true">
+        <f:facet name="message">
+            <p:panel class="divContent">
+                <div class="ui-g">
+                    <div class="ui-g-12 ui-md-12 ui-lg-12">
+                        <h:outputText value="#{loc.stockpriceinselectedbrancheswillbechanged}" />
+                    </div>
+                    <div class="ui-g-12 ui-md-12 ui-lg-12">
+                        <h:outputText value="#{loc.areyousureyouwanttocontinue}" />
+                    </div>
+                    <div class="ui-g-12 ui-md-12 ui-lg-6">
+                        <p:commandButton value="#{loc.yes}" actionListener="#{centralPriceProcessesBean.confirmSave()}" async="true" global="true" onclick="PF('dlgConfirmSavePrice').hide()"   styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+                    </div>
+                    <div class="ui-g-12 ui-md-12 ui-lg-6">
+                        <p:commandButton value="#{loc.no}"  onclick="PF('dlgConfirmSavePrice').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+                    </div>
+                </div>
+            </p:panel>
+        </f:facet>
+    </p:confirmDialog>
+    
+    <script>
+        function updateDatatable() {
+            document.getElementById("frmCentralPriceProcessDatatable:updateDatatable").click();
+        }
+    </script>
+
+</ui:composition>

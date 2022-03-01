@@ -1,0 +1,75 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+        <ui:param name="bean" value="#{starbucksMachineBean}"/> 
+        <ui:param name="update" value="dlgStarbucksMachineProcess"/>
+        <ui:param name="btnNewId" value='#{starbucksMachineBean.getRendered(349, 0)}'/>
+        <ui:param name="datatable" value="frmStarbucksMachine:dtbStarbucksMachine" />
+        <ui:param name="widgetvar" value="starbucksMachinePF" />
+        <ui:param name="form" value='frmToolbarStarbucksMachine' />
+        <ui:param name="fileName" value="#{loc.starbucksdevicedescription}"/> 
+        <ui:param name="renderedToggler" value='true'/>
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+    </ui:include>
+
+
+    <h:form id="frmStarbucksMachine">
+
+        <p:dataTable  id="dtbStarbucksMachine" var="starbucksMachine"  value="#{starbucksMachineBean.listOfObjects}" filteredValue="#{starbucksMachineBean.listOfFilteredObjects}" widgetVar="starbucksMachinePF" selection="#{starbucksMachineBean.selectedObject}"  selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{starbucksMachine.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                      reflow="true">
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{starbucksMachineBean.update()}" update="dlgStarbucksMachineProcess" global="false" /> 
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false"/>
+            <p:ajax event="colReorder" listener="#{starbucksMachineBean.reorder}" update="frmToolbarStarbucksMachine:toggle" />     
+            <p:ajax event="colResize"  listener="#{starbucksMachineBean.onResize}" />  
+
+            <f:facet name="footer" rendered="false" >
+                <p:inputText id="globalFilter" value="#{starbucksMachineBean.autoCompleteValue}"  style="display: none"  />
+            </f:facet>
+
+
+            <p:column id="clmCode" headerText="#{loc.code}" sortable="true" sortBy="#{starbucksMachine.code}" filterable="true"  filterBy="#{starbucksMachine.code}" filterMatchMode="contains" visible="#{starbucksMachineBean.toogleList[0]}" exportable="#{starbucksMachineBean.toogleList[0]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{starbucksMachine.code}" />
+            </p:column >
+            <p:column id="clmName" headerText="#{loc.name}" sortable="true" sortBy="#{starbucksMachine.name}" filterable="true"  filterBy="#{starbucksMachine.name}" filterMatchMode="contains" visible="#{starbucksMachineBean.toogleList[1]}" exportable="#{starbucksMachineBean.toogleList[1]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{starbucksMachine.name}" />
+            </p:column >
+            <p:column id="clmMachineBarcode" headerText="#{loc.devicebarcode}" sortable="true" sortBy="#{starbucksMachine.machineBarcode}" filterable="true"  filterBy="#{starbucksMachine.machineBarcode}" filterMatchMode="contains" visible="#{starbucksMachineBean.toogleList[2]}" exportable="#{starbucksMachineBean.toogleList[2]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{starbucksMachine.machineBarcode}" />
+            </p:column >
+            <p:column id="clmPubkey" headerText="#{loc.pubkey}" sortable="true" sortBy="#{starbucksMachine.pubKey}" filterable="true"  filterBy="#{starbucksMachine.pubKey}" filterMatchMode="contains" visible="#{starbucksMachineBean.toogleList[3]}" exportable="#{starbucksMachineBean.toogleList[3]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{starbucksMachine.pubKey}" />
+            </p:column >
+        </p:dataTable>  
+    </h:form>
+
+
+
+    <p:dialog id="dlgStarbucksMachineProcess" widgetVar="dlg_StarbucksMachineProcess" resizable="false" transient="true" focus="dlgStarbucksMachineProcess" responsive="true" dynamic="true" modal="true" closeOnEscape="true" width="50%">
+        <ui:include src="/pages/inventory/starbucksmachine/starbucksmachineprocess.xhtml" />
+    </p:dialog>
+
+
+</ui:composition>
+
+

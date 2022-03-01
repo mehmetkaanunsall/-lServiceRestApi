@@ -1,0 +1,122 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <!--
+    -Parametreler
+    -bean:  Bu xhtml hangi sayfada kullanılıyorsa o sayfanın bean i gönderilir.
+    -outputtext: Toolbarın başlığı
+    -update: Raporlama Butonuna basıldğında update edilecek componentların id si gönderilir.
+    
+    -->
+
+
+
+    <p:remoteCommand name="exportLimitMessege"  action="#{bean.showLimitMessege()}" />
+    <p:remoteCommand name="waitToExportPdf"   actionListener="#{bean.waitToExportPdf()}"   />
+    <p:remoteCommand name="waitToExportExcel"   actionListener="#{bean.waitToExportExcel()}"   />
+    <p:remoteCommand name="exportLimitMessegeForExcel"  action="#{bean.showLimitMessegeForExcel()}" />
+
+    <p:toolbar >
+        <f:facet name="left">
+            <p:commandLink title="#{loc.back}" class="Fleft" rendered="#{renderedBack}"   immediate="true"  >
+                <i class="icon-reply-outline Fs20 tlbrBackBtn"/>    
+                <f:actionListener  binding="#{marwiz.gotoBackActionListener()}"/> 
+            </p:commandLink>
+            <h:outputText value="#{outputtext}" class="outputTextFont Fleft MarRight8" />
+
+        </f:facet>
+
+        <f:facet name="right">   
+
+            <h:panelGroup id="pgrExporter" class="panelGridNoBorder">
+                <h:commandLink id="btnExcel" title="#{loc.transfertoexcel}"  class ="Fleft tlbrIcon"  onclick="if (count > 300000) {
+                                exportLimitMessegeForExcel();
+                                return false;
+                            } else {
+                                waitToExportExcel();
+                            }"  rendered="#{renderedExcel and bean.renderExportButton}" actionListener="#{bean.createExcel()}">
+                    <i class="icon-file-excel tlbrExcelBtn Fs23"  />
+                </h:commandLink>  
+                <h:commandLink id="btnPdf"    title="#{loc.transfertopdf}"  class ="Fleft tlbrIcon "  onclick="if (count > 60000) {
+                                exportLimitMessege();
+                                return false;
+                            } else {
+                                waitToExportPdf();
+                            }"  rendered="#{renderedPdf and bean.renderExportButton}"  actionListener="#{bean.createPdf()}" >
+                    <i class="icon-file-pdf tlbrPdfBtn Fs23"  />
+                </h:commandLink>
+
+                <h:commandLink id="btnPdfReport"    title="#{loc.transfertopdf}"  class ="Fleft tlbrIcon " rendered="#{renderedReportPdf and bean.renderExportButton}"  actionListener="#{bean.createPdf()}" >
+                    <i class="icon-file-pdf tlbrPdfBtn Fs23"  />
+                </h:commandLink>
+
+                <h:commandLink id="btnExcelReport"    title="#{loc.transfertoexcel}"  class ="Fleft tlbrIcon " rendered="#{renderedReportExcel and bean.renderExportButton}"  actionListener="#{bean.createExcel()}" >
+                    <i class="icon-file-excel tlbrExcelBtn Fs23"  />
+                </h:commandLink>
+
+            </h:panelGroup>
+            <h:panelGroup id="pgrPrinter">
+                <p:commandLink id="btnPrint" actionListener="#{bean.createPrinter()}" title="#{loc.print}" onclick="if (count > 60000) {
+                                exportLimitMessege();
+                                return false;
+                            }" class ="tlbrIcon" rendered="#{renderedPrint and  bean.renderExportButton}">
+                    <i class="icon-print Fs23 tlbrSaveBtn"/>  
+                </p:commandLink>        
+            </h:panelGroup>    
+
+            <p:commandLink class="Fleft" rendered="#{renderedIntegration}" title="#{loc.send}" actionListener="#{bean.sendIntegrationBatch()}" >
+                <i class="fa fa-paper-plane Fs20 tlbrUploadBtn" style="margin-top: 5px;  margin-right: 7px" />      
+            </p:commandLink>
+
+            <p:commandLink id="btnFind" title="#{loc.find}" update="#{update}"  actionListener="#{bean.find}" process="@form" >
+                <i class="fa fa-search Fs20 MarTop5 tlbrSaveBtn"/>    
+            </p:commandLink>
+
+            <p:commandLink id="btnListView" title="#{loc.list}" update="#{update}" rendered="#{renderBtnListView}" actionListener="#{bean.changeView}" process="@form" >
+                <i class="fa fa-list Fs18 MarTop5 tlbrSaveBtn"/>                 
+            </p:commandLink>
+
+            <p:commandLink title="#{loc.save}" process="@form" actionListener="#{bean.save}" rendered="false" >
+                <i class="fa fa-save Fs20 MarTop5 tlbrSaveBtn"/>                 
+            </p:commandLink>
+
+            <div class="verticalSeparator" >
+                <p:commandLink title="#{loc.openclose}" class="Fleft panelToggleRotate" global="false" onclick="Centrowiz.panelToggle();" >                 
+                    <i class="icon-up-open Fs16 tlbrPanelToggle" /> 
+                </p:commandLink>    
+            </div>
+
+
+            <p:commandLink id="toolbarIconMenu"  title="#{loc.processes}" class="Fright tlbrIconMenu display-none">
+                <i class="icon-th-1 Fs23"></i>
+            </p:commandLink>
+
+
+
+            <p:menu  overlay="true" trigger="toolbarIconMenu" class="Wid20 tlbrResponsiveMenu" my="right top" at="right bottom">
+
+                <p:menuitem rendered="#{renderedExcel and bean.renderExportButton}" onclick="$('#btnExcel').click();"><i class="icon-file-excel Fs23 marginLevel-1 tlbrExcelBtn"/></p:menuitem>
+                <p:menuitem rendered="#{renderedPdf and bean.renderExportButton}" onclick="$('#btnPdf').click();"><i class="icon-file-pdf Fs23 marginLevel-1 tlbrPdfBtn "/></p:menuitem>
+                <p:menuitem rendered="#{renderedPrint}" onclick="$('#frmGridToolbar\\:btnPrint').click();"><i class="icon-print Fs23 marginLevel-1 tlbrSaveBtn"/></p:menuitem>
+                <p:menuitem rendered="#{renderedGraphic}" onclick="$('#frmGridToolbar\\:btnGraphic').click();"><i class="icon-chart-bar-2 Fs23 marginLevel-1 tlbrGraphicBtn"/></p:menuitem>
+
+            </p:menu>
+
+
+            <p:defaultCommand target="btnFind" rendered="#{!renderedDefaultComand}"/>
+        </f:facet>
+
+
+    </p:toolbar> 
+    <script>
+
+        var count = 0;
+
+    </script>   
+
+</ui:composition>
+
+

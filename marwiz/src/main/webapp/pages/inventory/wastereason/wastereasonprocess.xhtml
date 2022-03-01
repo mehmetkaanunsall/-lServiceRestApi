@@ -1,0 +1,38 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions" 
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:form id="frmWasteReasonDefinitionProcess">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.wastereasondefinitionprocess}"/>
+            <ui:param name="bean" value='#{wasteReasonBean}' />
+            <ui:param name="update" value="pgrWasteReasonDefinitionProcess" />
+            <ui:param name="btnSaveId" value="#{sessionBean.user.lastBranchSetting.isCentralIntegration ? false : wasteReasonBean.getRendered(303, 0)}" />     
+            <ui:param name="renderback" value='false'/>
+            <ui:param name="btnDeleteId" value="false" />
+            <ui:param name="dtbWidgetVar" value="wasteReasonPF" />
+            <c:if test="#{wasteReasonBean.processType==2}">               
+                <ui:param name="btnDeleteId" value="#{sessionBean.user.lastBranchSetting.isCentralIntegration ? false : wasteReasonBean.getRendered(304, 0)}" />
+                <ui:param name="btnTestBeforeDeleteId" value="true" />
+            </c:if>           
+        </ui:include>
+
+        <h:panelGroup id="pgrWasteReasonDefinitionProcess" layout="block">
+            <div class="ui-g divContent">
+                <p:focus for="txtWasteReasonName"/>
+                <div class="ui-g-12 ui-md-6 ui-lg-12">
+                    <p:outputLabel value="#{loc.reasonname}" for="txtWasteReasonName" class="FontBold Fs12"/>
+                    <p:inputText id="txtWasteReasonName" disabled="#{(!sessionBean.user.lastBranchSetting.isCentralIntegration and wasteReasonBean.selectedObject.centerwastereason_id>0 and wasteReasonBean.processType==2) ? true : false}" value="#{wasteReasonBean.selectedObject.name}" styleClass="Wid95" required="true" placeholder="#{loc.reasonname}"/>  
+                </div>
+            </div>
+        </h:panelGroup>
+        
+    </h:form>
+    
+    
+    
+</ui:composition>

@@ -1,0 +1,303 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+<!--**************BU SAYFAYA FORMAT YAPMAYINIZ.JAVASCRİPT BOZULUYOR.*******************************-->
+<!--**************BU SAYFAYA FORMAT YAPMAYINIZ.JAVASCRİPT BOZULUYOR.*******************************-->
+<!--**************BU SAYFAYA FORMAT YAPMAYINIZ.JAVASCRİPT BOZULUYOR.*******************************-->
+<!--**************BU SAYFAYA FORMAT YAPMAYINIZ.JAVASCRİPT BOZULUYOR.*******************************-->
+    <script type="text/javascript">
+
+        var maskList;
+        var returnSelects = [];
+        var selectedCode;
+        var c=0;
+
+        $(function () {
+           
+           maskList = Centrowiz.readJson('#{resource["sentinel-layout:js/phone-codes.json"]}');
+           
+           
+
+            //http://localhost:8080/Centrowiz/resources/sentinel-layout/js/phone-codes.json");                        
+        })
+ 
+
+        function countriesCodeFind(formId) {
+            
+           
+            selectedCode = $("#" + formId + "\\:slcMaskCountry_panel .ui-state-highlight").attr("title");
+
+            returnSelects = $.grep(maskList, function (element, index) {
+                return element.cc == selectedCode;
+            });
+           
+             
+            
+                
+                var phoneInput = $("#" + formId + "\\:txtPhone");            
+                $.mask.definitions['9'] = '';
+                $.mask.definitions['#'] = '[0-9]';
+                if(selectedCode=='TR'){                                        
+                    phoneInput.mask("+90(###)#######");
+                     
+                } else{
+                    phoneInput.unmask("+90(###)#######");
+                     
+                }
+                
+                if (returnSelects[0] != undefined)
+                {
+                var firstMask = returnSelects[0].mask.replace(/[^0-9\s]/gi, '').replace(/[_\s]/g, '');
+                console.debug(firstMask);
+                phoneInput.val('+' + firstMask);
+
+                 
+                }
+                else{
+                        phoneInput.val('');
+                }
+                
+                 $( "#" + formId + "\\:txtPhone" ).focus();                  
+        }
+        
+        function bringMask(formId){
+           
+          if(c==0){
+             selectedCode = $("#" + formId + "\\:slcMaskCountry_panel .ui-state-highlight").attr("title");
+             returnSelects = $.grep(maskList, function (element, index) {
+                return element.cc == selectedCode;
+            });
+           var phoneInput = $("#" + formId + "\\:txtPhone");            
+            $.mask.definitions['9'] = '';
+            $.mask.definitions['#'] = '[0-9]';
+            if(selectedCode.trim()=='TR'){  
+                
+                phoneInput.mask("+90(###)#######");
+            } else{
+                   
+                phoneInput.unmask("+90(###)#######");
+            }
+            c=c+1;
+        }
+    }
+
+
+        function maskControl(formId) {
+            
+            selectedCode = $("#" + formId + "\\:slcMaskCountry_panel .ui-state-highlight").attr("title");
+              returnSelects = $.grep(maskList, function (element, index) {
+                return element.cc == selectedCode;
+            });
+           
+            var phoneInput = $("#" + formId + "\\:txtPhone");
+            var phoneNumber = phoneInput.val();
+          
+
+
+            var returnValue = $("#" + formId + "\\:ihdValid");
+            if (phoneNumber != '' &amp;&amp; selectedCode != 0 &amp;&amp; returnSelects.length != 0)
+            {
+                var count=0;
+                console.debug(phoneNumber.length);
+                phoneNumber = phoneNumber.replace(/[^0-9#\s]/gi, '').replace(/[_\s]/g, '');
+               
+                console.debug("phoneNumber");
+                console.debug(phoneNumber);
+                //Seçilen ülkenin mask sayısı kadar döner
+                for (var i = 0; i &lt; returnSelects.length; i++) {
+                    
+                    returnSelects[i].mask = returnSelects[i].mask.replace(/[^0-9#\s]/gi, '').replace(/[_\s]/g, '');
+                    
+                    console.debug("returnSelects[i].mask");
+                    console.debug(returnSelects[i].mask);
+                    count = 0;
+                    //Mask ile girilen değerinin uzunluk karşılaştırılması
+                    if(returnSelects[i].mask.length == phoneNumber.length)
+                    {
+                        //Seçilen ülkenin mask karekter sayısı kadar 
+                        for (var j = 0; j &lt; returnSelects[i].mask.length; j++) {
+                            
+                            if(returnSelects[i].mask.charAt(j)!="#"){
+
+                                if(returnSelects[i].mask.charAt(j) == phoneNumber.charAt(j)) {                                 
+                                    count = count + 1;
+                                    console.debug("phoneNumber.charAt(j)Eşit olan sayı");
+                                    console.debug(phoneNumber.charAt(j));
+                                }
+                            }
+                            else{                               
+                                count = count + 1;                                 
+                            }                             
+                         }                                                  
+                         
+                         if(count == phoneNumber.length){
+                            console.debug("esit");
+                            returnValue.val("true");
+                            phoneInput.css("border-color","#34a853");                            
+                            return true;
+                         }
+                         else{
+                            console.debug("esit değil");
+                            returnValue.val("false")
+                            phoneInput.css("border-color","#F00"); 
+                         }
+                    }
+                    else{
+                        console.debug("uygun format değil");
+                        returnValue.val("false");
+                        phoneInput.css("border-color","#F00");
+                    }             
+                }
+               
+                returnValue.val("false");
+                phoneInput.css("border-color","#F00");
+        }
+        else{
+            
+            returnValue.val("true");
+            
+        }
+    }
+    
+
+      
+    </script>
+
+
+
+    <p:focus for="txtPhone"/> 
+    <p:focus for="txtMail"/>
+    <p:focus for="txtAddress"/>
+    <p:focus for="txtInternet"/>
+
+    <h:panelGroup id="grdCommunication" class="divContent" layout="block">
+
+        <div class="ui-g ">
+            <h:panelGroup  rendered="#{bean.selectedObject.type.id==1}">
+                <div  class="ui-g-12 ui-md-3">
+                    <p:outputLabel value="#{loc.communicationtype}" for="slcCommunicationType" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcCommunicationType" value="#{bean.selectedObject.type.id}" required="true" disabled="#{bean.communicationProcessType!=1}" styleClass="Wid90">
+                        <f:selectItems value="#{bean.listOfCommunicationType}" var="type" itemLabel="#{type.nameMap.get(sessionBean.langId).name}" itemValue="#{type.id}"  />
+                        <p:ajax  update="#{updateGrid}" listener="#{bean.changeType()}"/> 
+                    </p:selectOneMenu>
+                </div>
+            </h:panelGroup>
+
+            <h:panelGroup  rendered="#{bean.selectedObject.type.id==1}">
+                <div class="ui-g-12 ui-md-3">
+                    <p:outputLabel value="#{loc.country}" for="slcCountry" styleClass="Fs12 FontBold" />
+                    <p:selectOneMenu id="slcCountry" filter="true" filterMatchMode="contains" required="true" styleClass="Wid90" value="#{bean.address.country.id}" >
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true"/> 
+                        <f:selectItems value="#{sessionBean.countries}" var="country" itemLabel="#{country.getName(sessionBean.langId)}" itemValue="#{country.id}"  />
+                        <p:ajax listener="#{citiesAndCountiesBean.updateCity(bean.address.country,bean.address.city,bean.address.county)}" update="slcCity,slcCounty" />
+                    </p:selectOneMenu>
+                </div>
+            </h:panelGroup>
+            <h:panelGroup  rendered="#{bean.selectedObject.type.id==1}">
+                <div class="ui-g-12 ui-md-3">
+                    <p:outputLabel value="#{loc.city}" for="slcCity" styleClass="Fs12 FontBold" />
+                    <p:selectOneMenu  id="slcCity" required="true" filter="true" filterMatchMode="contains" styleClass="Wid90" value="#{bean.address.city.id}">
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true" />
+                        <f:selectItems value="#{citiesAndCountiesBean.cities}" itemLabel="#{city.getName(sessionBean.langId)}" itemValue="#{city.id}" var="city" />
+                        <p:ajax  listener="#{citiesAndCountiesBean.updateCounty(bean.address.country,bean.address.city,bean.address.county)}" update="slcCounty" />
+                    </p:selectOneMenu>
+                </div>
+            </h:panelGroup>
+            <h:panelGroup  rendered="#{bean.selectedObject.type.id==1}">
+                <div class="ui-g-12 ui-md-3">
+                    <p:outputLabel value="#{loc.county}" for="slcCounty" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcCounty" required="true" filter="true" filterMatchMode="contains" styleClass="Wid90" value="#{bean.address.county.id}" >
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true" />
+                        <f:selectItems value="#{citiesAndCountiesBean.counties}" itemLabel="#{county.name}" itemValue="#{county.id}" var="county" />
+
+                    </p:selectOneMenu>
+                </div>
+            </h:panelGroup>
+            <h:panelGroup rendered="#{bean.selectedObject.type.id==1}">
+                <div class="ui-g-12 ui-md-12">   
+                    <p:outputLabel value="#{loc.communicationinformation}" for="txtAddress" styleClass="Fs12 FontBold"  />
+                    <p:inputTextarea id="txtAddress" value="#{bean.addressHelp}" styleClass="Wid97" autoResize="false" style="resize: none;"  placeholder="#{loc.communicationinformation}" required="true"  />                                    
+                </div>
+            </h:panelGroup>
+        </div>
+
+        <div class="ui-g ">
+            <h:panelGroup  rendered="#{bean.selectedObject.type.id!=1}">
+                <div  class="ui-g-12 ui-md-12">
+                    <p:outputLabel value="#{loc.communicationtype}" for="slcCommunicationType1" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcCommunicationType1" value="#{bean.selectedObject.type.id}" required="true" disabled="#{bean.communicationProcessType!=1}" styleClass="Wid97">
+                        <f:selectItems value="#{bean.listOfCommunicationType}" var="type" itemLabel="#{type.nameMap.get(sessionBean.langId).name}" itemValue="#{type.id}"  />
+                         <p:ajax update="#{updateGrid}"/> 
+                        
+                    </p:selectOneMenu>
+                </div>
+            </h:panelGroup>
+            <h:panelGroup  rendered="#{bean.selectedObject.type.id==88 or bean.selectedObject.type.id==89 or bean.selectedObject.type.id==90}" >
+                <div class="ui-g-12 ui-md-6">
+                    
+                    <p:outputLabel value="#{loc.country}" for="slcMaskCountry" styleClass="Fs12 FontBold"  />
+                    <div style="display: flex !important">  
+                        <c:if test="#{bean.phone.country.code==null}">
+                            <p:graphicImage id="imgFlag" transient="true" cache="false" class="clmInputGroup flagPositionForFlagImage"  rendered="true" value="/resources/sentinel-layout/country-flag/choose.png"/>
+                        </c:if>
+                        <c:if test="#{bean.phone.country.code!=null}">
+                            <p:graphicImage id="imgFlag" transient="true" cache="false" class="clmInputGroup flagPositionForFlagImage"  rendered="true" value="/resources/sentinel-layout/country-flag/#{bean.phone.country.code}.png"/>  
+                        </c:if>
+
+
+
+                        <p:selectOneMenu id="slcMaskCountry" converter="entityConverter" var="t"  required="true" filter="true" filterMatchMode="contains" class="maskcountry" value="#{bean.phone.country}" onchange="countriesCodeFind('#{form}')">
+                            <f:selectItem itemLabel="#{loc.choose}" itemValue="0" /> 
+                            <f:selectItems value="#{sessionBean.countries}" var="country" itemLabel="#{country.getName(sessionBean.langId)}" itemValue="#{country}" itemDescription="#{country.code}" />                            
+                            <p:column style="width:10%">
+                                <p:graphicImage  transient="true" cache="false"   rendered="true" value="/resources/sentinel-layout/country-flag/#{t.code}.png"/>
+
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{t.getName(sessionBean.langId)}" />
+                            </p:column>
+                            <p:ajax update="imgFlag"/>
+                        </p:selectOneMenu>
+                    </div>
+                </div>
+                 
+            </h:panelGroup>
+
+            <h:panelGroup  rendered="#{(bean.selectedObject.type.id==88 or bean.selectedObject.type.id==89 or bean.selectedObject.type.id==90)}" >
+                <div class="ui-g-12 ui-md-6">
+                    <p:outputLabel value="#{loc.communicationinformation}" for="txtPhone" styleClass="Fs12 FontBold" />
+                    <p:inputText id="txtPhone" styleClass="Wid97" placeholder="#{loc.communicationinformation}" value="#{bean.phone.tag}" required="true" onblur="maskControl('#{form}')" onkeydown="bringMask('#{form}')" >
+                       <p:keyFilter regEx="/[0-9+]/"/>
+                    </p:inputText>
+                    <h:inputHidden id="ihdValid" value="#{bean.phoneControl}"></h:inputHidden>
+                </div>
+                
+            </h:panelGroup> 
+            
+            <h:panelGroup  rendered="#{bean.selectedObject.type.id==85}">
+                <div class="ui-g-12 ui-md-12">
+                    <p:outputLabel value="#{loc.communicationinformation}" for="txtMail" styleClass="Fs12 FontBold" />
+                    <p:inputText id="txtMail" styleClass="Wid97" placeholder="#{loc.communicationinformation}"  value="#{bean.internet.tag}" required="true" >
+                        <f:validator validatorId="emailValidator"/>
+                    </p:inputText>
+                </div>
+            </h:panelGroup>
+
+            <h:panelGroup rendered="#{bean.selectedObject.type.id==86 or bean.selectedObject.type.id==87}">
+                <div class="ui-g-12 ui-md-12">
+                    <p:outputLabel value="#{loc.communicationinformation}" for="txtInternet" styleClass="Fs12 FontBold"  />
+                    <p:inputText id="txtInternet" styleClass="Wid97" placeholder="#{loc.communicationinformation}"  value="#{bean.internet.tag}" required="true"  >
+                    </p:inputText>
+                </div>
+            </h:panelGroup>
+        </div>
+
+    </h:panelGroup> 
+
+    <div class="EmptyBox5"></div>
+
+
+</ui:composition>

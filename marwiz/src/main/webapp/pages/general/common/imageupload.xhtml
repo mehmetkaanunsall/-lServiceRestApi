@@ -1,0 +1,151 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+    <div id="imagePanel" class="Fleft PosRelative" >
+        <style type="text/css">
+
+
+            #imagePanel .ui-fileupload-choose {
+                height: 30px !important; 
+                position: absolute;
+                opacity : 0;
+                filter : alpha( Opacity=0); 
+                -moz-opacity : 0;
+                z-index:1000;
+                bottom: 0px;
+                left: 0px;
+                width: 50% !important;
+
+            }
+
+            #imagePanel .ui-icon-plusthick{
+                left: 50%;
+                margin-left: -8px;
+            }
+
+
+
+            #imagePanel .ui-fileupload-choose > .ui-button-text {
+
+                border-radius: 0px !important;
+                -webkit-box-shadow:none !important;
+                box-shadow:none !important;
+
+            }
+
+            #imagePanel .close_button{
+                height: 30px !important; 
+                position: absolute;
+                opacity : 0;
+                filter : alpha( Opacity=0 ); 
+                -moz-opacity : 0;
+                bottom: 0px;
+                right: 0px;
+                width: 50% !important;
+
+            }
+
+            #imagePanel .close_button > .ui-button-text{
+
+                border-radius: 0px !important;
+                -webkit-box-shadow:none !important;
+                box-shadow:none !important;
+                padding-top: 4px !important;
+            }
+
+            #imagePanel:hover .ui-fileupload-choose , 
+            #imagePanel:hover .close_button{ 
+                opacity : 0.9;
+                filter : alpha( Opacity=0.9 ); 
+                -moz-opacity : 0.9;
+            }
+            #imagePanel .ui-fileupload-buttonbar .ui-fileupload-choose input{
+                z-index: 1000 !important;
+            }
+
+
+            #imagePanel .img{
+                cursor: pointer;
+                width: 120px; 
+                height: 100px; 
+                left: 50%;
+                top:50%
+            }
+
+            #imagePanel .ui-button-text{
+                z-index: 0 !important;
+            } 
+
+
+            #imagePanel .ui-icon-close{
+                background-image: url("#{resource['primefaces-sentinel:images/ui-icons_ffffff_256x240.png']}") !important;
+            }
+
+            #imagePanel .ui-fileupload-content .ui-messages{
+                position: absolute;
+                z-index:1001;
+            }
+
+            #imagePanel .ui-fileupload-files{
+                position: absolute;
+            }
+
+            #imagePanel .ui-fileupload-files tr td:nth-child(1),.ui-fileupload-files tr td:nth-child(2),.ui-fileupload-files tr td:nth-child(3){
+                display: none !important;
+            }
+
+            #imagePanel .ui-fileupload-content .ui-progressbar{
+                width: 100px !important;
+            }
+            .ui-fileupload-buttonbar .ui-button{
+                padding: 0px !important;
+            }
+            #imagePanel .ui-fileupload-content .ui-messages-error .ui-icon-close{
+                background-image:  url("#{resource['primefaces-sentinel:images/delete-pink.svg']}") !important;
+                background-position: center !important;
+                background-size: 100% !important;
+            }
+
+        </style>
+        <p:fileUpload rendered="#{btnAdd}" update="@this,#{imgid} dlgImage"  allowTypes="/(\.|\/)(jpe?g|png)$/" invalidFileMessage="#{loc.invalidfiletype}" invalidSizeMessage="#{loc.filesizecannotbegreaterthan1mb}"
+                      label=""  auto="true" sizeLimit="10000000" fileUploadListener="#{ftpConnectionBean.handleFileUploadImage}"  mode="advanced"  />
+
+        <p:commandButton  rendered="#{btnDelete}"   icon="ui-icon-close white"   oncomplete="PF('dlg_delete').show();"  class="close_button" >
+
+        </p:commandButton>
+
+
+        <p:confirmDialog widgetVar="dlg_delete" showEffect="fade" hideEffect="fade"  closeOnEscape="true" responsive="true">
+            <f:facet name="message" >
+                <h:outputText value="#{loc.areyousureyouwanttodelete}">
+                    <i class="ui-icon-alert" /> 
+                </h:outputText>
+            </f:facet>
+            <p:commandButton  action="#{ftpConnectionBean.deleteImg()}" update="#{imgid}" process="@this" onclick="PF('dlg_delete').hide();" value="#{loc.yes}"  styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white" />
+            <p:commandButton value="#{loc.no}" type="button" styleClass="ui-confirmdialog-no"  onclick="PF('dlg_delete').hide();" icon="ui-icon-close fa fa-close Fs14 white" />
+        </p:confirmDialog>
+
+        <p:commandLink id="#{imgid}" update="dlgImage" oncomplete="PF('dlg_image').show()">
+            <img  class= "img"  src="#{ftpConnectionBean.path}"  alt=" " onError="this.onerror = null; this.src = 'resources/primefaces-sentinel/images/add_photo.png';" />
+        </p:commandLink>
+
+        <p:dialog id="dlgImage" widgetVar="dlg_image" class="dlg_image" resizable="false" responsive="true" dynamic="true" closeOnEscape="true" modal="true" transient="true">
+            <div class="OvAuto">
+                <img  id="#{imgDialogid}" class= "BordRad10" src="#{ftpConnectionBean.path}"  alt=" " onError="this.onerror = null; this.src = 'resources/primefaces-sentinel/images/add_photo.png';" />
+            </div>
+
+        </p:dialog>
+        
+
+    </div>
+
+
+
+
+</ui:composition>

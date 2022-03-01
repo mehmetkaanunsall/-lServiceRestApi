@@ -1,0 +1,414 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+        <ui:param name="bean" value="#{tankBean}"/>   <!-- Bean -->
+        <ui:param name="update" value=""/>  <!-- Yeni butonuna basınca açılacak sayfa  -->
+        <ui:param name="btnNewId" value="#{tankBean.getRendered(164, 0)}"/>  <!-- buton id yetki kontrolü için  -->
+        <ui:param name="datatable" value="frmTank:dtbTank" />  <!-- datatable  -->       
+        <ui:param name="widgetvar" value='tankPF' />
+        <ui:param name="form" value='frmToolbarTank' />
+        <ui:param name="fileName" value="#{loc.tanks}"/> 
+        <ui:param name="renderedToggler" value='true'/>       
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+    </ui:include>
+
+
+    <h:form id="frmTank">
+
+        <p:dataTable  id="dtbTank" var="tank"  value="#{tankBean.listOfObjects}" widgetVar="tankPF" selection="#{tankBean.selectedObject}" filteredValue="#{tankBean.listOfFilteredObjects}" selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{tank.id}" paginator="true" 
+                      paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" resizableColumns="true" resizeMode="expand" draggableColumns="true"
+                      paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                      reflow="true" rowStyleClass="#{tank.status.id==14 ? 'ColumnColorRed' : null}">
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{tankBean.gotoProcess()}"  />  
+
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false"/>
+            <p:ajax event="colReorder" listener="#{tankBean.reorder}" update="frmToolbarTank:toggle" />     
+            <p:ajax event="colResize"  listener="#{tankBean.onResize}" /> 
+
+            <f:facet name="footer" rendered="false" >
+                <p:inputText id="globalFilter" value="#{tankBean.autoCompleteValue}"  style="display: none"  />
+            </f:facet>
+
+            <p:column id="clmName" headerText="#{loc.tankname}" sortable="true" sortBy="#{tank.name}" filterable="true"  filterBy="#{tank.name}" filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmName')}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.name}" />
+            </p:column >
+
+
+            <p:column id="clmCode" headerText="#{loc.tankcode}" sortable="true" sortBy="#{tank.code}" filterable="true"  filterBy="#{tank.code}" filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmCode')}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.code}"/>
+            </p:column>
+
+
+
+            <p:column id="clmPurchaseTotalLiter" headerText="#{loc.purchasetotal}"  sortable="true" sortBy="#{tank.purchaseTotalLiter}" filterable="true"  filterBy="#{tank.purchaseTotalLiter}" filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmPurchaseTotalLiter')}" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.purchaseTotalLiter}"  class="Fright" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="unit" value="#{tank.stock.unit}"/>
+                    <f:attribute name="type" value="unit" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmSalesTotalLiter" headerText="#{loc.salestotal}"  sortable="true" sortBy="#{tank.salesTotalLiter}" filterable="true"  filterBy="#{tank.salesTotalLiter}" filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmSalesTotalLiter')}"  >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.salesTotalLiter}"  class="Fright" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="unit" value="#{tank.stock.unit}"/>
+                    <f:attribute name="type" value="unit" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmAvailableQuantity" headerText="#{loc.availablequantity}"  sortable="true" sortBy="#{tank.lastQuantity}" filterable="true"  filterBy="#{tank.lastQuantity}" filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmAvailableQuantity')}" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.lastQuantity}"  class="Fright" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="unit" value="#{tank.stock.unit}"/>
+                    <f:attribute name="type" value="unit" />
+                </h:outputText>
+            </p:column>
+
+
+
+            <p:column id="clmPurchaseUnitPriceWithoutTax" headerText="#{loc.purchasepricee} (#{loc.withouttax})"  sortable="true" sortBy="#{tank.purchaseUnitPriceWithoutTax}" filterable="true"  filterBy="#{tank.purchaseUnitPriceWithoutTax}" filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmPurchaseUnitPriceWithoutTax')}" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.purchaseUnitPriceWithoutTax}"  class="Fright" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+
+            <p:column id="clmPurchaseUnitPriceWithTax" headerText="#{loc.purchasepricee} (#{loc.withtax})"  sortable="true" sortBy="#{tank.purchaseUnitPriceWithTax}" filterable="true"  filterBy="#{tank.purchaseUnitPriceWithTax}" filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmPurchaseUnitPriceWithTax')}"  >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.purchaseUnitPriceWithTax}"  class="Fright" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+
+
+            <p:column id="clmPurchaseTotalPrice" headerText="#{loc.totalpurchaseamount} (#{loc.withouttax})"  sortable="true" sortBy="#{tank.purchaseTotalPrice}" filterable="true"  filterBy="#{tank.purchaseTotalPrice}" filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmPurchaseTotalPrice')}"  >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.purchaseTotalPrice}"  class="Fright" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmPurchaseTotalMoney" headerText="#{loc.totalpurchaseamount} (#{loc.withtax})"  sortable="true" sortBy="#{tank.purchaseTotalMoney}" filterable="true"  filterBy="#{tank.purchaseTotalMoney}" filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmPurchaseTotalMoney')}"  >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.purchaseTotalMoney}"  class="Fright" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmSalesUnitPriceWithoutTax" headerText="#{loc.saleprice}  (#{loc.withouttax})"  sortable="true" sortBy="#{tank.salesUnitPriceWithoutTax}" filterable="true"  filterBy="#{tank.salesUnitPriceWithoutTax}" filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmSalesUnitPriceWithoutTax')}"  >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.salesUnitPriceWithoutTax}"  class="Fright" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmSalesUnitPriceWithTax" headerText="#{loc.saleprice}  (#{loc.withtax})"  sortable="true" sortBy="#{tank.salesUnitPriceWithTax}" filterable="true"  filterBy="#{tank.salesUnitPriceWithTax}" filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmSalesUnitPriceWithTax')}"  >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.salesUnitPriceWithTax}"  class="Fright" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+
+            <p:column id="clmSalesTotalPrice" headerText="#{loc.totalsalesamount}  (#{loc.withouttax})"  sortable="true" sortBy="#{tank.salesTotalPrice}" filterable="true"  filterBy="#{tank.salesTotalPrice}" filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmSalesTotalPrice')}" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.salesTotalPrice}"  class="Fright" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmSalesTotalMoney" headerText="#{loc.totalsalesamount}  (#{loc.withtax})"  sortable="true" sortBy="#{tank.salesTotalMoney}" filterable="true"  filterBy="#{tank.salesTotalMoney}" filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmSalesTotalMoney')}"  >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.salesTotalMoney}"  class="Fright" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+
+            <p:column id="clmAvailableStockWithoutSalesPrice" headerText="#{loc.availablestocksaleprice} (#{loc.withouttax})"  sortable="true"  sortBy="#{tank.availableStockWithoutSalesPrice}" filterable="true" filterBy="#{tank.availableStockWithoutSalesPrice}"    filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmAvailableStockWithoutSalesPrice')}"  >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.availableStockWithoutSalesPrice}"  class="Fright" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmAvailableStockWithSalesPrice" headerText="#{loc.availablestocksaleprice} (#{loc.withtax})"  sortable="true"  sortBy="#{tank.availableStockWithSalesPrice}" filterable="true" filterBy="#{tank.availableStockWithSalesPrice}"    filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmAvailableStockWithSalesPrice')}"  >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.availableStockWithSalesPrice}"  class="Fright" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+
+            <p:column id="clmAvailableStockWithoutPurchasePrice" headerText="#{loc.availablestockpurchaseprice} (#{loc.withouttax})"  sortable="true"  sortBy="#{tank.availableStockWithoutPurchasePrice}"  filterable="true"  filterBy="#{tank.availableStockWithoutPurchasePrice}"  filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmAvailableStockWithoutPurchasePrice')}"  >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.availableStockWithoutPurchasePrice}"  class="Fright" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmAvailableStockWithPurchasePrice" headerText="#{loc.availablestockpurchaseprice} (#{loc.withtax})"  sortable="true"  sortBy="#{tank.availableStockWithPurchasePrice}" filterable="true"   filterBy="#{tank.availableStockWithPurchasePrice}"  filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmAvailableStockWithPurchasePrice')}" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.availableStockWithPurchasePrice}"  class="Fright" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+
+
+
+
+            <p:column id="clmCapacity" headerText="#{loc.capacity}" sortable="true" sortBy="#{tank.capacity}" filterable="true"  filterBy="#{tank.capacity}" filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmCapacity')}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.capacity}" class="Fright"> 
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="unit" value="#{tank.stock.unit}"/>
+                    <f:attribute name="type" value="unit" /></h:outputText>
+            </p:column>
+
+
+            <p:column id="clmMinCapacity" headerText="#{loc.minamount}" sortable="true" sortBy="#{tank.minCapacity}" filterable="true"  filterBy="#{tank.minCapacity}" filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmMinCapacity')}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.minCapacity}" class="Fright">
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="unit" value="#{tank.stock.unit}"/>
+                    <f:attribute name="type" value="unit" /></h:outputText>
+            </p:column>
+
+            <p:column id='clmConcenrationRate' headerText="#{loc.concentrationrate}" sortable="true" sortBy="#{tank.concentrationRate}" filterable="true"  filterBy="#{tank.concentrationRate}" filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmConcenrationRate')}" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.concentrationRate}" class="Fright" >
+                    <f:converter converterId="currencyConverter" />   
+                    <f:attribute name="type" value="percent" />
+                </h:outputText>
+            </p:column >
+
+
+            <p:column id="clmStatus" headerText="#{loc.statu}" sortable="true" sortBy="#{tank.status.tag}" filterable="true"  filterBy="#{tank.status.tag}" filterMatchMode="contains" exportable="#{tankBean.getColumnVisibility('frmTank:dtbTank:clmStatus')}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{tank.status.tag}" />
+            </p:column>
+
+            <p:columnGroup id="clmColumGroup"  type="footer"   >
+                <p:column id='clmName2'  >
+                    <f:facet name="footer"   >
+                        <h:outputText value=" " />
+                    </f:facet>
+                </p:column >
+                <p:column id='clmCode2'  >
+                    <f:facet name="footer"  >
+                        <h:outputText value=" " />
+                    </f:facet>
+                </p:column >
+
+                <p:column id='clmPurchaseTotalLiter2' style="color: black; font-weight: bold !important;" >
+                    <f:facet name="footer"   >
+                        <h:outputText value="#{tankBean.calculateSubTotal(1)}"  class="Fright" /> 
+                    </f:facet>
+                </p:column >
+
+                <p:column id='clmSalesTotalLiter2' style="color: black; font-weight: bold !important;" >
+                    <f:facet name="footer"  >
+                        <h:outputText value="#{tankBean.calculateSubTotal(2)}" class="Fright" />
+                    </f:facet>
+                </p:column >
+
+                <p:column id='clmAvailableQuantity2' style="color: black; font-weight: bold !important;" >
+                    <f:facet name="footer"  >
+                        <h:outputText value="#{tankBean.calculateSubTotal(3)}" class="Fright" />
+                    </f:facet>
+                </p:column >
+
+                <p:column id='clmPurchaseUnitPriceWithoutTax2' style="color: black; font-weight: bold !important;" >
+                    <f:facet name="footer"  >
+                        <h:outputText value=" " />
+                    </f:facet> 
+                </p:column >
+                <p:column id='clmPurchaseUnitPriceWithTax2' style="color: black; font-weight: bold !important;" >
+                    <f:facet name="footer"  >
+                        <h:outputText value="" class="Fright" >
+
+                        </h:outputText>
+                    </f:facet>            
+                </p:column >
+                <p:column id='clmPurchaseTotalPrice2' style="color: black; font-weight: bold !important;"  >
+                    <f:facet name="footer"  >
+                        <h:outputText value="#{tankBean.calculateSubTotal(4)}" class="Fright" >
+                        </h:outputText>
+                    </f:facet>
+                </p:column >
+                <p:column id='clmPurchaseTotalMoney2' style="color: black; font-weight: bold !important;"  >
+                    <f:facet name="footer"  >
+                        <h:outputText value="#{tankBean.calculateSubTotal(5)}" class="Fright" >
+
+                        </h:outputText>
+                    </f:facet>
+                </p:column >
+                <p:column id='clmSalesUnitPriceWithoutTax2'  style="color: black; font-weight: bold !important;"  >
+                    <f:facet name="footer"  >
+                        <h:outputText value="" class="Fright" >
+                        </h:outputText>
+                    </f:facet>
+                </p:column >
+                <p:column id='clmSalesUnitPriceWithTax2' style="color: black; font-weight: bold !important;"  >
+                    <f:facet name="footer"  >
+                        <h:outputText value="" class="Fright" >
+                        </h:outputText>
+                    </f:facet>
+                </p:column >
+                <p:column id='clmSalesTotalPrice2' style="color: black; font-weight: bold !important;" >
+                    <f:facet name="footer"  >
+                        <h:outputText value="#{tankBean.calculateSubTotal(6)}" class="Fright" >
+                        </h:outputText>
+                    </f:facet>
+                </p:column >
+                <p:column id='clmSalesTotalMoney2' style="color: black; font-weight: bold !important;" >
+                    <f:facet name="footer"  >
+                        <h:outputText value="#{tankBean.calculateSubTotal(7)}" class="Fright" >
+                        </h:outputText>
+                    </f:facet>
+                </p:column >
+                <p:column id='clmAvailableStockWithoutSalesPrice2' style="color: black; font-weight: bold !important;"  >
+                    <f:facet name="footer"  >
+                        <h:outputText value="#{tankBean.calculateSubTotal(8)}" class="Fright" >
+                        </h:outputText>
+                    </f:facet>
+                </p:column >
+                <p:column id='clmAvailableStockWithSalesPrice2' style="color: black; font-weight: bold !important;"  >
+                    <f:facet name="footer"  >
+                        <h:outputText value="#{tankBean.calculateSubTotal(9)}" class="Fright" >
+                        </h:outputText>
+                    </f:facet>
+                </p:column >
+                <p:column id='clmAvailableStockWithoutPurchasePrice2' style="color: black; font-weight: bold !important;"  >
+                    <f:facet name="footer"  >
+                        <h:outputText value="#{tankBean.calculateSubTotal(10)}" class="Fright" >
+                        </h:outputText>
+                    </f:facet>
+                </p:column >
+
+                <p:column id='clmAvailableStockWithPurchasePrice2' style="color: black; font-weight: bold !important;"  >
+                    <f:facet name="footer"  >
+                        <h:outputText value="#{tankBean.calculateSubTotal(11)}" class="Fright" >
+                        </h:outputText>
+                    </f:facet>
+                </p:column >
+                <p:column id='clmCapacity2' style="color: black; font-weight: bold !important;"  >
+                    <f:facet name="footer"  >
+                        <h:outputText value=" " class="Fright" >
+                        </h:outputText>
+                    </f:facet>
+                </p:column >
+                <p:column id='clmMinCapacity2' style="color: black; font-weight: bold !important;"  >
+                    <f:facet name="footer"  >
+                        <h:outputText value=" " class="Fright" >
+                        </h:outputText>
+                    </f:facet>
+                </p:column >
+                <p:column id='clmConcenrationRate2' style="color: black; font-weight: bold !important;"  >
+                    <f:facet name="footer"  >
+                        <h:outputText value=" " />
+                    </f:facet>
+                </p:column >
+                <p:column id='clmStatus2' style="color: black; font-weight: bold !important;" >
+                    <f:facet name="footer"  >
+                        <h:outputText value=" " />
+                    </f:facet>
+                </p:column >
+            </p:columnGroup> 
+
+
+        </p:dataTable>  
+        <p:remoteCommand name="order" actionListener="#{tankBean.bringOrder('frmTank:dtbTank')}" oncomplete="updateToggle()" autoRun="true"  global="false" />
+        <p:remoteCommand name="updateToggle"  update="frmToolbarTank:toggle" delay="500" global="false" /> 
+
+    </h:form>
+
+
+</ui:composition>
+
+
+

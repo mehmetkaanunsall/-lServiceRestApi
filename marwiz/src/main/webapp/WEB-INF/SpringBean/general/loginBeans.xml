@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                            http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://www.springframework.org/schema/tx 
+                            http://www.springframework.org/schema/tx/spring-tx.xsd">
+      
+    <bean id="logindao" class="com.mepsan.marwiz.general.login.dao.LoginDao" scope="prototype" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+     
+    <bean id="loginService" class="com.mepsan.marwiz.general.login.business.LoginService"  scope="prototype"   >
+        <property name="userDetailService" ref="userDetailService"/>
+        <property name="authenticationManager" ref="authenticationManager"/>
+        <property name="sessionAuthenticationStrategy" ref="sas"/>
+        <property name="sessionRegistry" ref="sessionRegistry"/>
+
+    </bean>
+    <!--    
+    <bean id="myAspect1" class="com.mepsan.centrowiz.general.login.aspect.AspectLoginDao" lazy-init="true" /> 
+    -->
+    
+    <bean id="LoginBean" class="com.mepsan.marwiz.general.login.presentation.LoginBean" scope="session" init-method="initialize" >
+       
+    </bean>
+   
+    
+</beans>

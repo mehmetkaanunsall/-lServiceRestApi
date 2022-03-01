@@ -1,0 +1,636 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+
+
+    <h:form id="frmPurchaseSalesReport">
+
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.purchasesalesreport}"/>
+            <ui:param name="bean" value='#{purchaseSalesReportBean}' />
+            <ui:param name="update" value="  pgrPurchaseSalesReport pgrPurchaseSalesReportDatatable frmPurchaseSalesReportDatatable:dtbPurchaseSalesReport" />
+        </ui:include>  
+
+        <h:panelGroup id="pgrPurchaseSalesReport"  layout="block" transient="true">  
+
+            <div class="ui-g divContent">
+                <div class="panelToggle ui-g-12">
+                    <div class="ui-g-12 ui-md-6  ui-lg-2">
+                        <p:outputLabel value="#{loc.type}" for="slcPurchase" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcPurchase" value="#{purchaseSalesReportBean.isPurchase}" required="true">
+                            <f:selectItem itemValue="true"  itemLabel="#{loc.purchase}" />
+                            <f:selectItem itemValue="false"  itemLabel="#{loc.sales}" />    
+                            <p:ajax  event="change" listener="#{purchaseSalesReportBean.changePurchase()}" update="pgrPurchaseSalesReport, slcPurchase" />
+
+
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldStartDate" value="#{purchaseSalesReportBean.selectedObject.beginDate}" class="datepicker" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat}" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldEndDate" value="#{purchaseSalesReportBean.selectedObject.endDate}" class="datepicker" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat}" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.currentname}" for="txtCustomer"  styleClass="Fs12 FontBold"/>
+                        <p:inputText  id="txtCustomer" onclick="showAccountBook()" value="#{purchaseSalesReportBean.selectedObject.account.name}" class="inputPositionForBookFilter"  readonly="true" placeholder="#{loc.all}" />   
+                        <p:commandLink id="btnCustomer" process="@this" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_account').loadContents();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax listener="#{accountBookFilterBean.findFilterListLazyLoading([purchaseSalesReportBean.selectedBranchList.size() != 0 ? purchaseSalesReportBean.selectedBranchList : purchaseSalesReportBean.listOfBranch],'frmAccountBookFilter','olp_account','report')}" />
+                        </p:commandLink>
+
+                    </div>
+
+                    <h:panelGroup>
+                        <div class="ui-g-12  ui-md-6 ui-lg-2" >
+                            <p:outputLabel value="#{loc.branch}" for="slcBranch" class="FontBold Fs12" />
+                            <p:selectCheckboxMenu  id="slcBranch"  value="#{purchaseSalesReportBean.selectedBranchList}" 
+                                                   filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                                   label="#{purchaseSalesReportBean.selectedBranchList.size()!=0 ? purchaseSalesReportBean.selectedBranchList.size() :loc.all} #{purchaseSalesReportBean.selectedBranchList.size()!=0 ? loc.branch : ''} #{purchaseSalesReportBean.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                                <f:selectItems value="#{purchaseSalesReportBean.listOfBranch}" itemLabel="#{branchSetting.branch.name}" itemValue="#{branchSetting}" var="branchSetting" />       
+                                <p:ajax oncomplete="PF('slcBranchCheckBox').show()" global="false" listener="#{purchaseSalesReportBean.changeBranch()}" update="frmPurchaseSalesReport:txtCategory,frmPurchaseSalesReport:btnCategory,frmPurchaseSalesReport:txtStock,frmPurchaseSalesReport:btnStock,slcBranch, slcTaxGroup,frmPurchaseSalesReport:pngSupplier, frmPurchaseSalesReport:txtCustomer" />
+                                <p:ajax event="toggleSelect" listener="#{purchaseSalesReportBean.changeBranch()}" update="frmPurchaseSalesReport:txtCategory,frmPurchaseSalesReport:btnCategory,frmPurchaseSalesReport:txtStock,frmPurchaseSalesReport:btnStock,slcBranch, slcTaxGroup, frmPurchaseSalesReport:pngSupplier, frmPurchaseSalesReport:txtCustomer"  oncomplete="PF('slcBranchCheckBox').show()" global="false"/>
+                            </p:selectCheckboxMenu>
+                        </div>     
+                    </h:panelGroup>
+
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.stock}" for="txtStock" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtStock"   value="#{stockBookCheckboxFilterBean.selectedCount}" onclick="showStockBook()" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}" />
+                        <p:commandLink id="btnStock"  process="@this" update="frmStockBookFilterCheckbox" actionListener="#{purchaseSalesReportBean.openDialog(2)}" class="commandLinkPositionForBookFilter btnDisableButton" oncomplete="PF('olp_stockcheckbox').show();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax   listener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading(  [purchaseSalesReportBean.selectedBranchList.size() != 0 ? purchaseSalesReportBean.selectedBranchList : purchaseSalesReportBean.listOfBranch] ,'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckboxwithbranch')}" />
+                        </p:commandLink>
+
+                    </div>
+                </div>
+                <div class="panelToggle ui-g-12">
+                    <div class="ui-g-12 ui-md-6  ui-lg-2">
+                        <p:outputLabel value="#{loc.stock} #{loc.category}" for="txtCategory"  styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtCategory"   onclick="showCategoryBook()" value="#{categoryBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter"  readonly="#{facesContext.currentPhaseId.ordinal ge 4}"  placeholder="#{loc.all}" />
+                        <p:commandLink id="btnCategory"  process="@this" update="frmCategoryBookFilter" action="#{purchaseSalesReportBean.openDialog(1)}" class="commandLinkPositionForBookFilter btnDisableButton" oncomplete="PF('olp_Category').loadContents();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax   listener="#{categoryBookCheckboxFilterBean.findFilterList([2,purchaseSalesReportBean.branchId] ,'frmCategoryBookFilter','olp_Category','purchasesalereportCheckbox')}" />
+                        </p:commandLink>
+                    </div>  
+
+                    <h:panelGroup id="pngSupplier">
+                        <h:panelGroup rendered="#{purchaseSalesReportBean.isCentralSupplier}">
+                            <div class="ui-g-12 ui-md-6 ui-lg-2" >
+                                <p:outputLabel id="lblCntrl" rendered="#{purchaseSalesReportBean.isCentralSupplier}" value="#{loc.centralsupplier}"  for="txtCentralSupplier"  styleClass="Fs12 FontBold"/>
+                                <p:commandLink id="cmdCentralSupplier"  resetValues="true" process="@this" global="false" title="#{loc.supplier}" actionListener="#{purchaseSalesReportBean.centralOrLocalSupplier(0)}" update="pngSupplier"  >
+                                    <i class="fa fa-refresh Fs14 tlbrAddBtn"/>                 
+                                </p:commandLink>
+
+                                <p:inputText  id="txtCentralSupplier"  onclick="showCentralSupplierBook()" value="#{centralSupplierBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+
+                                </p:inputText>
+                                <p:commandLink id="btnCentralSupplier"  process="@this" actionListener="#{purchaseSalesReportBean.openDialog(3)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_centralsuppliercheckbox').loadContents();">
+                                    <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                    <p:ajax listener="#{centralSupplierBookCheckboxFilterBean.findFilterListLazyLoading([],'frmCentralSupplierBookFilterCheckbox','olp_centralsuppliercheckbox', 'reportcheckbox')}" />
+                                </p:commandLink>
+                            </div>
+                        </h:panelGroup>
+
+
+
+
+
+                        <h:panelGroup  rendered="#{!purchaseSalesReportBean.isCentralSupplier}">
+                            <div class="ui-g-12 ui-md-6 ui-lg-2">
+                                <p:outputLabel value="#{loc.supplier}" id="lblSupplier" rendered="#{!purchaseSalesReportBean.isCentralSupplier}" for="txtSupplier"  styleClass="Fs12 FontBold"/>
+                                <p:commandLink id="clmSupplier" resetValues="true" process="@this" rendered="#{purchaseSalesReportBean.isCentralSupplierIconView}" global="false" title="#{loc.centralsupplier}" actionListener="#{purchaseSalesReportBean.centralOrLocalSupplier(1)}" update="pngSupplier"  >
+                                    <i class="fa fa-refresh Fs14 tlbrAddBtn"/>                 
+                                </p:commandLink>
+
+                                <p:inputText  id="txtSupplier" onclick="showAccountBookCheckbox()" value="#{accountBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+
+                                </p:inputText>
+                                <p:commandLink id="btnSupplier" process="@this" actionListener="#{purchaseSalesReportBean.openDialog(4)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_accountcheckbox').loadContents();">
+                                    <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                    <p:ajax listener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([purchaseSalesReportBean.selectedBranchList.size() != 0 ? purchaseSalesReportBean.selectedBranchList : purchaseSalesReportBean.listOfBranch],'frmAccountBookFilterCheckbox','olp_accountcheckbox', 'supplierCheckboxReport')}" />
+                                </p:commandLink>
+                            </div>
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+
+
+                    <div class=" ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.taxgroup}" for="slcTaxGroup" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcTaxGroup" value="#{purchaseSalesReportBean.selectedObject.stocktaxgroup.id}" >
+                            <f:selectItem itemValue="0"  itemLabel="#{loc.choose}" />
+                            <f:selectItems value="#{purchaseSalesReportBean.selectedObject.taxGroupList}" var="tax" itemLabel="#{tax.name} #{tax.rate.intValue()}" itemValue="#{tax.id}"  />
+                        </p:selectOneMenu> 
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.cost}" for="slcCostType"  styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcCostType" value="#{purchaseSalesReportBean.selectedObject.costType}">
+                            <f:selectItem itemValue="1" itemLabel="#{loc.lastprice}"/>
+                            <f:selectItem itemValue="2" itemLabel="#{loc.fifo}"/>
+                            <f:selectItem itemValue="3" itemLabel="#{loc.lifo}"/>
+                            <f:selectItem itemValue="4" itemLabel="#{loc.weightedaverage}"/>
+                        </p:selectOneMenu> 
+                    </div> 
+                </div>
+            </div>
+
+        </h:panelGroup>
+
+
+        <p:remoteCommand name="showCategoryBook" process="@this" update="frmCategoryBookFilter" action="#{purchaseSalesReportBean.openDialog(1)}" oncomplete="PF('olp_Category').loadContents();" actionListener="#{categoryBookCheckboxFilterBean.findFilterList([2,purchaseSalesReportBean.branchId ],'frmCategoryBookFilter','olp_Category','purchasesalereportCheckbox')}" />
+        <p:remoteCommand name="showStockBook" process="@this" update="frmStockBookFilterCheckbox" oncomplete="PF('olp_stockcheckbox').show();" action="#{purchaseSalesReportBean.openDialog(2)}" actionListener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([purchaseSalesReportBean.selectedBranchList.size() != 0 ? purchaseSalesReportBean.selectedBranchList : purchaseSalesReportBean.listOfBranch],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckboxwithbranch')}" />
+        <p:remoteCommand name="showCentralSupplierBook" process="@this" oncomplete="PF('olp_centralsuppliercheckbox').loadContents();" action="#{purchaseSalesReportBean.openDialog(3)}" actionListener="#{centralSupplierBookCheckboxFilterBean.findFilterListLazyLoading([],'frmCentralSupplierBookFilterCheckbox','olp_centralsuppliercheckbox', 'reportcheckbox')}" />
+        <p:remoteCommand name="showAccountBookCheckbox" process="@this" oncomplete="PF('olp_accountcheckbox').loadContents();" action="#{purchaseSalesReportBean.openDialog(4)}" actionListener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([purchaseSalesReportBean.selectedBranchList.size() != 0 ? purchaseSalesReportBean.selectedBranchList : purchaseSalesReportBean.listOfBranch],'frmAccountBookFilterCheckbox','olp_accountcheckbox', 'supplierCheckboxReport')}" />
+        <p:remoteCommand name="showAccountBook" process="@this" oncomplete="PF('olp_account').loadContents();" actionListener="#{accountBookFilterBean.findFilterListLazyLoading([purchaseSalesReportBean.selectedBranchList.size() != 0 ? purchaseSalesReportBean.selectedBranchList : purchaseSalesReportBean.listOfBranch],'frmAccountBookFilter','olp_account','report')}" />
+
+    </h:form>
+    <div class="EmptyBox20" />
+    <h:panelGroup id="pgrPurchaseSalesReportDatatable" >
+        <h:panelGroup rendered="#{purchaseSalesReportBean.isFind}">
+            <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" > 
+                <ui:param name="bean" value="#{purchaseSalesReportBean}"/>
+                <ui:param name="datatable" value="frmPurchaseSalesReportDatatable:dtbPurchaseSalesReport" />
+                <ui:param name="fileName" value="#{loc.purchasesalesreport}"/>
+                <ui:param name="renderedToggler" value='true'/>
+                <ui:param name="renderedExcel" value='true'/>
+                <ui:param name="renderedPdf" value='true'/> 
+                <ui:param name="renderedPrint" value='true'/>
+                <ui:param name="renderedGraphic" value='false'/>
+            </ui:include>            
+            <h:form id="frmPurchaseSalesReportDatatable" >
+                <p:dataTable  id="dtbPurchaseSalesReport" var="purchaseSalesReport" widgetVar="purchaseSalesReportPF" emptyMessage="#{loc.norecordsfound}" value="#{purchaseSalesReportBean.listOfObjects}" selectionMode="single" selection="#{purchaseSalesReportBean.selectedPurchaseSales}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{purchaseSalesReport.stock.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true" lazy="true" class="dtbReport" 
+                              >
+                    <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{purchaseSalesReportBean.showDetail()}" update="dlgPurchaseSalesProc" />  
+
+                    <p:ajax event="colReorder" listener="#{purchaseSalesReportBean.reorder}" update="frmGridToolbar:toggle" />     
+                    <p:ajax event="colResize"  listener="#{purchaseSalesReportBean.onResize}" />
+
+
+                    <p:column id="clmBranch" headerText="#{loc.branch}"   visible="#{purchaseSalesReportBean.toogleList[0]}" exportable="#{purchaseSalesReportBean.toogleList[0]}">
+                        <h:outputText  value="#{purchaseSalesReport.branchSetting.branch.name}"/>
+                    </p:column>
+
+                    <p:column id="clmStockCode" headerText="#{loc.stockcode}"  visible="#{purchaseSalesReportBean.toogleList[1]}" exportable="#{purchaseSalesReportBean.toogleList[1]}">
+                        <h:outputText  value="#{purchaseSalesReport.stock.code}"/>
+                    </p:column>
+                    <p:column id="clmCenterStockCode" headerText="#{loc.centerstockcode}"  visible="#{purchaseSalesReportBean.toogleList[2]}" exportable="#{purchaseSalesReportBean.toogleList[2]}">
+                        <h:outputText  value="#{purchaseSalesReport.stock.centerProductCode}"/>
+                    </p:column>
+                    <p:column id="clmStockBarcode" headerText="#{loc.stockbarcode}"  visible="#{purchaseSalesReportBean.toogleList[3]}" exportable="#{purchaseSalesReportBean.toogleList[3]}">
+                        <h:outputText  value="#{purchaseSalesReport.stock.barcode}"/>
+                    </p:column>
+                    <p:column id="clmStock" headerText="#{loc.stock}"  visible="#{purchaseSalesReportBean.toogleList[4]}" exportable="#{purchaseSalesReportBean.toogleList[4]}">
+                        <h:outputText  value="#{purchaseSalesReport.stock.name}"/>
+                    </p:column>
+                    <p:column id="clmCategory" headerText="#{loc.stockcategory}"  visible="#{purchaseSalesReportBean.toogleList[5]}" exportable="#{purchaseSalesReportBean.toogleList[5]}">
+                        <h:outputText  value="#{purchaseSalesReport.category}"/>
+                    </p:column>
+                    <p:column id="clmCentralSupplier" headerText="#{loc.centralsupplier}" rendered="#{purchaseSalesReportBean.isCentralSupplierIconView}"  visible="#{purchaseSalesReportBean.toogleList[6]}" exportable="#{purchaseSalesReportBean.toogleList[6]}">
+                        <h:outputText  value="#{purchaseSalesReport.stock.centralSupplier.name}"/>
+                    </p:column>
+                    <p:column id="clmSupplier" headerText="#{loc.supplier}"  visible="#{purchaseSalesReportBean.toogleList[7]}" exportable="#{purchaseSalesReportBean.toogleList[7]}">
+                        <h:outputText  value="#{purchaseSalesReport.stock.supplier.name}"/>
+                    </p:column>
+                    <p:column id="clmBrand" headerText="#{loc.brand}"  visible="#{purchaseSalesReportBean.toogleList[8]}" exportable="#{purchaseSalesReportBean.toogleList[8]}">
+                        <h:outputText  value="#{purchaseSalesReport.stock.brand.name}"/>
+                    </p:column>
+
+                    <p:column id="clmKDV" headerText="#{loc.taxgroup}"  visible="#{purchaseSalesReportBean.toogleList[9]}" exportable="#{purchaseSalesReportBean.toogleList[9]}">
+                        <h:outputText  value="#{purchaseSalesReport.stocktaxgroup.rate}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value=""/>
+                            <f:attribute name="type" value="percent" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmQuantity" headerText="#{loc.quantity}"  visible="#{purchaseSalesReportBean.toogleList[10]}" exportable="#{purchaseSalesReportBean.toogleList[10]}">
+                        <h:outputText  value="#{purchaseSalesReport.quantity}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value="#{purchaseSalesReport.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+
+
+                    <p:column id="clmAvgSaleUnitPrice" headerText="#{loc.averagesalesunitprice}"  visible="#{purchaseSalesReportBean.toogleList[11]}" exportable="#{purchaseSalesReportBean.toogleList[11]}">
+                        <h:outputText  value="#{purchaseSalesReport.avgSaleUnitPrice}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{purchaseSalesReport.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmAvgPurchaseUnitPrice" headerText="#{loc.averagepurchaseunitprice}"  visible="#{purchaseSalesReportBean.toogleList[12]}" exportable="#{purchaseSalesReportBean.toogleList[12]}">
+                        <h:outputText  value="#{purchaseSalesReport.avgPurchaseUnitPrice}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{purchaseSalesReport.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmLastSaleUnitPrice" headerText="#{loc.lastsaleprice}"  visible="#{purchaseSalesReportBean.toogleList[13]}" exportable="#{purchaseSalesReportBean.toogleList[13]}">
+                        <h:outputText  value="#{purchaseSalesReport.lastSaleUnitPrice}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{purchaseSalesReport.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmLastPurchaseUnitPrice" headerText="#{loc.lastpurchaseprice}"  visible="#{purchaseSalesReportBean.toogleList[14]}" exportable="#{purchaseSalesReportBean.toogleList[14]}">
+                        <h:outputText  value="#{purchaseSalesReport.lastPurchaseUnitPrice}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{purchaseSalesReport.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmPurchaseCost" headerText="#{loc.purchasecost}"  visible="#{purchaseSalesReportBean.toogleList[15]}" exportable="#{purchaseSalesReportBean.toogleList[15]}">
+                        <h:outputText  value="#{purchaseSalesReport.cost}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{purchaseSalesReport.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    
+                     
+                    <p:column id="clmSalesPrice" headerText="#{loc.salesprice}"  visible="#{purchaseSalesReportBean.toogleList[16]}" exportable="#{purchaseSalesReportBean.toogleList[16]}">
+                        <h:outputText  value="#{purchaseSalesReport.salesTotalMoney}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{purchaseSalesReport.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmProfitMargin" headerText="#{loc.profitmargin}"  visible="#{purchaseSalesReportBean.toogleList[17]}" exportable="#{purchaseSalesReportBean.toogleList[17]}">
+                        <h:outputText  value="#{purchaseSalesReportBean.calculateProfit(purchaseSalesReport, 1)}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value=""/>
+                            <f:attribute name="type" value="percent" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmProfitRate" headerText="#{loc.profitpercentage}"  visible="#{purchaseSalesReportBean.toogleList[18]}" exportable="#{purchaseSalesReportBean.toogleList[18]}">
+                        <h:outputText  value="#{purchaseSalesReportBean.calculateProfit(purchaseSalesReport, 2)}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value=""/>
+                            <f:attribute name="type" value="percent" />
+                        </h:outputText>
+                    </p:column>
+
+
+
+                    <p:column id="clmTotal" headerText="#{loc.sum}"  visible="#{purchaseSalesReportBean.toogleList[19]}" exportable="#{purchaseSalesReportBean.toogleList[19]}">
+                        <h:outputText value="#{purchaseSalesReport.totalPrice}" class="Fright" >
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{purchaseSalesReport.currency}" />
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmTotalTax" headerText="#{loc.taxprice}"  visible="#{purchaseSalesReportBean.toogleList[20]}" exportable="#{purchaseSalesReportBean.toogleList[20]}">
+                        <h:outputText value="#{purchaseSalesReport.totalTax}" class="Fright" >
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{purchaseSalesReport.currency}" />
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmTotalDiscount" headerText="#{loc.totaldiscount}"  visible="#{purchaseSalesReportBean.toogleList[21]}" exportable="#{purchaseSalesReportBean.toogleList[21]}">
+                        <h:outputText value="#{purchaseSalesReport.totalDiscount}" class="Fright">
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{purchaseSalesReport.currency}" />
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+
+
+
+                    <p:column id="clmTotalMoney" headerText="#{loc.overalltotal}"  visible="#{purchaseSalesReportBean.toogleList[22]}" exportable="#{purchaseSalesReportBean.toogleList[22]}">
+                        <h:outputText value="#{purchaseSalesReport.totalMoney}" class="Fright">
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{purchaseSalesReport.currency}" />
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>   
+
+                    <p:columnGroup  type="footer" class="Fright" > 
+                        <h:panelGroup id="alvs">
+                            <ui:repeat  value="#{purchaseSalesReportBean.listOfSubTotal}" var="purchase"  >
+                                <p:row>
+
+                                    <p:column colspan="#{purchaseSalesReportBean.isPurchase ? purchaseSalesReportBean.toogleList.size()-purchaseSalesReportBean.countToggle-7 : purchaseSalesReportBean.toogleList.size()-purchaseSalesReportBean.countToggle-7}" style="text-align:right; font-weight: bold;">
+                                        <f:facet name="footer"  >
+                                            <h:outputText value="#{loc.quantity}: " class=""/> 
+                                            <h:outputText value="#{purchase.quantity}" class="">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="type" value="" />                 
+                                            </h:outputText>
+
+                                        </f:facet>
+                                    </p:column>
+                                    
+                                     <p:column colspan="1" style="text-align:right; font-weight: bold;">
+                                        <f:facet name="footer"  >
+                                            <h:outputText value="#{loc.purchasecost}: " class=""/> 
+                                            <h:outputText value="#{purchase.cost}" class="">
+                                                <f:converter converterId="currencyConverter"  />
+                                                <f:attribute name="currency"  value="#{purchase.currency}" />
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>
+
+                                        </f:facet>
+                                    </p:column>
+
+                                    <p:column colspan="1" style="text-align:right; font-weight: bold;">
+                                        <f:facet name="footer"  >
+                                            <h:outputText value="#{loc.profitprice}: " class=""/> 
+                                            <h:outputText value="#{purchase.profitAmount}" class="">
+                                                <f:converter converterId="currencyConverter"  />
+                                                <f:attribute name="currency"  value="#{purchase.currency}" />
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>
+
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column colspan="1" style="text-align:right; font-weight: bold;">
+                                        <f:facet name="footer"  >
+                                            <h:outputText value="#{loc.profitpercentage}: " class=""/> 
+                                            <h:outputText value="#{purchase.profitpercentage}" class="">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value=""/>
+                                                <f:attribute name="type" value="percent" />
+                                            </h:outputText>
+
+                                        </f:facet>
+                                    </p:column>
+
+                                    <p:column colspan="1" style="text-align:right; font-weight: bold;">
+                                        <f:facet name="footer"  >   
+                                            <h:outputText value="#{loc.sum}: " class=""/> 
+                                            <h:outputText value="#{purchase.totalPrice}" class="">          
+                                                <f:converter converterId="currencyConverter"  />        
+                                                <f:attribute name="currency"  value="#{purchase.currency}" />
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column colspan="1" style="text-align:right; font-weight: bold;">
+                                        <f:facet name="footer"  >
+                                            <h:outputText value="#{loc.taxprice}: " class=""/> 
+                                            <h:outputText value="#{purchase.totalTax}" class="">
+                                                <f:converter converterId="currencyConverter"  />
+                                                <f:attribute name="currency"  value="#{purchase.currency}" />
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>  
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column colspan="1" style="text-align:right; font-weight: bold;">
+                                        <f:facet name="footer"  >
+                                            <h:outputText value="#{loc.totaldiscount}: " class=""/> 
+                                            <h:outputText value="#{purchase.totalDiscount}" class="">
+                                                <f:converter converterId="currencyConverter"  />
+                                                <f:attribute name="currency"  value="#{purchase.currency}" />
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column colspan="1" style="text-align:right; font-weight: bold;">
+                                        <f:facet name="footer"  >
+                                            <h:outputText value="#{loc.overalltotal}: " class=""/> 
+                                            <h:outputText value="#{purchase.totalMoney}" class="">
+                                                <f:converter converterId="currencyConverter"  />
+                                                <f:attribute name="currency"  value="#{purchase.currency}" />
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>
+
+                                        </f:facet>
+                                    </p:column>
+
+
+
+                                </p:row>         
+                            </ui:repeat>
+                        </h:panelGroup>
+                    </p:columnGroup>
+
+
+                </p:dataTable>  
+            </h:form>
+        </h:panelGroup>
+    </h:panelGroup>
+
+    <p:dialog id="dlgPurchaseSalesProc"   widgetVar="dlg_PurchaseSalesProc" resizable="false" width="65%" focus="dlgPurchaseSalesProc" responsive="true" dynamic="true" closeOnEscape="true">
+        <p:toolbar >
+            <f:facet name="left">
+                <h:outputText value="#{loc.type} : #{purchaseSalesReportBean.isPurchase ? loc.purchase :loc.sales }" class="outputTextFont Fleft MarRight8" />
+            </f:facet>
+        </p:toolbar>
+
+
+        <h:form id="frmPurchaseSalesProc">  
+            <p:dataTable  id="dtbPurchaseSalesProc" var="PurchaseSalesProc"  value="#{purchaseSalesReportBean.listOfStockDetail}" widgetVar="PurchaseSalesProcPF"   emptyMessage="#{loc.norecordsfound}"
+                          rows="#{sessionBean.user.defualtGridSize}" rowKey="#{PurchaseSalesProc.stock.id}" paginator="true" 
+                          paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                          rowsPerPageTemplate="#{sessionBean.user.gridSize}" 
+                          paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                          reflow="true" >
+
+                <p:column id="clmStockCode2" headerText="#{loc.stockcode}" >
+                    <f:facet name="filter"> <p:outputLabel   rendered="false" /> </f:facet> 
+                    <h:outputText value="#{PurchaseSalesProc.stock.code}" > </h:outputText>                    
+                </p:column>
+
+                <p:column id="clmCenterStockCode" headerText="#{loc.centerstockcode}" >
+                    <f:facet name="filter"> <p:outputLabel   rendered="false" /> </f:facet> 
+
+                    <h:outputText  value="#{PurchaseSalesProc.stock.centerProductCode}"/>
+                </p:column>
+
+                <p:column id="clmStockBarcode" headerText="#{loc.stockbarcode}"  >
+                    <f:facet name="filter"> <p:outputLabel   rendered="false" /> </f:facet> 
+                    <h:outputText value="#{PurchaseSalesProc.stock.barcode}" > </h:outputText>          
+                </p:column>
+                <p:column id="clmStock" headerText="#{loc.stockname}" >
+                    <f:facet name="filter"> <p:outputLabel   rendered="false" /> </f:facet> 
+                    <h:outputText  value="#{PurchaseSalesProc.stock.name}"/>
+                </p:column>
+
+                <p:column id="clmKDV" headerText="#{loc.taxgroup}"  >
+                    <f:facet name="filter"> <p:outputLabel   rendered="false" /> </f:facet> 
+                    <h:outputText  value="#{PurchaseSalesProc.stocktaxgroup.rate}" class="Fright">
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="unit" value=""/>
+                        <f:attribute name="type" value="percent" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmQuantity" headerText="#{loc.quantity}" >
+                    <f:facet name="filter"> <p:outputLabel   rendered="false" /> </f:facet> 
+                    <h:outputText  value="#{PurchaseSalesProc.quantity}" class="Fright">
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="unit" value="#{PurchaseSalesProc.stock.unit}"/>
+                        <f:attribute name="type" value="unit" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmUnitPrice" headerText="#{loc.unitprice}" >
+                    <f:facet name="filter"> <p:outputLabel   rendered="false" /> </f:facet> 
+                    <h:outputText  value="#{PurchaseSalesProc.unitPrice}" class="Fright">
+                        <f:converter converterId="currencyConverter" />  
+                        <f:attribute name="currency" value="#{PurchaseSalesProc.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmTotal" headerText="#{loc.sum}" >      
+                    <f:facet name="filter"> <p:outputLabel   rendered="false" /> </f:facet> 
+                    <h:outputText value="#{PurchaseSalesProc.totalPrice}" class="Fright" >
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{PurchaseSalesProc.currency}" />
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                </p:column>
+                <p:column id="clmTotalTax" headerText="#{loc.taxprice}"  >   
+                    <f:facet name="filter"> <p:outputLabel   rendered="false" /> </f:facet> 
+                    <h:outputText value="#{PurchaseSalesProc.totalTax}" class="Fright" >
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{PurchaseSalesProc.currency}" />
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmTotalDiscount" headerText="#{loc.totaldiscount}" >
+                    <h:outputText value="#{PurchaseSalesProc.totalDiscount}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{PurchaseSalesProc.currency}" />
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                </p:column>
+
+
+
+                <p:column id="clmTotalMoney" headerText="#{loc.overalltotal}" > 
+                    <f:facet name="filter"> <p:outputLabel   rendered="false" /> </f:facet> 
+                    <h:outputText value="#{PurchaseSalesProc.totalMoney}" class="Fright">
+                        <f:converter converterId="currencyConverter"  />
+                        <f:attribute name="currency"  value="#{PurchaseSalesProc.currency}" />
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                </p:column>   
+            </p:dataTable>  
+        </h:form> 
+
+    </p:dialog>
+
+
+
+
+
+
+
+
+
+
+
+    <p:overlayPanel id="olpCategory" widgetVar="olp_Category" showEvent="none" modal="true" transient="true" for="frmPurchaseSalesReport:btnCategory"  my="right top" at="left bottom" dismissable="true" hideEffect="blind" showCloseIcon="true" class="Wid30">
+        <ui:include src="/pages/general/common/categorybookcheckbox.xhtml">
+            <ui:param name="updateBean" value='#{purchaseSalesReportBean}' />
+            <ui:param name="type" value='purchasesalereportCheckbox' />
+
+            <ui:param name="parameters" value='#{[2,purchaseSalesReportBean.branchId]}' /> 
+
+            <ui:param name="form" value='frmCategoryBookFilter' /> 
+        </ui:include>
+    </p:overlayPanel>
+
+
+
+
+    <!--Kitaptan stok seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/stockbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{purchaseSalesReportBean}' />
+        <ui:param name="for" value='frmPurchaseSalesReport:btnStock' />
+        <ui:param name="type" value='reportcheckboxwithbranch' />
+        <ui:param name="parameters" value='#{[purchaseSalesReportBean.selectedBranchList.size() != 0 ? purchaseSalesReportBean.selectedBranchList : purchaseSalesReportBean.listOfBranch]}' /> 
+        <ui:param name="columnsize" value='4' /> 
+        <ui:param name="form" value='frmStockBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_stockcheckbox" />
+    </ui:include>
+
+
+    <!--Kitaptan merkezi tedarikçi seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/centralsupplierbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{purchaseSalesReportBean}' />
+        <ui:param name="for" value='frmPurchaseSalesReport:btnCentralSupplier' />
+        <ui:param name="type" value='reportcheckbox' />
+        <ui:param name="parameters" value='' /> 
+        <ui:param name="columnsize" value='1' /> 
+        <ui:param name="form" value='frmCentralSupplierBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_centralsuppliercheckbox" />
+    </ui:include>
+
+    <!--Kitaptan tedarikçi seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/accountbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{purchaseSalesReportBean}' />
+        <ui:param name="for" value='frmPurchaseSalesReport:btnSupplier' />
+        <ui:param name="type" value='supplierCheckboxReport' />
+        <ui:param name="parameters" value='#{[purchaseSalesReportBean.selectedBranchList.size() != 0 ? purchaseSalesReportBean.selectedBranchList : purchaseSalesReportBean.listOfBranch]}' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmAccountBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_accountcheckbox" />
+    </ui:include>
+
+    <!--Kitaptan cari seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/accountbook.xhtml" >
+        <ui:param name="updateBean" value='#{purchaseSalesReportBean}' />
+        <ui:param name="for" value='frmPurchaseSalesReport:btnCustomer' />
+        <ui:param name="type" value='report' />
+        <ui:param name="parameters" value='#{[purchaseSalesReportBean.selectedBranchList.size() != 0 ? purchaseSalesReportBean.selectedBranchList : purchaseSalesReportBean.listOfBranch]}' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmAccountBookFilter' /> 
+        <ui:param name="overlay" value="olp_account" />
+    </ui:include>
+
+
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.purchasesalesreport}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+</ui:composition>

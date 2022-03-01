@@ -1,0 +1,153 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+        <ui:param name="bean" value="#{safeBean}"/>   <!-- Bean -->
+        <ui:param name="update" value=""/>  <!-- Yeni butonuna basınca açılacak sayfa  -->
+        <ui:param name="btnNewId" value="#{safeBean.getRendered(116, 0)}"/>  <!-- buton id yetki kontrolü için  -->
+        <ui:param name="datatable" value="frmSafe:dtbSafe" />  <!-- datatable  -->       
+        <ui:param name="widgetvar" value='safePF' />
+        <ui:param name="form" value='frmToolbarSafe' />
+        <ui:param name="fileName" value="#{loc.safe}"/> 
+        <ui:param name="renderedToggler" value='true'/>       
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+    </ui:include>
+
+
+    <h:form id="frmSafe">
+        
+        <p:remoteCommand name="afterFilter" global="false" actionListener="#{safeBean.calcSubTotals()}" update="frmSafe:dtbSafe" />
+
+        <p:dataTable  id="dtbSafe" var="Safe"  value="#{safeBean.listOfObjects}" widgetVar="safePF" filteredValue="#{safeBean.listOfFilteredObjects}" selection="#{safeBean.selectedObject}"  selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{Safe.id}" paginator="true" 
+                      paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}"  
+                      paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                      reflow="true" rowStyleClass="#{Safe.status.id==24 ? 'ColumnColorRed' : null}">
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{safeBean.update()}"  />  
+
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false" oncomplete="afterFilter()"/>
+            <p:ajax event="colReorder" listener="#{safeBean.reorder}" update="frmToolbarSafe:toggle" />     
+            <p:ajax event="colResize"  listener="#{safeBean.onResize}" /> 
+
+            <f:facet name="footer" rendered="false" >
+                <p:inputText id="globalFilter" value="#{safeBean.autoCompleteValue}"  style="display: none"  />
+            </f:facet>
+
+            <p:column id="clmName" headerText="#{loc.safename}" sortable="true" sortBy="#{Safe.name}" filterable="true"  filterBy="#{Safe.name}" filterMatchMode="contains" visible="#{safeBean.toogleList[0]}" exportable="#{safeBean.toogleList[0]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{Safe.name}" />
+            </p:column >
+
+            <p:column id="clmCode" headerText="#{loc.safecode}" sortable="true" sortBy="#{Safe.code}" filterable="true"  filterBy="#{Safe.code}" filterMatchMode="contains" visible="#{safeBean.toogleList[1]}" exportable="#{safeBean.toogleList[1]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{Safe.code}"/>
+            </p:column>
+
+            <p:column id="clmBalance" sortable="true" sortBy="#{Safe.balance}" filterable="true"  filterBy="#{Safe.balance}" filterMatchMode="contains" visible="#{safeBean.toogleList[2]}" exportable="false">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <f:facet name="header" class="TexAlCenter">
+                    <h:outputText value="#{loc.balance}"/>
+                </f:facet>
+                <h:panelGroup rendered="#{safeBean.renderedColumnValue(Safe.balance,1)}" >
+
+                    <li class="Fleft BordRad10 TexAlLeft" >
+                        <i class="fa fa-arrow-down red"></i>
+                    </li>
+
+                </h:panelGroup>
+                <h:panelGroup rendered="#{safeBean.renderedColumnValue(Safe.balance,2)}" >
+
+                    <li  class="Fleft BordRad10 TexAlLeft">
+                        <i class="fa fa-arrow-up green"></i>
+                    </li>
+
+                </h:panelGroup>
+                <h:outputText value="#{Safe.balance}" style="float: right;">
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{Safe.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+            
+            <p:column id="clmBalance1"  visible="false"  exportable="#{safeBean.toogleList[2]}" toggleable="false">
+                <f:facet name="header" class="TexAlCenter">
+                    <h:outputText value="#{loc.balance}"/>
+                </f:facet>
+                <h:outputText value="#{Safe.balance}" style="float: right;">
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{Safe.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmCurrency" headerText="#{loc.currency}" sortable="true" sortBy="#{Safe.currency.code}" filterable="true"  filterBy="#{Safe.currency.code}" filterMatchMode="contains" visible="#{safeBean.toogleList[4]}" exportable="#{safeBean.toogleList[4]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{Safe.currency.code} - #{Safe.currency.tag}" />
+            </p:column>
+
+            <p:column id="clmStatus" headerText="#{loc.statu}" sortable="true" sortBy="#{Safe.status.tag}" filterable="true"  filterBy="#{Safe.status.tag}" filterMatchMode="contains" visible="#{safeBean.toogleList[5]}" exportable="#{safeBean.toogleList[5]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{Safe.status.tag}" />
+            </p:column>
+
+            
+            <p:columnGroup id="clmColumGroup" rendered="#{safeBean.listOfObjects.size()>0}"  type="footer" >
+                <p:column visible="#{safeBean.toogleList[0]}" exportable="#{safeBean.toogleList[0]}">
+                    <f:facet name="footer"  >
+                        <h:outputText value="" class="FontBold"/>
+                    </f:facet>
+                </p:column>
+
+                <p:column  visible="#{safeBean.toogleList[1]}" exportable="#{safeBean.toogleList[1]}">
+                    <f:facet name="footer"  >
+                        <h:outputText value="" class="Fright FontBold"/>
+                    </f:facet>
+                </p:column>
+
+                <p:column visible="#{safeBean.toogleList[2]}" exportable="#{safeBean.toogleList[2]}" filterable="true" filterBy="#{safeBean.subTotalBalance}">
+                    <f:facet name="footer"  >
+                        <h:outputText value="#{safeBean.subTotalBalance}" class="Fright FontBold"/>
+                    </f:facet>
+                </p:column>
+
+                <p:column visible="#{safeBean.toogleList[4]}" exportable="#{safeBean.toogleList[4]}">
+                    <f:facet name="footer"  >
+                        <h:outputText value=""/>
+                    </f:facet>
+                </p:column>
+                
+                <p:column visible="#{safeBean.toogleList[5]}" exportable="#{safeBean.toogleList[5]}">
+                    <f:facet name="footer"  >
+                        <h:outputText value=""/>
+                    </f:facet>
+                </p:column>
+            </p:columnGroup>
+
+
+        </p:dataTable>   
+    </h:form>
+
+
+
+</ui:composition>
+
+
+

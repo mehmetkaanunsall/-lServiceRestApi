@@ -1,0 +1,69 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <style>
+        .ui-chkbox .ui-chkbox-box {
+            border-color: #7a8186  !important ;
+        }
+    </style>
+
+    <h:form id="frmProfileSecurityTab">
+        <p:panelGrid columns="1" layout="grid"  class="panelGridNoBorder MarTop10 Wid100">
+            <h:outputText value="#{loc.securitysettings}"  styleClass="FontBold Fs16 headerColor"></h:outputText>
+            <p:separator class="profileSeparator" />    
+        </p:panelGrid> 
+
+        <h:panelGrid columns="1" cellpadding="1" class="MarLeft5 Wid100">
+            <h:panelGrid columns="2" cellpadding="1">
+                <p:selectBooleanCheckbox  value="true">
+                    <p:ajax event="change" listener="#{profileSecurityTabBean.saveMobile()}"/>
+                </p:selectBooleanCheckbox>
+                #{loc.allowaccessfrommobiledevice}
+            </h:panelGrid>  
+  
+        </h:panelGrid>          
+
+        <p:panelGrid columns="1" layout="grid"  class="panelGridNoBorder MarTop10 Wid100">
+            <h:outputText value="#{loc.systemsettings}"  styleClass="FontBold Fs16 headerColor"></h:outputText>
+            <p:separator class="profileSeparator" />    
+        </p:panelGrid> 
+
+        <h:panelGrid columns="1" cellpadding="1" class="MarLeft5 Wid100">
+            <h:panelGrid columns="4" cellpadding="1">
+                <h:panelGrid columns="2" cellpadding="1">
+                    #{loc.gridlistingnumber} :
+                    <p:inputText value="#{profileSecurityTabBean.s1}" style="width: 50%" maxlength="3">
+                        <p:keyFilter regEx="/[0-9]/" />
+                    </p:inputText>
+                </h:panelGrid>
+                <h:panelGrid columns="2" cellpadding="1" style="margin-left: -78px;margin-right: -78px;">
+                    <h:outputText value="-"/>
+                    <p:inputText value="#{profileSecurityTabBean.s2}" style="width: 50%" maxlength="3">
+                        <p:keyFilter regEx="/[0-9]/"/>
+                    </p:inputText>
+                </h:panelGrid>
+                <h:panelGrid columns="2" cellpadding="1">
+                    <h:outputText value="-"/>
+                    <p:inputText value="#{profileSecurityTabBean.s3}" style="width: 50%" maxlength="3">
+                        <p:keyFilter regEx="/[0-9]/"/>   
+                    </p:inputText>
+                </h:panelGrid>
+                <h:panelGrid columns="1" cellpadding="1" style="margin-left: -50px">
+                    <p:commandButton id="btnSaveSecurity" value="#{loc.save}" actionListener="#{profileSecurityTabBean.save()}" global="false" process="@this,frmProfileSecurityTab" update="frmProfileSecurityTab"/>
+                </h:panelGrid>
+            </h:panelGrid> 
+            <h:panelGrid columns="2" cellpadding="1">
+                <p:selectBooleanCheckbox  value="true">
+                    <p:ajax event="change" listener="#{profileSecurityTabBean.savePageInformation()}"/>
+                </p:selectBooleanCheckbox>
+                #{loc.doyouhaveinformationonthepage}
+            </h:panelGrid> 
+        </h:panelGrid>   
+
+      
+    </h:form>
+
+</ui:composition>

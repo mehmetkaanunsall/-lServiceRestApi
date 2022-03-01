@@ -1,0 +1,270 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+                xmlns:pe="http://primefaces.org/ui/extensions">
+    <!--
+    bean:Hangi sayfada kullanılcaksa o sayfanın Bean i
+    update: Yeni butonuna basınca açılacak dialog  
+    btnNewId: buton id yetki kontrolü için 
+    datatable: kullanılan sayfadaki datatable in id si
+    detailFilterXhtmlPath: detaylı filtre için açılan xhtml yolu
+    filterBean: detaylı filtre için açılan bean
+    fileName: excel pdf için oluşturulacak dosyanın adı
+    renderedFilter: Filtre butonunun yetki kontrolü
+    renderedToggler: Grid kolonları açıp kapatma butonunun yetki kontrolü
+    renderedExel:excel butonunun yetki kontrolü
+    renderedPdf: pdf butonunun yetki kontrolü
+    renderedAdd:artı butonunun yetki kontrolü
+    gridId: kullanılan sayfadaki gridin veri tabanındaki id si
+    -->
+
+
+    <h:form id="frmGridToolbar"  >
+        <p:remoteCommand name="hotkey"  actionListener="#{bean.create}" resetValues="true" rendered="#{btnNewId}"  update="#{update}"   process="@this"/>
+        <p:hotkey  bind="ctrl+shift+a"   actionListener="#{bean.create}" resetValues="true" rendered="#{btnNewId}"  update="#{update}"   process="@this" />
+        <p:defaultCommand  target="generalFilter"   />
+        <p:commandLink    id="generalFilter" delay="100" actionListener="#{bean.generalFilter}"    style="display: none"   onstart="PF('#{dtbWidgetVar}').filter();" />
+
+        <p:remoteCommand name="exportLimitMessege"  action="#{bean.showLimitMessege()}" />
+        <p:remoteCommand name="waitToExportPdf"   actionListener="#{bean.waitToExportPdf()}"   />
+        <p:remoteCommand name="waitToExportExcel"   actionListener="#{bean.waitToExportExcel()}"   />
+        <p:remoteCommand name="exportLimitMessegeForExcel"  action="#{bean.showLimitMessegeForExcel()}" />
+
+        <p:toolbar  id="ttttt">
+            <f:facet name="right" id="tttt">
+
+                <!-- Sipariş faturalandırma butonu -->
+                <p:commandButton class="Fleft MarTop5 tlbrIsDirection" rendered="#{btnCreateWaybill}" value="#{loc.waybill}" actionListener="#{bean.createWaybill()}"  process="@this"/>
+                <p:commandButton class="Fleft MarTop5 tlbrIsDirection" rendered="#{btnCreateInvoice}" value="#{loc.invoice}" actionListener="#{bean.createInvoice()}"  process="@this"/>
+                <p:commandLink title="#{loc.save}" class="Fleft" process="@form" actionListener="#{bean.save}" rendered="#{renderedSaveProcess}" >
+                    <i class="fa fa-save Fs23 MarTop5 tlbrSaveBtn"/>                 
+                </p:commandLink>
+
+                <p:commandLink title="#{loc.collectiveupdateprice}" rendered="#{renderedUpdatePrice}" process="@this" actionListener="#{bean.updatePrice()}" class="Fleft MarTop7 tlbrIcon" resetValues="true">
+                    <i class="fa fa-magic tlbrBackBtn Fs21" style="margin-top: -1px; margin-right: 3px;"></i>
+                </p:commandLink>  
+
+                <p:commandLink id="btnStock" title="#{loc.transferstock}" rendered="#{renderedStockBook}" process="@this" update="frmStockBookFilterCheckbox" actionListener="#{bean.openDialog()}" class="Fleft MarTop7 tlbrIcon" oncomplete="PF('olp_stockcheckbox').show();">
+                    <i class="fa fa-random tlbrBackBtn Fs21"></i>
+                    <p:ajax   listener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([bean.wareHouse],'frmStockBookFilterCheckbox','olp_stockcheckbox','warehouseitem')}" />
+                </p:commandLink>
+                <p:remoteCommand name="showStockBook" rendered="#{renderedStockBook}" process="@this" update="frmStockBookFilterCheckbox" oncomplete="PF('olp_stockcheckbox').show();" action="#{bean.openDialog()}" actionListener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([bean.wareHouse],'frmStockBookFilterCheckbox','olp_stockcheckbox','warehouseitem')}" />
+
+                <p:commandLink id="btnChangeView" title="#{bean.isScrollView ? loc.paging : loc.showallrecords}" rendered="#{renderedStockPage}" process="@this" actionListener="#{bean.changeView()}" class="Fleft MarTop6 MarRight10 tlbrIcon" >
+                    <i class="fa fa-table tlbrColumnBtn Fs22"></i>
+                </p:commandLink> 
+
+                <p:commandLink id="btnBatchUpdate" title="#{loc.batchupdate}" rendered="#{renderedBatchUpdate}" process="@this" actionListener="#{bean.batchUpdate()}" class="Fleft MarTop7 tlbrIcon" >
+                    <i class="fa fa-magic tlbrBackBtn Fs21"></i>
+                </p:commandLink>  
+
+                <p:commandLink  title="#{loc.shownontransferableshifts}" process="@this" immediate="true" rendered="#{btnShowNonTransferableShifts}" actionListener="#{bean.showNonTransferableShift()}" class="Fleft">
+                    <i class="fa fa-times-circle-o Fs22 tlbrBackBtn MarTop5 MarRight7" />                 
+                </p:commandLink>
+
+                <p:commandLink  title="#{loc.bringshift}" process="@this" immediate="true" rendered="#{btnBringShift}" actionListener="#{bean.bringShift()}" class="Fleft"  >
+                    <i class="fa fa-sign-in Fs21 tlbrBackBtn MarTop6 MarRight7" />                 
+                </p:commandLink>
+
+                <p:commandLink  title="#{btnImportForTurpak ? loc.manualfileupload : loc.fileupload}" process="@this" immediate="true" rendered="#{btnImport}" class="Fleft" onclick="PF('dlg_shiftfileupload').show();"  >
+                    <i class="#{btnImportForTurpak ? 'fa fa-upload Fs20' : 'fa fa-cloud-upload Fs23'} tlbrUploadBtn" style="#{btnImportForTurpak ? 'margin-top: 6px; margin-right: 7px;' : 'margin-top: 5px;'}" />                 
+                </p:commandLink>
+
+                <p:commandLink  title="#{loc.fileupload}" process="@this" immediate="true" rendered="#{btnImportForTurpak}" class="Fleft" actionListener="#{bean.readFileNameForTurpak()}"  >
+                    <i class="fa fa-cloud-upload tlbrUploadBtn Fs23" style="margin-top: 5px;" />                 
+                </p:commandLink>
+
+
+
+                <h:panelGroup id="pgrExporter" class="panelGridNoBorder">
+
+
+
+                    <p:commandLink id="btnFinishStockTaking" rendered="#{renderedFinishStockTaking}" title="#{loc.finishstocktaking}" class ="Fleft tlbrIcon" actionListener="#{bean.finishStockTaking}"  process="@this"  >
+                        <i class="fa fa-flag-checkered tlbrBackBtn Fs22"  style="margin-top: 9px; margin-right: 4px;" />
+                    </p:commandLink>   
+                    <p:commandLink id="btnCloseAllDifferences" delay="100" rendered="#{renderedStockTaking}" class ="Fleft tlbrIcon" title="#{loc.updateall}" actionListener="#{bean.closeAllDifferences}"  process="@this"  >
+                        <i class="fa fa-check-circle-o tlbrBackBtn Fs24" style="margin-top: 7px" />
+                    </p:commandLink> 
+
+                    <p:commandLink id="btnTxtUpload" global="false" title="#{loc.importtxt}" resetValues="true"  class ="Fleft tlbrIcon" rendered="#{renderedTxtUpload and bean.renderExportButton}" update="#{updateDialog}" actionListener="#{bean.openTxtUpload}" >
+                        <i class="fa fa-upload tlbrUploadBtn Fs21" style="margin-top: 7px;margin-left: 4px;" />
+                    </p:commandLink>
+
+<!--   <p:commandLink id="btnUpload" global="false" title="#{loc.fileupload}" resetValues="true"  class ="Fleft tlbrIcon" rendered="#{renderedUpload and bean.renderExportButton}" update="#{updateDialog}" actionListener="#{bean.openFileUpload}" >
+    <i class="fa fa-cloud-upload tlbrUploadBtn Fs23" style="margin-top: 7px;margin-left: 4px;" />
+</p:commandLink> *-->                    
+                    <p:commandLink id="btnUpload" global="false" title="#{loc.fileupload}" resetValues="true"  class ="Fleft tlbrIcon" rendered="#{renderedUpload and bean.renderExportButton}" update="#{updateDialog}" actionListener="#{bean.openUploadProcessPage}" >
+                        <i class="fa fa-cloud-upload tlbrUploadBtn Fs23" style="margin-top: 5px;" />
+                    </p:commandLink>
+
+                    <h:commandLink id="btnExportStocks" title="#{loc.transfertoexcel}"  class ="Fleft tlbrIcon" rendered="#{exportTaking}"  actionListener="#{bean.exportStocks()}">
+                        <i class="fa fa-cloud-download tlbrUploadBtn Fs23"  style="margin-top: 7px;" />
+                    </h:commandLink>  
+
+                    <c:if test="#{!renderedSpecialExportExcel}">
+                        <h:commandLink id="btnExcel" title="#{loc.transfertoexcel}"  class ="Fleft tlbrIcon" rendered="#{renderedExel and bean.renderExportButton}">
+                            <i class="icon-file-excel tlbrExcelBtn Fs23"  />
+                            <p:dataExporter type="xls" target="#{datatable}" fileName="#{bean.encodeFileNameForExportData(fileName)}" postProcessor="#{bean.postProcessXLS}" options="#{bean.excelOptions}"/>  
+                        </h:commandLink>  
+                    </c:if>
+                    <c:if test="#{!renderedSpecialExport}">
+                        <h:commandLink id="btnPdf" title="#{loc.transfertopdf}"  class ="Fleft tlbrIcon "  rendered="#{renderedPdf and bean.renderExportButton}">
+                            <i class="icon-file-pdf tlbrPdfBtn Fs23"  />
+                            <pe:exporter type="pdf" target="#{datatable}" fileName="#{bean.encodeFileNameForExportDataPdf(fileName)}"   
+                                         facetBackground="#000000" facetFontSize="8" facetFontColor="#FFFFFF" facetFontStyle="BOLD"  
+                                         cellFontColor="#000000" cellFontSize="8" cellFontStyle="NORMAL" encoding="Cp1254" />  
+                        </h:commandLink>
+                    </c:if>
+                    <c:if test="#{renderedSpecialExportExcel}">
+                        <h:commandLink id="btnExcel" title="#{loc.transfertoexcel}"  class ="tlbrIcon"  onclick="if (count > 300000) {
+                                    exportLimitMessegeForExcel();
+                                    return false;
+                                } else {
+                                    waitToExportExcel();
+                                }"  rendered="#{renderedExel and bean.renderExportButton}" actionListener="#{bean.createExcel()}">
+                            <i class="icon-file-excel tlbrExcelBtn Fs23"  />
+                        </h:commandLink>  
+                    </c:if>
+                    <c:if test="#{renderedSpecialExport}"> 
+                        <h:commandLink id="btnPdf"    title="#{loc.transfertopdf}"  class ="Fleft tlbrIcon "  onclick="if (count > 200000) {
+                                    exportLimitMessege();
+                                    return false;
+                                } else {
+                                    waitToExportPdf();
+                                }"  rendered="#{renderedPdf and bean.renderExportButton}"  actionListener="#{bean.createPdf()}" >
+                            <i class="icon-file-pdf tlbrPdfBtn Fs23"  />
+                        </h:commandLink>
+                    </c:if>
+                    <c:if test="#{!renderedSpecialExport}"> 
+                        <h:commandLink id="btnExcelExportManuel" title="#{loc.transfertoexcel}"  class ="tlbrIcon"  onclick="if (count > 300000) {
+                                    exportLimitMessegeForExcel();
+                                    return false;
+                                } else {
+                                    waitToExportExcel();
+                                }" rendered="#{renderedExcelManuel and bean.renderExportButton}" actionListener="#{bean.createExcel()}">
+                            <i class="icon-file-excel tlbrExcelBtn Fs23"  />
+                        </h:commandLink>  
+                    </c:if>
+                    <c:if test="#{!renderedSpecialExport}"> 
+                        <h:commandLink id="btnPdfExportManuel"    title="#{loc.transfertopdf}"  class ="Fleft tlbrIcon "  onclick="if (count > 60000) {
+                                    exportLimitMessege();
+                                    return false;
+                                } else {
+                                    waitToExportPdf();
+                                }"  rendered="#{renderedPdfManuel and bean.renderExportButton}"  actionListener="#{bean.createPdf()}" >
+                            <i class="icon-file-pdf tlbrPdfBtn Fs23"  />
+                        </h:commandLink>
+                    </c:if>
+                </h:panelGroup>
+
+                <p:commandLink  id="btnToggler" title="#{loc.editcolumns}" global="false" rendered="#{renderedToggler}"   class="Fright tlbrIcon">
+                    <i class="icon-list tlbrColumnBtn Fs23"  />
+                </p:commandLink>
+                <p:columnToggler    id="toggle"  datasource="#{datatable}" widgetVar="columnToggler" trigger="btnToggler" >
+                    <p:ajax event="toggle"   listener="#{bean.onToggle}"   global="false" update="#{datatable} pgrExporter" />
+                </p:columnToggler>
+
+                <p:commandLink id="toolbarIconMenu"  title="#{loc.processes}" class="Fright tlbrIconMenu display-none">
+                    <i class="icon-th-1 Fs23"></i>
+                </p:commandLink>
+                <p:menu  overlay="true" trigger="toolbarIconMenu" class="Wid20 tlbrResponsiveMenu" my="right top" at="right bottom">
+
+
+                    <p:menuitem rendered="#{btnNewId}" onclick="hotkey()"><i class="icon-plus Fs23 marginLevel-1 tlbrAddBtn"/></p:menuitem>
+                    <p:menuitem rendered="#{renderedFilter}" onclick="$('#frmGridToolbar\\:btnFilter').click();"><i class="icon-sliders Fs23 marginLevel-1 tlbrFilterBtn"/></p:menuitem>
+                    <p:menuitem rendered="#{renderedExel and bean.renderExportButton}" onclick="$('#frmGridToolbar\\:btnExcel').click();"><i class="icon-file-excel Fs23 marginLevel-1 tlbrExcelBtn"/></p:menuitem>
+                    <p:menuitem rendered="#{renderedPdf and bean.renderExportButton}" onclick="$('#frmGridToolbar\\:btnPdf').click();"><i class="icon-file-pdf Fs23 marginLevel-1 tlbrPdfBtn "/></p:menuitem>
+
+                </p:menu> 
+            </f:facet>
+            <f:facet name="left">
+                <p:commandLink id="btnAdd" actionListener="#{bean.create}" resetValues="true" rendered="#{btnNewId}" title="#{loc.new}"  update="#{update}" class="Fleft tlbrIcon" process="@this" >
+                    <i class="icon-plus tlbrAddBtn Fs23" />
+                </p:commandLink>  
+
+
+                <!-- <p:autoComplete  id="autToolbarSearch" active="false"  value="#{bean.autoCompleteValue}" size="2" queryEvent="keyup" forceSelection="false"  completeMethod="#{bean.autoComplete}"   minQueryLength="1" maxResults="7" effect="blind" emptyMessage="#{loc.norecordsfoundamatchingyoursearch}"  inputStyleClass="tlbrSearchInput"  >                                                                              
+                     <p:ajax  event="itemSelect" listener="#{bean.generalFilter}" update="#{datatable},@this" />                                   
+                 </p:autoComplete>  -->
+                <p:inputText   id="autToolbarSearch"  value="#{bean.autoCompleteValue}" class="Fleft tlbrSearchInput" >
+
+                </p:inputText>
+                <p:watermark for="autToolbarSearch" value="#{loc.enteratleastonecharacter}" id="watermark"/>
+
+                <!--   <p:commandLink title="#{loc.clear}" id="detailFilterClear" process="@this" class="tlbrSearchInputClear"  update="#{datatable},dlgDetailFilter,autToolbarSearch" resetValues="true"  actionListener="">
+                        <i class="icon-cancel-alt Fs16 tlbrSearchClear"/>
+                    </p:commandLink> -->
+
+                <!--  <p:commandLink id="btnFilter" title="#{loc.detailsearch}" rendered="#{renderedFilter}"  process="@this" class="tlbrIcon" resetValues="true" update=" frmDetailFilter" actionListener="#{detailFilterBean.init()}" oncomplete="PF('detail').show()" ><i class="icon-sliders tlbrFilterBtn  Fs23"/></p:commandLink>              
+                <p:commandLink id="btnRefresh" title="#{loc.filter} #{loc.remove}" rendered="#{detailFilterBean.refresh}"  process="@this" class="tlbrIcon"  update="frmGridToolbar,mainPanel" actionListener="#{detailFilterBean.setRefresh(false)}" action="#{bean.reset()}"  ><i class="icon-arrows-cw  green Fs23"/></p:commandLink> --> 
+
+                <p:selectBooleanCheckbox value="#{bean.stockParam.isWithoutSalePrice}" rendered="#{renderedStockPage}"  itemLabel="#{loc.notshowthatdonthaveasaleprice}" class="Fleft allcheck" style="margin-top: 6px; margin-left: 5px;">
+                    <p:ajax delay="100" listener="#{bean.bringList}" process="@form" />
+                </p:selectBooleanCheckbox>
+
+                <p:selectBooleanCheckbox value="#{bean.stockParam.isNoneZero}" rendered="#{renderedStockPage}"  itemLabel="#{loc.dontshowstockswhichhavezeroamount}" class="Fleft allcheck" style="margin-top: 6px; margin-left: 5px;">
+                    <p:ajax delay="100" listener="#{bean.bringList}" process="@form" />
+                </p:selectBooleanCheckbox>
+
+                <p:selectBooleanCheckbox value="#{bean.stockParam.isPassiveStock}" rendered="#{renderedStockPage}"  itemLabel="#{loc.showpassive}" class="Fleft allcheck" style="margin-top: 6px;">
+                    <p:ajax delay="100" listener="#{bean.bringList}" process="@form" />
+                </p:selectBooleanCheckbox>
+
+                <p:selectBooleanCheckbox value="#{bean.isCheck}" rendered="#{renderedCheckBox}"  itemLabel="#{labelForCheckBox}" class="Fleft allcheck MarLeft15 MarTop6">
+                    <p:ajax delay="100" listener="#{bean.showList()}" process="@form" />
+                </p:selectBooleanCheckbox>
+
+                <p:selectBooleanCheckbox value="#{bean.isCheck2}" rendered="#{renderedCheckBox2}"  itemLabel="#{labelForCheckBox2}" class="Fleft allcheck MarLeft2 MarTop6" >
+                    <p:ajax delay="100" listener="#{bean.showList2()}" process="@form" />
+                </p:selectBooleanCheckbox>
+
+                <p:selectBooleanCheckbox value="#{bean.stockParam.isService}" rendered="#{renderedStockPage}"  itemLabel="#{loc.showserviceproducts}" class="Fleft allcheck" style="margin-top: 6px; margin-left: 5px;">
+                    <p:ajax delay="100" listener="#{bean.bringList}" process="@form" />
+                </p:selectBooleanCheckbox>
+
+                <p:selectOneButton value="#{bean.searchObject.type}" rendered="#{renderedIsPurchase}" unselectable="false" class="MarLeft10 MarTop5 tlbrIsPurchase">
+                    <f:selectItem itemLabel="#{loc.sales}" itemValue="0" />
+                    <f:selectItem itemLabel="#{loc.purchase}" itemValue="1" />
+                    <f:selectItem itemLabel="#{loc.all}" itemValue="2" />
+                    <p:ajax listener="#{bean.find()}" update="mainPanel"/>
+                </p:selectOneButton>
+
+                <p:selectOneButton value="#{bean.creditType}" rendered="#{renderedCredit}" unselectable="false" class="MarLeft10 MarTop5 tlbrIsPurchase">
+                    <f:selectItem itemLabel="#{loc.collection}" itemValue="1" />
+                    <f:selectItem itemLabel="#{loc.payment}" itemValue="2" />
+                    <f:selectItem itemLabel="#{loc.all}" itemValue="0" />
+                    <p:ajax listener="#{bean.bringListAccordingToIsCustomer()}" update="mainPanel"/>
+                </p:selectOneButton>
+
+                <p:selectOneButton value="#{bean.isDirection}" rendered="#{renderedIsDirection}" unselectable="false" class="MarLeft10 MarTop5 tlbrIsDirection">
+                    <f:selectItem itemLabel="#{loc.entry}" itemValue="0" />
+                    <f:selectItem itemLabel="#{loc.exit}" itemValue="1" />
+                    <f:selectItem itemLabel="#{loc.all}" itemValue="2" />
+                    <p:ajax listener="#{bean.bringListAccordingToIsDirection()}" update="mainPanel"/>
+                </p:selectOneButton>
+            </f:facet>
+        </p:toolbar>
+        <p:focus   for="autToolbarSearch" /> 
+
+<!--  <p:remoteCommand name="order" actionListener="#{bean.bringOrder(datatable)}" oncomplete="updateToggle()" autoRun="true"  global="false" />
+<p:remoteCommand name="updateToggle"  update="frmGridToolbar:toggle" delay="500" global="false" /> -->
+    </h:form>
+
+    <!--
+        <c:if test="#{renderedFilter}">
+            <ui:include src="/pages/general/common/detailfilter.xhtml" >            
+                <c:set var="gridId" value="#{gridId}" scope="request" />
+                <ui:param name="path" value="#{detailFilterXhtmlPath}" />
+                <ui:param name="filterBean" value="#{filterBean}" />
+                <ui:param name="bean" value="#{bean}" />
+                <ui:param name="datatable" value="#{datatable}"/>
+                <ui:param name="dtbWidgetVar" value="#{dtbWidgetVar}" /> 
+    
+            </ui:include>
+        </c:if>
+    -->
+</ui:composition> 

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                            http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://www.springframework.org/schema/tx 
+                            http://www.springframework.org/schema/tx/spring-tx.xsd">
+      
+    <bean id="responsibleDao" class="com.mepsan.marwiz.general.responsible.dao.ResponsibleDao" lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+     
+    <bean id="responsibleService" class="com.mepsan.marwiz.general.responsible.business.ResponsibleService" lazy-init="true" scope="prototype" >
+    </bean>
+
+    
+    <bean id="responsibleAddressService" class="com.mepsan.marwiz.general.responsible.business.ResponsibleAddressService" lazy-init="true"  scope="request" >
+       
+    </bean> 
+    
+    <bean id="responsibleAddressDao" class="com.mepsan.marwiz.general.responsible.dao.ResponsibleAddressDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="responsibleInternetService" class="com.mepsan.marwiz.general.responsible.business.ResponsibleInternetService" lazy-init="true"  scope="request" >
+       
+    </bean> 
+    
+    <bean id="responsibleInternetDao" class="com.mepsan.marwiz.general.responsible.dao.ResponsibleInternetDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="responsiblePhoneService" class="com.mepsan.marwiz.general.responsible.business.ResponsiblePhoneService" lazy-init="true"  scope="request" >
+       
+    </bean> 
+    
+    <bean id="responsiblePhoneDao" class="com.mepsan.marwiz.general.responsible.dao.ResponsiblePhoneDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+</beans>

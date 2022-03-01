@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:form id="frmProfileWidgetTab">
+        <p:panelGrid columns="1" layout="grid" class="panelGridNoBorder MarTop10 Wid100">
+            <h:outputText value="#{loc.widgetsettings}"  styleClass="FontBold Fs16 headerColor"></h:outputText>
+            <p:separator class="profileSeparator"/>    
+        </p:panelGrid>   
+
+        <ui:include src="/pages/general/common/tabgridtoolbar.xhtml">
+            <ui:param name="bean" value="#{profileWidgetTabBean}"/>
+            <!--<ui:param name="btnNewId" value="true"/>-->
+            <ui:param name="update" value="" />
+            <ui:param name="outputtext" value="#{loc.widgets}" />
+        </ui:include>
+        <p:dataTable  id="dtbOpportunity" var="widget" widgetVar="opportunityPF"  value="#{profileWidgetTabBean.listOfObjects}"  selection="#{profileWidgetTabBean.selectedObjectList}" 
+                      emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" filteredValue="#{profileWidgetTabBean.listOfObjects}" rowKey="#{widget.id}" paginator="true" 
+                      paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true" >
+            <p:ajax event="rowSelectCheckbox" process="@this" listener="#{profileWidgetTabBean.createWidgetUserDataCon()}" />
+            <p:ajax event="rowUnselectCheckbox"  process="@this" listener="#{profileWidgetTabBean.deleteWidgetUserDataCon()}" />
+            <p:ajax event="toggleSelect" process="@this" listener="#{profileWidgetTabBean.checkedChange()}" />
+
+            <p:column selectionMode="multiple" style="width:25px;" class="TexAlCenter" selectRow="false" />
+            <p:column id="clmName" selectRow="false" headerText="#{loc.widgets}"   sortable="true" sortBy="#{widget.name}" filterable="true"  filterBy="#{widget.name}" filterMatchMode="contains" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{loc[widget.name]}" />
+            </p:column>
+
+        </p:dataTable>
+    </h:form>
+    <p:dialog  id="dlgWidget" widgetVar="dlg_widget" width="50%" resizable="false"  dynamic="true"  responsive="true"  modal="false" closeOnEscape="true">
+        <ui:include  src="/pages/general/createwidget.xhtml"   >
+
+        </ui:include>
+    </p:dialog>
+</ui:composition>
+

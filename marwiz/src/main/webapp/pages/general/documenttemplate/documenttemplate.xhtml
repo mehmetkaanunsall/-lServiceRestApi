@@ -1,0 +1,137 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml">
+        <ui:param name="bean" value="#{documentTemplateBean}"/> 
+        <ui:param name="update" value="dlgDocumentTemplateProcess"/>
+        <ui:param name="btnNewId" value='#{documentTemplateBean.getRendered(260, 0)}'/>
+        <ui:param name="datatable" value="frmDocumentTemplate:dtbDocumentTemplate" />
+        <ui:param name="widgetvar" value="documentTemplatePF" />
+        <ui:param name="form" value='frmToolbarDocumentTemplate' />
+        <ui:param name="fileName" value="#{loc.documenttemplate}"/> 
+        <ui:param name="renderedToggler" value='false'/>
+        <ui:param name="renderedExel" value='false'/>
+        <ui:param name="renderedPdf" value='false'/>
+    </ui:include>
+
+    <h:form id="frmDocumentTemplate">
+
+        <p:dataTable id="dtbDocumentTemplate" var="documentTemplate"  value="#{documentTemplateBean.listOfObjects}" filteredValue="#{documentTemplateBean.listOfFilteredObjects}" widgetVar="documentTemplatePF" selection="#{documentTemplateBean.selectedObject}"  selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                     rows="#{sessionBean.user.defualtGridSize}" rowKey="#{documentTemplate.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                     rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                     reflow="true">
+
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{marwiz.goToPage('/pages/general/documenttemplate/documenttemplateprocess.xhtml', documentTemplateBean.selectedObject, 1, 96)}"  global="true" immediate="false" />
+            <!--
+                <p:ajax event="#{sessionBean.user.gridRowSelect}"  listener="#{documentTemplateBean.goToProcess()}" global="false" />
+            -->
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false"/>
+
+            <f:facet name="footer">
+                <p:inputText id="globalFilter" value="#{documentTemplateBean.autoCompleteValue}"  style="display: none"  />
+            </f:facet>
+
+            <p:column id="clmName" headerText="#{loc.templatename}" sortable="true" sortBy="#{documentTemplate.name}" filterable="true"  filterBy="#{documentTemplate.name}" filterMatchMode="contains" visible="#{documentTemplateBean.toogleList[0]}" exportable="#{documentTemplateBean.toogleList[0]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{documentTemplate.name}" />
+            </p:column>
+
+            <p:column id="clmTypeName" headerText="#{loc.documenttype}" sortable="true" sortBy="#{documentTemplate.type.tag}" filterable="true"  filterBy="#{documentTemplate.type.tag}" filterMatchMode="contains" visible="#{documentTemplateBean.toogleList[1]}" exportable="#{documentTemplateBean.toogleList[1]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{documentTemplate.type.tag}" />
+            </p:column>
+
+            <p:column id="clmPaperDirection" headerText="#{loc.paperdirection}" sortable="true" sortBy="#{documentTemplate.isVertical}" filterable="true"  filterBy="#{documentTemplate.isVertical}" filterMatchMode="contains" visible="#{documentTemplateBean.toogleList[2]}" exportable="#{documentTemplateBean.toogleList[2]}">
+                <f:facet name="filter">
+                    <p:outputLabel rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{documentTemplate.isVertical == true ? loc.vertical : loc.horizontal}" />
+            </p:column>
+
+            <p:column id="clmPaperSize" headerText="#{loc.papersize}" sortable="true" sortBy="#{documentTemplate.paperSize}" filterable="true"  filterBy="#{documentTemplate.paperSize}" filterMatchMode="contains" visible="#{documentTemplateBean.toogleList[3]}" exportable="#{documentTemplateBean.toogleList[3]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{(documentTemplate.paperSize == 1 ? 'A4' : documentTemplate.paperSize == 2 ? 'A3' : loc.special)}" />
+            </p:column>
+
+            <p:column id="clmWidth" headerText="#{loc.width}" sortable="true" sortBy="#{documentTemplate.width}" filterable="true"  filterBy="#{documentTemplate.width}" filterMatchMode="contains" visible="#{documentTemplateBean.toogleList[4]}" exportable="#{documentTemplateBean.toogleList[4]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{documentTemplate.width}" class="Fright">
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value=""/>
+                    <f:attribute name="type" value="" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmHeight" headerText="#{loc.height}" sortable="true" sortBy="#{documentTemplate.height}" filterable="true"  filterBy="#{documentTemplate.height}" filterMatchMode="contains" visible="#{documentTemplateBean.toogleList[5]}" exportable="#{documentTemplateBean.toogleList[5]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{documentTemplate.height}" class="Fright">
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value=""/>
+                    <f:attribute name="type" value="" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmDefault" headerText="#{loc.isdefault}" sortable="true" sortBy="#{documentTemplate.isDefault}" filterable="true"  filterBy="#{documentTemplate.isDefault}" filterMatchMode="contains" visible="#{documentTemplateBean.toogleList[6]}" exportable="false">
+                <f:facet name="filter">
+                    <p:outputLabel rendered="false" />
+                </f:facet> 
+                <h:panelGroup rendered="#{documentTemplate.isDefault}" >
+                    <li class="Fleft BordRad10 TexAlLeft" >
+                        <i class="fa fa-check green"></i>
+                    </li>
+                </h:panelGroup>
+                <h:panelGroup rendered="#{!documentTemplate.isDefault}" >
+                    <li  class="Fleft BordRad10 TexAlLeft">
+                        <i class="fa fa-times red"></i>
+                    </li>
+                </h:panelGroup>
+                <h:outputText value="#{documentTemplate.isDefault ? loc.yes : loc.no}" style="margin-left: 3px"/>
+            </p:column>
+
+        </p:dataTable>  
+    </h:form>
+
+
+
+    <p:dialog id="dlgDocumentTemplateProcess" widgetVar="dlg_DocumentTemplateProcess" resizable="false" transient="true" focus="dlgDocumentTemplateProcess" responsive="true" dynamic="true"  closeOnEscape="true" width="50%">
+        <h:form id="frmNewDocumentTemplate" >  
+            <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+                <ui:param name="bean" value='#{documentTemplateBean}' />
+                <ui:param name="outputtext" value="#{loc.documenttemplateprocess}"/>
+                <ui:param name="update" value="pgrNewDocumentTemplate" />
+                <ui:param name="btnSaveId" value="#{documentTemplateBean.getRendered(263, 0)}" />
+                <ui:param name="btnDeleteId" value='false' /> 
+            </ui:include>
+
+            <h:panelGroup id="pgrNewDocumentTemplate" layout="block">
+                <div class="ui-g divContent">   
+                    <ui:include src="/pages/general/documenttemplate/newdocumenttemplate.xhtml" >
+                        <ui:param name="processInsert" value="true" />
+                        <ui:param name="processUpdate" value="false" />
+                        <ui:param name="bean" value='#{documentTemplateBean}' />
+                    </ui:include>
+                </div>
+            </h:panelGroup>
+        </h:form>
+
+    </p:dialog>
+
+</ui:composition>
+
+

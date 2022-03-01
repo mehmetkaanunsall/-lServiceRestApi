@@ -1,0 +1,26 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <p:overlayPanel widgetVar="#{overlay}" showEvent="none" for="#{for}"  dismissable="true" modal="true" hideEffect="blind" class="Wid30" showCloseIcon="true" transient="true" >  
+
+        <ui:include src="/pages/general/common/bookfilterlazyloadingcheckbox.xhtml">
+            <ui:param name="form" value='#{form}' />                                          <!-- Açılan kitabın formu -->
+            <ui:param name="filterBean" value='#{accountBookCheckboxFilterBean}' />                                 <!-- Hangi BookFilterı kullandıgımız (account için sabit) -->
+            <ui:param name="updateBean" value='#{updateBean}' />                                            <!-- Listeye çift tıklayınca çalışacak updateAllInformation metodun beanı -->
+            <ui:param name="header1" value='#{loc.companyname} / #{loc.namesurname}' />                                                 <!-- 1.kolon başlık -->
+            <ui:param name="value1" value='#{data.name}' />  <!-- 1.kolonda hangi veri gösterilecek -->
+            <ui:param name="header2" value="#{loc.taxno} / #{loc.identityno}" />                                                   <!-- 2.kolon başlık -->
+            <ui:param name="value2" value='#{data.taxNo}' />      <!-- 2.kolonda hangi veri gösterilecek -->
+            <ui:param name="header3" value="#{loc.code}" />                                                   <!-- 3.kolon başlık -->
+            <ui:param name="value3" value='#{data.code}' />      <!-- 3.kolonda hangi veri gösterilecek -->
+            <ui:param name="bean" value="" />                                                               <!-- (+) butonuna tıklayınca create() metodunun çağırılacağı bean -->
+            <ui:param name="newButtonID" value="" />                                                        <!-- (+) butonu yetki kontrolu için id bilgisi-->
+            <ui:param name="type" value='#{type}' />                                                        <!-- accountbook hangi sayfadan include edildi ise o sayfaya özel type örn:employee,station..-->    
+            <ui:param name="parameters" value='#{parameters}' />                                            <!-- Kitaba tıkladığımız yerde seçilen objeyi gönderiyoruz. Sayfaya ve parametreye göre sorgu çalışması için -->
+            <ui:param name="columnsize" value='#{columnsize}' />                                            <!-- Kitapta görülecek kolon sayısı -->
+            <ui:param name="bookname" value='accountbook' />
+        </ui:include>
+    </p:overlayPanel> 
+</ui:composition>

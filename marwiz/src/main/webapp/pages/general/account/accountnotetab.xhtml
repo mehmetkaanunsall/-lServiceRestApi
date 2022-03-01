@@ -1,0 +1,33 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+    <h:form id="frmAccountNoteTab">
+        <div class="ContainerIndent">
+            <ui:include src="/pages/general/common/tabgridtoolbar.xhtml">
+                <ui:param name="bean" value="#{accountNoteTabBean}"/>
+                <ui:param name="btnNewId" value="#{(!sessionBean.user.lastBranchSetting.isProcessPassiveAccount and accountNoteTabBean.selectedAccount.status.id == 6) ? 'false' : marwiz.pageIdOfGoToPage==11 ? accountNoteTabBean.getRendered(268, 0) : accountNoteTabBean.getRendered(269, 0)}"/>
+                <ui:param name="update" value="dlgNoteProcess" />
+                <ui:param name="outputtext" value="#{loc.notes}" />
+            </ui:include>
+            <p:dataTable id="dtbNotes"  var="note" selectionMode="single" value="#{accountNoteTabBean.listOfObjects}" widgetVar="notePF" selection="#{accountNoteTabBean.selectedObject}"
+                         rowKey="#{note.id}" emptyMessage="#{loc.norecordsfound}" class="tabDatatable" resizableColumns="true" >
+
+                <p:ajax event="#{sessionBean.user.gridRowSelect}" resetValues="true" listener="#{accountNoteTabBean.createDialog(2)}" update="dlgNoteProcess"  />  
+
+                <p:column id="clmName" headerText="#{loc.subject}" sortBy="#{note.name}">
+                    <h:outputText value="#{note.name}" />
+                </p:column>
+                <p:column id="clmPosition" headerText="#{loc.description}" sortBy="#{note.description}">
+                    <h:outputText value="#{note.description}" />
+                </p:column>
+            </p:dataTable>
+        </div>
+    </h:form>
+
+</ui:composition>

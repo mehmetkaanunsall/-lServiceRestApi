@@ -1,0 +1,37 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <p:dialog  id="dlgAccountProcess" widgetVar="dlg_accountProcess" width="70%" focus="dlgAccountProcess" dynamic="true" resizable="false"  responsive="true" transient="true"  modal="true" closeOnEscape="true">
+
+        <h:form id="frmNewAccount"  > 
+            <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+                <ui:param name="bean" value='#{newAccountBean}' />
+                <ui:param name="outputtext" value="#{loc.accountprocesses}"/>
+                <ui:param name="btnSaveId" value="true" />  
+                <ui:param name="btnDeleteId" value='false' /> 
+                <ui:param name="renderback" value='false'/>
+                <ui:param name="update" value='pgrNewAccount'/>
+            </ui:include>
+
+            <h:panelGroup id="pgrNewAccount" layout="block">
+                <div class="ui-g-12 divContent">    
+                    <ui:include  src="/pages/general/account/newaccount.xhtml">
+                        <ui:param name="bean" value="#{newAccountBean}"/>
+                    </ui:include>
+                </div>
+            </h:panelGroup>
+
+        </h:form> 
+
+    </p:dialog>
+
+</ui:composition>
+
+
+
+
+

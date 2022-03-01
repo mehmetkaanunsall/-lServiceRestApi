@@ -1,0 +1,113 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <!-- 
+        Açıklama : Satış ve satın alma irsaliyelerinin ortak grid sayfası tasarımı
+        Yazan    : Ali Kurt
+        Bean     : waybillBean
+        Sayfa    : Finans yönetimi altında irsaliye sayfaları 
+        Tarih    : 05.04.2017
+    -->
+
+    <h:panelGroup rendered="#{waybillBean.listOfBranch.size()>1}">
+        <h:form id="frmCriterTab">
+
+            <h:panelGroup id="pgrWaybillCriter" layout="block" transient="true">
+                <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+                    <ui:param name="outputtext" value="#{loc.waybills}"/>
+                    <ui:param name="bean" value='#{waybillBean}' />
+                    <ui:param name="update" value="pgrCriter" />
+                </ui:include>
+
+                <h:panelGroup id="pgrCriter" layout="block" transient="true">  
+                    <div class="ui-g divContent">
+                        <div class="panelToggle ui-g-12">
+                            <div class="ui-g-12 ui-md-6 ui-lg-2">
+                                <p:outputLabel value="#{loc.branch}" for="slcBranchCheckBox" styleClass="Fs12 FontBold"/>
+                                <p:selectCheckboxMenu  id="slcBranchCheckBox" value="#{waybillBean.searchObject.selectedBranchList}" 
+                                                       filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                                       label="#{waybillBean.searchObject.selectedBranchList.size()!=0 ? waybillBean.searchObject.selectedBranchList.size() :loc.all} #{waybillBean.searchObject.selectedBranchList.size()!=0 ? loc.branch : ''} #{waybillBean.searchObject.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                                    <f:selectItems value="#{waybillBean.listOfBranch}" itemLabel="#{branch.name}" itemValue="#{branch}" var="branch" />       
+                                    <p:ajax oncomplete="PF('slcBranchCheckBox').show()" global="false"  update="frmCriterTab:slcBranchCheckBox"/>
+                                    <p:ajax event="toggleSelect" update="frmCriterTab:slcBranchCheckBox"  oncomplete="PF('slcBranchCheckBox').show()" global="false"/>
+                                </p:selectCheckboxMenu>
+                            </div>
+                        </div>
+                    </div>
+                </h:panelGroup>
+            </h:panelGroup>
+        </h:form>
+        <div class="EmptyBox10"/>
+    </h:panelGroup>
+    
+    <ui:include src="/pages/general/common/datagridtoolbar.xhtml" >
+        <ui:param name="bean" value="#{waybillBean}"/>   <!-- Bean -->
+        <ui:param name="update" value=""/>  <!-- Yeni butonuna basınca açılacak sayfa  -->
+        <ui:param name="btnNewId" value="#{waybillBean.getRendered(11, 0)}"/>  <!-- buton id yetki kontrolü için  -->
+        <ui:param name="datatable" value="frmWaybill:dtbWaybill" />  <!-- datatable  -->
+        <ui:param name="dtbWidgetVar" value="waybillPF" />  <!--   datatable WidgetVar  -->
+        <ui:param name="fileName" value="#{loc.waybills}"/>
+        <ui:param name="renderedFilter" value='false'/>
+        <ui:param name="renderedToggler" value='true'/>
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+        <ui:param name="renderedAdd" value='true'/>
+        <ui:param name="renderedIsPurchase" value='true'/>
+    </ui:include>
+
+
+    <h:form id="frmWaybill">
+
+        <p:dataTable  id="dtbWaybill" var="waybill"  value="#{waybillBean.listOfObjects}" widgetVar="waybillPF" selection="#{waybillBean.selectedObject}" selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{waybill.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true" lazy="true"  >
+
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{waybillBean.goToPage()}"  />
+
+            <p:ajax event="sort" listener="#{waybillBean.sortListener}" />
+              <p:ajax event="colReorder" listener="#{waybillBean.reorder}" update="frmGridToolbar:toggle" />     
+            <p:ajax event="colResize"  listener="#{waybillBean.onResize}" />
+
+            <p:column id="clmBranch" headerText="#{loc.branch}" sortable="true" sortBy="#{waybill.br.name}" visible="#{waybillBean.toogleList[0]}" exportable="#{waybillBean.toogleList[0]}">               
+                <h:outputText value="#{waybill.branchSetting.branch.name}"  />
+            </p:column>
+            <p:column id="clmWaybillDate" headerText="#{loc.waybilldate}" sortable="true" sortBy="#{waybill.wb.waybilldate}" visible="#{waybillBean.toogleList[1]}" exportable="#{waybillBean.toogleList[1]}">               
+                <h:outputText value="#{waybill.waybillDate}"  >
+                    <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                </h:outputText>
+            </p:column>
+            <p:column id="clmDocumentNo" headerText="#{loc.documentnumber}" sortable="true" sortBy="#{waybill.wb.documentnumber}" visible="#{waybillBean.toogleList[2]}" exportable="#{waybillBean.toogleList[2]}">
+                <h:outputText value="#{waybill.documentSerial}" rendered="#{waybill.dNumber.id!=0}" />
+                <h:outputText value="#{waybill.documentNumber}" />
+            </p:column>
+            <p:column id="clmCurrentName" headerText="#{loc.currentname}" sortable="true" sortBy="#{waybill.acc.name}" visible="#{waybillBean.toogleList[3]}" exportable="#{waybillBean.toogleList[3]}">
+                <h:outputText value="#{waybill.account.name}" />
+            </p:column>
+
+            <p:column id="clmDeliveryPerson" headerText="#{marwiz.pageIdOfGoToPage==41 ? loc.senderperson : loc.deliveryperson}" sortable="true" sortBy="#{waybill.wb.deliveryperson}" visible="#{waybillBean.toogleList[4]}" exportable="#{waybillBean.toogleList[4]}" >
+                <h:outputText value="#{waybill.deliveryPerson}" />
+            </p:column>
+
+            <p:column id="clmType" headerText="#{loc.type}" sortable="true" sortBy="#{waybill.typd.name}" visible="#{waybillBean.toogleList[5]}" exportable="#{waybillBean.toogleList[5]}" >
+                <h:outputText value="#{waybill.type.tag}" />
+            </p:column>
+
+            <p:column id="clmStatus" headerText="#{loc.statu}" sortable="true" sortBy="#{waybill.sttd.name}" visible="#{waybillBean.toogleList[6]}" exportable="#{waybillBean.toogleList[6]}" >
+                <h:outputText value="#{waybill.status.tag}" />
+            </p:column>
+
+            <p:column id="clmPurchase" headerText="#{loc.ispurchase}" sortable="true" sortBy="#{waybill.wb.is_purchase}" visible="#{waybillBean.toogleList[7]}" exportable="#{waybillBean.toogleList[7]}" >
+                <h:outputText value="#{waybill.isPurchase ? loc.purchasewaybill : loc.saleswaybill}" />
+            </p:column>
+
+            <p:column id="clmWarehouse" headerText="#{loc.warehousename}" visible="#{waybillBean.toogleList[8]}" exportable="#{waybillBean.toogleList[8]}" >
+                <h:outputText value="#{waybill.warehouseNameList}" />
+            </p:column>
+
+        </p:dataTable>  
+    </h:form>
+
+</ui:composition>

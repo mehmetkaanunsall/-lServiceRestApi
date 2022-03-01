@@ -1,0 +1,204 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"> 
+
+
+
+    <h:form id="frmEInvoiceProcess">  
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.purchasinginvoiceprocesses }"/>
+            <ui:param name="bean" value='#{incomingEInvoicesBean}' />
+            <ui:param name="update" value="pgrEInvoiceProcess" />
+            <ui:param name="btnSaveId" value="#{incomingEInvoicesBean.processType==2}" />
+            <ui:param name="btnRejectId" value="#{incomingEInvoicesBean.selectedObject.invoiceScenarioId==2 and incomingEInvoicesBean.processType==2}" />
+        </ui:include>
+
+
+
+        <div class="divContent ui-g-12">
+            <h:panelGroup id="pgrEInvoiceProcess" layout="block">  
+                <div class="ui-g panelToggle">
+                    <div class="ui-g-12 ui-md-4 ui-lg-4">
+                        <p:outputLabel value="#{loc.current}"  styleClass="Fs12 FontBold"  />
+                        <p:commandLink id="btnAccountName"   process="@this" rendered="#{!incomingEInvoicesBean.isThereCurrent and incomingEInvoicesBean.processType==2 and incomingEInvoicesBean.selectedObject.account.id == 0}" title="#{loc.currentmatch}" actionListener="#{incomingEInvoicesBean.goToAccountUpdate()}" update="dlgAccount" >
+                            <i class="fa fa-link Fs15 tlbrSaveBtn "  style="margin-right: 8px !important" /> 
+                        </p:commandLink>
+                        <p:commandLink id="btnAccountName1"   process="@this" rendered="#{incomingEInvoicesBean.processType==2 and incomingEInvoicesBean.selectedObject.account.id != 0}" title="#{loc.currentmatched}" actionListener="#{incomingEInvoicesBean.goToAccountUpdate()}" update="dlgAccount" >
+                            <i class="Fs15 icon-ok green "  style="margin-right: 8px !important" /> 
+                        </p:commandLink>
+                        <p:inputText id="txtAccountName"  value="#{incomingEInvoicesBean.selectedObject.account.title}"  required="true"  readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.currentname}">
+                        </p:inputText>
+                    </div>
+
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel value="#{loc.currenttaxno}" for="txtCurrentTaxNo" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtCurrentTaxNo" value="#{incomingEInvoicesBean.selectedObject.account.taxNo}" readonly="true" placeholder="#{loc.currenttaxno}" styleClass="Wid95" /> 
+                    </div>
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel value="#{loc.invoicescenario}" for="txtInvoiceScenario" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtInvoiceScenario" value="#{incomingEInvoicesBean.selectedObject.invoiceScenarioId == 1 ? loc.basicinvoice : loc.commercialinvoice}" readonly="true" placeholder="#{loc.invoicescenario}" styleClass="Wid95" /> 
+                    </div>
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel value="#{loc.invoicetype}" for="txtInvoiceType" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtInvoiceType" value="#{incomingEInvoicesBean.selectedObject.type.tag}" readonly="true" placeholder="#{loc.invoicetype}" styleClass="Wid95" /> 
+                    </div>
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel value="#{loc.invoiceno}" for="txtInvoiceNo" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtInvoiceNo" value="#{incomingEInvoicesBean.eInvoiceNumber}" readonly="true" placeholder="#{loc.invoiceno}" styleClass="Wid95" /> 
+                    </div>
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel value="#{loc.documentdate}" for="txtInvoiceDate" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtInvoiceDate" value="#{incomingEInvoicesBean.selectedObject.invoiceDate}" readonly="true" placeholder="#{loc.invoiceDate}" styleClass="Wid95" > 
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                        </p:inputText>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel value="#{loc.discountamount}" for="txtDiscountAmount" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtDiscountAmount" value="#{incomingEInvoicesBean.selectedObject.totalDiscount}" readonly="true" placeholder="#{loc.discountamount}" styleClass="Wid95" >
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{incomingEInvoicesBean.selectedObject.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </p:inputText> 
+                    </div>
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel value="#{loc.roundingprice}" for="txtRounding" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtRounding" value="#{incomingEInvoicesBean.selectedObject.roundingPrice}" readonly="true" placeholder="#{loc.roundingprice}" styleClass="Wid95" >
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{incomingEInvoicesBean.selectedObject.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </p:inputText> 
+                    </div>
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel value="#{loc.totalprice}" for="txtTotalPrice" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtTotalPrice" value="#{incomingEInvoicesBean.selectedObject.totalMoney}" readonly="true" placeholder="#{loc.totalprice}" styleClass="Wid95" >
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{incomingEInvoicesBean.selectedObject.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </p:inputText> 
+                    </div>
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel value="#{loc.currency}" for="txtCurrency" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtCurrency" value="#{incomingEInvoicesBean.selectedObject.currency.code}" readonly="true" placeholder="#{loc.currency}" styleClass="Wid95" >
+                        </p:inputText>
+                    </div>
+
+                    <h:panelGroup rendered="#{incomingEInvoicesBean.processType==2}" >
+                        <div class="ui-g-12 ui-md-4 ui-lg-2">
+                            <p:outputLabel value="#{loc.termdate}" for="cldDueDate" styleClass="Fs12 FontBold"/>
+                            <p:calendar  id="cldDueDate" value="#{incomingEInvoicesBean.selectedObject.dueDate}" 
+                                         required="true" class="datepicker" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" 
+                                         showOn="button" showButtonPanel="true" placeholder="#{loc.termdate}" mask="true" navigator="true" timeControlType="select"
+                                         locale="#{sessionBean.locale}" yearRange="c-100:c+20"  >
+                                <p:ajax event="change" update="cldDueDate" resetValues="true" />
+                            </p:calendar>
+                        </div>
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{incomingEInvoicesBean.processType==2}" >
+                        <div class="ui-g-12 ui-md-4 ui-lg-2">
+                            <p:outputLabel value="#{loc.dispatchdate}" for="cldDispatchDate" styleClass="Fs12 FontBold"/>
+                            <p:calendar  id="cldDispatchDate" value="#{incomingEInvoicesBean.selectedObject.dispatchDate}" 
+                                         required="true" class="datepicker" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" 
+                                         showOn="button" showButtonPanel="true" placeholder="#{loc.dispatchdate}" mask="true" navigator="true" timeControlType="select"
+                                         locale="#{sessionBean.locale}" yearRange="c-100:c+20"  >
+                                <p:ajax event="change" update="cldDispatchDate" resetValues="true" global="false"/>
+                            </p:calendar>
+                        </div>
+                    </h:panelGroup>
+
+                    <div class="ui-g-12 ui-md-2 ui-lg-2">
+                        <p:outputLabel value="#{loc.description}" for="txtDescription" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtDescription" value="#{incomingEInvoicesBean.selectedObject.description}"  
+                                     placeholder="#{loc.description}" readonly="true" styleClass="Wid98"/>
+                    </div>
+
+
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel value="#{loc.approvalstatus}" for="txtApproval" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtApproval" value="#{incomingEInvoicesBean.selectedObject.approvalStatusId == 1 ?  loc.waitingforapproval :  ieInvoice.approvalStatusId == 2 ? loc.approved : ieInvoice.approvalStatusId == 3 ? loc.rejected : loc.noapprovalrequired}" readonly="true" placeholder="#{loc.approvalstatus}" styleClass="Wid95" /> 
+                    </div>
+
+
+                    <h:panelGroup rendered="#{incomingEInvoicesBean.processType==2 and incomingEInvoicesBean.selectedObject.type.id != 27}" >
+                        <div class="ui-g-12 ui-md-2 ui-lg-2">
+                            <p:outputLabel value="#{loc.fuelinvoice}" styleClass="Fs12 FontBold"/>
+                            <p:panelGrid layout="grid" columns="1" class="pngCheckBox" >  
+                                <p:selectBooleanCheckbox id="sbcFuelInvoice1"  disabled="#{incomingEInvoicesBean.processType==1}" value="#{incomingEInvoicesBean.selectedObject.isFuel}"   class="Fleft" >
+                                    <p:outputLabel value="#{loc.isfuelinvoice}"  style="margin-left: 2px;"  class="FontNormal"/>
+                                    <p:ajax global="false" listener="#{incomingEInvoicesBean.changeFuel}" update="pgrEInvoiceProcess"  /> 
+                                </p:selectBooleanCheckbox>
+
+                            </p:panelGrid> 
+                        </div> 
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{incomingEInvoicesBean.processType==2 and !incomingEInvoicesBean.selectedObject.isFuel}" >
+                        <div class="ui-g-12 ui-md-2 ui-lg-2">
+                            <p:outputLabel value="#{loc.warehouse}" for="slcWareHouse" styleClass="Fs12 FontBold"/>
+                            <p:selectOneMenu id="slcWareHouse" value="#{incomingEInvoicesBean.selectedObject.warehouse.id}" filter="true" required="true" styleClass="Wid95">
+                                <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true" />
+                                <f:selectItems value="#{incomingEInvoicesBean.listWarehouses}"  var="ware" itemLabel="#{ware.name}" itemValue="#{ware.id}" />
+                                <p:ajax event="change" global="false" update="pgrEInvoiceProcess" />
+                            </p:selectOneMenu>
+                        </div>
+                    </h:panelGroup>
+
+
+
+                </div>
+            </h:panelGroup>
+        </div>
+        <p:growl id="grwEProcessMessage" showDetail="true" globalOnly="true" life="10000"/> 
+
+    </h:form>
+
+    <div class="EmptyBox10"></div>
+
+    <p:tabView id="tbvEInvoice" activeIndex="#{marwiz.tabIndex}"  scrollable="true" cache="true"  dynamic="true">
+        <p:tab id="tab1" title="#{loc.stocks}" >
+            <ui:include src="/pages/system/einvoiceintegration/incomingeinvoicestocktab.xhtml"/>
+        </p:tab> 
+    </p:tabView>
+
+    <h:panelGroup id="pngAccountBook">
+
+        <ui:include src="/pages/general/common/accountbook.xhtml" >
+            <ui:param name="updateBean" value='#{incomingEInvoicesBean}' />
+            <ui:param name="for" value='frmEInvoiceProcess:txtAccountName' />
+            <ui:param name="type" value='' />
+            <ui:param name="parameters" value='' /> 
+            <ui:param name="columnsize" value='2' /> 
+            <ui:param name="form" value='frmAccountBookFilter' /> 
+            <ui:param name="overlay" value="olp_account" />
+        </ui:include>
+
+    </h:panelGroup>
+
+    <ui:include src="/pages/general/common/stockbook.xhtml" >
+        <ui:param name="updateBean" value='#{incomingEInvoicesBean}' />
+        <ui:param name="for" value='frmEInvoiceProcess:txtCurrency' />
+        <ui:param name="type" value='einvoicestock' />
+        <ui:param name="parameters" value="#{[incomingEInvoicesBean.selectedObject, incomingEInvoicesBean.selectedInvoiceItem.oldUnitName]}" /> 
+        <ui:param name="columnsize" value='4' /> 
+        <ui:param name="form" value='frmStockBookFilter' /> 
+        <ui:param name="overlay" value="olp_stock" />
+        <ui:param name="renderedNumberColumn" value="true" />
+    </ui:include>
+
+
+
+
+</ui:composition>

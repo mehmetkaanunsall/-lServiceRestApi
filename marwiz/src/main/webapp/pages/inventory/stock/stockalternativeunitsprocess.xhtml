@@ -1,0 +1,63 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <!-- 
+        Açıklama : Stok sayfasında alternatif birimler tabında ekleme,güncelleme,silme yapmak için açılan dialoğun içindeki xhtml
+        Yazan    : Esra ÇABUK
+        Bean     : stockAlternativeUnitsTabBean
+        Sayfa    : Stoklar
+    -->  
+
+    <h:form id="frmAlternativeUnitsProcess" >
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.alternativeunitprocesses}"/>
+            <ui:param name="bean" value='#{stockAlternativeUnitsTabBean}' />
+            <ui:param name="update" value="tbvStokProc:frmAlternativeUnits:dtbAlternativeUnits pgrAlternativeUnitProcess" />
+            <ui:param name="btnSaveId" value="#{stockAlternativeUnitsTabBean.getRendered(130, 0) and (stockAlternativeUnitsTabBean.selectedObject.isOtherBranch or stockAlternativeUnitsTabBean.processType==1)}" />   
+            <ui:param name="btnDeleteId" value='false' />
+            <c:if test="#{stockAlternativeUnitsTabBean.processType==2}">
+                <ui:param name="btnDeleteId" value="#{stockAlternativeUnitsTabBean.getRendered(131, 0) and (stockAlternativeUnitsTabBean.selectedObject.isOtherBranch or stockAlternativeUnitsTabBean.processType==1)}" />
+            </c:if>             
+        </ui:include>
+
+        <h:panelGroup id="pgrAlternativeUnitProcess" layout="block"> 
+            <div class="ui-g-12 divContent">
+                <div class="ui-g-12 ui-md-3 ui-lg-3">
+
+                    <p:outputLabel value="#{loc.unit}"  styleClass="Fs12 FontBold"/>
+                    <p:outputLabel value="1 #{stockAlternativeUnitsTabBean.stock.unit.name} = " class="Wid100 DispInlBlock WSpaceNoWrap MarTop5" />
+
+
+                </div>
+                <div class="ui-g-12 ui-md-4 ui-lg-4">
+
+                    <p:outputLabel value="#{loc.equivalent}" for="txtCode"  styleClass="Fs12 FontBold"/>
+                    <p:inputNumber id="txtCode" decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}"  
+                                   thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                   roundMethod="D" decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}" 
+                                   value="#{stockAlternativeUnitsTabBean.selectedObject.quantity}"  class="Wid97 TexAlRight"  placeholder="#{loc.equivalent}" required="true">
+                    </p:inputNumber>
+
+                </div>
+                <div class="ui-g-12 ui-md-5 ui-lg-5">
+
+                    <p:outputLabel value="#{loc.alternativeunit}" for="slAlternativeUnit" styleClass="Fs12 FontBold"/>
+                    <p:commandLink class="TextDecNone" title="#{loc.new}" immediate="true" update="tbvStokProc:dlgAlternativeUnitDefinitionProc" rendered="#{newUnitBean.getRendered(251, 0)}" actionListener="#{newUnitBean.create(2,stockAlternativeUnitsTabBean.unitList)}"  resetValues="true" >
+                        <i class="fa fa-plus Fs14 fltrPlusBtn" ></i>                               
+                    </p:commandLink>
+                    <p:selectOneMenu id="slAlternativeUnit" value="#{stockAlternativeUnitsTabBean.selectedObject.unit.id}" required="true" styleClass="Wid90">
+                        <f:selectItems value="#{stockAlternativeUnitsTabBean.unitList}"  var="unit" itemLabel="#{unit.name}" itemValue="#{unit.id}" />
+                    </p:selectOneMenu>
+
+                </div>
+            </div>
+        </h:panelGroup>
+    </h:form>
+
+
+</ui:composition>

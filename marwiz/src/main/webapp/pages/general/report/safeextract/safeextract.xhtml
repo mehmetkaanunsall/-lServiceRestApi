@@ -1,0 +1,276 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmSafeReport">
+
+
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.safeextract}"/>
+            <ui:param name="bean" value='#{safeExtractBean}' />
+            <ui:param name="update" value="pgSafeReport pgrSafeReportDatatable" />
+        </ui:include>
+
+        <h:panelGroup id="pgSafeReport" class="divContent ui-g" layout="block" transient="true">  
+            <div class="panelToggle  ui-g-12">
+
+
+                <h:panelGroup id="pnlWhereBranch"  >
+                    <h:panelGroup  >
+                        <div class="ui-g-12 ui-md-6 ui-lg-2 ">
+                            <p:outputLabel value="#{loc.branch}" for="slcBranch" class="FontBold Fs12"/>
+                            <p:selectCheckboxMenu  id="slcBranch"  value="#{safeExtractBean.selectedBranchList}" 
+                                                   filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                                   label="#{safeExtractBean.selectedBranchList.size()!=0 ? safeExtractBean.selectedBranchList.size() :loc.all} #{safeExtractBean.selectedBranchList.size()!=0 ? loc.branch : ''} #{safeExtractBean.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                                <f:selectItems value="#{safeExtractBean.listOfBranch}" itemLabel="#{branch.name}" itemValue="#{branch}" var="branch" />       
+                                <p:ajax oncomplete="PF('slcBranchCheckBox').show()" listener="#{safeExtractBean.changeBranch()}" global="false" update="pgSafeReport slcBranch"/>
+                                <p:ajax event="toggleSelect" update="pgSafeReport slcBranch" listener="#{safeExtractBean.changeBranch()}" oncomplete="PF('slcBranchCheckBox').show()" global="false"/>
+                            </p:selectCheckboxMenu>
+                        </div>    
+                    </h:panelGroup>
+                </h:panelGroup>
+
+
+                <div  class="ui-g-12 ui-md-6 ui-lg-2">
+                    <p:outputLabel value="#{loc.safecodename}" for="slcSafe" styleClass="Fs12 FontBold"/>
+                    <p:selectCheckboxMenu  id="slcSafe" converter="entityConverter" value="#{safeExtractBean.listOfSelectedSafe}" filter="true" 
+                                           filterMatchMode="contains" widgetVar="slc_safeCheckBox"  
+                                           label="#{safeExtractBean.listOfSelectedSafe.size()!=0 ? safeExtractBean.listOfSelectedSafe.size() :loc.all} #{safeExtractBean.listOfSelectedSafe.size()!=0 ? loc.safe : ''} #{safeExtractBean.listOfSelectedSafe.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                        <f:selectItems value="#{safeExtractBean.listOfSafeForExtract}" itemLabel="#{safe.name}" itemValue="#{safe}" var="safe" />       
+                        <p:ajax update="slcSafe ,safeReportDates, pnlWhereBranch " oncomplete="PF('slc_safeCheckBox').show()" global="false"/>
+                        <p:ajax event="toggleSelect" update="slcSafe , safeReportDates, pnlWhereBranch" oncomplete="PF('slc_safeCheckBox').show()" global="false"/>
+                    </p:selectCheckboxMenu>
+                </div>
+                <h:panelGroup id="safeReportDates" >
+                    <h:panelGroup rendered="#{(safeExtractBean.listOfSelectedSafe.size() == 1 and safeExtractBean.selectedBranchList.size() == 1) or (safeExtractBean.selectedBranchList.isEmpty() ? safeExtractBean.listOfBranch.size()>1 : safeExtractBean.selectedBranchList.size()>1)}">
+                        <div class="ui-g-12 ui-md-6 ui-lg-2">
+                            <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                            <p:calendar  id="cldStartDate" class="datepicker" value="#{safeExtractBean.selectedObject.beginDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                                <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                            </p:calendar>
+                        </div>
+                        <div class="ui-g-12 ui-md-6 ui-lg-2">
+                            <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                            <p:calendar  id="cldEndDate" class="datepicker" value="#{safeExtractBean.selectedObject.endDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                                <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                            </p:calendar>
+                        </div>   
+                    </h:panelGroup>
+                </h:panelGroup>
+            </div>
+        </h:panelGroup>
+
+    </h:form>
+    <div class="EmptyBox20" />
+
+    <h:panelGroup id="pgrSafeReportDatatable" >
+        <h:panelGroup rendered="#{safeExtractBean.isFind}">
+
+
+            <h:panelGroup id="pngDetail2">
+
+                <div class="EmptyBox10"/>
+                <c:if test="#{!((safeExtractBean.listOfSelectedSafe.size()==1 and safeExtractBean.selectedBranchList.size() == 1) or (safeExtractBean.selectedBranchList.isEmpty() ? safeExtractBean.listOfBranch.size()>1 : safeExtractBean.selectedBranchList.size()>1))}">
+                    <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                        <ui:param name="bean" value="#{safeExtractBean}"/>   <!-- Bean -->
+                        <ui:param name="datatable" value="frmSafeReportDatatableDetail:dtbSafeDetail" /> 
+                        <ui:param name="fileName" value="#{loc.safeextract}"/>
+                        <ui:param name="renderedToggler" value='true'/>
+                        <ui:param name="renderedExcel" value='true'/>
+                        <ui:param name="renderedPdf" value='true'/>
+                        <ui:param name="renderedPrint" value='true'/>
+                        <ui:param name="renderedGraphic" value='false'/>
+                        <ui:param name="renderedOutputText" value="true"/>
+                        <ui:param name="outputText" value="#{loc.lastsituation}"/>
+                    </ui:include>
+                </c:if> 
+
+
+
+             
+
+                <h:form id="frmSafeReportDatatableDetail">
+                    <c:if test="#{(safeExtractBean.listOfSelectedSafe.size()==1 and safeExtractBean.selectedBranchList.size() == 1) or (safeExtractBean.selectedBranchList.isEmpty() ? safeExtractBean.listOfBranch.size()>1 : safeExtractBean.selectedBranchList.size()>1)}">
+                        <p:toolbar style="height: 28px;" >
+                            <f:facet name="left"> 
+                                <p:commandLink title="#{loc.back}" class="Fleft" rendered="#{safeExtractBean.isBack}"   immediate="true"  >
+                                    <i class="icon-reply-outline Fs20 tlbrBackBtn"/>    
+                                    <f:actionListener  binding="#{safeExtractBean.goToBack()}"/>
+                                </p:commandLink>
+                                <h:outputText value="#{loc.lastsituation}" class="outputTextFont Fleft MarRight8" ></h:outputText>
+                            </f:facet>
+                        </p:toolbar>      
+                    </c:if>  
+
+                    <p:dataTable  id="dtbSafeDetail"  var="SafeDetail"  value="#{safeExtractBean.listOfSafeMovement}" selectionMode="single"  widgetVar="safeDetailPF" emptyMessage="#{loc.norecordsfound}" selection="#{safeExtractBean.selectedSafeMovement}"
+                                  rows="#{sessionBean.user.defualtGridSize}" rowKey="#{SafeDetail.safe.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                                  rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" reflow="true" lazy="false" 
+                                  class="dtbReport" >
+
+                        <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{safeExtractBean.seeSafeExtractDetail()}" />
+
+                        <p:ajax event="colReorder" listener="#{stockBean.reorder}" update="frmGridToolbar:toggle" />     
+                        <p:ajax event="colResize"  listener="#{stockBean.onResize}" />
+
+                        <p:column id="clmBranch" headerText="#{loc.branch}" visible="#{safeExtractBean.toogleList[0]}" exportable="#{safeExtractBean.toogleList[0]}">
+                            <h:outputText  value="#{SafeDetail.branch.name}"/>
+                        </p:column>
+
+                        <p:column id="clmSafe" headerText="#{loc.safename}" visible="#{safeExtractBean.toogleList[1]}"  exportable="#{safeExtractBean.toogleList[1]}">
+                            <h:outputText value="#{SafeDetail.safe.name}" />
+                        </p:column>
+
+                        <p:column id="clmIncoming" headerText="#{loc.sum}  #{loc.incoming}" visible="#{safeExtractBean.toogleList[2]}"  exportable="#{safeExtractBean.toogleList[2]}">
+                            <p:column>
+                                <h:outputText value="#{SafeDetail.totalIncoming}" style="float: right;">
+                                    <f:converter converterId="currencyConverter" />
+                                    <f:attribute name="currency" value="#{SafeDetail.safe.currency}"/>
+                                    <f:attribute name="type" value="currency" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column rendered="true" >
+                                <li  class="Fleft BordRad10" style="float: right;margin-right: 10px">
+                                    <i class="fa fa-plus green"></i>
+                                </li>  
+                            </p:column>
+                        </p:column>
+
+                        <p:column id="clmOutcoming" headerText="#{loc.sum} #{loc.outcoming}" visible="#{safeExtractBean.toogleList[3]}"  exportable="#{safeExtractBean.toogleList[3]}">
+                            <p:column>
+                                <h:outputText value="#{SafeDetail.totalOutcoming}" style="float: right;">
+                                    <f:converter converterId="currencyConverter" />
+                                    <f:attribute name="currency" value="#{SafeDetail.safe.currency}"/>
+                                    <f:attribute name="type" value="currency" />
+                                </h:outputText>
+                            </p:column>    
+                            <p:column rendered="true" >
+                                <li  class="Fleft BordRad10" style="float: right;margin-right: 10px">
+                                    <i class="fa fa-minus red"></i>
+                                </li>
+                            </p:column>
+                        </p:column>
+
+                        <p:column id="clmBalance" headerText="#{loc.balance}" visible="#{safeExtractBean.toogleList[4]}"  exportable="#{safeExtractBean.toogleList[4]}">
+
+                            <h:outputText value="#{SafeDetail.balance}" style="float: right;">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{SafeDetail.safe.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+
+                        <p:columnGroup id="clmColumGroup" rendered="#{safeExtractBean.listOfSafeMovement.size()>0 and !(safeExtractBean.listOfSelectedSafe.size()==1 and safeExtractBean.selectedBranchList.size() == 1)}"  type="footer" >
+
+                            <p:column visible="#{safeExtractBean.toogleList[0]}" exportable="#{safeExtractBean.toogleList[0]}">
+                                <f:facet name="footer"  >
+                                    <h:outputText value="" class="FontBold"/>
+                                </f:facet>
+                            </p:column>
+
+
+                            <p:column visible="#{safeExtractBean.toogleList[1]}" exportable="#{safeExtractBean.toogleList[1]}">
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{loc.sum}" class="FontBold"/>
+                                </f:facet>
+                            </p:column>
+
+                            <p:column  visible="#{safeExtractBean.toogleList[2]}" exportable="#{safeExtractBean.toogleList[2]}">
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{safeExtractBean.subTotalIncome}" class="Fright FontBold"/>
+                                </f:facet>
+                            </p:column>
+
+                            <p:column visible="#{safeExtractBean.toogleList[3]}" exportable="#{safeExtractBean.toogleList[3]}">
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{safeExtractBean.subTotalOutcome}" class="Fright FontBold"/>
+                                </f:facet>
+                            </p:column>
+
+                            <p:column visible="#{safeExtractBean.toogleList[4]}" exportable="#{safeExtractBean.toogleList[4]}">
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{safeExtractBean.subTotalBalance}" class="Fright FontBold"/>
+                                </f:facet>
+                            </p:column>
+                        </p:columnGroup>
+
+                    </p:dataTable>  
+                </h:form>
+            </h:panelGroup>
+
+            <div class="EmptyBox10"/>
+
+            <h:panelGroup id="pngMovement">
+                <c:if test="#{(safeExtractBean.listOfSelectedSafe.size()==1 and safeExtractBean.selectedBranchList.size() == 1) or (safeExtractBean.selectedBranchList.isEmpty() ? safeExtractBean.listOfBranch.size()>1 : safeExtractBean.selectedBranchList.size()>1)}">
+
+                    <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                        <ui:param name="bean" value="#{safeMovementTabBean}"/>
+                        <ui:param name="datatable" value="frmMovementDataTable:dtbMovement" />
+                        <ui:param name="fileName" value="#{loc.safeextract}"/>
+                        <ui:param name="renderedToggler" value='false'/>
+                        <ui:param name="renderedExcel" value='true'/>
+                        <ui:param name="renderedPdf" value='true'/>
+                        <ui:param name="renderedPrint" value='true'/>
+                        <ui:param name="renderedGraphic" value='false'/>
+                    </ui:include>
+                    #{safeMovementTabBean.init()}
+                    <ui:include src="/pages/general/common/movementtabdatatable.xhtml">
+                        <ui:param name="bean" value='#{safeMovementTabBean}' />
+                        <ui:param name="currency" value='#{movement.safe.currency}' />
+                        <ui:param name="safeName" value='#{movement.safe.name}' />
+                        <ui:param name="type" value="safeExtract"/>
+                        <ui:param name="renderedBranch" value="#{true}"/>
+                        <ui:param name="renderedSafeName" value="#{true}"/>
+                        <ui:param name="renderedSub" value="#{true}"/>
+                    </ui:include>
+
+                </c:if>
+            </h:panelGroup>
+
+        </h:panelGroup>
+    </h:panelGroup>
+
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+
+
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.safeextract}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+
+    <script type="text/javascript">
+        function print_pageMovement() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.safemovements}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+
+
+</ui:composition>

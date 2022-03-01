@@ -1,0 +1,94 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:form id="frmProfileShortCutProcess">
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.shortcutprocess}"/>
+            <ui:param name="bean" value='#{profileShortcutTabBean}' />
+            <ui:param name="update" value=" grwProfileSortcut" />
+            <ui:param name="btnSaveId" value="true" />               
+            <ui:param name="renderback" value='false'/>
+            <ui:param name="btnDeleteId" value='false' />
+            <ui:param name="dtbWidgetVar" value="sortcutPF" />
+            <ui:param name="privateTest" value="true" />  
+            
+            <c:if test="#{bean.processType==2}">
+                <ui:param name="btnDeleteId" value="true" />
+            </c:if>
+        </ui:include>
+
+        <p:growl id="grwProfileSortcut" showDetail="true" globalOnly="true" life="5000"/>
+        <h:panelGroup id="pgrProfileShortCutType1" layout="block" transient="true" >  
+            <div class="ui-g divContent">
+
+
+                <div class="ui-g-12 ui-md-3 ui-lg-3 ">
+                    <p:outputLabel value="#{loc.modulename}" for="slcModule" class="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcModule" value="#{profileShortcutTabBean.moduleId}"  styleClass="Wid95" required="true">
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="0" />
+                        <f:selectItems value="#{sessionBean.authorizedModules}" var="module" itemLabel="#{module.nameMap.get(sessionBean.langId).name}" itemValue="#{module.id}" />
+                        <p:ajax listener="#{profileShortcutTabBean.updateFolders()}" update="slcFolder,slcPage" />
+
+                    </p:selectOneMenu>
+                </div>
+
+                <div class="ui-g-12 ui-md-3 ui-lg-3">
+                    <p:outputLabel value="#{loc.foldername}" for="slcFolder" class="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcFolder" value="#{profileShortcutTabBean.folderId}"   styleClass="Wid95" required="true">
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="0" />
+                        <f:selectItems value="#{profileShortcutTabBean.selectedModule.folders}" var="folder" itemLabel="#{folder.nameMap.get(sessionBean.langId).name}" itemValue="#{folder.id}" />
+                        <p:ajax listener="#{profileShortcutTabBean.updatePages()}" update="slcPage" />
+                    </p:selectOneMenu>
+                </div>
+
+                <div class="ui-g-12 ui-md-3 ui-lg-3">
+                    <p:outputLabel value="#{loc.pagename}" for="slcPage" class="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcPage" value="#{profileShortcutTabBean.selectedObject.page.id}" styleClass="Wid95" required="true" >
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="0" />
+                        <f:selectItems value="#{profileShortcutTabBean.selectedFolder.pages}" var="page" itemLabel="#{page.nameMap.get(sessionBean.langId).name}" itemValue="#{page.id}" />
+                        <p:ajax listener="#{profileShortcutTabBean.bringPage()}" update="slcPage" />
+                    </p:selectOneMenu>
+                </div>
+
+                <div class="ui-g-12 ui-md-3  ui-lg-3">
+                    <p:outputLabel value="#{loc.shortcutdefinition}" for="txtShortcutDefinition"  styleClass="Fs12 FontBold" />
+                    <p:inputText id="txtShortcutDefinition" value="#{profileShortcutTabBean.selectedObject.hotkey}" required="true"  placeholder="Ctrl+Shift+k"/>
+
+
+
+                </div>
+
+            </div>
+
+        </h:panelGroup>
+
+        <h:panelGroup id="pgrProfileShortCutType2" layout="block" transient="true" rendered="false">  
+            <div class="ui-g divContent">
+
+                <div class="ui-g-12 ui-md-6 ui-lg-6">
+                    <p:outputLabel value="#{loc.pagename}" for="txtPage"  styleClass="Fs12 FontBold" />
+                    <p:inputText id="txtPage" value="#{profileShortcutTabBean.selectedObject.page.tag}" required="true"  placeholder="#{loc.pagename}" readonly="true"/>
+
+                </div>
+
+                <div class="ui-g-12 ui-md-6  ui-lg-6">
+                    <p:outputLabel value="#{loc.shortcutdefinition}" for="txtShortcut"  styleClass="Fs12 FontBold" />
+                    <p:inputText id="txtShortcut" value="#{profileShortcutTabBean.selectedObject.hotkey}" required="true"  placeholder="Ctrl+Shift+k">
+
+                    </p:inputText>
+
+                </div>
+
+            </div>
+
+        </h:panelGroup>
+
+    </h:form>
+
+</ui:composition> 
+

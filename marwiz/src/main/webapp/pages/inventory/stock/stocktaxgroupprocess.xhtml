@@ -1,0 +1,53 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <!-- 
+        Açıklama : Stoğa vergi grupları eklemek için açılan dialoğa include edilen xhtml
+        Yazan    : Ali Kurt
+        Bean     : stockTaxGroupsTabBean
+        Sayfa    : Stoklar
+    --> 
+    <h:form id="frmTaxGroupProcess" >
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.taxgroupprocess}"/>
+            <ui:param name="bean" value='#{stockTaxGroupsTabBean}' />
+            <ui:param name="update" value="slcTaxGroup" />
+            <ui:param name="btnSaveId" value="#{stockTaxGroupsTabBean.getRendered(127, 0)}" />   
+            <ui:param name="btnDeleteId" value='false' />
+            <ui:param name="btnDeleteId" value="#{stockTaxGroupsTabBean.processType==2 and stockTaxGroupsTabBean.getRendered(128, 0)}" />
+            <c:if test="#{stockTaxGroupsTabBean.processType==2}">
+                <ui:param name="renderedHistory" value="true"/>
+            </c:if>
+        </ui:include>
+
+        <div class="ui-g divContent">
+            <div class="ui-g-12">
+
+                <p:outputLabel value="#{loc.type}" for="slcPurchase" styleClass="Fs12 FontBold"/>
+                <p:selectOneMenu id="slcPurchase" value="#{stockTaxGroupsTabBean.isPurchase}" required="true">
+                    <f:selectItem itemValue="true"  itemLabel="#{loc.purchase}" />
+                    <f:selectItem itemValue="false"  itemLabel="#{loc.sales}" />
+                    <p:ajax global="false" listener="#{stockTaxGroupsTabBean.selectTaxGroup()}" update="frmTaxGroupProcess" />
+                </p:selectOneMenu> 
+
+                <p:outputLabel value="#{loc.name}" for="slcTaxGroup" styleClass="Fs12 FontBold"/>
+                <p:commandLink class="TextDecNone" title="#{loc.new}" immediate="true" update="tbvStokProc:dlgTaxGroupProc" rendered="#{newTaxGroupBean.getRendered(186, 0)}" actionListener="#{newTaxGroupBean.create(stockTaxGroupsTabBean.taxGroupList)}"  resetValues="true" >
+                    <i class="fa fa-plus Fs14 fltrPlusBtn" ></i>                               
+                </p:commandLink>
+
+                <p:selectOneMenu id="slcTaxGroup" value="#{stockTaxGroupsTabBean.stocktaxgroup.taxGroup.id}" required="true">
+                    <f:selectItem itemValue="0"  itemLabel="#{loc.choose}" itemDisabled="true"/>
+                    <f:selectItems value="#{stockTaxGroupsTabBean.taxGroupList}" var="tax" itemLabel="#{tax.name}" itemValue="#{tax.id}"  />
+                </p:selectOneMenu> 
+            </div>
+        </div>
+    </h:form>
+
+
+
+</ui:composition>

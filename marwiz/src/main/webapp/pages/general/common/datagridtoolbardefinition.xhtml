@@ -1,0 +1,266 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+                xmlns:pe="http://primefaces.org/ui/extensions">
+    <!--BU SAYFADA FORMAT YAPMAYINIZ JAVASCRİPT BOZUULUYOR !!!!!
+    bean:Hangi sayfada kullanılcaksa o sayfanın Bean i
+    update: Yeni butonuna basınca açılacak dialog  
+    btnNewId: buton id yetki kontrolü için 
+    datatable: kullanılan sayfadaki datatable in id si
+    detailFilterXhtmlPath: detaylı filtre için açılan xhtml yolu
+    filterBean: detaylı filtre için açılan bean
+    fileName: excel pdf için oluşturulacak dosyanın adı
+    renderedFilter: Filtre butonunun yetki kontrolü
+    renderedToggler: Grid kolonları açıp kapatma butonunun yetki kontrolü
+    renderedExel:excel butonunun yetki kontrolü
+    renderedPdf: pdf butonunun yetki kontrolü
+    renderedAdd:artı butonunun yetki kontrolü
+    gridId: kullanılan sayfadaki gridin veri tabanındaki id si
+    -->
+    <h:form id="#{form}"   >
+
+        <p:remoteCommand name="waitToExportExcel"   actionListener="#{bean.waitToExportExcel()}"   />
+        <p:remoteCommand name="exportLimitMessegeForExcel"  action="#{bean.showLimitMessegeForExcel()}" />
+        <p:remoteCommand name="exportLimitMessege"  action="#{bean.showLimitMessege()}" />
+        <p:remoteCommand name="waitToExportPdf"   actionListener="#{bean.waitToExportPdf()}"   />
+
+        #{bean.clearFilter(widgetvar)} 
+        <p:defaultCommand  target="test" />
+        <p:commandLink  id="test" global="false" style="display: none"   />
+        <p:toolbar>
+            <f:facet name="left">
+                <p:commandLink id="btnAdd" actionListener="#{bean.create}" resetValues="true" rendered="#{btnNewId}" title="#{loc.new}"  update="#{update}"  onclick="hide()" class="Fleft" process="@this" >
+                    <i class="icon-plus tlbrAddBtn Fs23"  />
+                </p:commandLink>  
+
+
+
+                <p:inputText id="globalFilter" value="#{bean.autoCompleteValue}" styleClass="tlbrSearchInput Fleft" >
+                    <p:ajax event="keyup"  global="false" onstart="PF('#{widgetvar}').filter();hide();" update="#{datatable}" />
+                </p:inputText>
+
+                <p:watermark for="globalFilter"  value="#{loc.enteratleastonecharacter}" id="watermark"/>
+
+
+                <p:commandLink process="@this" rendered="#{renderedEInvoiceStock}" title="#{loc.einvoiceproductinformation}" actionListener="#{bean.eInvoiceInformation()}" resetValues="true" >
+                    <i class="fa fa-file-text-o Fs20 " style=" margin-top: 8px; margin-left: 10px; color: #0078A8"  />
+                </p:commandLink>
+                <p:selectBooleanCheckbox value="#{bean.isCheck}" rendered="#{renderedCheckBox}"  itemLabel="#{labelForCheckBox}" class="Fleft allcheck dialogCheckbox MarTop5 MarLeft15">
+                    <p:ajax delay="100" listener="#{bean.showList()}" process="@form" />
+                </p:selectBooleanCheckbox>
+
+                <p:selectBooleanCheckbox value="#{valueForCheckBox1}" rendered="#{renderedCheckBox1}" itemLabel="#{labelForCheckBox1}" class="Fleft allcheck MarTop6 MarLeft5">
+                    <p:ajax delay="100" listener="#{bean.bringList}" process="@form" />
+                </p:selectBooleanCheckbox>
+
+                <p:selectBooleanCheckbox value="#{valueForCheckBox2}" rendered="#{renderedCheckBox2}" itemLabel="#{labelForCheckBox2}" class="Fleft allcheck MarTop6 MarLeft5">
+                    <p:ajax delay="100" listener="#{bean.bringList}" process="@form" />
+                </p:selectBooleanCheckbox>
+
+                <p:selectOneButton value="#{bean.chequeBillType}" rendered="#{renderedChequeBill}" unselectable="false" class="MarLeft10 MarTop5 tlbrIsPurchase">
+                    <f:selectItem itemLabel="#{loc.customercheque}" itemValue="1" />
+                    <f:selectItem itemLabel="#{loc.debtcheque}" itemValue="2" />
+                    <f:selectItem itemLabel="#{loc.customerbill}" itemValue="3" />
+                    <f:selectItem itemLabel="#{loc.debtbill}" itemValue="4" />
+                    <f:selectItem itemLabel="#{loc.all}" itemValue="0" />
+                    <p:ajax listener="#{bean.changeChequeBillType()}" update="mainPanel"/>
+                </p:selectOneButton>
+
+
+            </f:facet>
+
+            <f:facet name="right" >
+
+                <p:selectOneButton value="#{bean.orderQuantityType}" rendered="#{renderedOrderQuantity}"  unselectable="false" class="Fleft MarLeft10 MarTop4 tlbrIsDirection">
+                    <f:selectItem itemLabel="#{loc.minimum}" itemValue="1" />
+                    <f:selectItem itemLabel="#{loc.maximum}" itemValue="2" />
+                    <f:selectItem itemLabel="#{loc.average}" itemValue="3" />
+                    <p:ajax listener="#{bean.showOrderQuantityMessage()}" />
+                </p:selectOneButton>
+
+                <p:commandLink title="#{titleOpen}"   process="@form" rendered="#{renderOpen}" actionListener="#{bean.openUpdate()}" class="Fleft"  >
+                    <i class="fa fa-unlock-alt Fs23 MarTop6 tlbrSaveBtn MarRight4" style="margin-top: 5px;"/>
+                </p:commandLink>  
+                
+                <p:commandLink title="#{titleUpdateSend}"   process="@form" rendered="#{renderUpdateSend}" actionListener="#{bean.updateSendStatus()}" class="Fleft"  >
+                    <i class="fa fa-pencil Fs23 MarTop6 tlbrSaveBtn MarRight10" style="margin-top: 5px;"/>
+                </p:commandLink>  
+                
+                
+                <p:commandLink class="Fleft" rendered="#{renderedIntegration}" title="#{loc.send}" actionListener="#{bean.sendIntegration()}" >
+                    <i class="fa fa-paper-plane Fs23 tlbrUploadBtn" style="margin-top: 5px;" />      
+                </p:commandLink>
+
+                <p:commandLink title="#{txtPriceForWaybill}"  class ="Fleft tlbrIcon" rendered="#{btnPriceForWaybill}"  actionListener="#{bean.bringPriceForWaybill()}">
+                    <i class="fa fa-retweet tlbrUploadBtn Fs20"  style="margin-top: 7px;" />
+                </p:commandLink>  
+
+                <p:commandLink  title="#{loc.quickadd}" rendered="#{btnQuickAdd}" actionListener="#{bean.openQuickAdd}" class="Fleft" process="@this" oncomplete="#{filterBean.dialogId}" >
+                    <i class="fa fa-bolt tlbrBackBtn Fs20 MarTop7" />
+                </p:commandLink> 
+
+                <p:commandLink id="btnPriceUpdate" title="#{loc.collectiveupdateprice}" rendered="#{renderedUpdatePrice}" process="@this" actionListener="#{bean.updatePrice()}" class="Fleft MarTop7 tlbrIcon" resetValues="true">
+                    <i class="fa fa-magic tlbrBackBtn Fs21" style="margin-top: -1px; margin-right: 3px;"></i>
+                </p:commandLink>  
+
+                <p:commandLink id="btnProcessInfo2" rendered="#{renderedProcessInfo2}" class="Fleft">
+                    <i class="icon-info-circled-alt tlbrBackBtn Fs23 MarRight-5" />
+                    <p:tooltip for="btnProcessInfo2" position="top" value="#{tltpProcessInfo2}" />
+                </p:commandLink>
+
+                <p:tooltip for="btnChangeStockTaxDepartment" value="#{loc.departmentofallstockscanbechangedaccordingtotaxgroup}"/>
+                <p:commandLink id="btnChangeStockTaxDepartment" actionListener="#{bean.beforeChangeStockTaxDepartment()}" resetValues="true" rendered="#{renderedTaxDepartment}" class="Fleft" process="@this" >
+                    <i class="fa fa-undo tlbrBackBtn Fs23 MarTop5"  />
+                </p:commandLink>
+
+                <p:commandLink id="btnProcessInfo" rendered="#{renderedProcessInfo}">
+                    <i class="icon-info-circled-alt tlbrBackBtn Fs23 MarLeft4" />
+                    <p:tooltip for="btnProcessInfo" position="top" value="#{tltpProcessInfo}" />
+                </p:commandLink>
+
+                <p:commandLink id="btnSave" class="Fleft" rendered="#{renderedSave}" title="#{loc.save}" actionListener="#{bean.save()}"  process="@this" >
+                    <i class="fa fa-save tlbrBackBtn Fs23" style="margin-top: 5px" />
+                </p:commandLink> 
+
+                <h:panelGroup id="pgrExporter" class="panelGridNoBorder">
+
+
+                    <p:commandLink id="btnFinishStockTaking" rendered="#{renderedFinishStockTaking}" title="#{loc.finishstocktaking}" class ="Fleft tlbrIcon" actionListener="#{bean.finishStockTaking}"  process="@this"  >
+                        <i class="fa fa-flag-checkered tlbrBackBtn Fs22"  style="margin-top: 9px; margin-right: 4px;" />
+                    </p:commandLink>                                                                                
+
+
+                    <p:commandLink id="btnCloseAllDifferences" delay="100" rendered="#{renderedStockTaking}" class ="Fleft tlbrIcon" title="#{loc.updateall}" actionListener="#{bean.closeAllDifferences}"  process="@this"  >
+                        <i class="fa fa-check-circle-o tlbrBackBtn Fs24" style="margin-top: 7px" />
+                    </p:commandLink> 
+
+                    <p:commandLink id="btnTxtUpload" global="false" title="#{loc.importtxt}" resetValues="true"  class ="Fleft tlbrIcon" rendered="#{renderedTxtUpload and bean.renderExportButton}" update="#{updateDialog}" actionListener="#{bean.openTxtUpload}" >
+                        <i class="fa fa-upload tlbrUploadBtn Fs21" style="margin-top: 7px;margin-left: 4px;" />
+                    </p:commandLink>
+
+                    <p:commandLink id="btnUpload" global="false" title="#{loc.fileupload}" resetValues="true"  class ="Fleft tlbrIcon" rendered="#{renderedUpload and bean.renderExportButton}" update="#{updateDialog}" actionListener="#{bean.openFileUpload}" >
+                        <i class="fa fa-cloud-upload tlbrUploadBtn Fs23" style="margin-top: 7px;margin-left: 4px;" />
+                    </p:commandLink>
+                    
+                    <p:commandButton rendered="#{btnCustomerAgreements}" action="#{bean.creditControl()}" value="#{loc.billing}" class="Fleft MarLeft10 MarTop4 tlbrIsDirection">
+
+                    </p:commandButton>
+
+                    <h:commandLink id="btnExportStocks" title="#{loc.transfertoexcel}"  class ="Fleft tlbrIcon" rendered="#{exportTaking}"  actionListener="#{bean.exportStocks()}">
+                        <i class="fa fa-cloud-download tlbrUploadBtn Fs23"  style="margin-top: 7px;" />
+                    </h:commandLink>  
+
+
+                    <h:commandLink id="btnExcelExportManuel" title="#{loc.transfertoexcel}"  class ="tlbrIcon"  onclick="if (count > 300000) {
+                        exportLimitMessegeForExcel();
+                        return false;
+                        } else {
+                        waitToExportExcel();
+                        }" rendered="#{renderedExcelManuel and bean.renderExportButton}" actionListener="#{bean.createExcel()}">
+                        <i class="icon-file-excel tlbrExcelBtn Fs23"  />
+                    </h:commandLink>  
+
+                    <h:commandLink id="btnPdfExportManuel"    title="#{loc.transfertopdf}"  class ="Fleft tlbrIcon "  onclick="if (count > 60000) {
+                        exportLimitMessege();
+                        return false;
+                        } else {
+                        waitToExportPdf();
+                        }"  rendered="#{renderedPdfManuel and bean.renderExportButton}"  actionListener="#{bean.createPdf()}" >
+                        <i class="icon-file-pdf tlbrPdfBtn Fs23"  />
+                    </h:commandLink>
+
+
+                    <h:commandLink id="btnExcel" title="#{loc.transfertoexcel}"  class ="Fleft tlbrIcon" rendered="#{renderedExel and bean.renderExportButton}">
+                        <i class="icon-file-excel tlbrExcelBtn Fs23"  />
+                        <p:dataExporter type="xls" target="#{datatable}" fileName="#{bean.encodeFileNameForExportData(fileName)}" postProcessor="#{bean.postProcessXLS}" options="#{bean.excelOptions}"/>  
+                    </h:commandLink>  
+                    <c:if test="#{!renderedSpecialExport}"> 
+                        <h:commandLink id="btnPdf" title="#{loc.transfertopdf}"  class ="Fleft tlbrIcon "  rendered="#{renderedPdf and bean.renderExportButton}">
+                            <i class="icon-file-pdf tlbrPdfBtn Fs23"  />
+                            <pe:exporter type="pdf" target="#{datatable}" fileName="#{bean.encodeFileNameForExportDataPdf(fileName)}" 
+                                         facetBackground="#000000" facetFontSize="8" facetFontColor="#FFFFFF" facetFontStyle="BOLD" 
+                                         cellFontColor="#000000" cellFontSize="8" cellFontStyle="NORMAL" encoding="Cp1254"  />  
+                        </h:commandLink>
+                    </c:if>
+                    <c:if test="#{renderedSpecialExport}"> 
+                        <h:commandLink id="btnPdf"    title="#{loc.transfertopdf}"  class ="Fleft tlbrIcon " rendered="#{renderedPdf and bean.renderExportButton}"  actionListener="#{bean.createPdf()}" >
+                            <i class="icon-file-pdf tlbrPdfBtn Fs23"  />
+                        </h:commandLink>
+                    </c:if>
+                </h:panelGroup>
+
+
+
+                <p:commandLink id="btnToggler" title="#{loc.editcolumns}" global="false" rendered="#{renderedToggler}"    class="Fright tlbrIcon">
+                    <i class="icon-list tlbrColumnBtn Fs23"  />
+                </p:commandLink>
+                <p:columnToggler    id="toggle"  datasource="#{datatable}" widgetVar="columnToggler" trigger="btnToggler" >
+                    <p:ajax event="toggle"   listener="#{bean.onToggle}"  update="#{datatable} pgrExporter" />
+                </p:columnToggler>
+
+
+
+
+                <p:commandButton id="btnDebiting"  global="false" actionListener="#{bean.openDebitingDialog}" rendered="#{btnDebiting}" process="@form" value="#{loc.accrue}" class="MarTop5" />   
+
+                <p:commandButton id="btnPaySalary"  global="false" actionListener="#{bean.openPaymentDialog}" rendered="#{btnPaySalary}" process="@form" value="#{loc.paysalary}" class="MarTop5" />   
+
+
+                <p:commandButton id="btnPaySalaryAndDebiting"  global="false" actionListener="#{bean.openPaymentandDebitingDialog}" rendered="#{btnPaySalaryAndDebiting}" process="@form" value="#{loc.accrueandpaysalary}" class="MarTop5" />   
+
+                <p:selectBooleanCheckbox value="#{bean.isResetAll}" rendered="#{renderedResetAll}"  itemLabel="#{loc.resetall}" class="Fleft allcheck dialogCheckbox MarTop5 MarLeft15">
+                    <p:ajax delay="100" listener="#{bean.resetAll()}" process="@form" />
+                </p:selectBooleanCheckbox>
+                <!--Ürün İşlemleri Sayfasına Özel Butonlar-->
+                <p:commandLink id="btnPrintTicket" title="#{loc.tag} #{loc.print}" rendered="#{btnPrintTicket}"  actionListener="#{bean.printStockTag()}"  update="printPanel"  process="@this"    style="margin-top: 5px; margin-bottom: 5px; " class="Fright" >
+                    <i class="fa fa-ticket Fs20 MarTop5" style="    color: #ad0d39 !important;"/>                   
+                </p:commandLink>
+                <p:commandLink id="btnChangePrice" title="#{loc.updateprice}" rendered="#{btnChangePrice}"   onclick="PF('dlgPriceListProcess').show()"  style="margin-top: 5px; margin-bottom: 5px;" class="Fright" >
+                    <i class="fa fa-edit Fs20 MarTop5 tlbrSaveBtn"/>                 
+                </p:commandLink>
+
+            </f:facet>
+
+        </p:toolbar>
+
+<!-- <p:remoteCommand name="order" actionListener="#{bean.bringOrder(datatable)}" oncomplete="updateToggle()" autoRun="true"  global="false" />
+<p:remoteCommand name="updateToggle"  update="#{form}:toggle" delay="500" global="false" /> -->
+    </h:form>
+    <p:focus context="#{form}:globalFilter"   for="#{form}:globalFilter"/>     
+    <script type="text/javascript"  >
+        var count = 0;
+        function inputSize() {
+        var pw = $('.tlbrSearchInput').parent().parent().width();
+        if (pw&lt; 500) {
+        $('.tlbrSearchInput').css({"max-width": pw - 60 + "px", "min-width": pw - (pw / 2) + "px"});
+        } else {
+
+        }
+        }
+
+        $(window).resize(function () {
+        inputSize();
+        });
+        $('.tlbrSearchInput').focus(function ()
+        {
+        inputSize();
+        if ($(document).width() > 640)
+                $(this).animate({width: '+=' + $(this).width() / 3}, 40);
+        }).blur(function ()
+        {
+        inputSize();
+        if ($(document).width() > 640)
+                $(this).animate({width: '-=' + $(this).width() / 3}, 40);
+        });
+        function hide() {
+        $('.ui-datatable-footer').css('display', 'none');
+        }
+
+
+        hide();
+    </script>
+
+</ui:composition> 

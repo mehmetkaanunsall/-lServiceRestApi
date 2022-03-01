@@ -1,0 +1,507 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+    <div class="ui-g">
+        <div class="categoryDiv open ui-g-12 ui-md-12 ui-lg-2">
+
+            <h:form id="frmCategorization">
+
+                <p:outputPanel id="ftrPanel">
+                    <c:set var="itemId" value="#{marwiz.pageIdOfGoToPage == 86 ? '26' : '3'}" scope="request" />
+                    <p:treeTable id="treCategory"  value="#{categoryBean.root}"    var="data"  selectionMode="single" selection="#{categoryBean.selectedCategory}" class="treeHoverIcon" style="height: 668px !important;" emptyMessage="#{loc.norecordsfound}">
+
+
+                        <p:ajax event="select" delay="500" listener="#{accountBean.bringList}"  />
+
+                        <p:column headerText="#{loc.categoryname}" >
+
+                            <h:outputText value="#{data.name}" title="#{data.name}"/>    
+                        </p:column>
+                    </p:treeTable>
+
+                </p:outputPanel>
+
+            </h:form>
+
+        </div>
+        <div class="divTable ui-g-12 ui-md-12 ui-lg-10">
+            <div class="ftrOpenClose btnRotate TexAlCenter" onclick="Centrowiz.openCloseCategory();">
+                <i class="fa fa-chevron-left tlbrBackBtn Fs20" style=" margin-top: 9px;" title="#{loc.categoryopenclose}"></i>
+            </div> 
+
+            <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+                <ui:param name="bean" value="#{accountBean}"/>   <!-- Bean -->
+                <ui:param name="update" value=""/>  <!-- Yeni butonuna basınca açılacak sayfa  -->
+                <ui:param name="btnNewId" value="#{marwiz.pageIdOfGoToPage==1 ? accountBean.getRendered(56, 0) : accountBean.getRendered(59, 0)}"/>  <!-- buton id yetki kontrolü için  -->
+                <ui:param name="datatable" value="frmAccount:dtbAccount" />  <!-- datatable  -->       
+                <ui:param name="widgetvar" value='accountPF' />
+                <ui:param name="fileName" value="#{marwiz.pageIdOfGoToPage==1 ? loc.accounts : loc.employees}"/>
+                <ui:param name="form" value='frmToolbarAccount' />
+                <ui:param name="renderedToggler" value='true'/>       
+                <ui:param name="renderedExel" value='true'/>
+                <ui:param name="renderedPdf" value='true'/>
+                <ui:param name="renderedUpload" value="#{marwiz.pageIdOfGoToPage==1 ? accountBean.getRendered(56, 0) : 'false'}"/>  <!-- #{marwiz.pageIdOfGoToPage==1 ? 'true' : 'false'}-->
+                <ui:param name="renderedSpecialExport" value='true'/>
+                <ui:param name="valueForCheckBox1" value="#{accountBean.accountParam.isWithoutMovement}"/>
+                <ui:param name="renderedCheckBox1" value='true'/>
+                <ui:param name="labelForCheckBox1" value="#{loc.dontshowwithoutmovement}"/>
+                <ui:param name="valueForCheckBox2" value="#{accountBean.accountParam.isZeroBalance}"/>
+                <ui:param name="renderedCheckBox2" value='true'/>
+                <ui:param name="labelForCheckBox2" value="#{loc.dontshowhavingzerobalance}"/>
+            </ui:include>
+
+            <h:form id="frmAccount">
+
+                <p:dataTable  id="dtbAccount" widgetVar="accountPF" selectionMode="single" var="account" rowKey="#{account.id}" value="#{accountBean.listOfObjects}" selection="#{accountBean.selectedObject}" filteredValue="#{accountBean.listOfFilteredObjects}" emptyMessage="#{loc.norecordsfound}"
+                              paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" resizableColumns="true" draggableColumns="true" resizeMode="expand" class="datatableDraggable"
+                              reflow="true" rowStyleClass="#{account.status.id == 6 ? 'ColumnColorRed' : account.id == 1 ? 'ColumnColorGreen' : account.paymenttype_id != 0 ? 'ColumnColorOrange' : null}" rowsPerPageTemplate="#{sessionBean.user.gridSize}" rows="#{sessionBean.user.defualtGridSize}" >
+
+                    <p:ajax event="#{sessionBean.user.gridRowSelect}"  listener="#{accountBean.goToProcess()}" global="false" />
+                    <p:ajax event="page" global="false"/>
+                    <p:ajax event="filter" global="false" oncomplete="updateGrid()" />
+                    <p:ajax event="colReorder" listener="#{accountBean.reorder}" update="frmToolbarAccount:toggle" />     
+                    <p:ajax event="colResize"  listener="#{accountBean.onResize}" />
+
+
+                    <f:facet name="footer" rendered="false" >
+                        <p:inputText id="globalFilter" value="#{accountBean.autoCompleteValue}"  style="display: none"  />
+                    </f:facet>
+
+                    <p:column id="clmIsPerson" headerText="#{loc.accounttypes}" width="100" sortable="true" sortBy="#{account.isPerson}" filterable="true"  filterBy="#{account.isPerson}" filterMatchMode="contains" exportable="#{accountBean.getColumnVisibility('frmAccount:dtbAccount:clmIsPerson')}" >
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet> 
+                        <h:outputText value="#{account.isPerson ? loc.individual : loc.corporate}" />
+                    </p:column>
+                    <p:column id="clmCode" headerText="#{loc.code}" width="100" sortable="true" sortBy="#{account.code}" filterable="true"  filterBy="#{account.code}" filterMatchMode="contains"  exportable="#{accountBean.getColumnVisibility('frmAccount:dtbAccount:clmCode')}" >
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet> 
+                        <h:outputText value="#{account.code}" />
+                    </p:column>
+                    <p:column id="clmName" headerText="#{loc.name}" width="200" sortable="true" sortBy="#{account.onlyAccountName}" filterable="true"  filterBy="#{account.onlyAccountName}" filterMatchMode="contains"  exportable="#{accountBean.getColumnVisibility('frmAccount:dtbAccount:clmName')}" >
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet> 
+                        <h:outputText value="#{account.onlyAccountName}" />
+                    </p:column>
+                    <p:column id="clmTitle" headerText="#{marwiz.pageIdOfGoToPage==86 ? loc.surname : loc.commercialtitle}" width="200" sortable="true" sortBy="#{account.title}" filterable="true"  filterBy="#{account.title}" filterMatchMode="contains" exportable="#{accountBean.getColumnVisibility('frmAccount:dtbAccount:clmTitle')}" >
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet> 
+                        <h:outputText value="#{account.title}" />
+                    </p:column>
+                    <p:column id="clmTaxNo" headerText="#{loc.taxno}" width="100" sortable="true" sortBy="#{account.taxNo}" filterable="true"  filterBy="#{account.taxNo}" filterMatchMode="contains" exportable="#{accountBean.getColumnVisibility('frmAccount:dtbAccount:clmTaxNo')}" >
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet> 
+                        <h:outputText value="#{account.taxNo}" />
+                    </p:column>
+                    <p:column id="clmTaxOffice" headerText="#{loc.taxoffice}" width="100" sortable="true" sortBy="#{account.taxOffice}" filterable="true"  filterBy="#{account.taxOffice}" filterMatchMode="contains" exportable="#{accountBean.getColumnVisibility('frmAccount:dtbAccount:clmTaxOffice')}" >
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet> 
+                        <h:outputText value="#{account.taxOffice}" />
+                    </p:column>
+                    <p:column id="clmCreditLimit" headerText="#{loc.balance}" width="100" sortable="true" sortBy="#{account.balance}" filterable="true"  filterBy="#{account.balance}" filterMatchMode="contains" exportable="#{accountBean.getColumnVisibility('frmAccount:dtbAccount:clmCreditLimit')}" >
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet> 
+                        <h:outputText value="#{account.balance}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmType" headerText="#{loc.type}" width="100" sortable="true" sortBy="#{account.type.tag}" filterable="true"  filterBy="#{account.type.tag}" filterMatchMode="contains" exportable="#{accountBean.getColumnVisibility('frmAccount:dtbAccount:clmType')}" >
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet> 
+                        <h:outputText value="#{account.type.tag}" />
+                    </p:column>
+                    <p:column id="clmStatus" headerText="#{loc.statu}" width="100" sortable="true" sortBy="#{account.status.tag}" filterable="true"  filterBy="#{account.status.tag}" filterMatchMode="contains" exportable="#{accountBean.getColumnVisibility('frmAccount:dtbAccount:clmStatus')}" >
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet> 
+                        <h:outputText value="#{account.status.tag}" />
+                    </p:column>
+
+                    <p:columnGroup id="clmColumGroup" rendered="#{accountBean.listOfObjects.size()>0}"  type="footer" >
+                        <p:column id="clmIsPerson2"  >
+                            <f:facet name="footer">
+                                <h:outputText value=""/>
+                            </f:facet>
+                        </p:column>
+
+                        <p:column id="clmCode2" >
+                            <f:facet name="footer">
+                                <h:outputText value=""/>
+                            </f:facet>
+                        </p:column>
+
+                        <p:column id="clmName2" >
+                            <f:facet name="footer">
+                                <h:outputText value="" />
+                            </f:facet>
+                        </p:column>
+
+                        <p:column id="clmTitle2" >
+                            <f:facet name="footer">
+                                <h:outputText value="" />
+                            </f:facet>
+                        </p:column>
+
+                        <p:column id="clmTaxNo2" >
+                            <f:facet name="footer">
+                                <h:outputText value="" />
+                            </f:facet>
+                        </p:column>
+
+                        <p:column id="clmTaxOffice2" >
+                            <f:facet name="footer">
+                                <h:outputText value="" />
+                            </f:facet>
+                        </p:column>
+
+                        <p:column id="clmCreditLimit2">
+                            <f:facet name="footer">
+                                <h:outputText value="#{accountBean.subTotalBalance}" class="Fright FontBold">
+                                    <f:converter converterId="currencyConverter" />
+                                    <f:attribute name="type" value="" />
+                                </h:outputText>
+                            </f:facet>
+
+                        </p:column>
+
+                        <p:column id="clmType2">
+                            <f:facet name="footer">
+                                <h:outputText value="">
+                                </h:outputText>
+                            </f:facet>
+
+                        </p:column>
+
+                        <p:column id="clmStatus2" >
+                            <f:facet name="footer">
+                                <h:outputText value="" /> 
+                            </f:facet>
+                        </p:column>
+
+                    </p:columnGroup>
+
+
+
+                </p:dataTable>  
+                <p:remoteCommand name="order" actionListener="#{accountBean.bringOrder('frmAccount:dtbAccount')}" oncomplete="updateToggle()"   autoRun="true"  global="false" />
+                <p:remoteCommand name="updateGrid" action="#{accountBean.calcSubTotals()}" actionListener="#{accountBean.updateGridProperties('frmAccount:dtbAccount')}"  global="false" />
+                <p:remoteCommand name="updateToggle"  update="frmToolbarAccount:toggle" delay="500" global="false" />
+            </h:form>
+        </div>
+    </div>
+
+
+    <!--/////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+    <p:dialog id="dlgStockFileUpload" widgetVar="dlg_stockfileupload" modal="true" dynamic="true" resizable="false" focus="dlgStockFileUpload"  responsive="true" closeOnEscape="true" width="55%" style="overflow-x: auto !important">
+        <h:form id="form" enctype="multipart/form-data" > 
+            <p:panelGrid id="pgrfileformat">
+                <div>               
+                    <table class="tableUp" style="border: 1px solid;border-color: #316996;background-color: #fbfcfd;">
+                        <thead>
+                            <tr >
+                                <th scope="col" colspan="11" class="Fs16 TexAlLeft"><h:outputText value="#{loc.fileformattobeuploaded}" style="color: #303030 !important;"/></th>
+                            </tr>
+                            <tr >
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.accounttypes}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} A)" style="color:#337190" class="Fs12"/><h:outputText value=" (*) "  class="Fs16 fontBold red"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.code}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} B)" style="color:#337190" class="Fs12"/><h:outputText value=" (*) "  class="Fs16 fontBold red"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.name}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} C)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.commercialtitle}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} D)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.taxoffice}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} E)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.taxno}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} F)" style="color:#337190" class="Fs12"/><h:outputText value=" (*) "  class="Fs16 fontBold red"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.type}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} G)" style="color:#337190" class="Fs12"/><h:outputText value=" (*) "  class="Fs16 fontBold red"/>
+                                </th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.payertype}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} H)" style="color:#337190" class="Fs12"/><h:outputText value=" (*) "  class="Fs16 fontBold red"/>
+                                </th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.duedate}(#{loc.day}) " style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} I)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.transferbalance} " style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} J)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.address} " style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} K)" style="color:#337190" class="Fs12"/></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach items="#{accountBean.sampleList}" var="sample">
+                                <tr>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.isPerson ? 1: 0}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.code}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.name}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.title}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.taxOffice}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.taxNo}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.type.id}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.taxpayertype_id}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.dueDay}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.transferBalance}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.address}" /></td>
+                                </tr>
+                            </c:forEach>
+
+                            <tr>    
+                                <td class="TexAlLeft Fs14" colspan="6" rowspan="2"><h:outputText value="#{loc.accounttypeinformation}"/> <h:outputText value=" (#{loc.cell} A)" style="color:#337190" class="Fs12"/></td>
+                                <td class="TexAlLeft Fs14" colspan="5"><h:outputText value="0 : #{loc.corporate}"/></td>
+                            </tr>
+
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="5"><h:outputText value="1 : #{loc.individual}"/></td>
+                            </tr>
+
+                            <td class="TexAlLeft Fs14" colspan="6" rowspan="#{sessionBean.getTypes(3).size()+1}"><h:outputText class="Fs14" value="#{loc.typeinformation}" /><h:outputText value=" (#{loc.cell} E)" style="color:#337190" class="Fs12"/></td>
+                            <c:forEach items="#{sessionBean.getTypes(3)}" var="type">
+                                <tr>
+                                    <td colspan="5" class="TexAlLeft Fs14"><h:outputText class="Fs14" value="#{type.id} : #{type.nameMap.get(sessionBean.langId).name}" /></td>
+                                </tr>
+                            </c:forEach>
+
+                            <tr>    
+                                <td class="TexAlLeft Fs14" colspan="6" rowspan="3"><h:outputText value="#{loc.payertypeinformation}"/> <h:outputText value=" (#{loc.cell} H)" style="color:#337190" class="Fs12"/></td>
+                                <td class="TexAlLeft Fs14" colspan="5"><h:outputText value="1 : #{loc.normal}"/></td>
+                            </tr>
+
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="5"><h:outputText value="2 : #{loc.einvoice}"/></td>
+                            </tr>
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="5"><h:outputText value="3 : #{loc.earchive}"/></td>
+                            </tr>
+
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="6" rowspan="1"><h:outputText value="#{loc.iconincolumn} " class="Fs14"/><h:outputText value=" (*) " class="Fs14 fontBold red" style="margin-left: 10px"/></td>
+                                <td class="TexAlLeft Fs14" colspan="5"><h:outputText value="#{loc.itismandatorytoenterinformationintothesefields}" class="fontBold"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>                    
+            </p:panelGrid>
+
+            <div class="EmptyBox20" />
+
+            <p:panelGrid  id="pgrFileUpload" class="pgrResponsive">
+                <div class="ui-g">
+                    <h:panelGroup layout="block">
+                        <p:row>
+                            <p:column colspan="10" style="font-weight: bold;font-size: 16px"> <h:outputText value="#{loc.fileselectionandtransferoperations}" /></p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column colspan="6">
+                                <table style="max-width: 200px !important;table-layout: fixed;border: none !important;" >
+                                    <tbody>
+                                        <tr>
+
+                                            <td style="border: none">
+                                                <p:commandButton id="btnSampleList" value="#{loc.sampleexcelfile}" style="min-width: 180px;margin-top:28px" class="samplebutton" oncomplete="downloadExcel();"  />
+                                                <h:commandLink id="btnExcel" title="#{loc.sampleexcelfile}" style="visibility:hidden"  class ="tlbrIcon" actionListener="#{accountBean.downloadSampleList()}">
+                                                    <i class="icon-file-excel  tlbrExcelBtn Fs23"  />
+                                                </h:commandLink>       
+                                            </td>
+                                            <td style="border: none">
+                                                <p:fileUpload  update="@this,btnTransfer,txtFileName,btnClose"  allowTypes="/(\.|\/)(xls|xlsx|xls|xlsm|xlsb|xltx|xltm|xlt|xla|xlw|xlr|)$/" invalidFileMessage="#{loc.invalidfiletype}" invalidSizeMessage="#{loc.filesizecannotbegreaterthan1mb}"
+                                                               class="#{accountBean.fileNames.length()==0 ? 'fileUploadEmpty' : 20>accountBean.fileNames.length() ? 'fileUploadSmall'  : 'fileUploadLong'}" label="#{loc.choosefile}" fileLimit="1"  
+                                                               auto="true" sizeLimit="10000000" style="width: 150px;" fileUploadListener="#{accountBean.handleFileUploadFile}"  mode="advanced"  multiple="true" dragDropSupport="false" />
+
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width: 100px;border:none !important;"><h:outputText id="txtFileName"  styleClass="wrapLabel" value="#{accountBean.fileNames}" /> </td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+
+                            </p:column> 
+                            <p:column  colspan="4">
+                                <p:commandButton id="btnTransfer" icon="fa fa-exchange" disabled="#{accountBean.isOpenTransferBtn}" resetValues="true" value="#{loc.transfer}" update="@this,btnTransfer ,btnClose,txtFileName" actionListener="#{accountBean.convertUploadData()}" />
+                                <p:commandButton id="btnClose"  icon="fa fa-close" disabled="#{accountBean.isOpenCancelBtn}" resetValues="true" value="#{loc.remove}" update="@this,btnTransfer ,btnClose,txtFileName" actionListener="#{accountBean.clear()}" />
+                            </p:column>
+                        </p:row>
+                    </h:panelGroup>
+                </div>
+            </p:panelGrid> 
+
+        </h:form>
+    </p:dialog>
+
+
+    <p:dialog id="dlgProductView" widgetVar="dlg_productView" showEffect="fade" hideEffect="fade" resizable="false" transient="true" modal="true" closeOnEscape="true" responsive="true" width="60%" class=" overflow-y: auto !important; max-height: 570px;" >
+        <p:ajax event="close" update="form:btnTransfer" listener="#{accountBean.clearProducts()}" global="false"/> 
+        <h:form id="frmtoolbar" prependId="false">
+            <p:toolbar>
+                <f:facet name="left">
+                    <h:outputText value="#{loc.productstobetransferredfromthefile}" class="outputTextFont Fleft MarRight8" />
+                </f:facet>
+
+                <f:facet name="right">
+                    <p:commandLink id="btnSave" disabled="#{accountBean.isOpenSaveBtn}" title="#{loc.transfer}" process="@this"  class="Fright" update="frmAccount:dtbAccount"  actionListener="#{accountBean.saveAccount()}"  >
+                        <i class="fa fa-save Fs20 MarTop5 tlbrSaveBtn"/>                 
+                    </p:commandLink>
+                </f:facet>
+            </p:toolbar>
+
+            <h:panelGroup id="pgrIsError" >
+                <p:separator style="margin-top: 0px !important; margin-bottom: 5px;" class="allCheckSeparator"/>
+                <p:panelGrid layout="grid" columns="1" class="allCheckPanelGrid" style="border-radius: 0px !important; border-bottom: 0px !important;">  
+                    <p:selectBooleanCheckbox value="#{accountBean.isOpenErrorData}" itemLabel="#{loc.showincorrectrecords}" class="Fleft allcheck" style="margin-top: 2px; margin-left: 5px;">
+                        <p:ajax global="false" resetValues="true" listener="#{accountBean.showErrorProductList()}"/>
+                    </p:selectBooleanCheckbox>
+                </p:panelGrid>
+            </h:panelGroup>
+        </h:form>
+
+        <!-- Aktar butonuna bastıktan sonra ürünlerin önizleme ile gösterildiği yer  -->
+        <h:panelGroup>
+            <h:form id="frmProductView">
+                <p:dataTable  id="dtbProductView" var="viewProduct"  value="#{accountBean.excelStockList}" widgetVar="viewPdocutPF" emptyMessage="#{loc.norecordsfound}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{viewProduct.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true"
+                              rowStyleClass="#{viewProduct.excelDataType==-1 ? 'ColumnColorRed' : null}" >
+
+
+                    <p:column headerText="#{loc.accounttypes}" selectRow="false">
+                        <h:outputText value="#{viewProduct.isPerson ? loc.individual : loc.corporate}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.code}" selectRow="false">
+                        <h:outputText value="#{viewProduct.code}" class="Fright" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.name}" selectRow="false">
+                        <h:outputText value="#{viewProduct.name}" class="Fright" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.commercialtitle}" selectRow="false">
+                        <h:outputText value="#{viewProduct.title}" class="Fright" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.taxoffice}" selectRow="false">
+                        <h:outputText value="#{viewProduct.taxOffice}" class="Fright" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.taxno}" selectRow="false">
+                        <h:outputText value="#{viewProduct.taxNo}" class="Fright" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.type}" selectRow="false">
+                        <h:outputText value="#{viewProduct.type.tag}" class="Fright" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.payertype}" selectRow="false">
+                        <h:outputText value="#{viewProduct.taxpayertype_id==1 ? loc.normal :viewProduct.taxpayertype_id==2 ? loc.einvoice : viewProduct.taxpayertype_id==3 ? loc.earchive : ''}" class="Fright" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.duedate} (#{loc.day})" selectRow="false">
+                        <h:outputText value="#{viewProduct.dueDay}" class="Fright" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.transferbalance}" selectRow="false">
+                        <h:outputText value="#{viewProduct.transferBalance}" class="Fright" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.address}" selectRow="false">
+                        <h:outputText value="#{viewProduct.address=='-1'? '' :viewProduct.address}" class="Fright" />
+                    </p:column>
+
+                </p:dataTable>
+            </h:form>
+        </h:panelGroup>
+    </p:dialog>
+
+
+    <!--Veritabanından hatalı dönen kayıtları görüntüleyen dialog -->
+    <p:dialog id="dlgProductErrorView" widgetVar="dlg_productErrorView" showEffect="fade" hideEffect="fade" resizable="false" transient="true" modal="true" closeOnEscape="true" responsive="true" width="40%"  >
+        <p:toolbar>
+            <f:facet name="left">
+                <h:outputText value="#{loc.unsavedincorrectrecords}" class="outputTextFont Fleft MarRight8" />
+            </f:facet>
+        </p:toolbar>
+
+        <h:panelGroup rendered="#{accountBean.errorList.size()!=0}">
+            <h:form id="frmProductErrorView">
+                <p:dataTable  id="dtbProductErrorView" var="viewErrorProduct"  value="#{accountBean.errorList}" widgetVar="viewErrorPdocutPF" emptyMessage="#{loc.norecordsfound}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{viewErrorProduct.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true"
+                              >
+
+                    <p:column headerText="#{loc.barcode}" selectRow="false">
+                        <h:outputText value="#{viewErrorProduct.barcode}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.errormessage}" selectRow="false">
+                        <h:outputText value="#{viewErrorProduct.errorString}" />
+                    </p:column>
+                </p:dataTable>
+            </h:form>
+        </h:panelGroup>
+    </p:dialog>
+
+    <script type="text/javascript">
+
+
+        function downloadExcel() {
+            document.getElementById("form:btnExcel").click();
+        }
+
+    </script>
+    <style type="text/css">
+        .ui-fileupload-buttonbar{
+            padding: 0px !important;
+            margin-top: -35px !important;
+            margin: -20px 2px;
+        }
+
+        .fileUploadLong .ui-button{
+            margin-top: 46px !important;
+            position: relative;
+        }
+        .fileUploadSmall .ui-button{
+            margin-top: 46px !important;
+            position: relative;
+        }
+        .fileUploadEmpty .ui-button{
+            margin-top: 35px !important;
+            position: relative;
+        }
+        .wrapLabel{
+            word-wrap: break-word !important;
+        }
+        .tableUp, th, td {
+            border: 1px solid #316996;
+        }
+
+        .tableUp {
+            border-collapse: collapse;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .tableUp tr {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: .35em;
+        }
+        .pgrResponsive{
+            border-collapse: collapse;
+            margin: 0;
+            padding: 0px;
+            width: 100%;
+            table-layout: auto;
+        }
+
+    </style>
+
+</ui:composition>

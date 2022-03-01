@@ -1,0 +1,67 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+        <ui:param name="bean" value="#{saleTypeBean}"/> 
+        <ui:param name="btnNewId" value='#{saleTypeBean.getRendered(229, 0)}'/>
+        <ui:param name="update" value="dlgSaleTypeProcess"/>
+        <ui:param name="datatable" value="frmSaleType:dtbSaleType" />
+        <ui:param name="widgetvar" value="saleTypePF" />
+        <ui:param name="form" value='frmToolbarSaleType' />
+        <ui:param name="fileName" value="#{loc.fuelsaletypeprocess}"/> 
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+        <ui:param name="renderedToggler" value='true'/>
+    </ui:include>
+
+    <h:form id="frmSaleType">
+
+        <p:dataTable  id="dtbSaleType" var="saleType"  value="#{saleTypeBean.listOfObjects}" widgetVar="saleTypePF" selection="#{saleTypeBean.selectedObject}"  selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{saleType.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                      reflow="true" filteredValue="#{saleTypeBean.listOfFilteredObjects}" sortBy="#{saleType.typeno}"  resizableColumns="true" draggableColumns="true" > 
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{saleTypeBean.update()}" update="dlgSaleTypeProcess" global="false" resetValues="true" /> 
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false" oncomplete="updateGrid()"/>
+            <p:ajax event="colReorder" listener="#{saleTypeBean.reorder}" update="frmToolbarSaleType:toggle" />     
+            <p:ajax event="colResize"  listener="#{saleTypeBean.onResize}" />
+
+            <f:facet name="footer" rendered="false" >
+                <p:inputText id="globalFilter" value="#{saleTypeBean.autoCompleteValue}"  style="display: none"  />
+            </f:facet>
+
+
+            <p:column id="clmName" headerText="#{loc.itsname}" sortable="true" sortBy="#{saleType.name}" filterable="true"  filterBy="#{saleType.name}" filterMatchMode="contains"  exportable="#{saleTypeBean.getColumnVisibility('frmSaleType:dtbSaleType:clmName')}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{saleType.name}" />
+            </p:column >
+
+            <p:column id="clmFuelType" headerText="#{loc.itsnumber}" sortable="true" sortBy="#{saleType.typeno}"   filterable="true"  filterBy="#{saleType.typeno}" filterMatchMode="contains"  exportable="#{saleTypeBean.getColumnVisibility('frmSaleType:dtbSaleType:clmFuelType')}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{saleType.typeno}" />
+            </p:column >
+
+        </p:dataTable>  
+
+        <p:remoteCommand name="order" actionListener="#{saleTypeBean.bringOrder('frmSaleType:dtbSaleType')}" oncomplete="updateToggle()" autoRun="true"  global="false" />
+        <p:remoteCommand name="updateGrid" actionListener="#{saleTypeBean.updateGridProperties('frmSaleType:dtbSaleType')}"  global="false" />
+        <p:remoteCommand name="updateToggle"  update="frmToolbarSaleType:toggle" delay="500" global="false" />
+
+    </h:form>
+
+
+    <p:dialog id="dlgSaleTypeProcess" widgetVar="dlg_SaleTypeProcess" resizable="false" transient="true" focus="dlgSaleTypeProcess" responsive="true" dynamic="true" modal="true" closeOnEscape="true" width="40%" appendTo="@(body)">
+        <ui:include src="saletypeprocess.xhtml" />
+    </p:dialog>  
+
+</ui:composition>
+
+

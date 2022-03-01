@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                            http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://www.springframework.org/schema/tx 
+                            http://www.springframework.org/schema/tx/spring-tx.xsd">
+      
+    <bean id="applicationDao" class="com.mepsan.marwiz.general.appllication.dao.ApplicationDao" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <bean id="appService" class="com.mepsan.marwiz.general.appllication.business.ApplicationService"  >
+    </bean>
+    <bean id="applicationBean" class="com.mepsan.marwiz.general.appllication.presentation.ApplicationBean"  scope="singleton" init-method="init" >
+    </bean>
+    <bean id="HttpSessionCollector" class="com.mepsan.marwiz.general.pattern.HttpSessionCollector"  />
+ 
+</beans>

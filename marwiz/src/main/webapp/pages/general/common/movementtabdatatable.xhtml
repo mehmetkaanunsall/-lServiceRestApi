@@ -1,0 +1,252 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:form id="frmMovementDataTable">
+
+
+        <p:dataTable  id="dtbMovement" var="movement"  value="#{bean.listOfObjects}" widgetVar="movementPF" selection="#{bean.selectedObject}"  selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{movement.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                      reflow="true" lazy="true"  >
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{bean.getfinancingDocument()}"  resetValues="true"/> 
+            <!-- <p:ajax event="colReorder" listener="#{bean.reorder}" update="frmGridToolbar:toggle" />   -->  
+            <p:ajax event="colResize"  listener="#{bean.onResize}" />
+
+            
+            <p:column id="clmBranch" headerText="#{loc.branch}"  rendered="#{renderedBranch}">
+                <h:outputText value="#{movement.branch.name}"/>      
+            </p:column>
+            <p:column id="clmSafe" headerText="#{loc.safe}" rendered="#{renderedSafeName}">
+                <h:outputText value="#{safeName}"/>      
+            </p:column>
+           <p:column id="clmMovementDate" headerText="#{loc.documentdate}"  >
+                <h:outputText value="#{movement.financingDocument.documentDate}">
+                    <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" /> 
+                </h:outputText>
+            </p:column>
+           
+            
+
+            <p:column id="clmDocumentNumber" headerText="#{loc.documentnumber}"  >
+                <h:outputText value="#{movement.financingDocument.id>0 ? movement.financingDocument.documentNumber : loc.openingbalance}"/>
+            </p:column>
+
+            <p:column id="clmCreatedDate" headerText="#{loc.createddate}" >
+                <h:outputText value="#{movement.dateCreated}">
+                    <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" />
+                </h:outputText>
+            </p:column>
+            <p:column id="clmCreatedPerson" headerText="#{loc.createdperson}">
+                <h:outputText value="#{movement.userCreated.id== 0 ? '' :movement.userCreated.fullName}"/>
+            </p:column>
+            <p:column id="clmUpdatedDate" headerText="#{loc.updateddate}" >
+                <h:outputText value="#{movement.dateUpdated}">
+                    <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" />
+                </h:outputText>
+            </p:column>
+            <p:column id="clmUpdatedPerson" headerText="#{loc.updatedperson}" >
+                <h:outputText value="#{movement.userUpdated.id==0 ? '' : movement.userUpdated.fullName}"/>
+            </p:column>
+
+            <p:column id="clmIncomeExpense" headerText="#{loc.incomeexpense}"  >
+                <h:outputText value="#{movement.financingDocument.incomeExpense.name}"/>
+            </p:column>
+
+            <p:column id="clmDescription" headerText="#{loc.description}" >
+                <h:outputText value="#{movement.financingDocument.description}"/>
+            </p:column>
+
+            <p:column id="clmFinancingDocumentType" headerText="#{loc.processtype}" >
+                <h:outputText value="#{movement.financingDocument.financingType.tag}"/>
+            </p:column>
+
+            <p:columnGroup type="header">
+                <p:row>
+                    <p:column rowspan="2"  headerText="#{loc.branch}" rendered="#{renderedBranch}"/>
+                    <p:column rowspan="2"  headerText="#{loc.safe}" rendered="#{renderedSafeName}"/>
+                    <p:column rowspan="2"  headerText="#{loc.documentdate}"/>
+                    <p:column  rowspan="2"  headerText="#{loc.documentnumber}"/>
+                    <p:column  rowspan="2"  headerText="#{loc.createddate}"/>
+                    <p:column  rowspan="2"  headerText="#{loc.createdperson}"/>
+                    <p:column  rowspan="2"  headerText="#{loc.updateddate}"/>
+                    <p:column  rowspan="2"  headerText="#{loc.updatedperson}"/>
+                    <p:column  rowspan="2"  headerText="#{loc.incomeexpense}"/>
+                    <p:column  rowspan="2"  headerText="#{loc.description}"/>
+                    <p:column  rowspan="2"  headerText="#{loc.processtype}"/>
+                    <p:column  colspan="2" >
+                        <f:facet name="header" >
+                            <h:outputText id="txtTransferringBalance" value="#{bean.transferringBalance}" style="float: right;" rendered="#{!renderedSub}">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                            <h:outputText value="#{bean.calculateTotal(3)}" style="float: right;" rendered="#{renderedSub}"/>
+
+                            <h:outputText value="#{loc.transferringbalance} : " style="float: right" />
+                        </f:facet>
+                    </p:column>
+                </p:row>
+                <p:row>
+                    <p:column headerText="#{loc.processamount}" />
+                    <p:column headerText="#{loc.balance}" />
+                </p:row>
+            </p:columnGroup>
+
+
+            <p:column id="clmPrice" >
+                <p:column>
+                    <h:outputText value="#{movement.price}" style="float: right;">
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="currency" value="#{currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                </p:column>
+                <p:column rendered="#{movement.isDirection}" >
+                    <li  class="Fleft BordRad10" style="float: right;margin-right: 10px">
+                        <i title="#{loc.entry}" class="fa fa-plus green"></i>
+                    </li>
+                </p:column>
+                <p:column rendered="#{!movement.isDirection}" >
+                    <li  class="Fleft BordRad10" style="float: right;margin-right: 10px">
+                        <i title="#{loc.exit}" class="fa fa-minus red"></i>
+                    </li>
+                </p:column>
+
+            </p:column>
+
+            <p:column id="clmPrice3">
+                <p:column>
+                    <h:outputText value="#{bean.convertBalanceSign(movement.balance)}" style="float: right;">
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="currency" value="#{currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                </p:column>
+                <p:column rendered="#{bean.manageBalanceSign(movement.balance)}" >
+                    <li  class="Fleft BordRad10" style="float: right;margin-right: 10px">
+                        <i class="fa fa-plus green"></i>
+                    </li>
+                </p:column>
+                <p:column rendered="#{!bean.manageBalanceSign(movement.balance)}" >
+                    <li  class="Fleft BordRad10" style="float: right;margin-right: 10px">
+                        <i class="fa fa-minus red"></i>
+                    </li>
+                </p:column>
+            </p:column>
+
+            <p:columnGroup type="footer" rendered="#{bean.listOfObjects.rowCount>0}">
+                <h:panelGroup rendered="#{!renderedSub}">
+                     <p:row>
+                    <p:column colspan="#{renderedBranch and renderedSafeName ? '12' : renderedBranch or renderedSafeName ? '11' : '10'}" style="text-align:right"  rendered="#{bean.opType==1 or bean.opType==3}">
+                        <f:facet name="footer" >
+                            <h:outputText value="#{loc.sumofincoming} : " class="FontBold"  />
+                        </f:facet>
+                    </p:column>
+                    <p:column colspan="1" style="text-align:right"  rendered="#{bean.opType==1 or bean.opType==3}">
+                        <f:facet name="footer" >
+                            <h:outputText  value="#{bean.totalIncoming}">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+                </p:row>
+                <p:row>
+                    <p:column colspan="#{renderedBranch and renderedSafeName ? '12' : renderedBranch or renderedSafeName ? '11' : '10'}" style="text-align:right"  rendered="#{bean.opType==2 or bean.opType==3}">
+                        <f:facet name="footer" >
+                            <h:outputText value="#{loc.sumofoutcoming} : " class="FontBold"  />
+                        </f:facet>
+                    </p:column>
+                    <p:column colspan="1" style="text-align:right"  rendered="#{bean.opType==2 or bean.opType==3}">
+                        <f:facet name="footer" >
+                            <h:outputText value="#{bean.totalOutcoming}">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+                </p:row>
+                <p:row>
+                    <p:column colspan="#{renderedBranch and renderedSafeName ? '12' : renderedBranch or renderedSafeName ? '11' : '10'}" style="text-align:right" >
+                        <f:facet name="footer" >
+                            <h:outputText value="#{loc.totalbalance} : " class="FontBold" style="font-size: 15px; color: #565656;"/>
+                        </f:facet>
+                    </p:column>
+                    <p:column colspan="1" style="text-align:right" >
+                        <f:facet name="footer" >
+                            <h:outputText  value="#{bean.totalBalance}" class="FontBold" style="font-size: 15px;  color: #565656;">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+                </p:row>
+                </h:panelGroup>
+                <h:panelGroup rendered="#{renderedSub}">
+                    <p:row>
+                    <p:column colspan="#{renderedBranch and renderedSafeName ? '12' : renderedBranch or renderedSafeName ? '11' : '10'}" style="text-align:right"  rendered="#{bean.opType==1 or bean.opType==3}">
+                        <f:facet name="footer" >
+                            <h:outputText value="#{loc.sumofincoming} : " class="FontBold"  />
+                        </f:facet>
+                    </p:column>
+                    <p:column colspan="1" style="text-align:right"  rendered="#{bean.opType==1 or bean.opType==3}">
+                        <f:facet name="footer" >
+                            <h:outputText  value="#{bean.calculateTotal(0)}"/>
+                        </f:facet>
+                    </p:column>
+                </p:row>
+                <p:row>
+                    <p:column colspan="#{renderedBranch and renderedSafeName ? '12' : renderedBranch or renderedSafeName ? '11' : '10'}" style="text-align:right"  rendered="#{bean.opType==2 or bean.opType==3}">
+                        <f:facet name="footer" >
+                            <h:outputText value="#{loc.sumofoutcoming} : " class="FontBold"  />
+                        </f:facet>
+                    </p:column>
+                    <p:column colspan="1" style="text-align:right"  rendered="#{bean.opType==2 or bean.opType==3}">
+                        <f:facet name="footer" >
+                             <h:outputText  value="#{bean.calculateTotal(1)}"/>
+                        </f:facet>
+                    </p:column>
+                </p:row>
+                <p:row>
+                    <p:column colspan="#{renderedBranch and renderedSafeName ? '12' : renderedBranch or renderedSafeName ? '11' : '10'}" style="text-align:right" >
+                        <f:facet name="footer" >
+                            <h:outputText value="#{loc.totalbalance} : " class="FontBold" style="font-size: 15px; color: #565656;"/>
+                        </f:facet>
+                    </p:column>
+                    <p:column colspan="1" style="text-align:right" >
+                        <f:facet name="footer" >
+                             <h:outputText  value="#{bean.calculateTotal(2)}"/>
+                        </f:facet>
+                    </p:column>
+                </p:row>
+                </h:panelGroup>
+               
+            </p:columnGroup>
+        </p:dataTable>  
+        <p:remoteCommand name="goToRelatedRecord" actionListener="#{bean.goToRelatedRecord()}" delay="200"/>
+    </h:form>
+    
+     <p:dialog id="dlgFinancingDocumentProc" widgetVar="dlg_financingdocumentproc" resizable="false" width="60%" focus="dlgFinancingDocumentProc" responsive="true" dynamic="true" modal="true" closeOnEscape="true">
+        <ui:include src="/pages/finance/financingdocument/financingdocumentformovement.xhtml" >
+            <ui:param name="financingDocument" value="#{bean.selectedObject.financingDocument}"/>
+            <ui:param name="bean" value='#{bean}' />
+            <ui:param name="type" value='#{type}' />
+        </ui:include>
+    </p:dialog>
+    
+     <p:overlayPanel id="olpIncomeExpense" widgetVar="olp_IncomeExpense" showEvent="none" modal="true" transient="true" dismissable="true" hideEffect="blind" showCloseIcon="true" class="Wid30">
+        <ui:include src="/pages/general/common/incomeexpensebook.xhtml">
+            <ui:param name="updateBean" value='#{bean}' />
+            <ui:param name="type" value='#{bean.beanName}' />
+            <ui:param name="parameters" value='#{[bean.isIncomeExpense, bean.selectedObject.financingDocument.branch]}' /> 
+            <ui:param name="form" value='frmIncomeExpenseBookFilter' /> 
+        </ui:include>
+    </p:overlayPanel>
+</ui:composition>

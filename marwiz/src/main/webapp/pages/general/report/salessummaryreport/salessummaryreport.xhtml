@@ -1,0 +1,316 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+
+
+    <h:form id="frmSalesSummary">
+
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.salessummaryreport}"/>
+            <ui:param name="bean" value='#{salesSummaryReportBean}' />
+            <ui:param name="update" value="frmSalesSummaryDatatable:dtbSalesSummary pgrSalesSummaryDatatable pgrSalesSummary" />
+        </ui:include>
+
+        <h:panelGroup id="pgrSalesSummary" layout="block" transient="true">  
+            <div class="ui-g divContent">
+                <div class="panelToggle ui-g-12">
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldStartDate" value="#{salesSummaryReportBean.selectedObject.beginDate}" class="datepicker" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat}" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldEndDate" value="#{salesSummaryReportBean.selectedObject.endDate}" class="datepicker" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat}" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+
+                    <div class="ui-g-12  ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.branch}" for="slcBranch" class="FontBold Fs12"/>
+                        <p:selectCheckboxMenu  id="slcBranch"  value="#{salesSummaryReportBean.selectedBranchList}" 
+                                               filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                               label="#{salesSummaryReportBean.selectedBranchList.size()!=0 ? salesSummaryReportBean.selectedBranchList.size() :loc.all} #{salesSummaryReportBean.selectedBranchList.size()!=0 ? loc.branch : ''} #{salesSummaryReportBean.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                            <f:selectItems value="#{salesSummaryReportBean.listOfBranch}" itemLabel="#{branchSetting.branch.name}" itemValue="#{branchSetting}" var="branchSetting" />       
+                            <p:ajax oncomplete="PF('slcBranchCheckBox').show()" global="false" listener="#{salesSummaryReportBean.changeBranch()}" update="frmSalesSummary:txtCategory,frmSalesSummary:btnStock,frmSalesSummary:btnCategory,frmSalesSummary:txtStock,slcBranch, frmSalesSummary:pngSupplier,frmSalesSummary:txtCustomer,frmSalesSummary:btnCustomer" />
+                            <p:ajax event="toggleSelect" listener="#{salesSummaryReportBean.changeBranch()}" update="frmSalesSummary:txtCategory,frmSalesSummary:btnStock,frmSalesSummary:btnCategory,frmSalesSummary:txtStock,slcBranch, frmSalesSummary:pngSupplier,frmSalesSummary:txtCustomer,frmSalesSummary:btnCustomer"  oncomplete="PF('slcBranchCheckBox').show()" global="false"/>
+                        </p:selectCheckboxMenu>
+                    </div>        
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.stock}" for="txtStock" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtStock"  value="#{stockBookCheckboxFilterBean.selectedCount}" onclick="showStockBook()" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}" >
+                        </p:inputText>     
+                        <p:commandLink id="btnStock" process="@this"  update="frmStockBookFilterCheckbox" actionListener="#{salesSummaryReportBean.openDialog(1)}" class="commandLinkPositionForBookFilter btnDisableButton" oncomplete="PF('olp_stockcheckbox').show();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax   listener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([salesSummaryReportBean.selectedBranchList.size() != 0 ? salesSummaryReportBean.selectedBranchList : salesSummaryReportBean.listOfBranch],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckboxwithbranch')}" />
+                        </p:commandLink>
+                    </div>   
+                    <div  class="ui-g-12 ui-md-6  ui-lg-2">        
+                        <p:outputLabel value="#{loc.stock} #{loc.category}" for="txtCategory"  styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtCategory" onclick="showCategoryBook()" value="#{categoryBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter"  readonly="#{facesContext.currentPhaseId.ordinal ge 4}"  placeholder="#{loc.all}" />
+
+                        <p:commandLink id="btnCategory"  process="@this" update="frmCategoryBookFilter" action="#{salesSummaryReportBean.openDialog(2)}" class="commandLinkPositionForBookFilter btnDisableButton" oncomplete="PF('olp_Category').loadContents();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>  
+                            <p:ajax   listener="#{categoryBookCheckboxFilterBean.findFilterList([2,salesSummaryReportBean.branchId],'frmCategoryBookFilter','olp_Category','SaleSummaryReportCheckbox')}" />
+                        </p:commandLink>
+                    </div>
+                    <h:panelGroup id="pngSupplier" >
+                    <h:panelGroup rendered="#{salesSummaryReportBean.isCentralSupplier}">
+                        <div class="ui-g-12 ui-md-6 ui-lg-2">
+                            <p:outputLabel value="#{loc.centralsupplier}" for="txtCentralSupplier"  styleClass="Fs12 FontBold"/>
+                            <p:commandLink id="cmdCentralSupplier" resetValues="true" process="@this" global="false" title="#{loc.supplier}" actionListener="#{salesSummaryReportBean.centralOrLocalSupplier(0)}" update="pgrSalesSummary"  >
+                                <i class="fa fa-refresh Fs14 tlbrAddBtn"/>                 
+                            </p:commandLink>
+
+                            <p:inputText  id="txtCentralSupplier" onclick="showCentralSupplierBook()" value="#{centralSupplierBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+
+                            </p:inputText>
+                            <p:commandLink id="btnCentralSupplier" process="@this" actionListener="#{salesSummaryReportBean.openDialog(3)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_centralsuppliercheckbox').loadContents();">
+                                <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                <p:ajax listener="#{centralSupplierBookCheckboxFilterBean.findFilterListLazyLoading([],'frmCentralSupplierBookFilterCheckbox','olp_centralsuppliercheckbox', 'reportcheckbox')}" />
+                            </p:commandLink>
+                        </div>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{!salesSummaryReportBean.isCentralSupplier}">
+                        <div class="ui-g-12 ui-md-6 ui-lg-2">
+                            <p:outputLabel value="#{loc.supplier}" for="txtSupplier"  styleClass="Fs12 FontBold"/>
+                            <p:commandLink id="clmSupplier" resetValues="true" process="@this" rendered="#{salesSummaryReportBean.isCentralSupplierIconView}" global="false" title="#{loc.centralsupplier}" actionListener="#{salesSummaryReportBean.centralOrLocalSupplier(1)}" update="pgrSalesSummary"  >
+                                <i class="fa fa-refresh Fs14 tlbrAddBtn"/>                 
+                            </p:commandLink>
+
+                            <p:inputText  id="txtSupplier" onclick="showAccountBook()" value="#{accountBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+
+                            </p:inputText>
+                            <p:commandLink id="btnSupplier" process="@this" actionListener="#{salesSummaryReportBean.openDialog(4)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_accountcheckbox').loadContents();">
+                                <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                <p:ajax listener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([salesSummaryReportBean.selectedBranchList.size() != 0 ? salesSummaryReportBean.selectedBranchList : salesSummaryReportBean.listOfBranch],'frmAccountBookFilterCheckbox','olp_accountcheckbox', 'supplierCheckboxReport')}" />
+                            </p:commandLink>
+                        </div>
+                    </h:panelGroup>
+                    </h:panelGroup>
+                    <div class="ui-g-12 ui-md-6  ui-lg-2">
+                        <p:outputLabel value="#{loc.customer}" for="txtCustomer" class="FontBold Fs12"/>
+                        <p:inputText  id="txtCustomer" onclick="showAccountBookCustomer()" value="#{salesSummaryReportBean.selectedObject.account.name}" class="inputPositionForBookFilter"  readonly="true" placeholder="#{loc.all}">   
+                        </p:inputText>
+                        <p:commandLink id="btnCustomer" process="@this" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_account').loadContents();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax listener="#{accountBookFilterBean.findFilterListLazyLoading([salesSummaryReportBean.selectedBranchList.size() != 0 ? salesSummaryReportBean.selectedBranchList : salesSummaryReportBean.listOfBranch],'frmAccountBookFilter','olp_account','report')}" />
+                        </p:commandLink>
+                    </div>  
+                </div>
+            </div> 
+        </h:panelGroup>
+        <p:remoteCommand name="showStockBook" process="@this" update="frmStockBookFilterCheckbox" oncomplete="PF('olp_stockcheckbox').show();" action="#{salesSummaryReportBean.openDialog(1)}" actionListener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([salesSummaryReportBean.selectedBranchList.size() != 0 ? salesSummaryReportBean.selectedBranchList : salesSummaryReportBean.listOfBranch],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckboxwithbranch')}" />
+        <p:remoteCommand name="showCategoryBook" process="@this" update="frmCategoryBookFilter" action="#{salesSummaryReportBean.openDialog(2)}" oncomplete="PF('olp_Category').loadContents();" actionListener="#{categoryBookCheckboxFilterBean.findFilterList([2,salesSummaryReportBean.branchId],'frmCategoryBookFilter','olp_Category','SaleSummaryReportCheckbox')}" />   
+        <p:remoteCommand name="showCentralSupplierBook" process="@this" oncomplete="PF('olp_centralsuppliercheckbox').loadContents();" action="#{salesSummaryReportBean.openDialog(3)}" actionListener="#{centralSupplierBookCheckboxFilterBean.findFilterListLazyLoading([],'frmCentralSupplierBookFilterCheckbox','olp_centralsuppliercheckbox', 'reportcheckbox')}" />
+        <p:remoteCommand name="showAccountBook" process="@this" oncomplete="PF('olp_accountcheckbox').loadContents();" action="#{salesSummaryReportBean.openDialog(4)}" actionListener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([salesSummaryReportBean.selectedBranchList.size() != 0 ? salesSummaryReportBean.selectedBranchList : salesSummaryReportBean.listOfBranch],'frmAccountBookFilterCheckbox','olp_accountcheckbox', 'supplierCheckboxReport')}" />
+        <p:remoteCommand name="showAccountBookCustomer" process="@this" oncomplete="PF('olp_account').loadContents();" actionListener="#{accountBookFilterBean.findFilterListLazyLoading([salesSummaryReportBean.selectedBranchList.size() != 0 ? salesSummaryReportBean.selectedBranchList : salesSummaryReportBean.listOfBranch],'frmAccountBookFilter','olp_account','report')}" />
+
+    </h:form>
+    <div class="EmptyBox20" />
+    <h:panelGroup id="pgrSalesSummaryDatatable" >
+        <h:panelGroup rendered="#{salesSummaryReportBean.isFind}">
+            <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                <ui:param name="bean" value="#{salesSummaryReportBean}"/>
+                <ui:param name="datatable" value="frmSalesSummaryDatatable:dtbSalesSummary" />
+                <ui:param name="fileName" value="#{loc.salessummaryreport}"/>
+                <ui:param name="renderedToggler" value='true'/>
+                <ui:param name="renderedExcel" value='true'/>
+                <ui:param name="renderedPdf" value='true'/>
+                <ui:param name="renderedPrint" value='true'/>
+                <ui:param name="renderedGraphic" value='false'/>
+            </ui:include>
+            <h:form id="frmSalesSummaryDatatable" >
+                <p:dataTable  id="dtbSalesSummary" var="salesSummaryReport" widgetVar="salesSummaryReportPF" emptyMessage="#{loc.norecordsfound}" value="#{salesSummaryReportBean.listOfObjects}" 
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{salesSummaryReport.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true" lazy="true"  
+                              >
+
+                    <p:ajax event="colReorder" listener="#{salesSummaryReportBean.reorder}" update="frmGridToolbar:toggle" />     
+                    <p:ajax event="colResize"  listener="#{salesSummaryReportBean.onResize}" />
+
+                    <p:column id="clmBranchName" headerText="#{loc.branch}" visible="#{salesSummaryReportBean.toogleList[0]}" exportable="#{salesSummaryReportBean.toogleList[0]}" sortable="true" sortBy="#{salesSummaryReport.brn.name}">
+                        <h:outputText  value="#{salesSummaryReport.branchSetting.branch.name}"/>
+                    </p:column> 
+
+                    <p:column id="clmStockCode" headerText="#{loc.stockcode}" visible="#{salesSummaryReportBean.toogleList[1]}" exportable="#{salesSummaryReportBean.toogleList[1]}" sortable="true" sortBy="#{salesSummaryReport.stck.code}">
+                        <h:outputText  value="#{salesSummaryReport.stock.code}"/>
+                    </p:column> 
+                    <p:column id="clmCenterStockCode" headerText="#{loc.centerstockcode}" visible="#{salesSummaryReportBean.toogleList[2]}" exportable="#{salesSummaryReportBean.toogleList[2]}" sortable="true" sortBy="#{salesSummaryReport.stck.centerproductcode}">
+                        <h:outputText  value="#{salesSummaryReport.stock.centerProductCode}"/>
+                    </p:column>                    
+                    <p:column id="clmBarcode" headerText="#{loc.stockbarcode}" visible="#{salesSummaryReportBean.toogleList[3]}" exportable="#{salesSummaryReportBean.toogleList[3]}" sortable="true" sortBy="#{salesSummaryReport.stck.barcode}">
+                        <h:outputText  value="#{salesSummaryReport.stock.barcode}" />
+                    </p:column>
+                    <p:column id="clmStock" headerText="#{loc.stock}" visible="#{salesSummaryReportBean.toogleList[4]}" exportable="#{salesSummaryReportBean.toogleList[4]}" sortable="true" sortBy="#{salesSummaryReport.stck.name}">
+                        <h:outputText  value="#{salesSummaryReport.stock.name}" />
+                    </p:column>
+                    <p:column id="clmCategory" headerText="#{loc.stockcategory}"  visible="#{salesSummaryReportBean.toogleList[5]}" exportable="#{salesSummaryReportBean.toogleList[5]}">
+                        <h:outputText  value="#{salesSummaryReport.category}"/>
+                    </p:column>
+                    <p:column id="clmCentralSupplier" headerText="#{loc.centralsupplier}"  rendered="#{salesSummaryReportBean.isCentralSupplierIconView}" visible="#{salesSummaryReportBean.toogleList[6]}" exportable="#{salesSummaryReportBean.toogleList[6]}" sortable="true" sortBy="#{salesSummaryReport.cspp.name}">
+                        <h:outputText  value="#{salesSummaryReport.stock.centralSupplier.name}"/>
+                    </p:column>
+                    <p:column id="clmSupplier" headerText="#{loc.supplier}"  visible="#{salesSummaryReportBean.toogleList[7]}" exportable="#{salesSummaryReportBean.toogleList[7]}" sortable="true" sortBy="#{salesSummaryReport.acc.name}">
+                        <h:outputText  value="#{salesSummaryReport.stock.supplier.name}"/>
+                    </p:column>
+                    <p:column id="clmBrand" headerText="#{loc.brand}"  visible="#{salesSummaryReportBean.toogleList[8]}" exportable="#{salesSummaryReportBean.toogleList[8]}" sortable="true" sortBy="#{salesSummaryReport.br.name}">
+                        <h:outputText  value="#{salesSummaryReport.stock.brand.name}"/>
+                    </p:column>
+                    <p:column id="clmSoldStockQuantity" headerText="#{loc.soldstockquantity}" visible="#{salesSummaryReportBean.toogleList[9]}" exportable="#{salesSummaryReportBean.toogleList[9]}" sortable="true" sortBy="#{salesSummaryReport.COALESCE(SUM(sli.quantity),0)}">
+                        <h:outputText  value="#{salesSummaryReport.countQuantity}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value="#{salesSummaryReport.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmUnitPrice" headerText="#{loc.unitprice}" visible="#{salesSummaryReportBean.toogleList[10]}" exportable="#{salesSummaryReportBean.toogleList[10]}" sortable="true" sortBy="#{salesSummaryReport.sli.unitprice*sli.exchangerate}">
+                        <h:outputText  value="#{salesSummaryReport.unitPrice}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{salesSummaryReport.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmTotalGiro" headerText="#{loc.giro}" visible="#{salesSummaryReportBean.toogleList[11]}" exportable="#{salesSummaryReportBean.toogleList[11]}" sortable="true" sortBy="#{salesSummaryReport.COALESCE(SUM((sli.totalmoney - ((sli.totalmoney * COALESCE(sl.discountrate, 0))/100)) *sli.exchangerate),0)}">
+                        <h:outputText  value="#{salesSummaryReport.totalGiro}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{salesSummaryReport.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmTotalQuantityByStock" headerText="#{loc.sum} #{loc.soldstockquantity}" visible="#{salesSummaryReportBean.toogleList[12]}" exportable="#{salesSummaryReportBean.toogleList[12]}" sortable="true" sortBy="#{salesSummaryReport.totalCountByStock}">
+                        <h:outputText  value="#{salesSummaryReport.totalCountByStock}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value="#{salesSummaryReport.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmAverageUnitPrice" headerText="#{loc.averageunitprice}" visible="#{salesSummaryReportBean.toogleList[13]}" exportable="#{salesSummaryReportBean.toogleList[13]}" sortable="true" sortBy="#{salesSummaryReport.averageUnitPrice}">
+                        <h:outputText  value="#{salesSummaryReport.totalCountByStock!=0 ? salesSummaryReport.totalGiroByStock / salesSummaryReport.totalCountByStock : 0}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{salesSummaryReport.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmTotalAmount" headerText="#{loc.totalgiro}" visible="#{salesSummaryReportBean.toogleList[14]}" exportable="#{salesSummaryReportBean.toogleList[14]}" sortable="true" sortBy="#{salesSummaryReport.totalGiroByStock}">
+                        <h:outputText  value="#{salesSummaryReport.totalGiroByStock}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{salesSummaryReport.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>   
+
+                    <p:columnGroup type="footer" rendered="#{salesSummaryReportBean.listOfObjects.rowCount>0}">
+                        <ui:repeat value="#{salesSummaryReportBean.listOfTotals}" var="totals" >
+                            <p:row>
+                                <p:column colspan="#{salesSummaryReportBean.toogleList.size()-salesSummaryReportBean.countToggle-1}" style="text-align:right" >
+                                    <f:facet name="footer" >
+                                        <h:outputText value="#{loc.sum} : " class="FontBold" style="font-size: 15px;  color: #565656;"/>
+                                    </f:facet>
+                                </p:column>
+                                <p:column colspan="1" style="text-align:right; font-weight: bold; ">
+                                    <f:facet name="footer" >
+                                        <h:panelGroup rendered="#{salesSummaryReportBean.listOfTotals.size()>1}">
+                                            <h:outputText value="(#{totals.branchSetting.branch.name})" />
+                                            <h:outputText value="12" style="visibility: hidden"/>
+                                        </h:panelGroup>
+
+                                        <h:outputText value="#{totals.totalGiroByStock}" style="text-align:right; font-weight: bold; font-size: 15px; " >
+                                            <f:converter converterId="currencyConverter" />
+                                            <f:attribute name="currency" value="#{totals.currency}"/>
+                                            <f:attribute name="type" value="currency" />
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column>
+                            </p:row>
+                        </ui:repeat>
+                    </p:columnGroup>
+                </p:dataTable>  
+            </h:form>
+        </h:panelGroup>
+    </h:panelGroup>
+
+    <!--Kitaptan stok seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/stockbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{salesSummaryReportBean}' />
+        <ui:param name="for" value='frmSalesSummary:btnStock' />
+        <ui:param name="type" value='reportcheckboxwithbranch' />   
+        <ui:param name="parameters" value='#{[salesSummaryReportBean.selectedBranchList.size() != 0 ? salesSummaryReportBean.selectedBranchList : salesSummaryReportBean.listOfBranch]}' /> 
+        <ui:param name="columnsize" value='4' /> 
+        <ui:param name="form" value='frmStockBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_stockcheckbox" />
+    </ui:include>
+
+    <p:overlayPanel id="olpCategory" widgetVar="olp_Category" showEvent="none" modal="true" transient="true" for="frmSalesSummary:btnCategory"  my="right top" at="left bottom" dismissable="true" hideEffect="blind" showCloseIcon="true" class="Wid30">
+        <ui:include src="/pages/general/common/categorybookcheckbox.xhtml">
+            <ui:param name="updateBean" value='#{salesSummaryReportBean}' />
+            <ui:param name="type" value='SaleSummaryReportCheckbox' />
+            <ui:param name="parameters" value='#{[2,salesSummaryReportBean.branchId]}' /> 
+            <ui:param name="form" value='frmCategoryBookFilter' /> 
+        </ui:include>
+    </p:overlayPanel>
+    
+    <!--Kitaptan merkezi tedarikçi seçtirmek için açılan overlay panel-->
+     <ui:include src="/pages/general/common/centralsupplierbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{salesSummaryReportBean}' />
+        <ui:param name="for" value='frmSalesSummary:btnCentralSupplier' />
+        <ui:param name="type" value='reportcheckbox' />
+        <ui:param name="parameters" value='' /> 
+        <ui:param name="columnsize" value='1' /> 
+        <ui:param name="form" value='frmCentralSupplierBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_centralsuppliercheckbox" />
+    </ui:include>
+     
+     <!--Kitaptan tedarikçi seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/accountbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{salesSummaryReportBean}' />
+        <ui:param name="for" value='frmSalesSummary:btnSupplier' />
+        <ui:param name="type" value='supplierCheckboxReport' />
+        <ui:param name="parameters" value='#{[salesSummaryReportBean.selectedBranchList.size() != 0 ? salesSummaryReportBean.selectedBranchList : salesSummaryReportBean.listOfBranch]}' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmAccountBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_accountcheckbox" />
+    </ui:include>
+     
+     <ui:include src="/pages/general/common/accountbook.xhtml" >
+         <ui:param name="updateBean" value='#{salesSummaryReportBean}' />
+         <ui:param name="for" value='frmSalesSummary:btnCustomer' />
+         <ui:param name="type" value='report' />
+         <ui:param name="parameters" value='#{[salesSummaryReportBean.selectedBranchList.size() != 0 ? salesSummaryReportBean.selectedBranchList : salesSummaryReportBean.listOfBranch]}' /> 
+         <ui:param name="columnsize" value='2' /> 
+         <ui:param name="form" value='frmAccountBookFilter' /> 
+         <ui:param name="overlay" value="olp_account" />
+     </ui:include>
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.salessummaryreport}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+
+    </script>
+</ui:composition>

@@ -1,0 +1,78 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+    <!--
+    bean:Hangi sayfada kullanılcaksa o sayfanın Bean i
+    update: Yeni butonuna basınca açılacak dialog  
+    btnNewId: buton id yetki kontrolü için 
+    datatable: kullanılan sayfadaki datatable in id si
+    detailFilterXhtmlPath: detaylı filtre için açılan xhtml yolu
+    filterBean: detaylı filtre için açılan bean
+    fileName: excel pdf için oluşturulacak dosyanın adı
+    renderedFilter: Filtre butonunun yetki kontrolü
+    renderedToggler: Grid kolonları açıp kapatma butonunun yetki kontrolü
+    renderedExel:excel butonunun yetki kontrolü
+    renderedPdf: pdf butonunun yetki kontrolü
+    renderedAdd:artı butonunun yetki kontrolü
+    gridId: kullanılan sayfadaki gridin veri tabanındaki id si 
+    -->
+    <p:defaultCommand  target="test" />
+    <p:commandLink  id="test" delay="100" actionListener="#{filterBean.generalFilter(type,parameters)}" style="display: none" onstart="PF('filterPF').filter();" />
+    <p:toolbar>
+        <f:facet name="left"  >
+            <p:commandLink id="btnAdd" actionListener="#{bean.create}" resetValues="true" rendered="#{btnNewId}" title="#{loc.new}"  update="#{update}" class="Fleft" process="@this" >
+                <i class="icon-plus tlbrAddBtn Fs23" />
+            </p:commandLink>  
+            
+            
+            <!-- <p:autoComplete id="autToolbarSearch" active="false"  value="#{filterBean.autoCompleteValue}" size="2" queryEvent="keyup" forceSelection="false"   completeMethod="#{filterBean.autoComplete}"   minQueryLength="1" maxResults="7" effect="blind" emptyMessage="#{loc.norecordsfoundamatchingyoursearch}"  inputStyleClass="tlbrSearchInput"  >                                                                              
+                 <p:ajax  event="itemSelect" listener="#{filterBean.generalFilter(type,parameters)}" update="#{datatable},@this" />                                   
+             </p:autoComplete> -->
+
+            <p:inputText id="autToolbarSearch" value="#{filterBean.autoCompleteValue}" class="Fleft tlbrSearchInput" >
+
+
+            </p:inputText>
+            <p:focus for="autToolbarSearch"/>     
+            <p:watermark for="autToolbarSearch" value="#{loc.enteratleastonecharacter}" id="watermark"/>
+
+        </f:facet>
+        <f:facet name="right"  >
+            <p:commandLink id="btnOkey"  title="#{loc.okey}" rendered="#{btnOk}" style="margin-top: 8px" actionListener="#{updateBean.updateAllInformation}" class="Fleft" process="@this" oncomplete="#{filterBean.dialogId}" >
+                <i class="fa fa-save tlbrBackBtn Fs20" />
+            </p:commandLink>  
+
+        </f:facet>
+    </p:toolbar>
+
+    <script type="text/javascript">
+
+        
+        function inputSize() {
+            var pw = $('.tlbrSearchInput').parent().parent().width();
+            if (pw &lt; 500) {
+                $('.tlbrSearchInput').css({"max-width": pw - 60 + "px", "min-width": pw - (pw / 2) + "px"});
+            } 
+        }
+
+        $(window).resize(function () {
+            inputSize();
+        });
+        
+        $('.tlbrSearchInput').focus(function ()
+        {
+            inputSize();
+            if ($(document).width() > 640)
+                $(this).animate({width: '+=' + $(this).width() / 3}, 150);
+        }).blur(function ()
+        {
+            inputSize();
+            if ($(document).width() > 640)
+                $(this).animate({width: '-=' + $(this).width() / 3}, 150);
+        });
+
+    </script>
+</ui:composition> 

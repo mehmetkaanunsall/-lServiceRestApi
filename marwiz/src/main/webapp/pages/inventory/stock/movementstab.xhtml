@@ -1,0 +1,255 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <script type="text/javascript">
+        function printchart(chart) {
+            $('#output').empty().append(PF(chart).exportAsImage());
+            PF('dlg').show();
+        }
+
+        function overrideAxis() {
+            this.cfg.axes.xaxis.tickOptions.fontSize = "9pt";
+            this.cfg.axes.xaxis.tickOptions.textColor = "#0f446c";
+            this.cfg.axes.xaxis.scaleToHiddenSeries = true;
+
+            this.cfg.axes.yaxis.tickOptions.fontSize = "9pt";
+            this.cfg.axes.yaxis.tickOptions.textColor = "#0f446c";
+            this.cfg.axes.yaxis.scaleToHiddenSeries = true;
+        }
+    </script>
+
+    <h:form id="frmMovementTab" style="padding: 5px 6px 0px 6px;">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.movements}"/>
+            <ui:param name="selectedObjectName" value=""/>
+            <ui:param name="bean" value='#{stockMovementsTabBean}' />
+            <ui:param name="update" value="tbvStokProc:pgrMovementDatatableProcess" />
+            <ui:param name="btnSaveId" value="false" />
+            <ui:param name="renderback" value='false'/>
+            <ui:param name="btnDeleteId" value='false' /> 
+            <ui:param name="renderSelectedObject" value='false'/>
+            <ui:param name="renderedFindReport" value='true'/>
+        </ui:include>
+
+
+        <h:panelGroup id="pgrMovementProcess" layout="block" transient="true">  
+            <div class="ui-g divContent">
+                <div class="ui-g-12">
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldStartDate" class="datepicker" value="#{stockMovementsTabBean.beginDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldEndDate" class="datepicker" value="#{stockMovementsTabBean.endDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-4">
+                        <p:outputLabel value="#{loc.processtype}" for="srdOperationType" styleClass="Fs12 FontBold"/>
+                        <p:panelGrid layout="grid" columns="1" class="pngCheckBox" >  
+                            <p:selectOneRadio id="srdOperationType" value="#{stockMovementsTabBean.opType}" class="srcExtractRadio" layout="responsive" columns="3">
+                                <f:selectItem itemLabel="#{loc.entry}" itemValue="1" />
+                                <f:selectItem itemLabel="#{loc.exit}" itemValue="2" />
+                                <f:selectItem itemLabel="#{loc.all}" itemValue="3" />
+                                <p:ajax event="change" listener="#{stockMovementsTabBean.find()}" update="tbvStokProc:pgrMovementDatatableProcess"/>
+                            </p:selectOneRadio>
+                        </p:panelGrid>
+                    </div> 
+                    <h:panelGroup rendered="#{stockMovementsTabBean.listOfBranch.size() > 1}">
+                        <div class="ui-g-12 ui-md-6 ui-lg-2">
+                            <p:outputLabel value="#{loc.branch}" for="slcBranch" styleClass="Fs12 FontBold"/>
+                            <p:selectCheckboxMenu  id="slcBranch" value="#{stockMovementsTabBean.selectedBranchList}" 
+                                                   filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                                   label="#{stockMovementsTabBean.selectedBranchList.size()!=0 ? stockMovementsTabBean.selectedBranchList.size() :loc.all} #{stockMovementsTabBean.selectedBranchList.size()!=0 ? loc.branch : ''} #{stockMovementsTabBean.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                                <f:selectItems value="#{stockMovementsTabBean.listOfBranch}" itemLabel="#{branch.name}" itemValue="#{branch}" var="branch" />       
+                                <p:ajax oncomplete="PF('slcBranchCheckBox').show()" global="false" listener="#{stockMovementsTabBean.changeBranch()}" update="tbvStokProc:frmMovementTab:slcWarehouse tbvStokProc:frmMovementTab:slcBranch"/>
+                                <p:ajax event="toggleSelect" listener="#{stockMovementsTabBean.changeBranch()}" update="tbvStokProc:frmMovementTab:slcWarehouse tbvStokProc:frmMovementTab:slcBranch"  oncomplete="PF('slcBranchCheckBox').show()" global="false"/>
+                            </p:selectCheckboxMenu>
+                        </div>
+                    </h:panelGroup>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.warehousename}" for="slcWarehouse" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcWarehouse" value="#{stockMovementsTabBean.selectedWarehouse.id}">
+                            <f:selectItem itemValue="0" itemLabel="#{loc.all}" />
+                            <f:selectItems value="#{stockMovementsTabBean.listOfWarehouses}" var="wh" itemValue="#{wh.id}" itemLabel="#{wh.name}" />
+                        </p:selectOneMenu>
+                    </div>
+
+                </div>  
+            </div>
+        </h:panelGroup>
+    </h:form>
+
+    <div class="EmptyBox20" />
+    <h:panelGroup id="pgrMovementDatatableProcess">
+        <div class="ui-g">
+            <div class="ui-g-12 ui-md-4 ui-lg-4">
+
+                <div class="ui-g-12 divContent" style="border-radius: 5px !important;height: 350px;">
+                    <h:outputText value="#{loc.warehouse}" class="FontBold MarLeft10" />
+                    <p:chart type="bar"   model="#{stockMovementsTabBean.warehouseChart}" responsive="true"  />
+                </div>
+
+            </div>
+            <div class="ui-g-12 ui-md-8 ui-lg-8">
+                <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml">
+                    <ui:param name="bean" value="#{stockMovementsTabBean}"/>
+                    <ui:param name="datatable" value="frmMovements:dtbItems" />
+                    <ui:param name="fileName" value="#{loc.movements}" />
+                    <ui:param name="outputText" value="#{loc.movements}" />
+                    <ui:param name="renderedOutputText" value="true" />
+                    <ui:param name="renderedPdf" value="true" />
+                    <ui:param name="renderedExcel" value="true" />
+                </ui:include>
+
+
+                <h:form id="frmMovements" >
+                    <p:dataTable id="dtbItems"  var="items" selectionMode="single" value="#{stockMovementsTabBean.listOfObjects}" widgetVar="waybillproductPF" selection="#{stockMovementsTabBean.selectedObject}"
+                                 rowKey="#{items.id}" emptyMessage="#{loc.norecordsfound}" class="tabDatatable"  rows="#{sessionBean.user.defualtGridSize}"
+                                 paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                                 rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                                 reflow="true" lazy="true"> 
+                        <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{stockMovementsTabBean.gotoDetail()}" global="true"/>
+                        
+                        <p:column id="clmBranch" headerText="#{loc.branch}"  visible="#{stockMovementsTabBean.toogleList[0]}" exportable="#{stockMovementsTabBean.toogleList[0]}" sortable="true" sortBy="#{items.tt.brname}">
+                            <h:outputText value="#{items.branch.name}"  />
+                        </p:column>
+                        <p:column id="clmDate" headerText="#{loc.date}"  visible="#{stockMovementsTabBean.toogleList[1]}"   exportable="#{stockMovementsTabBean.toogleList[1]}" sortable="true" sortBy="#{items.tt.movedate}">
+                            <h:outputText value="#{items.moveDate}" >
+                                <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" />
+                            </h:outputText>
+                        </p:column>
+
+                        <p:column id="clmWarehoseName" headerText="#{loc.warehousename}" visible="#{stockMovementsTabBean.toogleList[2]}"   exportable="#{stockMovementsTabBean.toogleList[2]}" sortable="true" sortBy="#{items.tt.whname}">
+                            <h:outputText value="#{items.warehouse.name}" />
+                        </p:column>
+
+                        <p:column id="clmDocumentNumber" headerText="#{loc.documentnumber}" visible="#{stockMovementsTabBean.toogleList[3]}"   exportable="#{stockMovementsTabBean.toogleList[3]}" sortable="true" sortBy="#{items.warehouseReceipt.receiptNumber}">
+                            <h:outputText value="#{items.warehouseReceipt.receiptNumber}" />
+                        </p:column>
+
+                        <p:column id="clmDocumentType" headerText="#{loc.operationtype}" visible="#{stockMovementsTabBean.toogleList[4]}"   exportable="#{stockMovementsTabBean.toogleList[4]}" sortable="true" sortBy="#{items.processType}">
+                            <h:outputText value="#{items.processType == 1 ? loc.consumption : items.processType == 2 ? loc.countdifference : items.processType == 3 ? loc.trasferbetweenwarehouses
+                                                   : items.processType == 4 ? loc.other : items.processType == 5 ? loc.returnreceipt : items.processType == 6 ? loc.receipt : items.processType == 7 ? loc.invoice : items.processType == 8 ? loc.waybill : items.processType == 9 ? loc.refuse : '' }" />
+                        </p:column>
+
+                        <p:column id="clmDocumentPrice" headerText="#{loc.unitprice} (#{loc.istaxincluded})" visible="#{stockMovementsTabBean.toogleList[5]}"   exportable="#{stockMovementsTabBean.toogleList[5]}" sortable="true" sortBy="#{items.unitPrice}">
+                            <h:outputText value="#{items.unitPrice}" >
+                                <f:converter converterId="currencyConverter"  />
+                                <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+
+                        <p:column id="clmDirection" headerText="#{loc.movement}" visible="#{stockMovementsTabBean.toogleList[6]}"   exportable="#{stockMovementsTabBean.toogleList[6]}" sortable="true" sortBy="#{items.tt.wmis_direction}">
+                            <h:outputText value="#{items.isDirection ? loc.entry : loc.exit}" />
+                        </p:column>
+
+
+
+                        <p:column id="clmamount" headerText="#{loc.amount}" visible="#{stockMovementsTabBean.toogleList[7]}"   exportable="#{stockMovementsTabBean.toogleList[7]}" sortable="true" sortBy="#{items.tt.wmquantity}">
+                            <h:outputText value="#{items.quantity}" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="unit" value="#{stockMovementsTabBean.selectedStock.unit}"/>
+                                <f:attribute name="type" value="unit" />
+                            </h:outputText>
+                        </p:column>
+
+                        <p:column id="clmremamount" headerText="#{loc.remainingamount}" visible="#{stockMovementsTabBean.toogleList[8]}"   exportable="#{stockMovementsTabBean.toogleList[8]}" >
+                            <h:outputText value="#{items.remainingAmount}" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="unit" value="#{stockMovementsTabBean.selectedStock.unit}"/>
+                                <f:attribute name="type" value="unit" />
+                            </h:outputText>
+                        </p:column>
+                        
+                        <p:columnGroup type="footer" rendered="#{stockMovementsTabBean.listOfObjects.rowCount>0}">
+                           <p:row>
+                                <p:column colspan="8" style="text-align:right">
+                                    <f:facet name="footer" >
+                                        <h:outputText value="#{loc.overturnamount} : " class="FontBold"  />
+                                    </f:facet>
+                                </p:column>
+                                <p:column style="text-align:right">
+                                    <f:facet name="footer" >
+                                        <h:outputText  value="#{stockMovementsTabBean.transferAmount}">
+                                            <f:converter converterId="currencyConverter" />
+                                            <f:attribute name="unit" value="#{stockMovementsTabBean.selectedStock.unit}"/>
+                                            <f:attribute name="type" value="unit" />
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column colspan="8" style="text-align:right"  rendered="#{stockMovementsTabBean.opType==1 or stockMovementsTabBean.opType==3}">
+                                    <f:facet name="footer" >
+                                        <h:outputText value="#{loc.sumofincoming} : " class="FontBold"  />
+                                    </f:facet>
+                                </p:column>
+                                <p:column style="text-align:right"  rendered="#{stockMovementsTabBean.opType==1 or stockMovementsTabBean.opType==3}">
+                                    <f:facet name="footer" >
+                                        <h:outputText  value="#{stockMovementsTabBean.totalIncoming}">
+                                            <f:converter converterId="currencyConverter" />
+                                            <f:attribute name="unit" value="#{stockMovementsTabBean.selectedStock.unit}"/>
+                                            <f:attribute name="type" value="unit" />
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column colspan="8" style="text-align:right"  rendered="#{stockMovementsTabBean.opType==2 or stockMovementsTabBean.opType==3}">
+                                    <f:facet name="footer" >
+                                        <h:outputText value="#{loc.sumofoutcoming} : " class="FontBold"  />
+                                    </f:facet>
+                                </p:column>
+                                <p:column style="text-align:right"  rendered="#{stockMovementsTabBean.opType==2 or stockMovementsTabBean.opType==3}">
+                                    <f:facet name="footer" >
+                                        <h:outputText value="#{stockMovementsTabBean.totalOutcoming}">
+                                            <f:converter converterId="currencyConverter" />
+                                            <f:attribute name="unit" value="#{stockMovementsTabBean.selectedStock.unit}"/>
+                                            <f:attribute name="type" value="unit" />
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column colspan="8" style="text-align:right" >
+                                    <f:facet name="footer" >
+                                        <h:outputText value="#{loc.remainingamount} : " class="FontBold" style="font-size: 15px; color: #565656;"/>
+                                    </f:facet>
+                                </p:column>
+                                <p:column colspan="1" style="text-align:right" >
+                                    <f:facet name="footer" >
+                                        <h:outputText  value="#{stockMovementsTabBean.remainingAmount}" class="FontBold" style="font-size: 15px;  color: #565656;">
+                                            <f:converter converterId="currencyConverter" />
+                                            <f:attribute name="unit" value="#{stockMovementsTabBean.selectedStock.unit}"/>
+                                            <f:attribute name="type" value="unit" />
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column>
+                            </p:row>
+                        </p:columnGroup>
+
+
+                    </p:dataTable>
+                </h:form>
+
+            </div>
+
+        </div>
+    </h:panelGroup>
+
+
+
+
+</ui:composition>
+

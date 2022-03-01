@@ -1,0 +1,181 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+    <style>
+        @media (min-width: 685px) {
+            #sm-topmenu li,
+            #sm-topmenu li.active-topmenuitem{
+                height: 30px !important;
+            }
+        }
+    </style>
+    <h:form id="frmtopbar" >
+        <div id="layout-header" class="Unselectable fontRegular" style="height: 38px;">
+
+            <h:commandLink id="cmdMarwizImage" actionListener="#{marwiz.goToPage('/pages/general/dashboard.xhtml', null, 1,0)}"  action="/pages/marwiz?faces-redirect=true" >
+                <h:graphicImage name="images/marwiz_logo_topbar.png" styleClass="Fleft" library="sentinel-layout"  style="margin: 9px 23px 8px;height: 20px !important;"/>
+            </h:commandLink>
+               <p:tooltip id="toolTipFades" for="cmdMarwizImage" value="v #{applicationBean.parameterMap.get('version').value}"  position="bottom"/>
+
+            <ul id="sm-topmenu" class="layout-header-widgets white Fs14">
+
+                <li id="process" class="Fleft BordRad10 TexAlCenter tooltip" data-title="#{loc.processes}">
+                    <p:commandLink  global="false" action="#{marwiz.goToPcrdTop(0)}" class="topBarLink">
+                        <i class="fa fa-cogs white Unselectable" style="margin-top: 8px !important;"></i>                    
+                        <!--   <f:param name="tip" value="0" />-->
+                    </p:commandLink>
+                </li>
+                <li id="card" class="Fleft BordRad10 TexAlCenter tooltip" data-title="#{loc.cards}">
+                    <p:commandLink   global="false" action="#{marwiz.goToPcrdTop(1)}" class="topBarLink">
+                        <i class="fa fa-id-card-o white Unselectable Fs15" style="margin-top: 8px !important;"></i>                    
+                        <!-- <f:param name="tip" value="1" />-->
+                    </p:commandLink>
+                </li>
+                <li id="report" class="Fleft BordRad10 TexAlCenter tooltip" data-title="#{loc.reports}">                    
+                    <p:commandLink global="false" action="#{marwiz.goToPcrdTop(2)}" class="topBarLink">
+                        <i class="fa fa-bar-chart white Unselectable Fs15" style="margin-top: 8px !important;"></i>                    
+                        <!-- <f:param name="tip" value="2" />-->
+                    </p:commandLink>
+                </li>
+                <li id="definition" class="Fleft BordRad10 TexAlCenter tooltip" data-title="#{loc.definitions}">
+                    <p:commandLink global="false" action="#{marwiz.goToPcrdTop(3)}" class="topBarLink">
+                        <i class="fa fa-thumb-tack white Unselectable Fs15" style="margin-top: 8px !important;"></i>                    
+                        <!--  <f:param name="tip" value="3" /> -->
+                    </p:commandLink>
+                </li>
+                <li id="definition" class="Fleft BordRad10 TexAlCenter tooltip" data-title="#{loc.mymenu}">
+                    <p:commandLink  id="mayMenu"  action="#{marwiz.goToPcrdMyMenu()}"   global="true" class="topBarLink">
+                        <i class="fa fa-heart white Unselectable" style="margin-top: 8px !important;"></i>                                            
+                    </p:commandLink>
+                </li>
+
+                <li class="Fright BordRad10 TexAlCenter"><i class="icon-user-male"></i>
+                    <ul class="layout-header-widgets-submenu BordRad5 shadows white Animated05">
+                        <li class="Animated05">
+                            <p:commandLink ajax="true" actionListener="#{marwiz.goToPage('/pages/general/profile.xhtml',null,1,-2)}" class="white Unselectable" >
+                                <i class="icon-user-male OvHidden" style="margin-top: 2px !important ;margin-left: 5px !important"></i>
+                                <span class="Fs18">#{sessionBean.user.name}<br/></span>
+                            </p:commandLink>
+                        </li>
+
+                        <li class="Animated05">
+                            <h:commandLink  action="#{marwiz.gotoNotes()}" class="white Unselectable">
+                                <i class="fa fa-clipboard" style="margin-top: 2px !important; margin-left: 8px !important"></i>
+                                <h:outputText value="#{loc.notes}" style="margin-left: 5px;" />
+                            </h:commandLink>
+                        </li>
+                        <h:panelGroup rendered="#{sessionBean.user.lastBranchSetting.isCentralIntegration}">
+                            <li class="Animated05">
+                                <p:commandLink  action="#{marwiz.synchronize()}" class="white Unselectable"     >
+                                    <i class="fa fa-refresh" style="margin-top: 2px !important; margin-left: 6px !important"></i>
+                                    <h:outputText value="#{loc.synchronize}" style="margin-left: 9px;" />
+                                </p:commandLink>
+                            </li>
+                        </h:panelGroup>
+                        <li class="Animated05">
+                            <h:commandLink  action="#{sessionBean.logoutPage()}" class="white Unselectable"     >
+                                <i class="icon-logout" style="margin-top: 2px !important; margin-left: 6px !important"></i>#{loc.logout}
+                            </h:commandLink>
+                        </li>
+                    </ul>
+                </li>
+                <li class="Fright BordRad10 TexAlCenter"><i class="icon-beaker"></i>
+                    <ul class="layout-header-widgets-submenu BordRad5 shadows white Animated05">
+                        <li class="Animated05">
+                            <p:commandLink global="false" action="#{marwiz.themeChange('bluedanger')}" class="Unselectable TexAlRight">
+                                <i class="icon-beaker" style="color: #4692d0; margin-top: 2px !important"></i>Blue Danger
+                            </p:commandLink>                          
+                        </li>
+                        <li class="Animated05">
+                            <p:commandLink global="false" action="#{marwiz.themeChange('greenmile')}" class="Unselectable TexAlRight">
+                                <i class="icon-beaker" style="color: #00695C; margin-top: 2px !important"></i>Green Mile
+                            </p:commandLink>                            
+                        </li>
+                        <li class="Animated05">
+                            <p:commandLink global="false" action="#{marwiz.themeChange('earlgrey')}" class="Unselectable TexAlRight">
+                                <i class="icon-beaker" style="color: #656565; margin-top: 2px !important"></i>Earl Grey
+                            </p:commandLink>                            
+                        </li>
+                        <li class="Animated05">
+                            <p:commandLink global="false" action="#{marwiz.themeChange('softblue')}" class="Unselectable TexAlRight">
+                                <i class="icon-beaker" style="color: #88BDE0; margin-top: 2px !important"></i>Soft Blue
+                            </p:commandLink>                            
+                        </li>
+                        <li class="Animated05">
+                            <p:commandLink global="false" action="#{marwiz.themeChange('deeppurple')}" class="Unselectable TexAlRight">
+                                <i class="icon-beaker" style="color: #3F51B5; margin-top: 2px !important"></i>Deep Purple
+                            </p:commandLink>                            
+                        </li>
+                        <li class="Animated05">
+                            <p:commandLink global="false" action="#{marwiz.themeChange('bluedanger-b')}" class="Unselectable TexAlRight">
+                                <i class="icon-beaker" style="color: #01202b; margin-top: 2px !important"></i>Blue Danger-B
+                            </p:commandLink>                            
+                        </li>
+
+                    </ul>
+                </li>
+                <li class="Fright BordRad10 TexAlCenter" style=" display: none">
+                    <span id="messagesize" /> 
+                </li>
+            </ul>
+            <!-- NEVER REMOVE FOLLOWING 'UL' TAG ! BECAUSE THIS CONTAINS RESPONSIVE MODE HEADER MENU OPEN-CLOSE BUTTON -->
+            <ul id="sm-mobiletopmenu" class="layout-header-widgets white Fs14">
+                <li class="Fleft BordRad10 TexAlCenter Animated05 DisplayOnResponsive" style="height: 31px"><i class="icon-th-1"></i></li>
+            </ul>
+            <!-- ****** -->
+        </div>
+
+
+        <p:dialog id="dlgSynchronizeProcess" widgetVar="dlg_synchronizeprocess" resizable="false" transient="true" focus="dlgSynchronizeProcess" responsive="true" dynamic="true" modal="true" closeOnEscape="true" width="40%">
+            <ui:include src="/pages/general/synchronizedetail.xhtml" />
+        </p:dialog>
+
+
+
+    </h:form>
+
+    <script type="text/javascript">
+
+        // function setListner(){
+        //<![CDATA[
+        PrimeFaces.widget.Droppable.prototype.bindDropListener = function () {
+            console.log('test');
+            var _self = this;
+            this.cfg.drop = function (event, ui) {
+                if (_self.cfg.onDrop) {
+                    _self.cfg.onDrop.call(_self, event, ui);
+                }
+                if (_self.cfg.behaviors) {
+                    var dropBehavior = _self.cfg.behaviors['drop'];
+                    if (dropBehavior) {
+                        var ext = {
+                            params: [
+                                {name: _self.id + '_dragId', value: ui.draggable.attr('id')},
+                                {name: _self.id + '_dropId', value: _self.cfg.target},
+                                {name: ui.draggable.attr('id') + '_left', value: ui.position.left},
+                                {name: ui.draggable.attr('id') + '_top', value: ui.position.top}
+                            ]
+                        };
+                        console.log(ext);
+                        var divLeft = ui.position.left;
+                        var divTop = ui.position.top;
+                        //   $("#txtLeft").val(Math.round(divLeft * 0.25));
+                        // $("#txtTop").val(Math.round(divTop * 0.25));
+                        console.log(ui);
+                        dropBehavior.call(_self, ext);
+                    }
+                }
+            };
+        }
+
+
+        // ]]>
+        //  }
+
+    </script>
+
+</ui:composition>

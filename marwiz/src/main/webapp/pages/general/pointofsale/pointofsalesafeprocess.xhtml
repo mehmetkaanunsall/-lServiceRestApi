@@ -1,0 +1,31 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmPOSSafeProcess">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.safeprocess}"/>
+            <ui:param name="bean" value='#{pointOfSaleSafeTabBean}' />
+            <ui:param name="update" value="grdPOSSafeProcess" />
+            <ui:param name="btnSaveId" value="#{pointOfSaleSafeTabBean.getRendered(202, 0)}" />      
+            <ui:param name="btnDeleteId" value='false' />
+            <ui:param name="btnDeleteId" value="#{pointOfSaleSafeTabBean.processType==2 and pointOfSaleSafeTabBean.getRendered(203, 0)}" />
+        </ui:include>
+        <h:panelGroup id="grdPOSSafeProcess" layout="block">
+            <div class="ui-g-12 divContent">
+                <div class="ui-g-12 ui-md-12 ui-lg-12">     
+                    <p:outputLabel value="#{loc.safe}" for="slcSafe" class="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcSafe" value="#{pointOfSaleSafeTabBean.selectedObject.safe.id}" required="true" styleClass="Wid95">
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}"  itemDisabled="true"/>
+                        <f:selectItems value="#{pointOfSaleSafeTabBean.listOfSelectableSafe}" var="safe" itemLabel="#{safe.name}" itemValue="#{safe.id}" />
+                    </p:selectOneMenu>
+                </div> 
+            </div>
+        </h:panelGroup>
+    </h:form>
+
+</ui:composition>

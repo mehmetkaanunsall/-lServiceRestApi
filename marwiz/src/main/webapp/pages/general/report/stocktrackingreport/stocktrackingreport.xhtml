@@ -1,0 +1,255 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+
+
+    <h:form id="frmStockTrackingForm">
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.stocklastsituationreport}"/>
+            <ui:param name="bean" value='#{stockTrackingReportBean}' />
+            <ui:param name="update" value="frmStockTracking:dtbStockTracking pgrStockTrackingDatatable pgrStockTracking" />
+        </ui:include>
+
+        <h:panelGroup id="pgrStockTracking" layout="block" transient="true">  
+            <div class="ui-g divContent">
+                <div class="panelToggle ui-g-12">
+
+                    <h:panelGroup id="pgrBranch" >
+                        <h:panelGroup>
+                            <div class="ui-g-12 ui-md-6 ui-lg-2 ">
+                                <p:outputLabel value="#{loc.branch}" for="slcBranch" class="FontBold Fs12"/>
+                                <p:selectCheckboxMenu  id="slcBranch"  value="#{stockTrackingReportBean.selectedBranchList}" 
+                                                       filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                                       label="#{stockTrackingReportBean.selectedBranchList.size()!=0 ? stockTrackingReportBean.selectedBranchList.size() : loc.all} #{stockTrackingReportBean.selectedBranchList.size()!=0 ? loc.branch : ''} #{stockTrackingReportBean.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                                    <f:selectItems value="#{stockTrackingReportBean.listOfBranch}" itemLabel="#{branchSetting.branch.name}" itemValue="#{branchSetting}" var="branchSetting" />       
+                                    <p:ajax oncomplete="PF('slcBranchCheckBox').show()" global="false" listener="#{stockTrackingReportBean.changeBranch()}" update="pgrStockTracking" />
+                                    <p:ajax event="toggleSelect" listener="#{stockTrackingReportBean.changeBranch()}"  oncomplete="PF('slcBranchCheckBox').show()" update="pgrStockTracking" global="false"/>
+                                </p:selectCheckboxMenu>
+                            </div>    
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.stock}" for="txtStock" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtStock" value="#{stockBookCheckboxFilterBean.selectedCount}" onclick="showStockBook()" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}" >
+
+                        </p:inputText>
+                        <p:commandLink id="btnStock" process="@this" update="frmStockBookFilterCheckbox" actionListener="#{stockTrackingReportBean.openDialog(1)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_stockcheckbox').show();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax   listener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([stockTrackingReportBean.selectedBranchList.size() != 0 ? stockTrackingReportBean.selectedBranchList : stockTrackingReportBean.listOfBranch],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckboxwithbranch')}" />
+                        </p:commandLink>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.warehouse}" for="slcWarehouse" class="Fs12 FontBold"/>
+                        <p:selectCheckboxMenu id="slcWarehouse" value="#{stockTrackingReportBean.selectedListOfWarehouse}" widgetVar="slc_warehouse" 
+                                              label="#{stockTrackingReportBean.selectedListOfWarehouse.size()!=0 ? stockTrackingReportBean.selectedListOfWarehouse.size() :loc.all} #{stockTrackingReportBean.selectedListOfWarehouse.size()!=0 ? loc.warehouse : ''} #{stockTrackingReportBean.selectedListOfWarehouse.size()!=0 ? loc.selected : ''}"
+                                              filter="true" filterMatchMode="contains" converter="entityConverter">
+                            <f:selectItems value="#{stockTrackingReportBean.listOfWarehouse}" itemValue="#{warehouse}" var="warehouse" itemLabel="#{warehouse.name}"/>
+                            <p:ajax update="slcWarehouse" oncomplete="PF('slc_warehouse').show()" global="false"/>
+                            <p:ajax event="toggleSelect" update="slcWarehouse" oncomplete="PF('slc_warehouse').show()" global="false"/>
+                        </p:selectCheckboxMenu>  
+                    </div>
+                    <h:panelGroup rendered="#{stockTrackingReportBean.isCentralSupplier}">
+                        <div class="ui-g-12 ui-md-6 ui-lg-2">
+                            <p:outputLabel value="#{loc.centralsupplier}" for="txtCentralSupplier"  styleClass="Fs12 FontBold"/>
+                            <p:commandLink id="cmdCentralSupplier" resetValues="true" process="@this" global="false" title="#{loc.supplier}" actionListener="#{stockTrackingReportBean.centralOrLocalSupplier(0)}" update="pgrStockTracking"  >
+                                <i class="fa fa-refresh Fs14 tlbrAddBtn"/>                 
+                            </p:commandLink>
+
+                            <p:inputText  id="txtCentralSupplier" onclick="showCentralSupplierBook()" value="#{centralSupplierBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+
+                            </p:inputText>
+                            <p:commandLink id="btnCentralSupplier" process="@this" actionListener="#{stockTrackingReportBean.openDialog(2)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_centralsuppliercheckbox').loadContents();">
+                                <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                <p:ajax listener="#{centralSupplierBookCheckboxFilterBean.findFilterListLazyLoading([],'frmCentralSupplierBookFilterCheckbox','olp_centralsuppliercheckbox', 'reportcheckbox')}" />
+                            </p:commandLink>
+                        </div>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{!stockTrackingReportBean.isCentralSupplier}">
+                        <div class="ui-g-12 ui-md-6 ui-lg-2">
+                            <p:outputLabel value="#{loc.supplier}" for="txtSupplier"  styleClass="Fs12 FontBold"/>
+                            <p:commandLink id="clmSupplier" resetValues="true" process="@this" rendered="#{stockTrackingReportBean.isCentralSupplierIconView}" global="false" title="#{loc.centralsupplier}" actionListener="#{stockTrackingReportBean.centralOrLocalSupplier(1)}" update="pgrStockTracking"  >
+                                <i class="fa fa-refresh Fs14 tlbrAddBtn"/>                 
+                            </p:commandLink>
+
+                            <p:inputText  id="txtSupplier" onclick="showAccountBook()" value="#{accountBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+
+                            </p:inputText>
+                            <p:commandLink id="btnSupplier" process="@this" actionListener="#{stockTrackingReportBean.openDialog(3)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_accountcheckbox').loadContents();">
+                                <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                <p:ajax listener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([stockTrackingReportBean.selectedBranchList.size() != 0 ? stockTrackingReportBean.selectedBranchList : stockTrackingReportBean.listOfBranch],'frmAccountBookFilterCheckbox','olp_accountcheckbox', 'supplierCheckboxReport')}" />
+                            </p:commandLink>
+                        </div>
+                    </h:panelGroup>
+                </div>
+            </div>
+        </h:panelGroup>
+        <p:remoteCommand name="showStockBook" process="@this" update="frmStockBookFilterCheckbox" oncomplete="PF('olp_stockcheckbox').show();" action="#{stockTrackingReportBean.openDialog(1)}" actionListener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([stockTrackingReportBean.selectedBranchList.size() != 0 ? stockTrackingReportBean.selectedBranchList : stockTrackingReportBean.listOfBranch],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckboxwithbranch')}" />
+        <p:remoteCommand name="showCentralSupplierBook" process="@this" oncomplete="PF('olp_centralsuppliercheckbox').loadContents();" action="#{stockTrackingReportBean.openDialog(2)}" actionListener="#{centralSupplierBookCheckboxFilterBean.findFilterListLazyLoading([],'frmCentralSupplierBookFilterCheckbox','olp_centralsuppliercheckbox', 'reportcheckbox')}" />
+        <p:remoteCommand name="showAccountBook" process="@this" oncomplete="PF('olp_accountcheckbox').loadContents();" action="#{stockTrackingReportBean.openDialog(3)}" actionListener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([stockTrackingReportBean.selectedBranchList.size() != 0 ? stockTrackingReportBean.selectedBranchList : stockTrackingReportBean.listOfBranch],'frmAccountBookFilterCheckbox','olp_accountcheckbox', 'supplierCheckboxReport')}" />
+
+    </h:form>
+
+    <div class="EmptyBox20" />
+    <h:panelGroup id="pgrStockTrackingDatatable" >
+        <h:panelGroup rendered="#{stockTrackingReportBean.isFind}">
+            <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                <ui:param name="bean" value="#{stockTrackingReportBean}"/> 
+                <ui:param name="datatable" value="frmStockTracking:dtbStockTracking" />
+                <ui:param name="fileName" value="#{loc.stocklastsituationreport}"/>
+                <ui:param name="renderedOutputText" value='true'/>
+                <ui:param name="renderedToggler" value='true'/>
+                <ui:param name="renderedExcel" value='true'/>
+                <ui:param name="renderedPdf" value='true'/>
+                <ui:param name="renderedPrint" value='true'/>
+                <ui:param name="renderedGraphic" value='false'/>
+            </ui:include>
+
+            <h:form id="frmStockTracking">
+
+                <p:dataTable  id="dtbStockTracking" var="stockTrackingReport"  value="#{stockTrackingReportBean.listOfObjects}" widgetVar="stockTrackingPF" emptyMessage="#{loc.norecordsfound}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{stockTrackingReport.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="false" lazy="true"
+                              >
+
+                    <p:ajax event="colReorder" listener="#{stockTrackingReportBean.reorder}" update="frmGridToolbar:toggle" />     
+                    <p:ajax event="colResize"  listener="#{stockTrackingReportBean.onResize}" />
+
+                    <p:column id="clmBranch"  headerText="#{loc.branch}"  visible="#{stockTrackingReportBean.toogleList[0]}" exportable="#{stockTrackingReportBean.toogleList[0]}" sortable="true" sortBy="#{stockTrackingReport.brn.name}">
+                        <h:outputText value="#{stockTrackingReport.branch.name}" />
+                    </p:column>
+                    <p:column id="clmStockCode" headerText="#{loc.stockcode}" visible="#{stockTrackingReportBean.toogleList[1]}" exportable="#{stockTrackingReportBean.toogleList[1]}" sortable="true" sortBy="#{stockTrackingReport.stck.code}">
+                        <h:outputText  value="#{stockTrackingReport.stock.code}"/>
+                    </p:column>
+                    <p:column id="clmCenterStockCode" headerText="#{loc.centerstockcode}" visible="#{stockTrackingReportBean.toogleList[2]}" exportable="#{stockTrackingReportBean.toogleList[2]}" sortable="true" sortBy="#{stockTrackingReport.stck.centerproductcode}">
+                        <h:outputText  value="#{stockTrackingReport.stock.centerProductCode}"/>
+                    </p:column>
+                    <p:column id="clmBarcode" headerText="#{loc.stockbarcode}" visible="#{stockTrackingReportBean.toogleList[3]}" exportable="#{stockTrackingReportBean.toogleList[3]}" sortable="true" sortBy="#{stockTrackingReport.stck.barcode}">
+                        <h:outputText  value="#{stockTrackingReport.stock.barcode}" />
+                    </p:column>
+                    <p:column id="clmStock" headerText="#{loc.stock}"   visible="#{stockTrackingReportBean.toogleList[4]}" exportable="#{stockTrackingReportBean.toogleList[4]}" sortable="true" sortBy="#{stockTrackingReport.stck.name}">
+                        <h:outputText value="#{stockTrackingReport.stock.name}"/> 
+                    </p:column>
+                    <p:column id="clmCategory" headerText="#{loc.stockcategory}"  visible="#{stockTrackingReportBean.toogleList[5]}" exportable="#{stockTrackingReportBean.toogleList[5]}">
+                        <h:outputText  value="#{stockTrackingReport.category}"/>
+                    </p:column>
+                    <p:column id="clmCentralSupplier" headerText="#{loc.centralsupplier}" rendered="#{stockTrackingReportBean.isCentralSupplierIconView}"  visible="#{stockTrackingReportBean.toogleList[6]}" exportable="#{stockTrackingReportBean.toogleList[6]}" sortable="true" sortBy="#{stockTrackingReport.cspp.name}">
+                        <h:outputText  value="#{stockTrackingReport.stock.centralSupplier.name}"/>
+                    </p:column>
+                    <p:column id="clmSupplier" headerText="#{loc.supplier}"  visible="#{stockTrackingReportBean.toogleList[7]}" exportable="#{stockTrackingReportBean.toogleList[7]}" sortable="true" sortBy="#{stockTrackingReport.acc.name}">
+                        <h:outputText  value="#{stockTrackingReport.stock.supplier.name}"/>
+                    </p:column>
+                    <p:column id="clmBrand" headerText="#{loc.brand}"  visible="#{stockTrackingReportBean.toogleList[8]}" exportable="#{stockTrackingReportBean.toogleList[8]}" sortable="true" sortBy="#{stockTrackingReport.br.name}">
+                        <h:outputText  value="#{stockTrackingReport.stock.brand.name}"/>
+                    </p:column>
+                    <p:column id="clmPurchasePrice" headerText="#{loc.productpurchasepricewithouttax}"   visible="#{stockTrackingReportBean.toogleList[9]}" exportable="#{stockTrackingReportBean.toogleList[9]}" sortable="true" sortBy="#{stockTrackingReport.COALESCE(si.currentpurchaseprice, 0)}">
+                        <h:outputText value="#{stockTrackingReport.purchasePrice}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{stockTrackingReport.purchaseCurrency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmPurchasePriceWithTax" headerText="#{loc.productpurchasepricewithtax}"   visible="#{stockTrackingReportBean.toogleList[10]}" exportable="#{stockTrackingReportBean.toogleList[10]}" sortable="true" sortBy="#{COALESCE(si.currentpurchaseprice,0)*(1+(COALESCE(ptg.rate,0)/100))}">
+                        <h:outputText value="#{stockTrackingReport.purchasePriceWithTax}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{stockTrackingReport.purchaseCurrency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmSalesPriceWithOutTax" headerText="#{loc.productsalespricewithouttax}"   visible="#{stockTrackingReportBean.toogleList[11]}" exportable="#{stockTrackingReportBean.toogleList[11]}" sortable="true" sortBy="#{stockTrackingReport.COALESCE(pll.price,0)}">
+                        <h:outputText value="#{stockTrackingReport.salesPriceWithOutTax}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{stockTrackingReport.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmSalesPrice" headerText="#{loc.productsalespricewithtax}"   visible="#{stockTrackingReportBean.toogleList[12]}" exportable="#{stockTrackingReportBean.toogleList[12]}" sortable="true" sortBy="#{stockTrackingReport.COALESCE(pll.price,0)}">
+                        <h:outputText value="#{stockTrackingReport.salesPrice}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{stockTrackingReport.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmQuantity" headerText="#{loc.remainingquantity}"   visible="#{stockTrackingReportBean.toogleList[13]}" exportable="#{stockTrackingReportBean.toogleList[13]}" sortable="true" sortBy="#{stockTrackingReport.COALESCE(SUM(iwi.quantity),0)}">
+                        <h:outputText  value="#{stockTrackingReport.quantity}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value="#{stockTrackingReport.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+
+                </p:dataTable>  
+            </h:form>
+
+        </h:panelGroup>
+    </h:panelGroup>
+
+
+    <!--Kitaptan stok seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/stockbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{stockTrackingReportBean}' />
+        <ui:param name="for" value='frmStockTrackingForm:btnStock' />
+        <ui:param name="type" value='reportcheckboxwithbranch' />
+        <ui:param name="parameters" value='#{[stockTrackingReportBean.selectedBranchList.size() != 0 ? stockTrackingReportBean.selectedBranchList : stockTrackingReportBean.listOfBranch]}' /> 
+        <ui:param name="columnsize" value='4' /> 
+        <ui:param name="form" value='frmStockBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_stockcheckbox" />
+    </ui:include>
+
+    <!--Kitaptan merkezi tedarikçi seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/centralsupplierbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{stockTrackingReportBean}' />
+        <ui:param name="for" value='frmStockTrackingForm:btnCentralSupplier' />
+        <ui:param name="type" value='reportcheckbox' />
+        <ui:param name="parameters" value='' /> 
+        <ui:param name="columnsize" value='1' /> 
+        <ui:param name="form" value='frmCentralSupplierBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_centralsuppliercheckbox" />
+    </ui:include>
+
+    <!--Kitaptan tedarikçi seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/accountbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{stockTrackingReportBean}' />
+        <ui:param name="for" value='frmStockTrackingForm:btnSupplier' />
+        <ui:param name="type" value='supplierCheckboxReport' />
+        <ui:param name="parameters" value='#{[stockTrackingReportBean.selectedBranchList.size() != 0 ? stockTrackingReportBean.selectedBranchList : stockTrackingReportBean.listOfBranch]}' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmAccountBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_accountcheckbox" />
+    </ui:include>
+
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.stocklastsituationreport}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+
+</ui:composition>
+
+
+

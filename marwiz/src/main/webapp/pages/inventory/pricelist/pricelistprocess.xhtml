@@ -1,0 +1,279 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:form id="frmPriceListProcess">  
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="bean" value="#{priceListProcessBean}" />
+            <ui:param name="outputtext" value="#{loc.pricelistprocesses}"/>
+            <ui:param name="update" value="pgrPriceListProcess" />
+            <ui:param name="btnSaveId" value="#{priceListProcessBean.getRendered(140, 0)}" />    
+            <ui:param name="btnDeleteId" value="#{priceListProcessBean.getRendered(141, 0)}" />
+            <ui:param name="btnTestBeforeDeleteId" value="true" />
+            <ui:param name="renderback" value='true'/>
+            <ui:param name="renderSelectedObject" value='true'/>
+            <ui:param name="selectedObjectName" value="#{priceListProcessBean.selectedObject.name}"/>
+        </ui:include>
+
+        <h:panelGroup id="pgrPriceListProcess" layout="block">
+            <p:focus for="txtName"/>
+            <div class="Fleft divContent ui-g-12">
+
+                <div class="panelToggle ui-g-12">
+                    <div class="ui-g-12 ui-md-4  ui-lg-2">
+                        <p:outputLabel value="#{loc.code}" for="txtCode" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtCode" value="#{priceListProcessBean.selectedObject.code}"  required="true" placeholder="#{loc.code}" />
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-4">
+                        <p:outputLabel value="#{loc.listname}" for="txtName" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtName"  value="#{priceListProcessBean.selectedObject.name}" required="true" placeholder="#{loc.listname}" />
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel value="#{loc.type}" for="slcIsPurchase" class="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcIsPurchase" value="#{priceListProcessBean.selectedObject.isPurchase}"  required="true"> 
+                            <f:selectItem itemLabel="#{loc.purchase}" itemValue="true" />
+                            <f:selectItem itemLabel="#{loc.sales}" itemValue="false" />
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel value="#{loc.isdefault}" for="slcIsDefault" class="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcIsDefault"  value="#{priceListProcessBean.selectedObject.isDefault}" required="true" disabled="#{sessionBean.getLastBranchSetting().purchaseUnitPriceUpdateOptionId==0 and priceListProcessBean.selectedObject.isPurchase and priceListProcessBean.selectedObject.isDefault}"> 
+                            <f:selectItem itemLabel="#{loc.no}" itemValue="false" />
+                            <f:selectItem itemLabel="#{loc.yes}" itemValue="true" />
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel value="#{loc.statu}" for="slcStatus" class="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcStatus"  value="#{priceListProcessBean.selectedObject.status.id}" required="true" > 
+                            <f:selectItems value="#{sessionBean.getStatus(6)}"  var="status" itemLabel="#{status.nameMap.get(sessionBean.langId).name}" itemValue="#{status.id}" />
+                        </p:selectOneMenu>
+                    </div>
+
+
+                </div>
+            </div>
+        </h:panelGroup>
+    </h:form>
+
+
+    <div class="EmptyBox10"></div>
+
+    <p:tabView id="tbvPriceList" activeIndex="#{marwiz.tabIndex}" rendered="#{priceListProcessBean.getRendered(37, 1) or priceListProcessBean.getRendered(38, 1)
+                                                or priceListProcessBean.getRendered(39, 1)}" scrollable="true" dynamic="true" cache="true">
+
+        <p:ajax event="tabChange" listener="#{priceListProcessBean.onTabChange}" />
+        <p:tab id="tab37" title="#{loc.stocks}" rendered="#{priceListProcessBean.getRendered(37, 1)}">
+            <c:if test="#{priceListProcessBean.activeIndex==37}">
+                <ui:include src="priceliststocktab.xhtml"/>
+            </c:if>
+        </p:tab>
+
+        <p:tab id="tab38" title="#{loc.batchoperations}" rendered="#{priceListProcessBean.getRendered(38, 1)}">
+            <c:if test="#{priceListProcessBean.activeIndex==38}">
+                <ui:include src="pricelistbatchoperations.xhtml"/>
+            </c:if>
+        </p:tab>
+
+        <p:tab id="tab39" title="#{loc.history}" rendered="#{priceListProcessBean.getRendered(39, 1)}">
+            <c:if test="#{priceListProcessBean.activeIndex==39}">
+                <ui:include src="/pages/general/common/historydatatable.xhtml" >
+                    <ui:param name="bean" value='#{historyTabBean}' />
+                    <c:set var="createdPerson" value='#{priceListProcessBean.selectedObject.userCreated.fullName}- #{priceListProcessBean.selectedObject.userCreated.username }' scope="request"/>
+                    <c:set var="createdTime" value='#{sessionBean.convertDateTime(priceListProcessBean.selectedObject.dateCreated)}'  scope="request"/>
+                    <c:set var="rowId" value="#{priceListProcessBean.selectedObject.id}" scope="request" /> 
+                    <c:set var="tableName" value="inventory.pricelist" scope="request"/>                      
+                </ui:include>
+            </c:if>
+        </p:tab>
+
+    </p:tabView>
+
+
+    <p:dialog  id="dlgStockProcess" widgetVar="dlg_StockProcess" modal="true" transient="true" width="40%" resizable="false" focus="dlgStockProcess" dynamic="true"  responsive="true" closeOnEscape="true">
+        <c:if test="#{priceListProcessBean.activeIndex==37}">
+            <ui:include src="priceliststockprocess.xhtml"/>
+        </c:if>
+    </p:dialog>
+
+    <p:confirmDialog id="dlgConfirmSavePriceList" global="true" class="deleteConfirm"  widgetVar="dlgConfirmSave" showEffect="fade" hideEffect="fade"  closeOnEscape="true" responsive="true">
+        <c:if test="#{priceListProcessBean.activeIndex==37}">
+            <f:facet name="message">
+                <h:outputText value="#{loc.thepriceenteredislowerthanrecommended}"  style="white-space: pre-wrap;">
+                    <i class="icon-trash Fs20 tlbrDeleteBtn" /> 
+                </h:outputText>
+            </f:facet>
+            <p:commandButton value="#{loc.yes}" actionListener="#{priceListStockTabBean.confirmSave()}"  onclick="PF('dlgConfirmSave').hide()"   styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+            <p:commandButton value="#{loc.no}"  onclick="PF('dlgConfirmSave').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+        </c:if>
+    </p:confirmDialog>
+
+
+    <p:dialog id="dlgFileUploadForTag" widgetVar="dlg_FileUploadForTag" modal="true" dynamic="true" resizable="false" focus="dlgFileUploadForTag"  responsive="true" closeOnEscape="true" width="26%">
+        <c:if test="#{priceListProcessBean.activeIndex==38}">
+            <h:form id="frmFileUploadForTag" enctype="multipart/form-data" > 
+                <p:panelGrid id="pgrfileformat">
+                    <div>               
+                        <table class="tableUp" style="border: 1px solid;border-color: #316996;background-color: #fbfcfd;">
+                            <colgroup>
+                                <col style="width: 50%" />
+                                <col style="width: 50%" />
+                            </colgroup>
+                            <thead>
+                                <tr >
+                                    <th scope="col" colspan="2" class="Fs16 TexAlLeft"><h:outputText value="#{loc.fileformattobeuploaded}" style="color: #303030 !important;"/></th>
+                                </tr>
+                                <tr >
+                                    <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.barcode}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} A)" style="color:#337190" class="Fs12"/></th> 
+                                    <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.tagcount}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} B)" style="color:#337190" class="Fs12"/></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach items="#{priceListBatchOpreationsBean.sampleList}" var="sample">
+                                    <tr>
+                                        <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.stock.barcode}" /></td>
+                                        <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.tagQuantity}" /></td>
+                                    </tr>
+                                </c:forEach>
+                            </tbody>
+                        </table>
+                    </div>                    
+                </p:panelGrid>
+
+                <div class="EmptyBox20" />
+
+                <p:panelGrid  id="pgrFileUpload" class="pgrResponsive">
+                    <div class="ui-g">
+                        <h:panelGroup layout="block">
+                            <p:row>
+                                <p:column colspan="15" style="font-weight: bold;font-size: 16px"> <h:outputText value="#{loc.fileselectionandtransferoperations}" /></p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column colspan="8">
+                                    <table style="width: 150px !important;table-layout: fixed;border: none !important;" >
+                                        <tbody>
+                                            <tr>
+                                                <p:fileUpload  update="@this,btnTransfer,txtFileName,btnClose"  allowTypes="/(\.|\/)(xls|xlsx|xls|xlsm|xlsb|xltx|xltm|xlt|xla|xlw|xlr|)$/" invalidFileMessage="#{loc.invalidfiletype}" invalidSizeMessage="#{loc.filesizecannotbegreaterthan1mb}"
+                                                               class="#{priceListBatchOpreationsBean.fileData.length()==0 ? 'fileUploadEmpty' : 20>priceListBatchOpreationsBean.fileData.length() ? 'fileUploadSmall'  : 'fileUploadLong'}" label="#{loc.choosefile}" fileLimit="1"  auto="true" sizeLimit="10000000" style="width: 150px;" fileUploadListener="#{priceListBatchOpreationsBean.handleFileUploadFile}"  mode="advanced"  multiple="true" dragDropSupport="false" />
+                                            </tr>
+
+                                            <tr>
+                                                <td style="width: 100px;border:none !important;"><h:outputText id="txtFileName"  styleClass="wrapLabel" value="#{priceListBatchOpreationsBean.fileData}" /> </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                </p:column> 
+                                <p:column  colspan="6">
+                                    <p:commandButton id="btnTransfer" icon="fa fa-exchange" disabled="#{priceListBatchOpreationsBean.isUpload}" resetValues="true" value="#{loc.transfer}" update="@this,btnTransfer ,btnClose,txtFileName dlgProductViewForTag" actionListener="#{priceListBatchOpreationsBean.convertData()}" />
+                                    <p:commandButton id="btnClose"  icon="fa fa-close" disabled="#{priceListBatchOpreationsBean.isCancel}" resetValues="true" value="#{loc.remove}" update="@this,btnTransfer ,btnClose,txtFileName" actionListener="#{priceListBatchOpreationsBean.clearData()}" />
+                                </p:column>
+                            </p:row>
+                        </h:panelGroup>
+
+                    </div>
+                </p:panelGrid> 
+
+            </h:form>
+        </c:if>
+    </p:dialog>
+
+    <p:dialog id="dlgProductViewForTag" widgetVar="dlg_ProductViewForTag" showEffect="fade" hideEffect="fade" resizable="false" transient="true" modal="true" closeOnEscape="true" responsive="true" width="40%"  >
+        <c:if test="#{priceListProcessBean.activeIndex==38}">  
+            <p:ajax event="close" update="frmFileUploadForTag:btnTransfer" listener="#{priceListBatchOpreationsBean.repeatProductShow()}" global="false"/>
+            <h:form id="frmUploaddToolbarForTag" prependId="false">
+                <p:toolbar>
+                    <f:facet name="left">
+                        <h:outputText value="#{loc.productstobetransferredfromthefile}" class="outputTextFont Fleft MarRight8" />
+                    </f:facet>
+
+                    <f:facet name="right">
+                        <p:commandLink id="btnSave" disabled="#{priceListBatchOpreationsBean.isSave}" title="#{loc.transfer}" process="@this"  class="Fright"   actionListener="#{priceListBatchOpreationsBean.saveProduct()}"  >
+                            <i class="fa fa-save Fs20 MarTop5 tlbrSaveBtn"/>                 
+                        </p:commandLink>
+                    </f:facet>
+                </p:toolbar>
+
+                <h:panelGroup id="pgrIsError" >
+                    <p:separator style="margin-top: 0px !important; margin-bottom: 5px;" class="allCheckSeparator"/>
+                    <p:panelGrid layout="grid" columns="1" class="allCheckPanelGrid" style="border-radius: 0px !important; border-bottom: 0px !important;">  
+                        <p:selectBooleanCheckbox value="#{priceListBatchOpreationsBean.isErrorDataShow}" itemLabel="#{loc.showincorrectrecords}" class="Fleft allcheck" style="margin-top: 2px; margin-left: 5px;">
+                            <p:ajax global="false"  resetValues="true" process="@this"  update="grpProductViewForTag" listener="#{priceListBatchOpreationsBean.showErrorProductList()}"/>
+                        </p:selectBooleanCheckbox>
+                    </p:panelGrid>
+                </h:panelGroup>
+
+                <!-- Aktar butonuna bastıktan sonra ürünlerin önizleme ile gösterildiği yer  -->
+                <h:panelGroup id="grpProductViewForTag">
+                    <p:dataTable  id="dtbProductViewForTag" var="viewProduct"  value="#{priceListBatchOpreationsBean.excelItemList}" widgetVar="viewPdocutPF" emptyMessage="#{loc.norecordsfound}"
+                                  rows="#{sessionBean.user.defualtGridSize}" rowKey="#{viewProduct.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                                  rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true"
+                                  rowStyleClass="#{viewProduct.type==-1 ? 'ColumnColorRed' : null}" >
+
+
+                        <p:column headerText="#{loc.barcode}" selectRow="false">
+                            <h:outputText value="#{viewProduct.stock.barcode}" />
+                        </p:column>
+                        <p:column headerText="#{loc.tagcount}" selectRow="false">
+                            <h:outputText value="#{viewProduct.tagQuantity}" />
+                        </p:column>
+
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+        </c:if>
+    </p:dialog>
+
+
+    <style type="text/css">
+        .ui-fileupload-buttonbar{
+            padding: 0px !important;
+            margin-top: -35px !important;
+            margin: -20px 2px;
+        }
+
+        .fileUploadLong .ui-button{
+            margin-top: 65px !important;
+            position: relative;
+        }
+        .fileUploadSmall .ui-button{
+            margin-top: 68px !important;
+            position: relative;
+        }
+        .fileUploadEmpty .ui-button{
+            margin-top: 46px !important;
+            position: relative;
+        }
+        .wrapLabel{
+            word-wrap: break-word !important;
+        }
+        .tableUp, th, td {
+            border: 1px solid #316996;
+        }
+
+        .tableUp {
+            border-collapse: collapse;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .tableUp tr {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: .35em;
+        }
+        .pgrResponsive{
+            border-collapse: collapse;
+            margin: 0;
+            padding: 0px;
+            width: 100%;
+            table-layout: auto;
+        }
+    </style>
+
+</ui:composition>

@@ -1,0 +1,45 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <!-- 
+        Açıklama : Stoğa alternatif barkod eklemek için açılan dialoğa include edilen xhtml
+        Yazan    : Esra ÇAbuk
+        Bean     : stockAlternativeBarcodeTabBean
+        Sayfa    : Stoklar
+    --> 
+    <h:form id="frmAlternativeBarcodeProcess" >
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.alternativebarcodeprocess}"/>
+            <ui:param name="bean" value='#{stockAlternativeBarcodeTabBean}'/>
+            <ui:param name="update" value="frmAlternativeBarcodeProcess" />
+            <ui:param name="btnSaveId" value="#{stockAlternativeBarcodeTabBean.getRendered(133, 0) and (stockAlternativeBarcodeTabBean.selectedObject.isOtherBranch or stockAlternativeBarcodeTabBean.processType==1)}" />   
+            <ui:param name="btnDeleteId" value="#{stockAlternativeBarcodeTabBean.processType==2 and stockAlternativeBarcodeTabBean.getRendered(134, 0) and (stockAlternativeBarcodeTabBean.selectedObject.isOtherBranch or stockAlternativeBarcodeTabBean.processType==1)}" />
+        </ui:include>
+
+        <div class="ui-g divContent">
+            <div class="ui-g-12">
+
+                <div class="ui-g-12 ui-md-6 ui-lg-6">
+                    <p:outputLabel value="#{loc.alternativebarcode}" for="txtBarcode" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtBarcode" value="#{stockAlternativeBarcodeTabBean.selectedObject.barcode}"  required="true" placeholder="#{loc.alternativebarcode}" /> 
+                </div>
+                <div class="ui-g-6 ui-md-6 ui-lg-6">
+                    <p:outputLabel value="#{loc.equivalent}" for="txtEquivalent"  styleClass="Fs12 FontBold"/>
+                    <p:inputNumber id="txtEquivalent" decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}"  
+                                   thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                   roundMethod="D" decimalPlaces="5" symbol="#{stockAlternativeBarcodeTabBean.stock.unit.sortName}" symbolPosition="s"
+                                   value="#{stockAlternativeBarcodeTabBean.selectedObject.quantity}"  class="Wid97 TexAlRight"  placeholder="#{loc.equivalent}" required="true">
+                    </p:inputNumber>
+                </div>
+            </div>
+        </div>
+    </h:form>
+
+
+
+</ui:composition>

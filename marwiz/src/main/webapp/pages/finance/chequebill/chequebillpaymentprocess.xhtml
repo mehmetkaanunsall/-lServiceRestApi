@@ -1,0 +1,133 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmChequeBillPaymentProcess">    
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{chequeBillPaymentTabBean.selectedChequeBill.isCustomer ? loc.collectionprocess : loc.paymentprocess}"/>
+            <ui:param name="bean" value='#{chequeBillPaymentTabBean}' />
+            <ui:param name="update" value="grdChequeBillPaymentProcess" />
+            <ui:param name="btnSaveId" value='#{chequeBillPaymentTabBean.getRendered(29, 0)}' />     
+            <c:if test="#{chequeBillPaymentTabBean.processType==2}">
+                <ui:param name="btnDeleteId" value='#{chequeBillPaymentTabBean.getRendered(30, 0)}' />
+                <ui:param name="btnTestBeforeDeleteId" value="true" />
+            </c:if>
+        </ui:include>
+
+
+        <h:panelGroup id="grdChequeBillPaymentProcess" layout="block">
+            <div class="ui-g divContent">
+                <p:focus for="slcType"/>
+
+                <div class="ui-g-12  ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{chequeBillPaymentTabBean.selectedChequeBill.isCustomer ? loc.collectiontype : loc.paymenttype}" for="slcType" class="FontBold Fs12"/>
+                    <p:selectOneMenu  id="slcType" value="#{chequeBillPaymentTabBean.selectedObject.type.id}" disabled="#{chequeBillPaymentTabBean.processType==2}"  filter="true" required="true" styleClass="Wid97">
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true"/> 
+                        <f:selectItems value="#{chequeBillPaymentTabBean.typeList}" var="type" itemLabel="#{type.nameMap.get(sessionBean.langId).name}" itemValue="#{type.id}"  />
+                        <p:ajax  process="@this" listener="#{chequeBillPaymentTabBean.changeType()}" update="txtExchangeRate grdChequeBillPaymentProcess" global="false" resetValues="true"/>
+                    </p:selectOneMenu>
+                </div>
+
+                <h:panelGroup rendered="#{chequeBillPaymentTabBean.selectedObject.type.id==17}">
+                    <div class="ui-g-12  ui-md-6 ui-lg-3" >
+                        <p:outputLabel value="#{loc.safecodename}" for="slcSafe" class="FontBold Fs12"/>
+                        <p:selectOneMenu id="slcSafe" value="#{chequeBillPaymentTabBean.selectedObject.safe.id}"  filter="true" required="true" styleClass="Wid97" >
+                            <f:selectItems value="#{chequeBillPaymentTabBean.safeList}" var="safe" itemLabel="#{safe.name} - (#{safe.currency.code})" itemValue="#{safe.id}" itemDisabled="#{!safe.isMposMovement}" />
+                            <p:ajax listener="#{chequeBillPaymentTabBean.bringCurrency()}" global="false"  update="grdChequeBillPaymentProcess txtExchangeRate" />
+                        </p:selectOneMenu> 
+                    </div>
+                </h:panelGroup>
+
+                <h:panelGroup rendered="#{chequeBillPaymentTabBean.selectedObject.type.id==18 or chequeBillPaymentTabBean.selectedObject.type.id==75}">
+                    <div class="ui-g-12  ui-md-6 ui-lg-3" >
+                        <p:outputLabel value="#{loc.bankcodename}" for="slcBankAccount" class="FontBold Fs12"/>
+                        <p:selectOneMenu id="slcBankAccount" value="#{chequeBillPaymentTabBean.selectedObject.bankAccount.id}"  filter="true" required="true" styleClass="Wid97">
+                            <f:selectItems value="#{chequeBillPaymentTabBean.bankAccountList}" var="bankAcoount" itemLabel="#{bankAcoount.name}" itemValue="#{bankAcoount.id}"  />
+                            <p:ajax listener="#{chequeBillPaymentTabBean.bringCurrency()}" global="false" update="grdChequeBillPaymentProcess txtExchangeRate"  />
+                        </p:selectOneMenu>
+                    </div>
+                </h:panelGroup>
+                <div  class="ui-g-12  ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.documentnumber}" for="txtDocumentNumber" styleClass="Fs12 FontBold" />
+                    <p:inputText id="txtDocumentNumber" styleClass="Wid99" placeholder="#{loc.documentnumber}" 
+                                 value="#{chequeBillPaymentTabBean.selectedObject.financingDocument.documentNumber}">
+                    </p:inputText>
+                </div>
+
+                <div class="ui-g-12  ui-md-6 ui-lg-3" >
+                    <p:outputLabel value="#{loc.documentdate}" for="cldProcessDate" class="FontBold Fs12"/>
+                    <p:calendar  id="cldProcessDate" required="true"
+                                 value="#{chequeBillPaymentTabBean.selectedObject.processDate}" styleClass="Wid95"  beforeShow="dpClearButton"
+                                 pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm" showOn="button" 
+                                 showButtonPanel="true" placeholder="#{loc.documentdate}" timeControlType="select" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                        <p:ajax event="dateSelect" global="false"/>
+                    </p:calendar>
+                </div>
+
+                <div class="ui-g-12  ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.total}" for="txtChequeBillAmount" class="FontBold Fs12"/>
+                    <p:inputNumber id="txtChequeBillAmount" decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1? '.': ','}"  
+                                   thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1? ',': '.'}" emptyValue="sign" minValue="0"
+                                   roundMethod="D" decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}" readonly="true"
+                                   value="#{chequeBillPaymentTabBean.selectedObject.price}"  class="Wid97 TexAlRight"  placeholder="#{loc.total}" required="true">
+                        <p:ajax event="keyup" process="@this" delay="1" global="false" update="txtPrice2" />
+                    </p:inputNumber>
+
+                </div>
+
+                <div  class="ui-g-12  ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.currency}" for="slcCurrency" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcCurrency" value="#{chequeBillPaymentTabBean.selectedObject.currency.id}" required="true" styleClass="Wid97" 
+                                     disabled="#{!sessionBean.lastBranchSetting.isForeignCurrency 
+                                                 or chequeBillPaymentTabBean.selectedObject.type.id==17 
+                                                 or chequeBillPaymentTabBean.selectedObject.type.id==18
+                                                 or chequeBillPaymentTabBean.selectedObject.type.id==75}">
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true"/> 
+                        <f:selectItems value="#{sessionBean.currencies}" var="currency" itemLabel="#{currency.code}" itemValue="#{currency.id}"  />
+                        <p:ajax listener="#{chequeBillPaymentTabBean.bringCurrency()}" global="false" update="grdChequeBillPaymentProcess txtExchangeRate"  />
+                    </p:selectOneMenu>
+                </div>
+
+                <h:panelGroup  rendered="#{sessionBean.lastBranchSetting.isForeignCurrency}" >
+                    <div  class="ui-g-12  ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.exchangerate} #{chequeBillPaymentTabBean.exchange}" for="txtExchangeRate" styleClass="Fs12 FontBold" />
+                        <p:inputNumber id="txtExchangeRate" decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? '.': ','}"  
+                                       thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                       roundMethod="D" decimalPlaces="4" minValue="0"
+                                       value="#{chequeBillPaymentTabBean.selectedObject.exchangeRate}"  class="Wid97 TexAlRight"  placeholder="#{loc.exchangerate}" required="true">
+                            <p:ajax event="keyup" process="@this" delay="1" global="false" update="txtPrice2" />
+                        </p:inputNumber>
+                    </div>
+                </h:panelGroup>
+                <h:panelGroup  rendered="#{!sessionBean.lastBranchSetting.isForeignCurrency}" >
+                    <div class="ui-g-12 ui-md-6 ui-lg-3" />
+                </h:panelGroup>
+
+                <div  class="ui-g-12  ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.totalprice}" for="txtPrice2" styleClass="Fs12 FontBold" />
+                    <p:inputNumber id="txtPrice2" decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}"  
+                                   thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}"
+                                   roundMethod="D" decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}" readonly="true"                                     
+                                   symbolPosition="s"
+                                   value="#{chequeBillPaymentTabBean.selectedObject.price*chequeBillPaymentTabBean.selectedObject.exchangeRate}"  class="Wid97 TexAlRight"  placeholder="#{loc.totalprice}" required="true">
+                    </p:inputNumber>
+                </div>
+
+                <div  class="ui-g-12 ui-md-12 ui-lg-12">
+                    <p:outputLabel value="#{loc.description}" for="txtDescription" styleClass="Fs12 FontBold" />
+                    <p:inputText id="txtDescription" styleClass="Wid99"  placeholder="#{loc.description}" value="#{chequeBillPaymentTabBean.selectedObject.financingDocument.description}">
+                        <p:ajax event="keyup" global="false"/>
+                    </p:inputText>
+                </div>
+            </div>
+        </h:panelGroup>
+    </h:form>
+
+
+
+</ui:composition>

@@ -1,0 +1,215 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <div class="ui-g">
+        <p:focus for="txtPortfolioNo"/>
+        <h:panelGroup rendered="#{bean.listOfBranch.size() > 1}">
+            <div class="ui-g-12 ui-md-4 ui-lg-2">
+                <p:outputLabel value="#{loc.branch}" for="slcBranch" styleClass="Fs12 FontBold"/>
+                <p:selectOneMenu id="slcBranch" value="#{bean.selectedObject.branch.id}" disabled="#{bean.processType==2}">
+                    <f:selectItem itemValue="#{null}" itemLabel="#{loc.choose}" itemDisabled="true"/>
+                    <f:selectItems value="#{bean.listOfBranch}" var="branch" itemValue="#{branch.id}" itemLabel="#{branch.name}" />
+                    <p:ajax update="pgrChequeBillProcess" listener="#{bean.changeBranch()}" process="@this"/>
+                </p:selectOneMenu>
+            </div>
+        </h:panelGroup>
+        <div class="#{bean.listOfBranch.size() > 1 ? (bean.selectedObject.isCheque ? 'ui-g-12  ui-md-4 ui-lg-2' : 'ui-g-12  ui-md-6 ui-lg-2') : (bean.selectedObject.isCheque ? 'ui-g-12  ui-md-6 ui-lg-2' : 'ui-g-12  ui-md-6 ui-lg-3')}">
+            <p:outputLabel value="#{loc.chequebill}" for="slcType" styleClass="Fs12 FontBold"/>
+            <p:selectOneMenu id="slcChequebill" value="#{bean.selectedObject.isCheque}" required="true" disabled="#{bean.processType==2}">
+                <f:selectItem itemValue="true"  itemLabel="#{loc.cheque}" />
+                <f:selectItem itemValue="false"  itemLabel="#{loc.bill}" />
+                <p:ajax update="pgrChequeBillProcess" global="false" />
+            </p:selectOneMenu> 
+        </div>
+        <div class="#{bean.listOfBranch.size() > 1 ? (bean.selectedObject.isCheque ? 'ui-g-12  ui-md-4 ui-lg-2' : 'ui-g-12  ui-md-6 ui-lg-2') : 
+                 (bean.selectedObject.isCheque ? 'ui-g-12  ui-md-4 ui-lg-2' : 'ui-g-12  ui-md-6 ui-lg-3')}">
+            <p:outputLabel value="#{loc.type}" for="slcType" styleClass="Fs12 FontBold"/>
+            <p:selectOneMenu id="slcType" value="#{bean.selectedObject.isCustomer}" required="true" disabled="#{bean.processType==2}" >               
+                <f:selectItem itemValue="false"  itemLabel="#{bean.selectedObject.isCheque ? loc.debtcheque : loc.debtbill}" />
+                <f:selectItem itemValue="true"  itemLabel="#{bean.selectedObject.isCheque ? loc.customercheque : loc.customerbill}" />
+                <p:ajax update="pgrChequeBillProcess" global="false" />
+            </p:selectOneMenu> 
+        </div>
+        <div class="#{bean.listOfBranch.size() > 1 ? (bean.selectedObject.isCheque ? 'ui-g-12  ui-md-4 ui-lg-2' : 'ui-g-12  ui-md-6 ui-lg-4') : 
+            (bean.selectedObject.isCheque ? 'ui-g-12  ui-md-4 ui-lg-2' : 'ui-g-12  ui-md-6 ui-lg-4')}">
+            <p:outputLabel value="#{loc.current}" for="txtAccountName" styleClass="Fs12 FontBold"/>
+            <p:inputText id="txtAccountName" onclick="#{bean.processType==1 ? 'showBook()' : ''}" value="#{bean.selectedObject.account.name}" class="inputPositionForBookFilter" required="true" 
+                         readonly="#{facesContext.currentPhaseId.ordinal ge 4}" disabled="#{bean.isDisabled}" placeholder="#{loc.currentname}" >
+            </p:inputText>
+            <p:commandLink id="btnAccountName" rendered="#{bean.processType==1}" class="commandLinkPositionForBookFilter" process="@this" oncomplete="PF('olp_account').loadContents();" >
+                <i class="fa fa-book Fs16 softgray iconPositionForBookFilter "/>   
+                <p:ajax listener="#{accountBookFilterBean.findFilterListLazyLoading([bean.selectedObject.branch],'frmAccountBookFilter','olp_account','chequebill')}" global="false" />
+            </p:commandLink>
+        </div>
+
+        <div class="#{bean.selectedObject.isCheque ? 'ui-g-12  ui-md-4 ui-lg-2' : 'ui-g-12  ui-md-6 ui-lg-2' }">
+            <p:outputLabel value="#{loc.portfoliono}" for="txtPortfolioNo" class="FontBold Fs12"/>
+            <p:inputText id="txtPortfolioNo" value="#{bean.selectedObject.portfolioNumber}" disabled="#{bean.isDisabled}" required="true" placeholder="#{loc.portfoliono}"/>  
+        </div>
+        <h:panelGroup rendered="#{!bean.selectedObject.isCustomer}">
+            <div class="#{bean.selectedObject.isCheque ? 'ui-g-12  ui-md-4 ui-lg-1' : 'ui-g-12  ui-md-3 ui-lg-2' }">
+                <p:outputLabel value="#{loc.serialno}" for="slcDocumentNumber" styleClass="Fs12 FontBold"/>
+                <p:selectOneMenu id="slcDocumentNumber" required="true" value="#{bean.selectedObject.documentNumber.id}" 
+                                 styleClass="Wid95" disabled="#{bean.processType==2}"  >
+                    <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true" />
+                    <f:selectItems value="#{bean.listOfDocumentNumber}"  var="dnumber" itemLabel="#{dnumber.serial}" itemValue="#{dnumber.id}" />
+                    <p:ajax listener="#{bean.bringDocument()}" global="false" update="txtDocumentNumber2" />
+                </p:selectOneMenu>
+            </div>
+            <div class="#{bean.selectedObject.isCheque ? 'ui-g-12  ui-md-4 ui-lg-1' : 'ui-g-12  ui-md-3 ui-lg-1' }">
+                <p:outputLabel value="#{loc.orderno}" for="txtDocumentNumber2" styleClass="Fs12 FontBold"/>
+                <p:inputNumber id="txtDocumentNumber2" value="#{bean.processType==1 ? bean.selectedObject.documentNumber.actualNumber : bean.selectedObject.documentNo}" required="true" 
+                               disabled="#{bean.processType==2}" styleClass="Wid95" placeholder="#{loc.number}"
+                               thousandSeparator="" decimalSeparator="." decimalPlaces="0" minValue="0" readonly="#{bean.processType==2}"
+                               />
+            </div>
+        </h:panelGroup>
+        <h:panelGroup rendered="#{bean.selectedObject.isCustomer}">
+            <div class="#{bean.selectedObject.isCheque ? 'ui-g-12  ui-md-4 ui-lg-2' : 'ui-g-12  ui-md-6 ui-lg-3' }">
+                <p:outputLabel value="#{loc.documentnumber}" for="txtDocumentNo" class="FontBold Fs12"/>
+                <p:inputText id="txtDocumentNo" value="#{bean.selectedObject.documentNo}" disabled="#{bean.isDisabled}" required="true" placeholder="#{loc.documentnumber}"/>  
+            </div>
+        </h:panelGroup>
+        <h:panelGroup rendered="#{bean.selectedObject.isCheque}">
+            <div  class="ui-g-12 ui-md-4 ui-lg-2">
+                <p:outputLabel value="#{loc.bankname} - #{loc.branchcode}" for="slcBank" styleClass="Fs12 FontBold"/>
+                <p:selectOneMenu id="slcBank" value="#{bean.selectedObject.bankBranch.id}"  filter="true" required="true" styleClass="Wid97" disabled="#{bean.isDisabled}">
+                    <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true"/> 
+                    <f:selectItems value="#{bean.listOfBankBranch}" var="bankbranch" itemLabel="#{bankbranch.bank.name} - #{bankbranch.code}" itemValue="#{bankbranch.id}"  />                          
+                </p:selectOneMenu>
+            </div>
+            <div class="ui-g-12  ui-md-4 ui-lg-2">
+                <p:outputLabel value="#{loc.accountnumber}" for="txtAccountNumber" class="FontBold Fs12"/>
+                <p:inputText id="txtAccountNumber" value="#{bean.selectedObject.accountNumber}" disabled="#{bean.isDisabled}"  placeholder="#{loc.accountnumber}"/>  
+            </div>
+            <div class="ui-g-12  ui-md-4 ui-lg-2">
+                <p:outputLabel value="#{loc.ibannumber}" for="txtIbanNumber" class="FontBold Fs12"/>
+                <p:inputText id="txtIbanNumber" value="#{bean.selectedObject.ibanNumber}" disabled="#{bean.isDisabled}" placeholder="#{loc.ibannumber}"/>  
+            </div>
+        </h:panelGroup>
+
+        <div class="#{bean.selectedObject.isCheque ? 'ui-g-12  ui-md-4 ui-lg-2' : 'ui-g-12  ui-md-6 ui-lg-3' }">
+            <p:outputLabel value="#{loc.endorsertoaccount}" for="txtEndorserAccount" class="FontBold Fs12"/>
+            <p:inputText id="txtEndorserAccount" value="#{bean.selectedObject.accountGuarantor}" disabled="#{bean.isDisabled}"  placeholder="#{loc.endorsertoaccount}"/>  
+        </div>
+
+        <h:panelGroup id="pgrEndorsedAccount" class="#{bean.selectedObject.isCheque ? 'ui-g-12  ui-md-12 ui-lg-4' : 'ui-g-12  ui-md-12 ui-lg-6'}" style="padding: 0px !important;" layout="block" >
+            <div  class="#{bean.selectedObject.isCheque and (bean.selectedObject.status.id==32 or bean.selectedObject.endorsedAccount.id>0 or bean.selectedObject.status.id==33 or bean.selectedObject.status.id==34 or bean.selectedObject.collectingBankAccount.id>0) ? 'ui-g-12  ui-md-4 ui-lg-3' : bean.selectedObject.isCheque and (bean.selectedObject.status.id!=32 and bean.selectedObject.status.id!=33 and bean.selectedObject.status.id!=34) ? 'ui-g-12  ui-md-4 ui-lg-6' : !bean.selectedObject.isCheque and (bean.selectedObject.status.id==32 or bean.selectedObject.endorsedAccount.id>0 or bean.selectedObject.status.id==33 or bean.selectedObject.status.id==34 or bean.selectedObject.collectingBankAccount.id>0) ? 'ui-g-12  ui-md-6 ui-lg-4' : !bean.selectedObject.isCheque and (bean.selectedObject.status.id!=32 and bean.selectedObject.status.id!=33 and bean.selectedObject.status.id!=34) ? 'ui-g-12  ui-md-6 ui-lg-6' : ' ' }">
+                <p:outputLabel value="#{loc.expirydate}" for="cldExpiryDate" styleClass="Fs12 FontBold"/>
+                <p:calendar  id="cldExpiryDate" required="true" value="#{bean.selectedObject.expiryDate}" disabled="#{bean.isDisabled}" showOn="button"  beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat}" showButtonPanel="true" placeholder="#{loc.expirydate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                    <p:ajax event="dateSelect" global="false"/>
+                </p:calendar>
+            </div>
+            <div  class="#{bean.selectedObject.isCheque and (bean.selectedObject.status.id==32 or bean.selectedObject.endorsedAccount.id>0 or bean.selectedObject.status.id==33 or bean.selectedObject.status.id==34 or bean.selectedObject.collectingBankAccount.id>0) ? 'ui-g-12  ui-md-4 ui-lg-3' : bean.selectedObject.isCheque and (bean.selectedObject.status.id!=32 and bean.selectedObject.status.id!=33 and bean.selectedObject.status.id!=34) ? 'ui-g-12  ui-md-4 ui-lg-6' : !bean.selectedObject.isCheque and (bean.selectedObject.status.id==32 or bean.selectedObject.endorsedAccount.id>0 or bean.selectedObject.status.id==33 or bean.selectedObject.status.id==34 or bean.selectedObject.collectingBankAccount.id>0) ? 'ui-g-12  ui-md-6 ui-lg-4' : !bean.selectedObject.isCheque and (bean.selectedObject.status.id!=32 and bean.selectedObject.status.id!=33 and bean.selectedObject.status.id!=34) ? 'ui-g-12  ui-md-6 ui-lg-6' : ' ' }">
+                <p:outputLabel value="#{loc.statu}" for="slcStatu" styleClass="Fs12 FontBold"/>
+                <p:selectOneMenu id="slcStatu" value="#{bean.selectedObject.status.id}" required="true" disabled="#{bean.processType==1 or bean.isDisabled}"
+                                 >
+                    <f:selectItems value="#{sessionBean.getStatus(18)}" var="statu" itemLabel="#{statu.nameMap.get(sessionBean.langId).name}" itemValue="#{statu.id}"  />
+                    <p:ajax update="pgrEndorsedAccount" global="false" listener="#{bean.changeStatus()}"/>
+                </p:selectOneMenu>
+            </div>
+
+            <h:panelGroup  rendered="#{bean.selectedObject.status.id==32 or bean.selectedObject.endorsedAccount.id>0}" >
+                <div class="#{bean.selectedObject.isCheque ? 'ui-g-12  ui-md-6 ui-lg-6' : 'ui-g-12  ui-md-4 ui-lg-4'}">
+                    <p:outputLabel value="#{loc.current}" for="txtEndorsedAccountName" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtEndorsedAccountName" onclick="#{bean.processType==2 ? 'showBook()' : ''}" value="#{bean.selectedObject.endorsedAccount.name}" class="inputPositionForBookFilter" required="true" 
+                                 readonly="#{facesContext.currentPhaseId.ordinal ge 4}" disabled="#{bean.isDisabled}" placeholder="#{loc.currentname}">
+                    </p:inputText>
+                    <p:commandLink id="btnAccountName2" rendered="#{bean.processType==2}" class="commandLinkPositionForBookFilter" process="@this" oncomplete="PF('olp_account').loadContents();" >
+                        <i class="fa fa-book Fs16 softgray iconPositionForBookFilter "/>   
+                        <p:ajax listener="#{accountBookFilterBean.findFilterListLazyLoading([bean.selectedObject.branch],'frmAccountBookFilter','olp_account','chequebill')}" global="false" />
+                    </p:commandLink>
+                </div>
+            </h:panelGroup>
+            <h:panelGroup  rendered="#{(bean.processType== 2 and (bean.selectedObject.status.id==33 or bean.selectedObject.status.id==34)) or bean.selectedObject.collectingBankAccount.id>0}" >
+                <div class="#{bean.selectedObject.isCheque ? 'ui-g-12  ui-md-6 ui-lg-6' : 'ui-g-12  ui-md-4 ui-lg-4'}">
+                    <p:outputLabel value="#{loc.bankaccount}" for="slcBankAccount" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcBankAccount" value="#{bean.selectedObject.collectingBankAccount.id}"  filter="true" required="true" styleClass="Wid97">
+                        <f:selectItems value="#{bean.bankAccountList}" var="bankAcoount" itemLabel="#{bankAcoount.name}" itemValue="#{bankAcoount.id}"  />
+                    </p:selectOneMenu>
+                </div>
+            </h:panelGroup>
+        </h:panelGroup>
+        <div class="#{bean.selectedObject.isCheque ? 'ui-g-12  ui-md-4 ui-lg-2' : 'ui-g-12  ui-md-6 ui-lg-3' }">
+            <p:outputLabel value="#{loc.total}" for="txtTotal" class="FontBold Fs12"/>
+            <p:inputNumber id="txtTotal" decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1? '.': ','}"  
+                           thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1? ',': '.'}" emptyValue="sign"
+                           roundMethod="D" decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}" readonly="#{bean.processType==2}" 
+                           disabled="#{bean.isDisabled}"
+                           value="#{bean.selectedObject.totalMoney}"  class="Wid97 TexAlRight"  placeholder="#{loc.total}" required="true">
+                <p:ajax event="keyup" process="@this" delay="1" global="false" update="txtTotalMoney" />
+            </p:inputNumber>
+
+        </div>
+
+        <div class="#{bean.selectedObject.isCheque ? 'ui-g-12  ui-md-4 ui-lg-2' : 'ui-g-12  ui-md-6 ui-lg-3' }">
+            <p:outputLabel value="#{loc.currency}" for="slcCurrency" styleClass="Fs12 FontBold"/>
+            <p:selectOneMenu id="slcCurrency" value="#{bean.selectedObject.currency.id}" 
+                             disabled="#{bean.processType==2 or !sessionBean.lastBranchSetting.isForeignCurrency}"  required="true" styleClass="Wid95">
+                <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true" />
+                <f:selectItems value="#{sessionBean.currencies}"  var="currency" itemLabel="#{currency.nameMap.get(sessionBean.langId).name}" itemValue="#{currency.id}" />
+                <p:ajax event="change" listener="#{bean.changeExchange()}" update="txtExchangeRate pgrExchange" global="false" />
+            </p:selectOneMenu>
+        </div>
+
+        <h:panelGroup  rendered="#{sessionBean.lastBranchSetting.isForeignCurrency}" >
+            <div class="#{bean.selectedObject.isCheque ? 'ui-g-12  ui-md-4 ui-lg-2' : 'ui-g-12  ui-md-6 ui-lg-3' }">
+                <h:panelGroup id="pgrExchange">
+                    <p:outputLabel value="#{loc.exchangerate} #{bean.exchange}" for="txtExchangeRate" styleClass="Fs12 FontBold"/>
+                    <p:inputNumber id="txtExchangeRate" decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}"  
+                                   thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                   roundMethod="D" decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}" disabled="#{bean.processType==2}"
+                                   value="#{bean.selectedObject.exchangeRate}"  class="Wid97 TexAlRight"  placeholder="#{loc.exchangerate}" required="true"> 
+                    </p:inputNumber>
+                </h:panelGroup>
+            </div>
+        </h:panelGroup>
+        <h:panelGroup  rendered="#{!sessionBean.lastBranchSetting.isForeignCurrency}" >
+            <div class="#{bean.selectedObject.isCheque ? 'ui-g-12  ui-md-4 ui-lg-2' : 'ui-g-12  ui-md-6 ui-lg-3' }" />
+        </h:panelGroup>
+
+        <div class="#{bean.selectedObject.isCheque ? 'ui-g-12  ui-md-4 ui-lg-2' : 'ui-g-12  ui-md-6 ui-lg-3' }">
+            <p:outputLabel value="#{loc.totalprice}" for="txtTotalMoney" styleClass="Fs12 FontBold"/>
+            <p:inputNumber id="txtTotalMoney" decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}"  
+                           thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                           roundMethod="D" decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}" readonly="true" disabled="#{bean.processType==2}"
+                           value="#{bean.selectedObject.totalMoney*bean.selectedObject.exchangeRate}"  class="Wid97 TexAlRight"  placeholder="#{loc.totalprice}" required="true"> 
+            </p:inputNumber>
+        </div>
+        <div class="#{bean.selectedObject.isCheque ? 'ui-g-12  ui-md-4 ui-lg-2' : 'ui-g-12  ui-md-6 ui-lg-3' }">
+            <p:outputLabel value="#{loc.country}" for="slcCountry" class="Fs12 FontBold"/>
+            <p:selectOneMenu id="slcCountry" value="#{bean.selectedObject.country.id}" disabled="#{bean.isDisabled}" filter="true" filterMatchMode="contains" required="true" >
+                <f:selectItem itemLabel="#{loc.choose}" itemValue="" itemDisabled="true" />
+                <f:selectItems value="#{sessionBean.countries}" var="country" itemLabel="#{country.getName(sessionBean.langId)}" itemValue="#{country.id}" /> 
+                <p:ajax listener="#{citiesAndCountiesBean.updateCity(bean.selectedObject.country,bean.selectedObject.paymentCity,null)}" update="slcCity" global="false"/>
+            </p:selectOneMenu>
+        </div>
+
+        <div class="#{bean.selectedObject.isCheque ? 'ui-g-12  ui-md-4 ui-lg-2' : 'ui-g-12  ui-md-6 ui-lg-3' }">
+            <p:outputLabel value="#{loc.city}" for="slcCity" class="Fs12 FontBold"/>
+            <p:selectOneMenu id="slcCity" value="#{bean.selectedObject.paymentCity.id}" disabled="#{bean.isDisabled}" filter="true" filterMatchMode="contains" required="true">
+                <f:selectItem itemLabel="#{loc.choose}" itemValue="" itemDisabled="true" />
+                <f:selectItems value="#{citiesAndCountiesBean.cities}" itemLabel="#{city.getName(sessionBean.langId)}" itemValue="#{city.id}" var="city"/>
+            </p:selectOneMenu>
+        </div>
+        <h:panelGroup rendered="#{!bean.selectedObject.isCheque}" >
+            <div  class="ui-g-12 ui-md-6 ui-lg-3">
+                <p:outputLabel value="#{loc.billcollocationdate}" for="cldBillCollocationDate" styleClass="Fs12 FontBold"/>
+                <p:calendar  id="cldBillCollocationDate" required="true" disabled="#{bean.isDisabled}" value="#{bean.selectedObject.billCollocationDate}" showOn="button"  beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat}" showButtonPanel="true" placeholder="#{loc.billcollocationdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                    <p:ajax event="dateSelect" global="false"/>
+                </p:calendar>
+            </div>
+            <div class="ui-g-12  ui-md-6 ui-lg-3">
+                <p:outputLabel value="#{loc.billquarantor}" for="txtBillQuarantor" class="FontBold Fs12"/>
+                <p:inputText id="txtBillQuarantor" value="#{bean.selectedObject.accountGuarantor}" disabled="#{bean.isDisabled}"  placeholder="#{loc.billquarantor}"/>  
+            </div>
+        </h:panelGroup>
+
+
+    </div>
+
+</ui:composition>

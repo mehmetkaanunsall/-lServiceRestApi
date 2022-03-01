@@ -1,0 +1,69 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+
+    <h:form id="frmNewDocumentNumber" >  
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="bean" value='#{documentNumberBean}' />
+            <ui:param name="outputtext" value="#{loc.documentserialprocesses}"/>
+            <ui:param name="update" value="pgrNewDocumentNo" />
+            <ui:param name="btnSaveId" value="#{documentNumberBean.getRendered(190, 0)}" />
+            <ui:param name="btnDeleteId" value='false' /> 
+            <c:if test="#{documentNumberBean.processType==2}">
+                <ui:param name="btnDeleteId" value='#{documentNumberBean.getRendered(191, 0)}' /> 
+                <ui:param name="btnTestBeforeDeleteId" value='true' /> 
+            </c:if>
+        </ui:include>
+
+        <h:panelGroup id="pgrNewDocumentNo" layout="block">
+            <div class="ui-g divContent">    
+                <p:focus for="txtName"/>
+                <div class="ui-g-12 ui-md-6 ui-lg-4">
+                    <p:outputLabel value="#{loc.name}" for="txtName" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtName" value="#{documentNumberBean.selectedObject.name}" required="true" placeholder="#{loc.name} "/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-4">
+                    <p:outputLabel value="#{loc.type}" for="slcType" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcType" value="#{documentNumberBean.selectedObject.item.id}" required="true" >
+                        <f:selectItems value="#{documentNumberBean.listOfItem}"  var="item" itemLabel="#{item.tag}" itemValue="#{item.id}" />
+                    </p:selectOneMenu>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-4">
+                    <p:outputLabel value="#{loc.serialno}" for="txtSerialNo" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtSerialNo" value="#{documentNumberBean.selectedObject.serial}" required="true" placeholder="#{loc.serialno} "/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-4">
+                    <p:outputLabel value="#{loc.begin} #{loc.number}" for="txtBegin" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtBegin" value="#{documentNumberBean.selectedObject.beginNumber}" required="true" placeholder="#{loc.begin} #{loc.number}">
+                        <p:keyFilter regEx="/[0-9]/"/>
+                        <p:ajax event="blur" listener="#{documentNumberBean.bringActualNumber()}" global="false" update="txtActual"/>
+                        <f:converter converterId="integerConverter" />
+                    </p:inputText>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-4">
+                    <p:outputLabel value="#{loc.end} #{loc.number}" for="txtEnd" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtEnd" value="#{documentNumberBean.selectedObject.endNumber}" required="true" placeholder="#{loc.end} #{loc.number}">
+                        <p:keyFilter regEx="/[0-9]/"/>
+                        <f:converter converterId="integerConverter" />
+                    </p:inputText>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-4">
+                    <p:outputLabel value="#{loc.actualnumber}" for="txtActual" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtActual" value="#{documentNumberBean.selectedObject.actualNumber}" required="true" placeholder="#{loc.actualnumber} ">
+                        <p:keyFilter regEx="/[0-9]/"/> 
+                        <f:converter converterId="integerConverter" />
+                    </p:inputText>
+                </div>
+            </div>
+        </h:panelGroup>
+    </h:form>    
+
+</ui:composition> 
+

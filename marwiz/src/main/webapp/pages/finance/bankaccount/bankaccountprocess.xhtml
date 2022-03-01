@@ -1,0 +1,437 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions" 
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:form id="frmBankAccountProcess">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.banktaccauntprocess}"/>
+            <ui:param name="bean" value='#{bankAccountProcessBean}' />
+            <ui:param name="update" value="pgrBankAccountProcess" />
+            <ui:param name="btnSaveId" value="#{bankAccountProcessBean.getRendered(111, 0)}" />     
+            <ui:param name="renderback" value='true'/>
+            <c:if test="#{bankAccountProcessBean.processType==2}">
+                <ui:param name="renderSelectedObject" value='true'/>
+                <ui:param name="selectedObjectName" value="#{bankAccountProcessBean.selectedObject.name}"/>
+                <ui:param name="btnDeleteId" value="#{bankAccountProcessBean.getRendered(112, 0)}" />
+                <ui:param name="btnTestBeforeDeleteId" value='true' />
+
+            </c:if>
+        </ui:include>
+
+        <h:panelGroup id="pgrBankAccountProcess" layout="block">
+            <div class="ui-g divContent">
+                <div class="ui-g-12 panelToggle">
+                    <p:focus for="txtAccountName"/>
+                    <div  class="ui-g-12 ui-md-3">
+                        <p:outputLabel value="#{loc.accountname}" for="txtAccountName" styleClass="Fs12 FontBold" />
+                        <p:inputText id="txtAccountName" value="#{bankAccountProcessBean.selectedObject.name}" placeholder="#{loc.accountname}" required="true" >
+                            <p:keyFilter regEx="/[^\\\{\}\[\]\,\:\u0022]/" preventPaste="false" />
+                            <f:validateRegex pattern="[^\\\{\}\[\]\,\:\u0022]*" />
+                        </p:inputText>
+                    </div>
+
+                    <div class="ui-g-12  ui-md-3">
+                        <p:outputLabel value="#{loc.bank}" for="txtBankName" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtBankName" value="#{bankAccountProcessBean.selectedObject.bankBranch.bank.name}" onclick="showBook()" class="inputPositionForBookFilter" required="true"  readonly="#{facesContext.currentPhaseId.ordinal ge 4}" rendered="#{facesContext.currentPhaseId.ordinal ne 4}" placeholder="#{loc.bank} ">
+                        </p:inputText>
+                        <p:commandLink id="btnBankName" update="frmBankBookFilter" class="commandLinkPositionForBookFilter"  process="@this" oncomplete="PF('olp_bank').show()"  >
+                            <i class="fa fa-book Fs16 black iconPositionForBookFilter "/>   
+                            <p:ajax listener="#{bankBookFilterBean.findFilterListLazyLoading([],'frmBankBookFilter','olp_bank','bankaccount')}"/>
+                        </p:commandLink>
+                    </div>
+                    <div class="ui-g-12  ui-md-2">
+                        <p:outputLabel value="#{loc.branch}" for="slcBranch" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcBranch" value="#{bankAccountProcessBean.selectedObject.bankBranch.id}" required="true">
+                            <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true" />
+                            <f:selectItems value="#{bankAccountProcessBean.listBankBranch}" var="branch" itemLabel="#{branch.name}" itemValue="#{branch.id}"  />
+                            <p:ajax listener="#{bankAccountProcessBean.updateBranchCode()}" update="txtBranchCode" global="false"/>
+                        </p:selectOneMenu> 
+                    </div>
+                    <div  class="ui-g-12 ui-md-2">
+                        <p:outputLabel value="#{loc.branchcode}" for="txtBranchCode" styleClass="Fs12 FontBold" />
+                        <p:inputText id="txtBranchCode" value="#{bankAccountProcessBean.selectedObject.bankBranch.code}" readonly="true"  placeholder="#{loc.branchcode}" required="true" />
+                    </div>
+
+                    <div class="ui-g-12  ui-md-2">
+                        <p:outputLabel value="#{loc.statu}" for="slcStatu" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcStatu" value="#{bankAccountProcessBean.selectedObject.status.id}" required="true" >
+                            <f:selectItems value="#{sessionBean.getStatus(13)}" var="statu" itemLabel="#{statu.nameMap.get(sessionBean.langId).name}" itemValue="#{statu.id}"  />
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div  class="ui-g-12 ui-md-3">
+                        <p:outputLabel value="#{loc.accountnumber}" for="txtAccountnumber" styleClass="Fs12 FontBold" />
+                        <p:inputText id="txtAccountnumber" value="#{bankAccountProcessBean.selectedObject.accountNumber}" placeholder="#{loc.accountnumber}" required="true" />
+                    </div>
+
+                    <div  class="ui-g-12 ui-md-3">
+                        <p:outputLabel value="#{loc.ibannumber}" for="txtIbanNumber" styleClass="Fs12 FontBold" />
+                        <p:inputText maxlength="38" id="txtIbanNumber" value="#{bankAccountProcessBean.selectedObject.ibanNumber}" placeholder="#{loc.ibannumber}" required="true" />
+                    </div>
+
+                    <div class="ui-g-12  ui-md-2">
+                        <p:outputLabel value="#{loc.accounttype}" for="slcAccountType" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcAccountType" value="#{bankAccountProcessBean.selectedObject.type.id}" required="true">
+                            <f:selectItems value="#{sessionBean.getTypes(13)}" var="type" itemLabel="#{type.nameMap.get(sessionBean.langId).name}" itemValue="#{type.id}"  />
+                            <p:ajax update="pngCommission pngBusinessCards" listener="#{bankAccountProcessBean.changeType()}"/>
+                        </p:selectOneMenu> 
+                    </div>
+
+
+
+
+
+                    <div  class="ui-g-12 ui-md-2">
+                        <p:outputLabel value="#{loc.balance}" for="txtBalance" styleClass="Fs12 FontBold" />
+                        <p:inputNumber id="txtBalance" decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}"  
+                                       thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                       roundMethod="D" decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}" readonly="#{bankAccountProcessBean.processType==2}"
+                                       value="#{bankAccountProcessBean.selectedObject.bankAccountBranchCon.balance}"  class="Wid97 TexAlRight"  placeholder="#{loc.balance}" required="true">
+                        <p:ajax listener="#{bankAccountProcessBean.calculateRemainingLimit()}" delay="1" global="false" event="keyup" update="frmBankAccountProcess:txtRemainingLimit"/>
+                        </p:inputNumber>
+                    </div>
+                    <div class="ui-g-12  ui-md-2">
+                        <p:outputLabel value="#{loc.currency}" for="slcCurreny" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcCurreny" value="#{bankAccountProcessBean.selectedObject.currency.id}" required="true"
+                                         disabled="#{bankAccountProcessBean.processType==2}">
+                            <f:selectItems value="#{sessionBean.currencies}" var="currency" itemLabel="#{currency.nameMap.get(sessionBean.langId).name}" itemValue="#{currency.id}"  />
+                        </p:selectOneMenu> 
+                    </div>
+                    <h:panelGroup id="pngCommission">
+                        <h:panelGroup rendered="#{bankAccountProcessBean.selectedObject.type.id == 16}">
+                            <div  class="ui-g-12 ui-md-2">
+                                <p:outputLabel value="#{loc.commissionrate}" for="txtCommissionRate" styleClass="Fs12 FontBold" />
+                                <p:inputNumber id="txtCommissionRate" decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}"  
+                                               thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" minValue="0"
+                                               roundMethod="D" decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}" symbol="%" symbolPosition="s"
+                                               value="#{bankAccountProcessBean.selectedObject.bankAccountBranchCon.commissionRate}"  class="Wid97 TexAlRight"  placeholder="#{loc.commissionrate}">
+                                </p:inputNumber>
+                            </div>
+                            <div  class="ui-g-12 ui-md-2">
+                                <p:outputLabel value="#{loc.commissionbankaccount}" for="slcCommissionBankAccount" styleClass="Fs12 FontBold"/>
+                                <p:selectOneMenu id="slcCommissionBankAccount" value="#{bankAccountProcessBean.selectedObject.bankAccountBranchCon.commissionBankAccount.id}"  filter="true" >
+                                    <f:selectItem itemLabel="#{loc.choose}" itemValue="0" /> 
+                                    <f:selectItems value="#{bankAccountProcessBean.listOfBankAccount}" var="bankaccount" itemLabel="#{bankaccount.name}" itemValue="#{bankaccount.id}"  />
+                                    <p:ajax listener="#{bankAccountProcessBean.changeCommissionBankAccount()}"/>
+                                </p:selectOneMenu>
+                            </div>
+                            <div class="ui-g-12 ui-md-2">
+                                <p:outputLabel value="#{loc.expense}" for="slcIncomeExpense" styleClass="Fs12 FontBold"/>
+                                <p:inputText id="slcIncomeExpense" onclick="showIncomeExpenseBookForCommission()"  value="#{bankAccountProcessBean.selectedObject.bankAccountBranchCon.commissionIncomeExpense.name}" class="inputPositionForBookFilter"  readonly="true"  placeholder="#{loc.expense}" />
+                                <p:commandLink process="@this" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_IncomeExpenseCommission').loadContents();">
+                                    <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                    <p:ajax listener="#{incomeExpenseBookFilterBean.findFilterList([false, bankAccountProcessBean.selectedObject.bankAccountBranchCon.branch],'frmIncomeExpenseBookFilterForCommission','olp_IncomeExpenseCommission','bankAccountProcessBean')}" />
+                                </p:commandLink>
+                            </div>
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+                    <h:panelGroup id="pngBusinessCards">
+                        <h:panelGroup rendered="#{bankAccountProcessBean.selectedObject.type.id == 104}">
+                            <div class="ui-g-12 ui-md-2">
+                                <p:outputLabel value="#{loc.creditcardlimit}" for="txtCreditCardLimit" class="FontBold Fs12"/>
+                                <p:inputNumber id="txtCreditCardLimit" value="#{bankAccountProcessBean.selectedObject.creditCardLimit}" styleClass="Wid95" required="false" placeholder="#{loc.creditcardlimit}" 
+                                               decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}"  
+                                               thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                               roundMethod="D" decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}" 
+                                               class="Wid97 TexAlRight">
+                                    <p:ajax listener="#{bankAccountProcessBean.calculateRemainingLimit()}" delay="1" global="false" event="keyup" update="frmBankAccountProcess:txtRemainingLimit"/>
+                                </p:inputNumber>
+                            </div>
+                            <div class="ui-g-12 ui-md-2 ui-lg-2">
+                                <p:outputLabel value="#{loc.cutoffdate}" for="cldCutOfDate" styleClass="Fs12 FontBold"/>
+                                <p:calendar  id="cldCutOfDate" class="datepicker" value="#{bankAccountProcessBean.selectedObject.cutOffDate}" required="false" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.cutoffdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                                    <p:ajax event="change" update="cldCutOfDate" resetValues="true" global="false"/>
+                                </p:calendar>
+                            </div>
+                            <div class="ui-g-12 ui-md-2 ui-lg-2">
+                                <p:outputLabel value="#{loc.paymentduedate}" for="cldPaymentDueDate" styleClass="Fs12 FontBold"/>
+                                <p:calendar  id="cldPaymentDueDate" class="datepicker" value="#{bankAccountProcessBean.selectedObject.paymentDueDate}" required="false" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.paymentduedate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                                    <p:ajax event="change" update="cldPaymentDueDate" resetValues="true" global="false"/>
+                                </p:calendar>
+                            </div>
+                            <div class="ui-g-12 ui-md-2 ui-lg-2">
+                                <p:outputLabel value="#{loc.remaininglimit}" for="txtRemainingLimit" styleClass="FontBold Fs12"/>
+                                <p:inputNumber id="txtRemainingLimit" value="#{bankAccountProcessBean.remainingLimit}" styleClass="Wid95" required="false" placeholder="#{loc.remaininglimit}" 
+                                               decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}"  
+                                               thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                               roundMethod="D" decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}" 
+                                               class="Wid97 TexAlRight" readonly="true">
+
+                                </p:inputNumber>
+                            </div>
+
+                        </h:panelGroup>
+                    </h:panelGroup>
+                </div>
+            </div>
+        </h:panelGroup>
+        <p:remoteCommand name="showBook" process="@this" update="frmBankBookFilter" oncomplete="PF('olp_bank').show();" actionListener="#{bankBookFilterBean.findFilterListLazyLoading([],'frmBankBookFilter','olp_bank','bankaccount')}" />
+        <p:remoteCommand name="showIncomeExpenseBookForCommission" process="@this"  oncomplete="PF('olp_IncomeExpenseCommission').loadContents();" 
+                         actionListener="#{incomeExpenseBookFilterBean.findFilterList([false, bankAccountProcessBean.selectedObject.bankAccountBranchCon.branch],'frmIncomeExpenseBookFilterForCommission','olp_IncomeExpenseCommission','bankAccountProcessBean')}" />
+    </h:form>
+
+    <div class="EmptyBox10" />
+
+    <p:tabView id="tbvBankAccountProc" activeIndex="#{marwiz.tabIndex}" rendered="#{bankAccountProcessBean.processType==2 and (bankAccountProcessBean.getRendered(28, 1) or bankAccountProcessBean.getRendered(70, 1) or bankAccountProcessBean.getRendered(62, 1))}" scrollable="true" dynamic="true" cache="true">
+        <p:ajax event="tabChange" listener="#{bankAccountProcessBean.onTabChange}" update="pngBookForMovement"/>
+        <p:tab id="tab28" title="#{loc.movements}" rendered="#{bankAccountProcessBean.getRendered(28, 1)}">
+            <c:if test="#{bankAccountProcessBean.activeIndex==28}" >
+                <ui:include src="/pages/finance/bankaccount/bankaccountmovementtab.xhtml"/>
+            </c:if>
+        </p:tab>
+        <p:tab id="tab70" title="#{loc.branches}" rendered="#{bankAccountProcessBean.getRendered(70, 1)}">
+            <c:if test="#{bankAccountProcessBean.activeIndex==70}" > 
+                <ui:include src="/pages/finance/bankaccount/bankaccountbranchtab.xhtml" />
+            </c:if>
+        </p:tab>
+        <p:tab id="tab62" title="#{loc.responsibles}" rendered="#{bankAccountProcessBean.getRendered(62, 1)}">
+            <c:if test="#{bankAccountProcessBean.activeIndex==62}" > 
+                <ui:include src="/pages/general/responsible/responsible.xhtml" >
+                    <ui:param name="btnNewId" value="#{responsibleBean.getRendered(274, 0)}"/>
+                </ui:include>
+            </c:if>
+        </p:tab>
+    </p:tabView>
+
+    <h:panelGroup id="pngBookForMovement">
+        <c:if test="#{bankAccountProcessBean.activeIndex==28}" >
+            <ui:include src="/pages/general/common/accountbook.xhtml" >
+                <ui:param name="updateBean" value='#{bankAccountMovementTabBean}' />
+                <ui:param name="for" value='tbvBankAccountProc:frmFinancingDocumentProcess:slcOperationType' />
+                <ui:param name="type" value="#{bankAccountMovementTabBean.bookType}" />
+                <ui:param name="parameters" value='#{[bankAccountMovementTabBean.selectedObject.financingDocument.branch]}' /> 
+                <ui:param name="columnsize" value='2' /> 
+                <ui:param name="form" value='frmAccountBookFilter' /> 
+                <ui:param name="overlay" value="olp_account" />
+            </ui:include>
+
+            <p:overlayPanel id="olpIncomeExpense" widgetVar="olp_IncomeExpense" showEvent="none" modal="true" transient="true" for="tbvBankAccountProc:frmFinancingDocumentProcess:slcOperationType" at="left bottom" dismissable="true" hideEffect="blind" showCloseIcon="true" class="Wid30">
+                <ui:include src="/pages/general/common/incomeexpensebook.xhtml">
+                    <ui:param name="updateBean" value='#{bankAccountMovementTabBean}' />
+                    <ui:param name="type" value='#{bankAccountMovementTabBean.beanName}' />
+                    <ui:param name="parameters" value='#{[bankAccountMovementTabBean.isIncomeExpense, bankAccountMovementTabBean.selectedObject.financingDocument.branch]}' /> 
+                    <ui:param name="form" value='frmIncomeExpenseBookFilter' /> 
+                </ui:include>
+            </p:overlayPanel>
+        </c:if>
+    </h:panelGroup>
+
+
+    <ui:include src="/pages/general/common/bankbook.xhtml" >
+        <ui:param name="updateBean" value='#{bankAccountProcessBean}' />
+        <ui:param name="for" value='frmBankAccountProcess:btnBankName' />
+        <ui:param name="type" value='bankaccount' />
+        <ui:param name="parameters" value='' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmBankBookFilter' /> 
+        <ui:param name="overlay" value="olp_bank" />
+    </ui:include>
+
+    <p:confirmDialog id="dlgRelatedRecordInfo" global="true"  class="deleteConfirm controlDelete" severity="alert" widgetVar="dlg_RelatedRecordInfo" closeOnEscape="true" width="20%" responsive="true">
+        <c:if test="#{bankAccountProcessBean.activeIndex==28}" >
+            <f:facet name="message">
+                <p:panel class="divContent">
+                    <div class="ui-g">
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+                            <h:outputText value="#{bankAccountMovementTabBean.deleteControlMessage}" style="color:black !important"/>
+                        </div>
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+                            <h:outputText value="#{bankAccountMovementTabBean.deleteControlMessage1}" style="color:black !important"/>
+                        </div>
+                        <h:panelGroup rendered="#{bankAccountMovementTabBean.response != -106}">
+                            <div class="ui-g-12 ui-md-12 ui-lg-6">
+                                <h:outputText value="#{bankAccountMovementTabBean.deleteControlMessage2}" class="Fright"/>
+                            </div>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{bankAccountMovementTabBean.response == -106}">
+                            <div class="ui-g-12 ui-md-12 ui-lg-12">
+                                <h:outputText value="#{bankAccountMovementTabBean.deleteControlMessage2}"/>
+                            </div>
+                        </h:panelGroup>
+                        <div class="ui-g-12 ui-md-12 ui-lg-6">
+                            <p:commandLink value="#{bankAccountMovementTabBean.relatedRecord}" class="Fleft cmdRelatedRecord" title="#{loc.gotorelatedrecord}" actionListener="#{bankAccountMovementTabBean.goToRelatedRecordBefore()}"/>
+                        </div>
+                    </div>
+                </p:panel>
+            </f:facet>
+        </c:if>
+    </p:confirmDialog>
+
+    <!--Yetkililer tabında yeni yetkili için açılan dialog-->
+    <p:dialog id="dlgResponsibleProc" widgetVar="dlg_responsibleproc" resizable="false" focus="dlgResponsibleProc" responsive="true" dynamic="true" modal="true" closeOnEscape="true" width="55%" >
+        <c:if test="#{bankAccountProcessBean.activeIndex==62}">
+            <p:ajax event="close" listener="#{responsibleBean.closeDialog()}"/>
+            <ui:include src="/pages/general/responsible/responsibleprocess.xhtml">
+                <ui:param name="btnSaveId" value='#{responsibleBean.getRendered(275, 0)}' />
+                <ui:param name="btnDeleteId" value='#{responsibleBean.processType==2 and responsibleBean.getRendered(276, 0)}' />
+                <ui:param name="tabViewRendered" value="#{responsibleBean.processType==2 and responsibleBean.getRendered(63, 1)}"/>
+                <ui:param name="tabRendered" value="#{responsibleBean.getRendered(63, 1)}"/>
+                <ui:param name="cifRendered" value="#{responsibleBean.activeIndex==63}"/>
+                <ui:param name="tabId" value="tab63"/>
+                <ui:param name="btnCommunicationNewId" value="#{responsibleCommunicationBean.getRendered(277, 0)}"/>
+                <c:set var="whichPage" value="#{2}" scope="request" />
+            </ui:include>
+        </c:if>
+    </p:dialog> 
+
+    <!--Yetkililer tabında communşcation için açılan dialog-->
+    <p:dialog id="dlgResponsibleCommunication" widgetVar="dlg_ResponsibleCommunication" resizable="false" focus="dlgResponsibleCommunication" width="35%" responsive="true" dynamic="true" modal="true" closeOnEscape="true" onHide="Centrowiz.removeVariable()">
+        <c:if test="#{bankAccountProcessBean.activeIndex==62}">
+            <h:form id="frmResponsibleCommunication" >
+                <ui:include src="/pages/general/common/processtoolbarcommunication.xhtml" > 
+                    <ui:param name="outputtext" value="#{loc.communicationprocesses}"/>
+                    <ui:param name="bean" value='#{responsibleCommunicationBean}'/>
+                    <ui:param name="update" value="grdCommunication tbvResponsibleProc:frmResponsibleCommunicationTab:dtbCommunication" />
+                    <ui:param name="btnSaveId" value="#{responsibleCommunicationBean.getRendered(278, 0)}" />
+                    <ui:param name="btnDeleteId" value='false' />
+                    <ui:param name="dialog" value='dlg_ResponsibleCommunication' />
+                    <c:if test="#{responsibleCommunicationBean.communicationProcessType==2}">
+                        <ui:param name="btnDeleteId" value="#{responsibleCommunicationBean.getRendered(279, 0)}" />
+                    </c:if>
+                </ui:include>
+
+                <ui:include src="/pages/general/common/communicationprocess.xhtml">
+                    <ui:param name="bean" value='#{responsibleCommunicationBean}'/>  
+                    <ui:param name="updateGrid" value="grdCommunication"/> 
+                    <ui:param name="form" value="frmResponsibleCommunication"/>
+                </ui:include>
+
+            </h:form>
+        </c:if>
+    </p:dialog> 
+
+
+    <p:dialog id="dlgBankAccountBranch" widgetVar="dlg_BankAccountBranch" resizable="false" focus="dlgBankAccountBranch" responsive="true" dynamic="true" modal="true" closeOnEscape="true" width="30%" >
+        <c:if test="#{bankAccountProcessBean.activeIndex==70}">
+            <ui:include src="/pages/finance/bankaccount/bankaccountbrachprocess.xhtml"/>
+        </c:if>
+    </p:dialog> 
+
+    <p:overlayPanel id="olpIncomeExpenseCommission" widgetVar="olp_IncomeExpenseCommission"  showEvent="none" modal="true" transient="true" for="frmBankAccountProcess:slcIncomeExpense"  my="right top" at="left bottom" dismissable="true" hideEffect="blind" showCloseIcon="true" class="Wid30">
+        <ui:include src="/pages/general/common/incomeexpensebook.xhtml">
+            <ui:param name="updateBean" value='#{bankAccountProcessBean}' />
+            <ui:param name="type" value='bankAccountProcessBean' />
+            <ui:param name="parameters" value='#{[false, bankAccountProcessBean.selectedObject.bankAccountBranchCon.branch]}' /> 
+            <ui:param name="form" value='frmIncomeExpenseBookFilterForCommission' /> 
+        </ui:include>
+    </p:overlayPanel>
+
+    <!--komisyon tabı için açılan dialog-->
+    <p:dialog id="dlgCommission" widgetVar="dlg_Commission" modal="true" resizable="false" width="30%" focus="dlgCommission" responsive="true" dynamic="true" closeOnEscape="true">
+        <c:if test="#{bankAccountProcessBean.activeIndex==28}">
+            <p:ajax event="close" listener="#{bankAccountMovementTabBean.closeCommissionDialog()}" global="false"/>
+            <h:form id="frmCommissionProcess">
+                <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+                    <ui:param name="outputtext" value="#{loc.commissionprocesses}"/>
+                    <ui:param name="bean" value='#{bankAccountMovementTabBean}' />
+                    <ui:param name="update" value="pgrCommissionProcess" />
+                    <ui:param name="btnSaveId" value="true" />     
+                </ui:include>
+
+                <h:panelGroup id="pgrCommissionProcess" layout="block">
+                    <div class="ui-g divContent">
+                        <p:focus for="txtTransferPrice"/>
+                        <div  class="ui-g-12 ui-md-6 ui-lg-4">
+                            <p:outputLabel value="#{loc.transferprice}" for="txtTransferPrice" styleClass="Fs12 FontBold" />
+                            <p:inputNumber id="txtTransferPrice" decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}"  
+                                           thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                           roundMethod="D" decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}"
+                                           value="#{bankAccountMovementTabBean.selectedBankAccountCommission.totalMoney}"  class="Wid97 TexAlRight"  placeholder="#{loc.transferprice}" required="true">
+                                <p:ajax listener="#{bankAccountMovementTabBean.calculateCommission()}" delay="1" global="false" event="keyup" update="frmCommissionProcess:txtCommissionPrice"/>
+                            </p:inputNumber>
+                        </div>
+                        <div  class="ui-g-12 ui-md-6 ui-lg-4">
+                            <p:outputLabel value="#{loc.commissionrate}" for="txtCommissionRate" styleClass="Fs12 FontBold" />
+                            <p:inputNumber id="txtCommissionRate" decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}"  
+                                           thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" minValue="0"
+                                           roundMethod="D" decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}" symbol="%" symbolPosition="s" readonly="true"
+                                           value="#{bankAccountMovementTabBean.selectedBankAccountCommission.commissionRate}"  class="Wid97 TexAlRight"  placeholder="#{loc.commissionrate}">
+                            </p:inputNumber>
+                        </div>
+                        <div  class="ui-g-12 ui-md-6 ui-lg-4">
+                            <p:outputLabel value="#{loc.commissionprice}" for="txtCommissionPrice" styleClass="Fs12 FontBold" />
+                            <p:inputNumber id="txtCommissionPrice" decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}"  
+                                           thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                           roundMethod="D" decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}"
+                                           value="#{bankAccountMovementTabBean.selectedBankAccountCommission.commissionMoney}"  class="Wid97 TexAlRight"  placeholder="#{loc.commissionprice}" required="true">
+                                <p:ajax listener="#{bankAccountMovementTabBean.calculateCommissionRate()}" delay="1" global="false" event="keyup" update="frmCommissionProcess:txtCommissionRate"/>
+                            </p:inputNumber>
+                        </div>
+                    </div>
+                </h:panelGroup>
+            </h:form>
+        </c:if>
+    </p:dialog>
+
+    <p:confirmDialog id="dlgCommissionWarning" global="true"  class="deleteConfirm controlDelete" severity="alert" widgetVar="dlg_CommissionWarning" closeOnEscape="true" width="20%" responsive="true">
+        <c:if test="#{bankAccountProcessBean.activeIndex==28}" >
+            <f:facet name="message">
+                <p:panel class="divContent">
+                    <div class="ui-g">
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+                            <h:outputText value="#{bankAccountMovementTabBean.commissionMessage}" style="color:black !important"/>
+                        </div>
+                        <div class="ui-g-12 ui-md-12 ui-lg-6">
+                            <p:commandButton value="#{loc.yes}" action="#{bankAccountMovementTabBean.updateCommission()}" onclick="PF('dlg_CommissionWarning').hide()" process="@this" styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+                        </div>
+                        <div class="ui-g-12 ui-md-12 ui-lg-6">
+                            <p:commandButton value="#{loc.no}" type="button" onclick="PF('dlg_CommissionWarning').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+                        </div>
+                    </div>
+                </p:panel>
+            </f:facet>
+        </c:if>
+    </p:confirmDialog>
+
+    <p:confirmDialog id="dlgCommissionDelete" global="true"  class="deleteConfirm controlDelete" severity="alert" widgetVar="dlg_CommissionDelete" closeOnEscape="true" width="20%" responsive="true">
+        <c:if test="#{bankAccountProcessBean.activeIndex==28}" >
+            <f:facet name="message">
+                <p:panel class="divContent">
+                    <div class="ui-g">
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+                            <h:outputText value="#{bankAccountMovementTabBean.commissionMessage}" style="color:black !important"/>
+                        </div>
+                        <div class="ui-g-12 ui-md-12 ui-lg-6">
+                            <p:commandButton value="#{loc.yes}" action="#{bankAccountMovementTabBean.deleteCommission()}" onclick="PF('dlg_CommissionDelete').hide()" process="@this" styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+                        </div>
+                        <div class="ui-g-12 ui-md-12 ui-lg-6">
+                            <p:commandButton value="#{loc.no}" type="button" onclick="PF('dlg_CommissionDelete').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+                        </div>
+                    </div>
+                </p:panel>
+            </f:facet>
+        </c:if>
+    </p:confirmDialog>
+
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.bankaccountmovements}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+
+
+
+</ui:composition>

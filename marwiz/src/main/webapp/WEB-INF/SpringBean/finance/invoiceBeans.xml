@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                            http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://www.springframework.org/schema/context
+                            http://www.springframework.org/schema/context/spring-context.xsd
+                            http://www.springframework.org/schema/tx 
+                            http://www.springframework.org/schema/tx/spring-tx.xsd">
+    
+    <bean id="invoiceDao" class="com.mepsan.marwiz.finance.invoice.dao.InvoiceDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="invoiceService" class="com.mepsan.marwiz.finance.invoice.business.InvoiceService" lazy-init="true" scope="prototype">
+    </bean> 
+
+    <bean id="gfInvoiceService" class="com.mepsan.marwiz.finance.invoice.business.GFInvoiceService" lazy-init="true" scope="prototype">
+    </bean> 
+
+    <bean id="invoiceItemDao" class="com.mepsan.marwiz.finance.invoice.dao.InvoiceItemDao"  lazy-init="true" scope="prototype" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="invoiceItemService" class="com.mepsan.marwiz.finance.invoice.business.InvoiceItemService" lazy-init="true" scope="prototype">
+    </bean> 
+    
+    <bean id="relatedRecordDao" class="com.mepsan.marwiz.finance.invoice.dao.RelatedRecordDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="relatedRecordService" class="com.mepsan.marwiz.finance.invoice.business.RelatedRecordService" lazy-init="true" scope="request">
+    </bean> 
+    
+    <bean id="invoicePaymentDao" class="com.mepsan.marwiz.finance.invoice.dao.InvoicePaymentDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="invoicePaymentService" class="com.mepsan.marwiz.finance.invoice.business.InvoicePaymentService" lazy-init="true" scope="prototype">
+    </bean> 
+    
+</beans>

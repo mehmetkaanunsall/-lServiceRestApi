@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                            http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://www.springframework.org/schema/context
+                            http://www.springframework.org/schema/context/spring-context.xsd
+                            http://www.springframework.org/schema/tx 
+                            http://www.springframework.org/schema/tx/spring-tx.xsd">
+    
+
+    <bean id="marketShiftReportDao" class="com.mepsan.marwiz.general.report.marketshiftreport.dao.MarketShiftReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="marketShiftReportService" class="com.mepsan.marwiz.general.report.marketshiftreport.business.MarketShiftReportService" lazy-init="true" scope="prototype" >
+    </bean> 
+    
+    <bean id="marketShiftReportPrintDao" class="com.mepsan.marwiz.general.report.marketshiftreport.dao.MarketShiftReportPrintDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="marketShiftReportPrintService" class="com.mepsan.marwiz.general.report.marketshiftreport.business.MarketShiftReportPrintService" lazy-init="true" scope="request" >
+    </bean>
+    
+    <bean id="marketShiftReportDetailDao" class="com.mepsan.marwiz.general.report.marketshiftreport.dao.MarketShiftReportDetailDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="marketShiftReportDetailService" class="com.mepsan.marwiz.general.report.marketshiftreport.business.MarketShiftReportDetailService" lazy-init="true" scope="request" >
+    </bean> 
+    
+    <bean id="orderListReportDao" class="com.mepsan.marwiz.general.report.orderlistreport.dao.OrderListReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="orderListReportService" class="com.mepsan.marwiz.general.report.orderlistreport.business.OrderListReportService" lazy-init="true" scope="request" >
+    </bean> 
+    
+    <bean id="salesReturnReportDao" class="com.mepsan.marwiz.general.report.salesreturnreport.dao.SalesReturnReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="salesReturnReportService" class="com.mepsan.marwiz.general.report.salesreturnreport.business.SalesReturnReportService" lazy-init="true" scope="request" >
+    </bean> 
+    
+    <bean id="salesTypeStockReportDao" class="com.mepsan.marwiz.general.report.salestypestockreport.dao.SalesTypeStockReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="salesTypeStockReportService" class="com.mepsan.marwiz.general.report.salestypestockreport.business.SalesTypeStockReportService" lazy-init="true" scope="request" >
+    </bean> 
+    
+    <bean id="salesDetailReportDao" class="com.mepsan.marwiz.general.report.salesdetailreport.dao.SalesDetailReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="salesDetailReportService" class="com.mepsan.marwiz.general.report.salesdetailreport.business.SalesDetailReportService" lazy-init="true" scope="request" >
+    </bean> 
+    
+    <bean id="salesSummaryReportDao" class="com.mepsan.marwiz.general.report.salessummaryreport.dao.SalesSummaryReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="salesSummaryReportService" class="com.mepsan.marwiz.general.report.salessummaryreport.business.SalesSummaryReportService" lazy-init="true" scope="request" >
+    </bean> 
+    
+    <bean id="totalGiroReportDao" class="com.mepsan.marwiz.general.report.totalgiroreport.dao.TotalGiroReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="totalGiroReportService" class="com.mepsan.marwiz.general.report.totalgiroreport.business.TotalGiroReportService" lazy-init="true" scope="request" >
+    </bean> 
+    
+    <bean id="stockTrackingReportDao" class="com.mepsan.marwiz.general.report.stocktrackingreport.dao.StockTrackingReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="stockTrackingReportService" class="com.mepsan.marwiz.general.report.stocktrackingreport.business.StockTrackingReportService" lazy-init="true" scope="request" >
+    </bean> 
+    
+    <bean id="salesReceiptReportDao" class="com.mepsan.marwiz.general.report.salesreceiptreport.dao.SalesReceiptReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="salesReceiptReportService" class="com.mepsan.marwiz.general.report.salesreceiptreport.business.SalesReceiptReportService" lazy-init="true" scope="request" >
+    </bean> 
+    
+    <bean id="bankExtractDao" class="com.mepsan.marwiz.general.report.bankextract.dao.BankExtractDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="bankExtractService" class="com.mepsan.marwiz.general.report.bankextract.business.BankExtractService" lazy-init="true" scope="request" >
+    </bean> 
+   
+   
+    <bean id="safeExtractDao" class="com.mepsan.marwiz.general.report.safeextract.dao.SafeExtractDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="safeExtractService" class="com.mepsan.marwiz.general.report.safeextract.business.SafeExtractService" lazy-init="true" scope="request" >
+    </bean>    
+        
+    <bean id="productMovementReportDao" class="com.mepsan.marwiz.general.report.productmovementreport.dao.ProductMovementReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="productMovementReportService" class="com.mepsan.marwiz.general.report.productmovementreport.business.ProductMovementReportService" lazy-init="true" scope="request" >
+    </bean> 
+   
+   
+    <bean id="profitMarginReportDao" class="com.mepsan.marwiz.general.report.profitmarginreport.dao.ProfitMarginReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="profitMarginReportService" class="com.mepsan.marwiz.general.report.profitmarginreport.business.ProfitMarginReportService" lazy-init="true" scope="request" >
+    </bean> 
+    
+    <bean id="accountExtractDao" class="com.mepsan.marwiz.general.report.accountextract.dao.AccountExtractDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="accountExtractService" class="com.mepsan.marwiz.general.report.accountextract.business.AccountExtractService" lazy-init="true" scope="request" >
+    </bean> 
+    
+    <bean id="warehouseMovementReportDao" class="com.mepsan.marwiz.general.report.warehousemovementreport.dao.WarehouseMovementReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="warehouseMovementReportService" class="com.mepsan.marwiz.general.report.warehousemovementreport.business.WarehouseMovementReportService" lazy-init="true" scope="request" >
+    </bean>
+    
+    <bean id="purchaseSummaryReportDao" class="com.mepsan.marwiz.general.report.purchasesummaryreport.dao.PurchaseSummaryReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="purchaseSummaryReportService" class="com.mepsan.marwiz.general.report.purchasesummaryreport.business.PurchaseSummaryReportService" lazy-init="true" scope="request" >
+    </bean> 
+    
+    <bean id="fullTakingReportDao" class="com.mepsan.marwiz.general.report.fulltakingreport.dao.FullTakingReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="fullTakingReportService" class="com.mepsan.marwiz.general.report.fulltakingreport.business.FullTakingReportService" lazy-init="true" scope="request" >
+    </bean>
+    
+    <bean id="purchaseSalesReportDao" class="com.mepsan.marwiz.general.report.purchasesalesreport.dao.PurchaseSalesReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="purchaseSalesReportService" class="com.mepsan.marwiz.general.report.purchasesalesreport.business.PurchaseSalesReportService" lazy-init="true" scope="request" >
+    </bean>
+    
+    <bean id="marketShiftPaymentDao" class="com.mepsan.marwiz.general.report.marketshiftreport.dao.MarketShiftPaymentDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="marketShiftPaymentService" class="com.mepsan.marwiz.general.report.marketshiftreport.business.MarketShiftPaymentService" lazy-init="true" scope="prototype" >
+    </bean>
+    
+    <bean id="entryExitSummaryReportDao" class="com.mepsan.marwiz.general.report.entryexitsummaryreport.dao.EntryExitSummaryReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="entryExitSummaryReportService" class="com.mepsan.marwiz.general.report.entryexitsummaryreport.business.EntryExitSummaryReportService" lazy-init="true" scope="request" >
+    </bean>
+    
+    <bean id="deficitCreditReportService" class="com.mepsan.marwiz.general.report.deficitcreditreport.business.DeficitCreditService" lazy-init="true" scope="request" >
+    </bean>
+    
+    <bean id="deficitCreditReportDao" class="com.mepsan.marwiz.general.report.deficitcreditreport.dao.DeficitCreditDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    
+    <bean id="removedStockReportService" class="com.mepsan.marwiz.general.report.removedstockreport.business.RemovedStockReportService" lazy-init="true" scope="request" >
+    </bean>
+    
+    <bean id="removedStockReportDao" class="com.mepsan.marwiz.general.report.removedstockreport.dao.RemovedStockReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="trialBalanceService" class="com.mepsan.marwiz.general.report.trialbalancereport.business.TrialBalanceService" lazy-init="true" scope="request" >
+    </bean>
+    
+    <bean id="trialBalanceDao" class="com.mepsan.marwiz.general.report.trialbalancereport.dao.TrialBalanceDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+
+    <bean id="movementReportBetweenWarehouseTakingsService" class="com.mepsan.marwiz.general.report.movementreportbetweenwarehousetakings.business.MovementReportBetweenWarehouseTakingsService" lazy-init="true" scope="request" >
+    </bean>
+    
+    <bean id="movementReportBetweenWarehouseTakingsDao" class="com.mepsan.marwiz.general.report.movementreportbetweenwarehousetakings.dao.MovementReportBetweenWarehouseTakingsDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="stationSalesSummaryReportService" class="com.mepsan.marwiz.general.report.stationsalessummaryreport.business.StationSalesSummaryReportService" lazy-init="true" scope="request" >
+    </bean>
+    
+    <bean id="stationSalesSummaryReportDao" class="com.mepsan.marwiz.general.report.stationsalessummaryreport.dao.StationSalesSummaryReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="stockInventoryReportService" class="com.mepsan.marwiz.general.report.stockinventoryreport.business.StockInventoryReportService" lazy-init="true" scope="request" >
+    </bean>
+    
+    <bean id="stockInventoryReportDao" class="com.mepsan.marwiz.general.report.stockinventoryreport.dao.StockInventoryReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="zReportService" class="com.mepsan.marwiz.general.report.zreport.business.ZReportService" lazy-init="true" scope="request" >
+    </bean>
+    
+    <bean id="zReportDao" class="com.mepsan.marwiz.general.report.zreport.dao.ZReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="starbucksSalesReportService" class="com.mepsan.marwiz.general.report.starbuckssalesreport.business.StarbucksSalesReportService" lazy-init="true" scope="request" >
+    </bean>
+    
+    <bean id="wasteReportService" class="com.mepsan.marwiz.general.report.wastereport.business.WasteReportService" lazy-init="true" scope="request" >
+    </bean>
+    
+    <bean id="wasteReportDao" class="com.mepsan.marwiz.general.report.wastereport.dao.WasteReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="produtReportSoldTogetherDao" class="com.mepsan.marwiz.general.report.productreportsoldtogether.dao.ProdutReportSoldTogetherDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="produtReportSoldTogetherService" class="com.mepsan.marwiz.general.report.productreportsoldtogether.business.ProdutReportSoldTogetherService" lazy-init="true" scope="prototype" >
+    </bean> 
+    
+    <bean id="dailySalesReportService" class="com.mepsan.marwiz.general.report.dailysalesreport.business.DailySalesReportService" lazy-init="true" scope="request" >
+    </bean>
+    
+    <bean id="dailySalesReportDao" class="com.mepsan.marwiz.general.report.dailysalesreport.dao.DailySalesReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="freeStockReportService" class="com.mepsan.marwiz.general.report.freestockreport.business.FreeStockReportService" lazy-init="true" scope="request" >
+    </bean>
+    
+    <bean id="freeStockReportDao" class="com.mepsan.marwiz.general.report.freestockreport.dao.FreeStockReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="purchaseDetailReportService" class="com.mepsan.marwiz.general.report.purchasedetailreport.business.PurchaseDetailReportService" lazy-init="true" scope="request" >
+    </bean>
+    
+    <bean id="purchaseDetailReportDao" class="com.mepsan.marwiz.general.report.purchasedetailreport.dao.PurchaseDetailReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="generalStationReportService" class="com.mepsan.marwiz.general.report.generalstationreport.business.GeneralStationReportService"  lazy-init="true"  scope="prototype" >
+    </bean>
+    
+    <bean id="generalStationReportDao" class="com.mepsan.marwiz.general.report.generalstationreport.dao.GeneralStationReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+   
+   
+    <bean id="duePaymentsReportService" class="com.mepsan.marwiz.general.report.duepaymentsreport.business.DuePaymentsReportService"  lazy-init="true"  scope="prototype" >
+    </bean>
+    
+    <bean id="duePaymentsReportDao" class="com.mepsan.marwiz.general.report.duepaymentsreport.dao.DuePaymentsReportDao"  lazy-init="true"  scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+</beans>

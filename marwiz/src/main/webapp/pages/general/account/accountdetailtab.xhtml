@@ -1,0 +1,53 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <h:form id="frmAccountDetailTab" >
+
+        <p:commandButton id="btnFindDetail" style="display: none"  actionListener="#{accountDetailTabBean.find()}"/>
+
+        <div class="ContainerIndent">
+
+            <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+                <ui:param name="bean" value='#{accountDetailTabBean}'/>
+                <ui:param name="outputtext" value="#{loc.accountdetail}"/>
+                <ui:param name="update" value="grdAccountDetail" />
+                <ui:param name="btnSaveId" value="#{(!sessionBean.user.lastBranchSetting.isProcessPassiveAccount and accountProcessBean.selectedObject.status.id == 6) ? 'false' : accountDetailTabBean.getRendered(70, 0)}" />     
+                <ui:param name="btnDeleteId" value='false' /> 
+            </ui:include>
+
+            <h:panelGroup id="grdAccountDetail" class="divContent" layout="block">
+
+                <div class="ui-g">
+                    <div class="ui-g-12 ui-md-3">
+                        <p:outputLabel value="#{loc.fuelintegrationcode}" for="txtfuelintegrationcode" styleClass="Fs12 FontBold" />
+                        <p:inputText id="txtfuelintegrationcode" value="#{accountDetailTabBean.fuelintegrationcode}" placeholder="#{loc.fuelintegrationcode}" />
+                    </div>
+                    <div class="ui-g-12 ui-md-3">
+                        <p:outputLabel value="#{loc.accountingintegrationcode}" for="txtaccountingintegrationcode" styleClass="Fs12 FontBold" />
+                        <p:inputText id="txtaccountingintegrationcode" value="#{accountDetailTabBean.accountingintegrationcode}" placeholder="#{loc.accountingintegrationcode}" />
+                    </div>
+
+                </div>
+            </h:panelGroup>
+
+
+        </div>
+
+
+    </h:form>
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            window.onload = my_code();
+        });
+
+        function my_code() {
+            document.getElementById('tbvAccountProc:frmAccountDetailTab:btnFindDetail').click();
+        }
+    </script>
+
+</ui:composition>

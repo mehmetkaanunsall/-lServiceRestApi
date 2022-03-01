@@ -1,0 +1,92 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+        <ui:param name="bean" value="#{marketShiftReportBean}"/> 
+        <ui:param name="datatable" value="frmShiftReport:dtbShiftReport" />
+        <ui:param name="fileName" value="#{loc.marketshiftreport}"/>
+        <ui:param name="outputText" value="#{loc.marketshiftreport}"/>
+        <ui:param name="renderedOutputText" value='true'/>
+        <ui:param name="renderedToggler" value='true'/>
+        <ui:param name="renderedExcel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+        <ui:param name="renderedPrint" value='true'/>
+        <ui:param name="renderedGraphic" value='false'/>
+    </ui:include>
+
+    <h:form id="frmShiftReport">
+
+        <p:dataTable  id="dtbShiftReport" var="shift"  value="#{marketShiftReportBean.listOfObjects}" selection="#{marketShiftReportBean.selectedObject}" selectionMode="single"  widgetVar="shiftReportPF" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{ShiftReport.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="false" lazy="true"
+                      >
+
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{marketShiftReportBean.goToDetail()}"/>
+                        <p:ajax event="colReorder" listener="#{marketShiftReportBean.reorder}" update="frmGridToolbar:toggle" />     
+                        <p:ajax event="colResize"  listener="#{marketShiftReportBean.onResize}" />
+
+            <p:column id="clmShiftNo" headerText="#{loc.shiftno}"   visible="#{marketShiftReportBean.toogleList[0]}" exportable="#{marketShiftReportBean.toogleList[0]}">
+                <h:outputText value="#{shift.shiftNo}" style="text-align: center !important; " /> 
+            </p:column>
+
+            <p:column id="clmStartDate" headerText="#{loc.startdate}"  visible="#{marketShiftReportBean.toogleList[1]}"   exportable="#{marketShiftReportBean.toogleList[1]}">
+                <h:outputText value="#{shift.beginDate}"  >
+                    <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" />
+                </h:outputText>
+            </p:column>
+            <p:column id="clmEndDate" headerText="#{loc.enddate}"  visible="#{marketShiftReportBean.toogleList[2]}"   exportable="#{marketShiftReportBean.toogleList[2]}">
+                <h:outputText value="#{shift.endDate}"  >
+                    <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmGraphic" style="text-align: center !important; width: 80px;" headerText="#{loc.graphic}"  visible="#{marketShiftReportBean.toogleList[3]}"   exportable="false">
+                <p:commandLink id="btnGraphic" title="#{loc.detail}" actionListener="#{marketShiftReportBean.findGraphic(shift.id,shift.shiftNo)}" update="dlgShiftGraphic" >
+                    <i class="icon-chart-bar"/>
+                </p:commandLink>  
+            </p:column>
+            <p:column id="clmPrint" headerText="#{loc.print}"   style="text-align: center !important;  width: 80px;" visible="#{marketShiftReportBean.toogleList[4]}"   exportable="false">
+                <p:commandLink id="btnPrint"  title="#{loc.print}" actionListener="#{marketShiftReportBean.goToPrintDetail(shift.id, shift.shiftNo,shift.beginDate,shift.endDate,shift.saleCount, shift.status.id)}">
+                    <i class="icon-print"  />
+                </p:commandLink> 
+            </p:column>
+        </p:dataTable>  
+    </h:form>
+
+
+    <p:dialog id="dlgShiftGraphic" widgetVar="dlg_ShiftGraphic" resizable="false" width="60%" focus="dlgShiftGraphic" modal="true" responsive="true" dynamic="true" closeOnEscape="true" class="dialogScroll">
+        <ui:include src="marketshiftgraphicprocess.xhtml"/>
+    </p:dialog>
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.marketshiftreport}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+
+</ui:composition>
+
+
+

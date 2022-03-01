@@ -1,0 +1,265 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+
+    <h:form id="frmNewUser" >  
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="bean" value='#{userDataProcessBean}' />
+            <ui:param name="outputtext" value="#{loc.userprocesses}"/>
+            <ui:param name="update" value="pgrNewUser" />
+            <c:if test="#{sessionBean.user.isAdmin or (!sessionBean.user.isAdmin and !userDataProcessBean.selectedObject.isAdmin)}">
+                <ui:param name="btnSaveId" value="#{userDataProcessBean.getRendered(175, 0)}" />
+            </c:if>
+            <ui:param name="btnDeleteId" value='false' /> 
+            <ui:param name="renderback" value='true'/>
+            <c:if test="#{userDataProcessBean.processType==2 and ((sessionBean.user.isAdmin) or (!sessionBean.user.isAdmin and !userDataProcessBean.selectedObject.isAdmin))}">
+                <ui:param name="btnDeleteId" value='#{userDataProcessBean.getRendered(176, 0)}' /> 
+            </c:if>
+        </ui:include>
+
+        <h:panelGroup id="pgrNewUser" layout="block">
+            <div class="ui-g-12 divContent">
+                <div class="panelToggle ui-g">
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.employee}" for="txtPerson" class="FontBold Fs12"/>
+                        <p:inputText  id="txtPerson" onclick="showAccountBook()" value="#{userDataProcessBean.accountName}" disabled="#{userDataProcessBean.selectedObject.account.id > 0 and userDataProcessBean.processType==2}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.employee}">   
+                        </p:inputText>
+                        <p:commandLink id="btnPerson" process="@this" class="commandLinkPositionForBookFilter" disabled="#{userDataProcessBean.selectedObject.account.id > 0 and userDataProcessBean.processType==2}" oncomplete="PF('olp_account').loadContents();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax listener="#{accountBookFilterBean.findFilterListLazyLoading([],'frmAccountBookFilter','olp_account','Personel')}" />
+                        </p:commandLink>
+                    </div>  
+                    <p:focus for="txtName"/>
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.name}" for="txtName" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtName" value="#{userDataProcessBean.selectedObject.name}" required="true" disabled="#{userDataProcessBean.selectedObject.account.id!=0}" placeholder="#{loc.name} ">
+                            <p:keyFilter regEx="/[^\\\{\}\[\]\,\:\u0022]/" preventPaste="false" />
+                            <f:validateRegex pattern="[^\\\{\}\[\]\,\:\u0022]*" />
+                        </p:inputText>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.surname}" for="txtSurname" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtSurname" value="#{userDataProcessBean.selectedObject.surname}" disabled="#{userDataProcessBean.selectedObject.account.id!=0}" required="true" placeholder="#{loc.surname} ">
+                            <p:keyFilter regEx="/[^\\\{\}\[\]\,\:\u0022]/" preventPaste="false" />
+                            <f:validateRegex pattern="[^\\\{\}\[\]\,\:\u0022]*" />
+                        </p:inputText>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.type}" for="slcType" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcType" value="#{userDataProcessBean.selectedObject.type.id}" required="true" disabled="#{userDataProcessBean.processType==2}">
+                            <f:selectItems value="#{sessionBean.getTypes(1)}"  var="type" itemLabel="#{type.nameMap.get(sessionBean.langId).name}" itemValue="#{type.id}" />
+                            <p:ajax event="change" update="pngIsCashierAddSalesBasket pngCashierReportAuthority" global="false" />
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.branch}"  for="slcBranch" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcBranch" value="#{userDataProcessBean.selectedObject.lastBranch.id}" required="true" disabled="#{userDataProcessBean.processType==2}" >
+                            <f:selectItems value="#{userDataProcessBean.branchList}"  var="branch" itemLabel="#{branch.name}" itemValue="#{branch.id}" />
+                            <p:ajax listener="#{userDataProcessBean.changeBranch()}" update="slcAuthorize" global="false "/>  
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.authorization}"  for="slcAuthorize" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcAuthorize" value="#{userDataProcessBean.selectedObject.lastAuthorize.id}" required="true" disabled="#{userDataProcessBean.processType==2}" >
+                            <f:selectItems value="#{userDataProcessBean.authorizeList}"  var="authorize" itemLabel="#{authorize.name}" itemValue="#{authorize.id}" />
+                        </p:selectOneMenu>
+                    </div>                  
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.language}" for="slcLanguage" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcLanguage" value="#{userDataProcessBean.selectedObject.language.id}" required="true">
+                            <f:selectItems value="#{sessionBean.getLangList()}" var="language" itemLabel="#{language.nameMap.get(sessionBean.langId).name}" itemValue="#{language.id}"/>
+                        </p:selectOneMenu>     
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2" >
+
+                        <p:outputLabel value="#{loc.username}" for="txtUserName" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtUserName"  value="#{userDataProcessBean.selectedObject.username}" required="true" placeholder="#{loc.username}" >
+                            <f:validateRegex pattern="^[a-zA-Z0-9[^ığüşöçİĞÜŞÖÇ\\\{\}\[\]\,\:\u0022]]+$"/>
+                            <p:keyFilter regEx="/[^ığüşöçİĞÜŞÖÇ\\\{\}\[\]\,\:\u0022]/"/>
+                        </p:inputText>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2" >
+                        <p:outputLabel value="#{loc.userpassword}" for="pswUserPassword1" styleClass="Fs12 FontBold"/>
+                        <p:password id="pswUserPassword1" value="#{userDataProcessBean.selectedObject.password}" required="#{userDataProcessBean.processType==1}" redisplay="true" placeholder="***"  match="pswUserPassword2">
+                        </p:password>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2" >
+                        <p:outputLabel value="#{loc.passwordagain}" for="pswUserPassword2" styleClass="Fs12 FontBold"/>
+                        <p:password  id="pswUserPassword2" value="#{userDataProcessBean.selectedObject.password}" required="#{userDataProcessBean.processType==1}" redisplay="true" placeholder="***"> 
+                            <p:ajax process="pswUserPassword1 pswUserPassword2" event="blur"/>  
+                        </p:password>
+                    </div>               
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.mail}" for="txtMail" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtMail" value="#{userDataProcessBean.selectedObject.mail}" disabled="#{userDataProcessBean.selectedObject.account.id!=0}" placeholder="#{loc.mail}" >
+                            <f:validator validatorId="emailValidator"/>
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.phone}"  for="txtPhone" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtPhone" value="#{userDataProcessBean.selectedObject.phone}" disabled="#{userDataProcessBean.selectedObject.account.id!=0}" placeholder="#{loc.phone}" >
+                            <p:keyFilter regEx="/[0-9]/"/>
+                            <f:validateRegex  pattern="^[0-9]+$"/>
+                        </p:inputText>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.statu}" for="slcStatu" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcStatu" value="#{userDataProcessBean.selectedObject.status.id}" required="true" >
+                            <f:selectItems value="#{sessionBean.getStatus(1)}"  var="statu" itemLabel="#{statu.nameMap.get(sessionBean.langId).name}" itemValue="#{statu.id}" />
+
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.country}" for="slcCountry" styleClass="Fs12 FontBold" />
+                        <p:selectOneMenu id="slcCountry" filter="true" filterMatchMode="contains" disabled="#{userDataProcessBean.selectedObject.account.id!=0}"  styleClass="Wid90" value="#{userDataProcessBean.selectedObject.country.id}" >
+                            <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}"/> 
+                            <f:selectItems value="#{sessionBean.countries}" var="country" itemLabel="#{country.getName(sessionBean.langId)}" itemValue="#{country.id}"  />
+                            <p:ajax listener="#{citiesAndCountiesBean.updateCity(userDataProcessBean.selectedObject.country,userDataProcessBean.selectedObject.city,userDataProcessBean.selectedObject.county)}" update="slcCity,slcCounty" />
+                        </p:selectOneMenu>
+                    </div>
+
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.city}" for="slcCity" styleClass="Fs12 FontBold" />
+                        <p:selectOneMenu  id="slcCity" disabled="#{userDataProcessBean.selectedObject.account.id!=0}"  filter="true" filterMatchMode="contains" styleClass="Wid90" value="#{userDataProcessBean.selectedObject.city.id}">
+                            <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}" />
+                            <f:selectItems value="#{citiesAndCountiesBean.cities}" itemLabel="#{city.getName(sessionBean.langId)}" itemValue="#{city.id}" var="city" />
+                            <p:ajax  listener="#{citiesAndCountiesBean.updateCounty(userDataProcessBean.selectedObject.country,userDataProcessBean.selectedObject.city,userDataProcessBean.selectedObject.county)}" update="slcCounty" />
+                        </p:selectOneMenu>
+                    </div>
+
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.county}" for="slcCounty" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcCounty" disabled="#{userDataProcessBean.selectedObject.account.id!=0}" filter="true" filterMatchMode="contains" styleClass="Wid90" value="#{userDataProcessBean.selectedObject.county.id}" >
+                            <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}" />
+                            <f:selectItems value="#{citiesAndCountiesBean.counties}" itemLabel="#{county.name}" itemValue="#{county.id}" var="county" />
+
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-12 ui-lg-4">
+                        <p:outputLabel value="#{loc.address}" for="txtAddress" styleClass="Fs12 FontBold"/>
+                        <p:inputTextarea id="txtAddress" value="#{userDataProcessBean.selectedObject.address}" disabled="#{userDataProcessBean.selectedObject.account.id!=0}" rows="1" autoResize="false" style="resize: none;"  placeholder="#{loc.address}" />
+                    </div>
+                    <h:panelGroup rendered="#{sessionBean.user.isAuthorized}">
+                        <div class="ui-g-12 ui-md-6 ui-lg-3">
+                            <p:outputLabel value="#{loc.authorization}" styleClass="Fs12 FontBold"/>
+                            <p:panelGrid layout="grid" columns="1" class="pngCheckBox" >  
+                                <p:selectBooleanCheckbox id="sbcIsAuthorized"  value="#{userDataProcessBean.selectedObject.isAuthorized}"   class="Fleft" >
+                                    <p:ajax global="false" />
+                                    <p:outputLabel value="#{loc.douserhaveadminauthorization}"  style="margin-left: 2px;"  class="FontNormal"/>
+                                    <p:tooltip for="sbcIsAuthorized" value="#{loc.itgivescallingtowebserviceforbackupintouseralsoifstationisagencyitallowstoenteredpriceinpurchaseinvoice}"  style="width: 250px"/> 
+                                </p:selectBooleanCheckbox>
+                            </p:panelGrid> 
+                        </div> 
+                    </h:panelGroup>
+
+                    <div class="#{sessionBean.user.isAuthorized ? 'ui-g-12 ui-md-6 ui-lg-3' : 'ui-g-12 ui-md-6 ui-lg-4'}">
+                        <h:panelGroup id="pngIsCashierAddSalesBasket" >
+                            <h:panelGroup rendered="#{userDataProcessBean.selectedObject.type.id == 2}" >
+                                <div class="ui-g-12 ui-md-12 ui-lg-12">
+                                    <p:outputLabel value="#{loc.cashierauthority}" styleClass="Fs12 FontBold" />
+                                    <p:panelGrid layout="grid" columns="1" class="pngCheckBox" >  
+                                        <p:selectBooleanCheckbox id="sbcIsCashierAddSalesBasket"  value="#{userDataProcessBean.selectedObject.isCashierAddSalesBasket}"   class="Fleft" >
+                                            <p:ajax global="false" />
+                                            <p:outputLabel value="#{loc.canthecashieraddsalestothebasket}"  style="margin-left: 2px;"  class="FontNormal"/>
+                                        </p:selectBooleanCheckbox>
+                                    </p:panelGrid> 
+                                </div>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </div>
+
+
+
+                    <div class="#{sessionBean.user.isAuthorized ? 'ui-g-12 ui-md-6 ui-lg-6' : 'ui-g-12 ui-md-6 ui-lg-8'}">
+                        <h:panelGroup id="pngCashierReportAuthority" >
+                            <h:panelGroup rendered="#{userDataProcessBean.selectedObject.type.id ==2}" >
+                                <div class="ui-g-12 ui-md-12 ui-lg-12">
+                                    <p:outputLabel value="#{loc.reportsavailabletothecashieruser}" styleClass="Fs12 FontBold" />
+                                    <p:panelGrid layout="grid" columns="1" class="pngCheckBox" >  
+                                        <p:selectManyCheckbox id="sbcCashierReportAuthority" value="#{userDataProcessBean.selectedOptions}"  layout="grid" columns="6">
+                                            <f:selectItems value="#{userDataProcessBean.importReportOptionsList}" var="option" itemLabel="#{option.tableName}" itemValue="#{option.id}" />
+                                            <p:ajax global="false"/>
+                                        </p:selectManyCheckbox>
+                                    </p:panelGrid> 
+                                </div>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </div>
+
+                </div>
+            </div>
+
+        </h:panelGroup>
+        <p:remoteCommand name="showAccountBook" process="@this" oncomplete="PF('olp_account').loadContents();" actionListener="#{accountBookFilterBean.findFilterListLazyLoading([],'frmAccountBookFilter','olp_account','Personel')}" />
+
+    </h:form>     
+
+    <div class="EmptyBox10" />
+
+    <p:tabView id="tbvUserDataProc" activeIndex="#{marwiz.tabIndex}" rendered="#{userDataProcessBean.processType==2 and (userDataProcessBean.getRendered(50, 1) or userDataProcessBean.getRendered(78, 1))}" scrollable="true" dynamic="true" cache="true">
+        <p:ajax event="tabChange" listener="#{userDataProcessBean.onTabChange}" />
+
+        <p:tab id="tab50" title="#{loc.authorizations}" rendered="#{userDataProcessBean.getRendered(50, 1)}">
+            <c:if test="#{userDataProcessBean.activeIndex==50}">
+                <ui:include src="/pages/system/userdata/userdataauthorizetab.xhtml"/>
+            </c:if>
+        </p:tab>
+
+        <p:tab id="tab78" title="#{loc.history}" rendered="#{userDataProcessBean.getRendered(78, 1)}">
+            <c:if test="#{userDataProcessBean.activeIndex==78}">
+                <ui:include src="/pages/general/common/historydatatable.xhtml" >
+                    <ui:param name="bean" value='#{historyTabBean}' />
+                    <c:set var="createdPerson" value='#{userDataProcessBean.selectedObject.userCreated.fullName}- #{userDataProcessBean.selectedObject.userCreated.username}' scope="request"/>
+                    <c:set var="createdTime" value='#{sessionBean.convertDateTime(userDataProcessBean.selectedObject.dateCreated)}'  scope="request"/>
+                    <c:set var="rowId" value="#{userDataProcessBean.selectedObject.id}" scope="request" /> 
+                    <c:set var="tableName" value="general.userdata" scope="request" /> 
+                </ui:include>
+            </c:if>
+        </p:tab>
+
+    </p:tabView>
+
+    <p:dialog id="dlgAuthorizeProcess" widgetVar="dlg_authorizeprocess" resizable="false" width="30%" focus="dlgAuthorizeProcess" responsive="true" dynamic="true" closeOnEscape="true" modal="true">
+        <c:if test="#{userDataProcessBean.activeIndex==50}">
+            <ui:include src="/pages/system/userdata/userdataauthorizeprocess.xhtml"/>
+        </c:if>
+    </p:dialog>
+
+    <ui:include src="/pages/general/common/accountbook.xhtml" >
+        <ui:param name="updateBean" value='#{userDataProcessBean}' />
+        <ui:param name="for" value='frmNewUser:btnPerson' />
+        <ui:param name="type" value='Personel' />
+        <ui:param name="parameters" value='' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="newButton" value="#{newAccountBean.getRendered(59, 0)}" /> 
+        <ui:param name="form" value='frmAccountBookFilter' /> 
+        <ui:param name="overlay" value="olp_account" />
+    </ui:include>
+
+    <!-- kitaptan hızlı cari ekleme paneli -->
+    <ui:include src="/pages/general/common/accountbookdialog.xhtml" />
+
+
+</ui:composition> 
+

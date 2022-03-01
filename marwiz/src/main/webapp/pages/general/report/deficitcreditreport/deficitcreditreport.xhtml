@@ -1,0 +1,234 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmDeficitCredit">
+
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.deficitcreditreport}"/>
+            <ui:param name="bean" value='#{deficitCreditBean}' />
+            <ui:param name="update" value="frmDeficitCreditDatatable" />
+        </ui:include>
+
+        <h:panelGroup id="pgrDeficitCredit" layout="block" transient="true">     
+            <div class="ui-g divContent">
+                <div class="panelToggle ui-g-12">
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2 ">
+                        <p:outputLabel value="#{loc.branch}" for="slcBranch" class="FontBold Fs12"/>
+                        <p:selectCheckboxMenu  id="slcBranch"  value="#{deficitCreditBean.selectedBranchList}" 
+                                               filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                               label="#{deficitCreditBean.selectedBranchList.size()!=0 ? deficitCreditBean.selectedBranchList.size() :loc.all} #{deficitCreditBean.selectedBranchList.size()!=0 ? loc.branch : ''} #{deficitCreditBean.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                            <f:selectItems value="#{deficitCreditBean.listOfBranch}" itemLabel="#{branch.name}" itemValue="#{branch}" var="branch" />       
+                            <p:ajax oncomplete="PF('slcBranchCheckBox').show()" listener="#{deficitCreditBean.changeBranch()}" global="false" update="txtCustomer btnCustomer slcBranch"/>
+                            <p:ajax event="toggleSelect" update="txtCustomer btnCustomer slcBranch" listener="#{deficitCreditBean.changeBranch()}" oncomplete="PF('slcBranchCheckBox').show()" global="false"/>
+                        </p:selectCheckboxMenu>
+                    </div>    
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.currentname}" for="txtCustomer"  styleClass="Fs12 FontBold"/>
+                        <p:inputText  id="txtCustomer" onclick="showAccountBook()" value="#{accountBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+                        </p:inputText>
+                        <p:commandLink id="btnCustomer" process="@this" actionListener="#{deficitCreditBean.openDialog()}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_accountcheckbox').loadContents();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax listener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([deficitCreditBean.selectedBranchList.size() != 0 ? deficitCreditBean.selectedBranchList : deficitCreditBean.listOfBranch],'frmAccountBookFilterCheckbox','olp_accountcheckbox','accountextractreportcheckbox')}" />
+                        </p:commandLink>
+                    </div>
+
+                    <h:panelGroup id="pnlDate"  >
+                        <h:panelGroup  >
+                            <div class="ui-g-12 ui-md-6 ui-lg-2">
+                                <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                                <p:calendar  id="cldStartDate" value="#{deficitCreditBean.selectedObject.beginDate}" class="datepicker" timeControlType="select"  required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                                    <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                                </p:calendar>
+                            </div>
+                            <div class="ui-g-12 ui-md-6 ui-lg-2">
+                                <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                                <p:calendar  id="cldEndDate" value="#{deficitCreditBean.selectedObject.endDate}" class="datepicker" timeControlType="select" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                                    <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                                </p:calendar>
+                            </div>
+                        </h:panelGroup>
+                    </h:panelGroup>
+                </div>
+            </div>
+        </h:panelGroup>
+        <p:remoteCommand name="showAccountBook" process="@this" oncomplete="PF('olp_accountcheckbox').loadContents();" action="#{deficitCreditBean.openDialog()}" actionListener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([deficitCreditBean.selectedBranchList.size() != 0 ? deficitCreditBean.selectedBranchList : deficitCreditBean.listOfBranch],'frmAccountBookFilterCheckbox','olp_accountcheckbox','accountextractreportcheckbox')}" />
+
+
+    </h:form>
+    <div class="EmptyBox10" />
+
+    <h:panelGroup id="pgrDeficitCreditDatatable" >
+        <h:panelGroup rendered="#{deficitCreditBean.isFind}">
+
+            <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                <ui:param name="bean" value="#{deficitCreditBean}"/>   <!-- Bean -->
+                <ui:param name="datatable" value="frmDeficitCreditDatatable:dtbDeficitCredit" />  <!-- datatable  -->
+                <ui:param name="fileName" value="#{loc.deficitcreditreport}"/>
+                <ui:param name="renderedToggler" value='true'/>
+                <ui:param name="renderedExcel" value='true'/>
+                <ui:param name="renderedPdf" value='true'/>
+                <ui:param name="renderedPrint" value='true'/>
+                <ui:param name="renderedGraphic" value='false'/>
+            </ui:include>
+
+            <h:form id="frmDeficitCreditDatatable" >
+                <p:dataTable  id="dtbDeficitCredit" var="deficitCredit" widgetVar="deficitCreditPF" emptyMessage="#{loc.norecordsfound}" value="#{deficitCreditBean.listOfObjects}" 
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{deficitCredit.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true" lazy="true"
+                              >
+
+
+<!-- <p:ajax event="colReorder" listener="#{deficitCreditBean.reorder}" update="frmGridToolbar:toggle" />     -->
+                    <p:ajax event="colResize"  listener="#{deficitCreditBean.onResize}" />
+                    <p:column id="clmProcessDate" headerText="#{loc.creditdate}" sortable="true" sortBy="#{deficitCredit.processDate}"  visible="#{deficitCreditBean.toogleList[0]}" exportable="#{deficitCreditBean.toogleList[0]}">               
+                        <h:outputText value="#{deficitCredit.processDate}"  >
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmBranch" headerText="#{loc.branch}" sortable="true" sortBy="#{deficitCredit.br.name}" visible="#{deficitCreditBean.toogleList[1]}" exportable="#{deficitCreditBean.toogleList[1]}">
+                        <h:outputText  value="#{deficitCredit.branchSetting.branch.name}"/>
+                    </p:column>
+                    
+                    <p:column id="cmlType" headerText="#{loc.type}" sortable="true" sortBy="#{deficitCredit.is_customer}"  visible="#{deficitCreditBean.toogleList[2]}" exportable="#{deficitCreditBean.toogleList[2]}">
+                        <h:outputText value="#{deficitCredit.isCustomer ? loc.collection:loc.payment}" />
+                    </p:column>
+
+                    <p:column id="cmlAccount" headerText="#{loc.current}" sortable="true" sortBy="#{deficitCredit.acc.name}"  visible="#{deficitCreditBean.toogleList[3]}" exportable="#{deficitCreditBean.toogleList[3]}">
+                        <h:outputText value="#{deficitCredit.account.name}" />
+                    </p:column>
+
+                    <p:column id="clmPaymentDate" headerText="#{loc.paymentdate}" sortable="true" sortBy="#{deficitCredit.dueDate}" visible="#{deficitCreditBean.toogleList[4]}" exportable="#{deficitCreditBean.toogleList[4]}">
+                        <h:outputText value="#{deficitCredit.dueDate}" >
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmCreditCount" headerText="#{loc.creditamount}" sortable="true" sortBy="#{deficitCredit.money}"   visible="#{deficitCreditBean.toogleList[5]}" exportable="#{deficitCreditBean.toogleList[5]}">
+                        <h:outputText  style="float:right;" value="#{deficitCredit.money}" >
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{deficitCredit.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmPaymentMoney" headerText="#{loc.amountpaid}" sortable="true" sortBy="#{deficitCredit.money}"   visible="#{deficitCreditBean.toogleList[6]}" exportable="#{deficitCreditBean.toogleList[6]}">
+                        <h:outputText  style="float:right;" value="#{deficitCredit.money.subtract(deficitCredit.remainingMoney)}" >
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{deficitCredit.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmRemainingMoney" headerText="#{loc.remainingamountt}" sortable="true" sortBy="#{deficitCredit.remainingMoney}"   visible="#{deficitCreditBean.toogleList[7]}" exportable="#{deficitCreditBean.toogleList[7]}">
+                        <h:outputText  style="float:right;" value="#{deficitCredit.remainingMoney}" >
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{deficitCredit.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmStatu" colspan="2" headerText="#{loc.statu}"  sortBy="#{deficitCredit.is_paid}" style="text-align: center" visible="#{deficitCreditBean.toogleList[8]}" exportable="false">
+                        <i class="#{deficitCredit.isCancel ==false? (deficitCredit.isPaid==true ? ' fa fa-check green' :'fa fa-close red'):''} Fs16"  title="#{deficitCredit.isPaid==true ? loc.itwaspaid :loc.unpaid}"  ></i>
+                        <h:outputText value="#{deficitCredit.isCancel ==true ? loc.canceled:''} " style="margin-left:10px;" />
+                    </p:column> 
+
+                    <p:column id="clmStatu1" headerText="#{loc.statu}"  sortBy="#{deficitCredit.is_paid}" style="text-align: center" visible="false"  exportable="#{deficitCreditBean.toogleList[9]}" toggleable="false">
+                        <h:outputText value="#{deficitCredit.isCancel ==false?(deficitCredit.isPaid==true ? loc.itwaspaid : loc.unpaid) : loc.canceled}" />
+                    </p:column>
+
+
+                    <p:columnGroup type="footer" class="Fright" rendered="#{deficitCreditBean.listOfTotal.size() > 0}">
+                        <p:row>
+                            <p:column colspan="#{deficitCreditBean.toogleList.size()-deficitCreditBean.countToggle-1}"  style="text-align:right; font-weight: bold; " priority="1">
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{loc.totalcollectionamount} : " style="text-align:right; font-weight: bold; font-size: 16px; " />
+                                </f:facet>
+                            </p:column>
+                            <p:column colspan="1" style="text-align:right; font-weight: bold; " >
+                                <f:facet name="footer"  >
+                                    <h:outputText  value="#{deficitCreditBean.totalMoney}"  style="text-align:right; font-weight: bold; font-size: medium;color: 	#4682B4; ">
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column  colspan="#{deficitCreditBean.toogleList.size()-deficitCreditBean.countToggle-1}"  style="text-align:right; font-weight: bold; " priority="1">
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{loc.amountcollectedontheball} :" style="text-align:right; font-weight: bold; font-size: 16px; " />
+                                </f:facet>
+                            </p:column>
+                            <p:column colspan="1" style="text-align:right; font-weight: bold; " >
+                                <f:facet name="footer"  >
+                                    <h:outputText  style="text-align:right; font-weight: bold; font-size: medium;color: 	#4682B4; " value="#{deficitCreditBean.paidMoney}" >
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+                            <p:column colspan="#{deficitCreditBean.toogleList.size()-deficitCreditBean.countToggle-1}" style="text-align:right; font-weight: bold; " priority="1">
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{loc.remainingcollectionamount} :" style="text-align:right; font-weight: bold; font-size: 16px; " />
+                                </f:facet>
+                            </p:column>
+                            <p:column colspan="1" style="text-align:right; font-weight: bold; "  >
+                                <f:facet name="footer">
+                                    <h:outputText style="text-align:right; font-weight: bold; font-size: medium;color: 	#4682B4; " value="#{deficitCreditBean.remainingMoney}" >
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column>
+                        </p:row>
+
+
+                    </p:columnGroup> 
+
+
+                </p:dataTable>  
+            </h:form>
+        </h:panelGroup>
+    </h:panelGroup>
+
+    <!--Kitaptan cari seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/accountbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{deficitCreditBean}' />
+        <ui:param name="for" value='frmDeficitCredit:btnCustomer' />
+        <ui:param name="type" value='accountextractreportcheckbox' />
+        <ui:param name="parameters" value='#{[deficitCreditBean.selectedBranchList.size() != 0 ? deficitCreditBean.selectedBranchList : deficitCreditBean.listOfBranch]}' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmAccountBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_accountcheckbox" />
+    </ui:include>
+
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.deficitcreditreport}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+
+
+</ui:composition>

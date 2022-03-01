@@ -1,0 +1,49 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions" 
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmWarehouseTranferStockProcess">
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.stockprocess}"/>
+            <ui:param name="bean" value='#{transferBetweenWarehouseProcessBean}' />
+            <ui:param name="update" value="pgrWarehouseTransferStockProcess" />
+            <ui:param name="renderback" value='false'/>
+            <ui:param name="btnDeleteId" value='#{transferBetweenWarehouseProcessBean.getRendered(320, 0)}' />
+        </ui:include>
+
+        <h:panelGroup id="pgrWarehouseTransferStockProcess" layout="block">
+            <div class="ui-g divContent">
+                <div class="ui-g-12 panelToggle">
+
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-4">                
+                        <p:outputLabel value="#{loc.stock}" for="txtStock" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtStock" value="#{transferBetweenWarehouseProcessBean.selectedObject.stock.name}"  required="true"  readonly="true" placeholder="#{loc.stock} ">
+                        </p:inputText>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-4">
+                        <p:outputLabel value="#{loc.quantity}" for="txtQuantity" class="FontBold Fs12"/>
+                        <p:inputText id="txtQuantity" value="#{transferBetweenWarehouseProcessBean.selectedObject.quantity}" class="TexAlRight" placeholder="#{loc.quantity}" readonly="true" required="true" >
+                            <p:keyFilter regEx="/[\d\.\s,]/"/>
+                        </p:inputText>
+                    </div> 
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-4">
+                        <p:outputLabel value="#{loc.unit}" for="txtUnit" class="FontBold Fs12"/>
+                        <p:inputText id="txtUnit" value="#{transferBetweenWarehouseProcessBean.selectedObject.stock.unit.name}"  placeholder="#{loc.unit}" required="true" readonly="true" />
+                    </div>
+                </div>
+            </div>
+
+        </h:panelGroup>
+
+    </h:form>
+
+</ui:composition>

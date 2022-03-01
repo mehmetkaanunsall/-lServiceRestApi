@@ -1,0 +1,142 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <!-- 
+Açıklama : Stok talepleri işlem sayfası içim xhtml
+Yazan    : Esra ÇABUK
+Bean     : stockBean
+Sayfa    : Stok Talepleri
+    --> 
+    <h:form id="frmStockProcess">  
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.stockrequestprocesses}"/>
+            <ui:param name="bean" value='#{bean}' />
+            <ui:param name="update" value="pgrStockProcess" />
+            <ui:param name="btnSaveId" value="#{(bean.processType==1 or (bean.selectedObject.approval==0)) and bean.getRendered(43, 0)}" />
+            <ui:param name="renderback" value='false'/>
+            <ui:param name="btnDeleteId" value='false' /> 
+            <ui:param name="renderedTxtStockRequest" value="#{bean.selectedObject.approval==1 and bean.selectedObject.approvalCenterStockId>0 and bean.selectedObject.approvalStock.id==0}" /> 
+            <ui:param name="btnGoToProduct" value="#{bean.selectedObject.approval==1 and bean.selectedObject.approvalCenterStockId>0 and bean.selectedObject.approvalStock.id>0}" /> 
+
+        </ui:include>
+
+
+        <h:panelGroup id="pgrStockProcess" class="divContent" layout="block">  
+            <div class="ui-g">
+                <div class="ui-g-12">
+                    <i class="fa fa-info-circle Fs15 tlbrBackBtn "> 
+                        <p:outputLabel styleClass="Fs12 FontBold" value="#{loc.therequestshouldbemadebycreatingtheproductnameintheformatbrandcontentifanycolorunitweight}" style="margin-left: 5px !important;"/>
+                    </i>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.stockname}" for="txtName" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtName" value="#{bean.selectedObject.name}" required="true" readonly="#{bean.selectedObject.approval!=0}" placeholder="#{loc.stockname}" >
+                        <p:keyFilter regEx="/[^\\\{\}\[\]\,\:\u0022]/" preventPaste="false" />
+                        <f:validateRegex pattern="[^\\\{\}\[\]\,\:\u0022]*" />
+                    </p:inputText>
+                </div>
+
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.barcode}" for="txtBarCode" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtBarCode" value="#{bean.selectedObject.barcode}" required="true" readonly="#{bean.selectedObject.approval!=0}" placeholder="#{loc.barcode}"  >
+                        <p:keyFilter regEx="/[^\u0022]/" preventPaste="false" />
+                        <f:validateRegex pattern="[^\u0022]*" />
+                    </p:inputText>
+                </div>  
+
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.stockcode}" for="txtReStockCode" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtReStockCode" value="#{bean.selectedObject.code}" placeholder="#{loc.stockcode}" >
+                        <p:keyFilter regEx="/[^\u0022]/" preventPaste="false" />
+                        <f:validateRegex pattern="[^\u0022]*" />
+                    </p:inputText>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.unit}" for="slcUnit" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcUnit" required="true"  disabled="#{bean.selectedObject.approval!=0}" value="#{bean.selectedObject.unit.id}">
+                        <f:selectItems value="#{bean.unitList}"  var="unit" itemLabel="#{unit.name}" itemValue="#{unit.id}" />
+                    </p:selectOneMenu>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.brand}" for="txtBrand" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtBrand" value="#{bean.selectedObject.brand}" required="true" readonly="#{bean.selectedObject.approval!=0}" placeholder="#{loc.brand}"  >
+                        <p:keyFilter regEx="/[^\u0022]/" preventPaste="false" />
+                        <f:validateRegex pattern="[^\u0022]*" />
+                    </p:inputText>
+                </div> 
+
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.isservice}" for="slcService" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcService" required="true" disabled="#{bean.selectedObject.approval!=0}" value="#{bean.selectedObject.isService}">
+                        <f:selectItem itemValue="true" itemLabel="#{loc.yes}" />
+                        <f:selectItem itemValue="false" itemLabel="#{loc.no}" />
+                    </p:selectOneMenu>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3"> 
+                    <p:outputLabel value="#{loc.saleprice}" for="txtPrice" class="Fs12 FontBold" />
+                    <p:inputNumber id="txtPrice" value="#{bean.selectedObject.price}" minValue="0" required="true" readonly="#{bean.selectedObject.approval!=0}"
+                                   decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}" thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                   roundMethod="D"  symbolPosition="#{sessionBean.locale=='tr' ? 'p': 's'}"
+                                   class="Wid90 TexAlRight" placeholder="#{loc.saleprice}" >                 
+                    </p:inputNumber>
+                </div>                
+                <div class="ui-g-12 ui-md-6 ui-lg-3">     
+                    <p:outputLabel value="#{loc.currency}" for="slcCurrency" class="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcCurrency" value="#{bean.selectedObject.currency.id}" required="true" disabled="#{bean.selectedObject.approval!=0}">
+                        <f:selectItems value="#{sessionBean.currencies}" var="currency" itemLabel="#{currency.nameMap.get(sessionBean.langId).name}" itemValue="#{currency.id}" />
+                    </p:selectOneMenu>
+                </div> 
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.contentunitquantity}" for="txtStockQuantity"  styleClass="Fs12 FontBold"/>                      
+                    <p:inputNumber id="txtStockQuantity" decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}"  
+                                   thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                   roundMethod="D" decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}" 
+                                   value="#{bean.selectedObject.weight}"  class="Wid97 TexAlRight"  placeholder="#{loc.contentunitquantity}" required="true">
+                    </p:inputNumber>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.contentunitgenus}" for="slcContentUnitGenus" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcContentUnitGenus"   disabled="#{bean.selectedObject.approval!=0}" required="true" value="#{bean.selectedObject.weightUnit.id}">
+                        <f:selectItems value="#{bean.unitList}"  var="contentUnitGenus" itemLabel="#{contentUnitGenus.name}" itemValue="#{contentUnitGenus.id}" />
+                    </p:selectOneMenu>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.salestaxrate}" for="slcSaleTax" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcSaleTax" required="true"  disabled="#{bean.selectedObject.approval!=0}" value="#{bean.selectedObject.saleTaxGroup.id}">
+                        <f:selectItems value="#{bean.saleTaxGroupList}"  var="saletax" itemLabel="#{saletax.name}" itemValue="#{saletax.id}" />
+                    </p:selectOneMenu>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.purchasetaxrate}" for="slcPurchaseTax" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcPurchaseTax" required="true"  disabled="#{bean.selectedObject.approval!=0}" value="#{bean.selectedObject.purchaseTaxGroup.id}">
+                        <f:selectItems value="#{bean.purchaseTaxGroupList}"  var="purchasetax" itemLabel="#{purchasetax.name}" itemValue="#{purchasetax.id}" />
+                    </p:selectOneMenu>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3"> 
+                    <p:outputLabel value="#{loc.productionplace}" for="slcCountry" class="Fs12 FontBold"/>
+                    <p:selectOneMenu   id="slcCountry" filter="true" filterMatchMode="contains" required="true" value="#{bean.selectedObject.country.id}" >
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}" /> 
+                        <f:selectItems value="#{sessionBean.countries}" var="country" itemLabel="#{country.getName(sessionBean.langId)}" itemValue="#{country.id}"  />
+                    </p:selectOneMenu>
+                </div>
+
+                <div class="ui-g-12 ui-md-12 ui-lg-9">
+                    <p:outputLabel value="#{loc.description}" for="txtDescription" styleClass="Fs12 FontBold"/>
+                    <p:inputTextarea id="txtDescription"  value="#{bean.selectedObject.description}" rows="1" cols="5" autoResize="false" style="resize: none;"  readonly="#{bean.selectedObject.approval!=0}" placeholder="#{loc.description}"  > 
+                        <p:keyFilter regEx="/[^\u0022]/" preventPaste="false" />
+                        <f:validateRegex pattern="[^\u0022]*" />
+                    </p:inputTextarea>
+                </div>  
+
+
+            </div>
+        </h:panelGroup>
+    </h:form> 
+
+</ui:composition>
+

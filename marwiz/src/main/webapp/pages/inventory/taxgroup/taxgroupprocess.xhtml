@@ -1,0 +1,55 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions" 
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:form id="frmtaxGroupProcess">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.taxgroupprocess}"/>
+            <ui:param name="bean" value='#{bean}' />
+            <ui:param name="update" value="pgrTaxGroupProcess" />
+            <ui:param name="btnSaveId" value="#{sessionBean.user.lastBranchSetting.isCentralIntegration ? false : bean.getRendered(187, 0)}" />     
+            <ui:param name="renderback" value='false'/>
+            <ui:param name="btnDeleteId" value='false' />
+            <ui:param name="dtbWidgetVar" value="taxgroupPF" />
+            <c:if test="#{bean.processType==2}">
+                <ui:param name="btnDeleteId" value="#{sessionBean.user.lastBranchSetting.isCentralIntegration ? false : bean.getRendered(188, 0)}" />
+                <ui:param name="btnTestBeforeDeleteId" value="#{sessionBean.user.lastBranchSetting.isCentralIntegration ? false : true}" />
+            </c:if>           
+        </ui:include>
+
+
+        <h:panelGroup id="pgrTaxGroupProcess" layout="block">
+            <div class="ui-g divContent">
+                <p:focus for="txtGroupName"/>
+                <div class="ui-g-12  ui-md-4">
+                    <p:outputLabel value="#{loc.groupname}" for="txtGroupName" class="FontBold Fs12"/>
+                    <p:inputText id="txtGroupName" disabled="#{(!sessionBean.user.lastBranchSetting.isCentralIntegration and (bean.selectedObject.centertaxgroup_id > 0 or bean.isAvailable)) ? true : false}" value="#{bean.selectedObject.name}" styleClass="Wid95" required="true" placeholder="#{loc.groupname}">
+                        <p:ajax global="false" />
+                    </p:inputText>
+                </div>
+
+                <div class="ui-g-12  ui-md-4">
+                    <p:outputLabel value="#{loc.ratio}" for="txtRatio" class="FontBold Fs12"/>
+                    <p:inputNumber  id="txtRatio" disabled="#{(!sessionBean.user.lastBranchSetting.isCentralIntegration and bean.selectedObject.centertaxgroup_id>0 and bean.processType==2) ? true : false}" symbol="%" symbolPosition="s" emptyValue="sign" value="#{bean.selectedObject.rate}" required="true" styleClass="Wid100" >
+                        <p:ajax event="blur" global="false"  listener="#{bean.findAccordingToTypeAndRate()}"/>
+                    </p:inputNumber>
+                </div>
+
+                <div class="ui-g-12  ui-md-4">
+                    <p:outputLabel value="#{loc.type}" for="slcType" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcType" disabled="#{(!sessionBean.user.lastBranchSetting.isCentralIntegration and bean.selectedObject.centertaxgroup_id>0 and bean.processType==2) ? true : false}" value="#{bean.selectedObject.type.id}" required="true" styleClass="Wid95">
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="" itemDisabled="true"  noSelectionOption="true" />
+                        <f:selectItems value="#{sessionBean.getTypes(10)}" itemLabel="#{Type.nameMap.get(sessionBean.langId).name}" itemValue="#{Type.id}" var="Type"/>
+                        <p:ajax event="change" global="false" process="@this"   listener="#{bean.findAccordingToTypeAndRate()}"/>
+                    </p:selectOneMenu>
+                </div>
+
+            </div>
+        </h:panelGroup>
+
+    </h:form>
+</ui:composition>

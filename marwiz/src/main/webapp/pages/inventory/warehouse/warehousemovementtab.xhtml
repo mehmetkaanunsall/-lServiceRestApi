@@ -1,0 +1,132 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+    <h:form id="frmMovementTab" style="padding: 5px 6px 0px 6px;">
+        <div class="EmptyBox20" />
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.movements}"/>
+            <ui:param name="selectedObjectName" value=""/>
+            <ui:param name="bean" value='#{warehouseMovementTabBean}' />
+            <ui:param name="update" value="tbvWarehouseProc:dtbItems" />
+            <ui:param name="btnSaveId" value="false" />
+            <ui:param name="renderback" value='false'/>
+            <ui:param name="btnDeleteId" value='false' /> 
+            <ui:param name="renderSelectedObject" value='false'/>
+            <ui:param name="renderedFindReport" value='true'/>
+        </ui:include>
+
+
+        <h:panelGroup id="pgrMovementProcess" layout="block" transient="true">  
+            <div class="ui-g divContent">
+                <div class="ui-g-12">
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldStartDate" class="datepicker" value="#{warehouseMovementTabBean.beginDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldEndDate" class="datepicker" value="#{warehouseMovementTabBean.endDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-4">
+                        <p:outputLabel value="#{loc.processtype}" for="srdOperationType" styleClass="Fs12 FontBold"/>
+                        <p:panelGrid layout="grid" columns="1" class="pngCheckBox" >  
+                            <p:selectOneRadio id="srdOperationType" value="#{warehouseMovementTabBean.opType}" class="srcExtractRadio" layout="responsive" columns="3" >
+                                <f:selectItem itemLabel="#{loc.entry}" itemValue="1" />
+                                <f:selectItem itemLabel="#{loc.exit}" itemValue="2" />
+                                <f:selectItem itemLabel="#{loc.all}" itemValue="3" />
+                                <p:ajax  listener="#{warehouseMovementTabBean.find()}" update="tbvWarehouseProc:dtbItems"/>
+                            </p:selectOneRadio>
+                        </p:panelGrid>
+                    </div> 
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-4">
+                        <p:outputLabel value="#{loc.stock}" for="txtStock" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtStock" value="#{stockBookCheckboxFilterBean.selectedCount}" onclick="showStockBook()" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}" >
+                           
+                        </p:inputText>
+                         <p:commandLink id="btnStock" process="@this" update="frmStockBookFilterCheckbox" actionListener="#{warehouseMovementTabBean.openDialog()}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_stockcheckbox').show();">
+                                <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                <p:ajax   listener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckbox')}" />
+                            </p:commandLink>
+                    </div>
+
+                </div>  
+            </div>
+        </h:panelGroup>
+
+
+        <p:remoteCommand name="showStockBook" process="@this" update="frmStockBookFilterCheckbox" oncomplete="PF('olp_stockcheckbox').show();" action="#{warehouseMovementTabBean.openDialog()}" actionListener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckbox')}" />
+
+
+    </h:form>
+    <div class="EmptyBox20" />
+
+    <h:panelGroup id="pgrMovementDatatableProcess">
+        <div class="ui-g">
+
+            <div class="ui-g-12 ui-md-12 ui-lg-12">
+                <ui:include src="/pages/general/common/tabgridtoolbar.xhtml">
+                    <ui:param name="bean" value="#{warehouseMovementTabBean}"/>
+                    <ui:param name="btnNewId" value="false"/>
+                    <ui:param name="update" value="" />
+                    <ui:param name="outputtext" value="#{loc.movements}" />
+
+                </ui:include>
+
+                <p:dataTable id="dtbItems" var="items" value="#{warehouseMovementTabBean.listOfObjects}"  selectionMode="single"   selection="#{warehouseMovementTabBean.selectedObject}"
+                             rowKey="#{items.id}" emptyMessage="#{loc.norecordsfound}" class="tabDatatable"  rows="#{sessionBean.user.defualtGridSize}"
+                             paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                             rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                             reflow="true" lazy="true"> 
+
+                    <p:column id="clmDate" headerText="#{loc.date}" >
+                        <h:outputText value="#{items.moveDate}" >
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmWarehoseName" headerText="#{loc.stockname}">
+                        <h:outputText value="#{items.stock.name}" />
+                    </p:column>
+
+                    <p:column id="clmDirection" headerText="#{loc.operationtype}">
+                        <h:outputText value="#{items.isDirection ? loc.entry : loc.exit }" />
+                    </p:column>
+
+                    <p:column id="clmamount" headerText="#{loc.amount}"  >
+                        <h:outputText value="#{items.quantity}"   class="Fright" >
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="unit" value="#{items.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmremamount" headerText="#{loc.remainingamount}" >
+                        <h:outputText value="#{items.remainingAmount}"   class="Fright" >
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="unit" value="#{items.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+
+
+                </p:dataTable>
+            </div>
+
+        </div>
+    </h:panelGroup>
+
+
+
+</ui:composition>
+

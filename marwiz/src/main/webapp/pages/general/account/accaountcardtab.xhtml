@@ -1,0 +1,52 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <div class="ContainerIndent">
+
+        <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+            <ui:param name="bean" value="#{accountCardTabBean}"/>
+            <ui:param name="update" value="dlgAccountCardProc"/> 
+            <ui:param name="btnNewId" value="#{(!sessionBean.user.lastBranchSetting.isProcessPassiveAccount and accountCardTabBean.selectedAccount.status.id == 6) ? 'false' : marwiz.pageIdOfGoToPage==11 ? accountCardTabBean.getRendered(81, 0) :  accountCardTabBean.getRendered(82, 0)}"/>
+            <ui:param name="datatable" value="tbvAccountProc:frmCardTab:dtbCard" />
+            <ui:param name="widgetvar" value='cardPF' />
+            <ui:param name="form" value='frmToolbarCard' />
+            <ui:param name="fileName" value="#{loc.cards}"/> 
+        </ui:include>
+
+        <h:form id="frmCardTab">
+            <p:dataTable  id="dtbCard" class="tabDatatable" var="card" value="#{accountCardTabBean.listOfObjects}"  selection="#{accountCardTabBean.selectedObject}" selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                          rowKey="#{card.id}" filteredValue="#{accountCardTabBean.listOfFilteredObjects}" widgetVar="cardPF"
+                         rowStyleClass="#{card.status.id == 56 ? 'ColumnColorRed' : ''}"    >
+
+                <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{accountCardTabBean.update()}" transient="true"  resetValues="true" update="dlgAccountCardProc" global="false"/>
+                <p:ajax event="filter" global="false"/>
+
+                <f:facet  name="footer"     >
+                    <p:inputText id="globalFilter" value="#{accountCardTabBean.autoCompleteValue}"  style="display: none" />
+                </f:facet>
+
+
+                <p:column id="clmPlate" headerText="#{loc.cardno}" sortable="true" sortBy="#{card.rfNo}" filterable="true"  filterBy="#{card.rfNo}" filterMatchMode="contains" >
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet> 
+                    <h:outputText value="#{card.rfNo}" />
+                </p:column> 
+
+                <p:column id="clmStatu" headerText="#{loc.statu}" sortable="true" sortBy="#{card.status.tag}" filterable="true"  filterBy="#{card.status.tag}" filterMatchMode="contains" >
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet> 
+                    <h:outputText value="#{card.status.tag}" />
+                </p:column> 
+            </p:dataTable>  
+        </h:form>
+
+    </div>
+
+</ui:composition>

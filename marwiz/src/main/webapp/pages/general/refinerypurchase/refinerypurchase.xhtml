@@ -1,0 +1,100 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <div class="ContainerIndent">
+        <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+            <ui:param name="bean" value="#{refineryPurchaseBean}"/>
+            <ui:param name="update" value="frmPriceListStockProcess"/> 
+            <ui:param name="btnNewId" value="false"/>
+            <ui:param name="datatable" value="frmRefineryPurchase:dtbRefinreyPurchase" />
+            <ui:param name="widgetvar" value='refinreyPurchasePF' />
+            <ui:param name="form" value='frmToolbarStock' />
+            <ui:param name="fileName" value="#{loc.refinerypurchasedefinitions}"/> 
+            <ui:param name="renderedToggler" value='false'/>       
+            <ui:param name="renderedExel" value='false'/>
+            <ui:param name="renderedPdf" value='false'/>
+            <ui:param name="renderedSave" value='false'/>
+
+        </ui:include>
+
+        <h:form id="frmRefineryPurchase">
+            <p:commandButton id="updateDatatable" process="@this" ajax="true" global="false" style="display: none;" update="frmRefineryPurchase:dtbRefinreyPurchase"></p:commandButton>
+
+            <p:dataTable id="dtbRefinreyPurchase" var="RefineryPurchase" widgetVar="refinreyPurchasePF" value="#{refineryPurchaseBean.listOfObjects}"  selectionMode="single" emptyMessage="#{loc.norecordsfound}" filteredValue="#{refineryPurchaseBean.listOfFilteredObjects}"
+                         rows="#{sessionBean.user.defualtGridSize}" rowKey="#{RefineryPurchase.rowId}" selection="#{refineryPurchaseBean.selectedObject}"  paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                         rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                         editable="true" editMode="cell" reflow="true" class="rowGroupTable" sortBy="#{RefineryPurchase.stock.id}" expandableRowGroups="true">
+     
+                <p:ajax event="cellEdit" listener="#{refineryPurchaseBean.onCellEdit}" global="false" />
+                <p:ajax event="page" global="false"/>
+                <p:ajax event="filter" global="false"/>
+
+                 <p:headerRow>
+                    <p:column colspan="2">
+                        <h:outputText value="#{RefineryPurchase.stock.name}"/>
+                    </p:column>
+                </p:headerRow> 
+                
+                <f:facet  name="footer" >
+                    <p:inputText id="globalFilter" value="#{refineryPurchaseBean.autoCompleteValue}"  style="display: none" />
+                </f:facet>
+               
+                <p:column id="cmlRefinery" headerText="#{loc.refinery}" sortable="false"  filterable="true" filterBy="#{RefineryPurchase.refineryId==1 ? 'İzmit'  : RefineryPurchase.refineryId==2 ? 'İzmir' : RefineryPurchase.refineryId==3 ? 'Kırıkkale' : 'Batman'}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet>
+                    <h:outputText value="#{RefineryPurchase.refineryId==1 ? 'İzmit'  : RefineryPurchase.refineryId==2 ? 'İzmir' : RefineryPurchase.refineryId==3 ? 'Kırıkkale' : RefineryPurchase.refineryId==0 ? '' : 'Batman'}" />
+                </p:column>
+                <p:column id="clmPrice" headerText="#{loc.price}" sortable="false" sortBy="#{RefineryPurchase.price}"  filterable="true"  filterBy="#{RefineryPurchase.price}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet>
+                    <p:cellEditor >
+                        <f:facet name="output">
+                            <h:outputText value="#{RefineryPurchase.price}" style="float: right" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="" />
+                                <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                            </h:outputText>
+                        </f:facet>
+                        <f:facet name="input" class="Fright">
+                            <p:inputNumber id="inpur34#{RefineryPurchase.rowId}" value="#{RefineryPurchase.price}" class="editableinput" onclick="this.setSelectionRange(0, this.value.length)"
+                                           decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? '.': ','}"  minValue="0"
+                                           thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                           decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}" style="text-align: right !important"
+                                           roundMethod="D" emptyValue=""/>  
+                        </f:facet>
+                    </p:cellEditor>
+                  
+                </p:column>
+
+                <p:column id="clmCurrency" headerText="#{loc.currency}" sortBy="#{RefineryPurchase.currency.tag}" sortable="false" filterable="true"  filterBy="#{RefineryPurchase.currency.tag}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet>
+                    <p:cellEditor>
+                        <f:facet name="output"><h:outputText value="#{RefineryPurchase.currency.tag}" /></f:facet>
+                        <f:facet name="input">
+                            <h:selectOneMenu id="slc34#{RefineryPurchase.rowId}" value="#{RefineryPurchase.currency.id}" style="width:50%">
+                                <f:selectItems value="#{sessionBean.currencies}" var="currency1" itemLabel="#{currency1.nameMap.get(sessionBean.langId).name}" itemValue="#{currency1.id}" />
+                            </h:selectOneMenu>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+            </p:dataTable>
+        </h:form>
+    </div>
+
+
+    <script>
+
+        function updateDatatable() {
+            document.getElementById("frmRefineryPurchase:updateDatatable").click();
+        }
+    </script>
+</ui:composition>

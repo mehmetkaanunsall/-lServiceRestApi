@@ -1,0 +1,171 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <!-- 
+        Açıklama : Çek Senet grid sayfası tasarımı
+        Yazan    : Esra Çabuk
+        Bean     : ChequeBillBean
+        Sayfa    : çek senet Sayfası
+        Tarih    : 05.07.2018
+    -->
+    
+     <h:panelGroup rendered="#{chequeBillBean.listOfBranch.size()>1}">
+        <h:form id="frmCriterTab">
+
+            <h:panelGroup id="pgrChqueBillCriter" layout="block" transient="true">
+                <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+                    <ui:param name="outputtext" value="#{loc.chequebill}"/>
+                    <ui:param name="bean" value='#{chequeBillBean}' />
+                    <ui:param name="update" value="pgrCriter" />
+                </ui:include>
+
+                <h:panelGroup id="pgrCriter" layout="block" transient="true">  
+                    <div class="ui-g divContent">
+                        <h:panelGroup rendered="#{chequeBillBean.listOfBranch.size() > 1}">
+                            <div class="ui-g-12 ui-md-6 ui-lg-2">
+                                <p:outputLabel value="#{loc.branch}" for="slcBranchCheckBox" styleClass="Fs12 FontBold"/>
+                                <p:selectCheckboxMenu  id="slcBranchCheckBox" value="#{chequeBillBean.searchObject.selectedBranchList}" 
+                                                       filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                                       label="#{chequeBillBean.searchObject.selectedBranchList.size()!=0 ? chequeBillBean.searchObject.selectedBranchList.size() :loc.all} #{chequeBillBean.searchObject.selectedBranchList.size()!=0 ? loc.branch : ''} #{chequeBillBean.searchObject.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                                    <f:selectItems value="#{chequeBillBean.listOfBranch}" itemLabel="#{branch.name}" itemValue="#{branch}" var="branch" />       
+                                    <p:ajax oncomplete="PF('slcBranchCheckBox').show()" global="false" update="frmCriterTab:slcBranchCheckBox"/>
+                                    <p:ajax event="toggleSelect" update="frmCriterTab:slcBranchCheckBox"  oncomplete="PF('slcBranchCheckBox').show()" global="false"/>
+                                </p:selectCheckboxMenu>
+                            </div>
+                        </h:panelGroup>
+                    </div>
+                </h:panelGroup>
+            </h:panelGroup>
+        </h:form>
+        <div class="EmptyBox10"/>
+    </h:panelGroup>
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+        <ui:param name="bean" value="#{chequeBillBean}"/>   <!-- Bean -->
+        <ui:param name="update" value="dlgChequeBillProc"/>  <!-- Yeni butonuna basınca açılacak sayfa  -->
+        <ui:param name="btnNewId" value="#{chequeBillBean.getRendered(25, 0)}"/>  <!-- buton id yetki kontrolü için  -->
+        <ui:param name="datatable" value="frmChequeBill:dtbChequeBill" />  <!-- datatable  -->       
+        <ui:param name="widgetvar" value='chequeBillPF' />
+        <ui:param name="form" value='frmToolbarChequeBill' />
+        <ui:param name="fileName" value="#{loc.chequebill}"/> 
+        <ui:param name="renderedToggler" value='true'/>       
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+        <ui:param name="renderedChequeBill" value='true'/>
+    </ui:include>
+
+    <h:form id="frmChequeBill">
+
+        <p:dataTable  id="dtbChequeBill" var="ChequeBill"  value="#{chequeBillBean.listOfObjects}" widgetVar="chequeBillPF"  filteredValue="#{chequeBillBean.listOfFilteredObjects}" selection="#{chequeBillBean.selectedObject}"  selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{ChequeBill.id}" paginator="true" 
+                      paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" resizableColumns="true" draggableColumns="true"
+                      paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                      reflow="true" >
+
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{chequeBillBean.update()}"  />  
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false" oncomplete="updateGrid()"/>
+            <p:ajax event="colReorder" listener="#{chequeBillBean.reorder}" update="frmToolbarChequeBill:toggle" />     
+            <p:ajax event="colResize"  listener="#{chequeBillBean.onResize}" />
+
+            <f:facet name="footer" rendered="false" >
+                <p:inputText id="globalFilter" value="#{chequeBillBean.autoCompleteValue}"  style="display: none"  />
+            </f:facet>
+
+            <p:column id="clmBranch" headerText="#{loc.branch}" exportable="#{chequeBillBean.getColumnVisibility('frmChequeBill:dtbChequeBill:clmBranch')}" sortable="true" sortBy="#{ChequeBill.branch.name}"  filterable="true"  filterBy="#{ChequeBill.branch.name}" filterMatchMode="contains" >               
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{ChequeBill.branch.name}"  />
+            </p:column>
+            <p:column id="clmDate" exportable="#{chequeBillBean.getColumnVisibility('frmChequeBill:dtbChequeBill:clmDate')}" headerText="#{loc.expirydate}" sortable="true" sortBy="#{ChequeBill.expiryDate}" filterable="true"  filterBy="#{ChequeBill.expiryDate}" filterMatchMode="contains" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{ChequeBill.expiryDate}" >
+                    <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat}" />
+                </h:outputText>
+            </p:column >
+            <p:column id="clmChequeBillType" exportable="#{chequeBillBean.getColumnVisibility('frmChequeBill:dtbChequeBill:clmChequeBillType')}" headerText="#{loc.type}" sortable="true" sortBy="#{!ChequeBill.isCheque} #{!ChequeBill.isCustomer} " filterable="true"  filterBy="#{(ChequeBill.isCustomer and ChequeBill.isCheque) ? loc.customercheque : (ChequeBill.isCustomer and !ChequeBill.isCheque) ? loc.customerbill : (!ChequeBill.isCustomer and ChequeBill.isCheque) ? loc.debtcheque : (!ChequeBill.isCustomer and !ChequeBill.isCheque) ? loc.debtbill : ''}" filterMatchMode="contains" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{(ChequeBill.isCustomer and ChequeBill.isCheque) ? loc.customercheque : (ChequeBill.isCustomer and !ChequeBill.isCheque) ? loc.customerbill : (!ChequeBill.isCustomer and ChequeBill.isCheque) ? loc.debtcheque : (!ChequeBill.isCustomer and !ChequeBill.isCheque) ? loc.debtbill : ''}" />
+            </p:column >
+            <p:column id="clmPortfolioNo" exportable="#{chequeBillBean.getColumnVisibility('frmChequeBill:dtbChequeBill:clmPortfolioNo')}" headerText="#{loc.portfoliono}" sortable="true" sortBy="#{ChequeBill.portfolioNumber}" filterable="true"  filterBy="#{ChequeBill.portfolioNumber}" filterMatchMode="contains"  >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{ChequeBill.portfolioNumber}" />
+            </p:column >
+            <p:column id="clmAccount"  exportable="#{chequeBillBean.getColumnVisibility('frmChequeBill:dtbChequeBill:clmAccount')}" headerText="#{loc.current}" sortable="true" sortBy="#{ChequeBill.account.name}" filterable="true"  filterBy="#{ChequeBill.account.name}" filterMatchMode="contains" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{ChequeBill.account.name}" />
+            </p:column >
+            <p:column id="clmStatus" exportable="#{chequeBillBean.getColumnVisibility('frmChequeBill:dtbChequeBill:clmStatus')}" headerText="#{loc.statu}" sortable="true" sortBy="#{ChequeBill.status.tag}" filterable="true"  filterBy="#{ChequeBill.status.tag}" filterMatchMode="contains" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{ChequeBill.status.tag}" class="#{ChequeBill.status.id==31 or ChequeBill.status.id==33 or ChequeBill.status.id==34 ? 'hardblue' : ChequeBill.status.id==32 ? 'yellow'  : ChequeBill.status.id==38 ? 'green' : ChequeBill.status.id==36 or ChequeBill.status.id==37 or ChequeBill.status.id==41 ? 'red' : '' }" />
+            </p:column>
+            <p:column id="clmTotalMoney" exportable="#{chequeBillBean.getColumnVisibility('frmChequeBill:dtbChequeBill:clmTotalMoney')}" headerText="#{loc.totalprice}" sortable="true" sortBy="#{ChequeBill.totalMoney}" filterable="true"  filterBy="#{ChequeBill.totalMoney}" filterMatchMode="contains" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{ChequeBill.totalMoney}" class="Fright" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{ChequeBill.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column >
+
+
+        </p:dataTable>  
+
+        <p:remoteCommand name="order" actionListener="#{chequeBillBean.bringOrder('frmChequeBill:dtbChequeBill')}" oncomplete="updateToggle()" autoRun="true"  global="false" />
+        <p:remoteCommand name="updateGrid" actionListener="#{chequeBillBean.updateGridProperties('frmChequeBill:dtbChequeBill')}"  global="false" />
+        <p:remoteCommand name="updateToggle"  update="frmToolbarChequeBill:toggle" delay="500" global="false" />
+    </h:form>
+    <p:dialog id="dlgChequeBillProc" widgetVar="dlg_chequebillproc" resizable="false" width="75%" focus="dlgChequeBillProc" responsive="true" dynamic="true" closeOnEscape="true">
+
+        <h:form id="frmNewChequeBill">  
+            <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+                <ui:param name="bean" value='#{chequeBillBean}' />
+                <ui:param name="outputtext" value="#{loc.chequebillprocesses}"/>
+                <ui:param name="update" value="pgrChequeBillProcess" />
+                <ui:param name="btnSaveId" value="#{chequeBillBean.getRendered(26, 0)}" />
+                <ui:param name="btnDeleteId" value='false' /> 
+            </ui:include>
+
+            <h:panelGroup id="pgrChequeBillProcess" layout="block" class="divContent">
+                <ui:include  src="newchequebill.xhtml">
+                    <ui:param name="bean" value='#{chequeBillBean}' />
+                </ui:include>
+            </h:panelGroup>
+            <p:remoteCommand name="showBook" process="@this" oncomplete="PF('olp_account').loadContents();" actionListener="#{accountBookFilterBean.findFilterListLazyLoading([chequeBillBean.selectedObject.branch],'frmAccountBookFilter','olp_account','chequebill')}" global="false" />
+        </h:form> 
+
+    </p:dialog>
+
+    <ui:include src="/pages/general/common/accountbook.xhtml" >
+        <ui:param name="updateBean" value='#{chequeBillBean}' />
+        <ui:param name="for" value='frmNewChequeBill:btnAccountName' />
+        <ui:param name="type" value='chequebill' />
+        <ui:param name="parameters" value='#{[chequeBillBean.selectedObject.branch]}' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmAccountBookFilter' /> 
+        <ui:param name="overlay" value="olp_account" />
+    </ui:include>
+
+
+
+
+</ui:composition>
+
+

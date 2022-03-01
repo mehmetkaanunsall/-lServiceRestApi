@@ -1,0 +1,175 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">  
+
+
+    <h:form id="frmWashingMachicneProcess">  
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{ loc.washingmachicneprocess}"/>
+            <ui:param name="bean" value='#{washingMachicneProcessBean}' />
+            <ui:param name="update" value="frmWashingMachicneProcess" />
+            <ui:param name="btnSaveId" value="#{washingMachicneProcessBean.getRendered(236, 0)}" />
+            <ui:param name="renderSelectedObject" value="#{washingMachicneProcessBean.processType==2 ? 'true':'false'}"/>
+            <ui:param name="selectedObjectName" value="#{washingMachicneProcessBean.processType==2 ? washingMachicneProcessBean.selectedObject.name : ''}"/>
+
+            <ui:param name="btnDeleteId" value='false' /> 
+            <ui:param name="renderback" value='true'/>
+            <c:if test="#{washingMachicneProcessBean.processType==2}">
+                <ui:param name="btnDeleteId" value="#{washingMachicneProcessBean.getRendered(237, 0)}" />
+                <ui:param name="btnTestBeforeDeleteId" value='true' />
+                <ui:param name="btnSendConfigure" value="#{washingMachicneProcessBean.getRendered(238, 0)}" />
+            </c:if>
+        </ui:include>    
+
+        <h:panelGroup id="pgrWashingMachincneProcess" layout="block">
+            <div class="ui-g-12 divContent">
+                <div class="ui-g-12 ">
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.name}" for="txtName" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtName" value="#{washingMachicneProcessBean.selectedObject.name}" styleClass="Wid95" required="true" placeholder="#{loc.name} "/>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.code}" for="txtCode" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtCode" value="#{washingMachicneProcessBean.selectedObject.code}" styleClass="Wid95" required="true" placeholder="#{loc.code} "/>
+                    </div>
+
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.macaddress}" for="txtMacAddress" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtMacAddress" value="#{washingMachicneProcessBean.selectedObject.macAddress}" styleClass="Wid95" required="true" placeholder="#{loc.macaddress} "/>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.ipaddress}" for="txtIpAddress" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtIpAddress" value="#{washingMachicneProcessBean.selectedObject.ipAddress}" styleClass="Wid95" required="true" placeholder="#{loc.ipaddress} "/>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-1">
+                        <p:outputLabel value="#{loc.port}" for="txtPort" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtPort" value="#{washingMachicneProcessBean.selectedObject.port}" styleClass="Wid95" required="true" placeholder="#{loc.port} "/>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel value="#{loc.electricunitprice} (kW)" for="txtElectricUnitPrice"  styleClass="Fs12 FontBold"/>
+                        <p:inputNumber id="txtElectricUnitPrice" value="#{washingMachicneProcessBean.selectedObject.electricUnitPrice}" minValue="0"
+                                       decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}"  
+                                       thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1? ',': '.'}" emptyValue="sign"
+                                       roundMethod="D" decimalPlaces="3"
+                                       symbol="#{sessionBean.user.lastBranch.currency.code}"
+                                       symbolPosition="#{sessionBean.locale=='tr' ? 's': 'p'}"
+                                       class="Wid90 TexAlRight" placeholder="#{loc.electricunitprice}" >                 
+                        </p:inputNumber> 
+                    </div>
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-1">
+                        <p:outputLabel value="#{loc.waterunitprice} (LT)" for="txtWaterUnitPrices"  styleClass="Fs12 FontBold"/>
+                        <p:inputNumber id="txtWaterUnitPrices" value="#{washingMachicneProcessBean.selectedObject.waterUnitPrice}" minValue="0"
+                                       decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}"  
+                                       thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" emptyValue="sign"
+                                       roundMethod="D" decimalPlaces="3"
+                                       symbol="#{sessionBean.user.lastBranch.currency.code}"
+                                       symbolPosition="#{sessionBean.locale=='tr' ? 's': 'p'}"
+                                       class="Wid90 TexAlRight" placeholder="#{loc.waterunitprice}" >                 
+                        </p:inputNumber> 
+                    </div>
+
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.version}" for="txtVersion" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtVersion" value="#{washingMachicneProcessBean.selectedObject.version}" styleClass="Wid95" required="true" placeholder="#{loc.version} "/>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.description}" for="txtDescription" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtDescription" value="#{washingMachicneProcessBean.selectedObject.description}" styleClass="Wid95"  placeholder="#{loc.description} "/>
+                    </div>
+
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.statu}" for="slcStatus" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcStatus" disabled="#{washingMachicneProcessBean.processType==1}" value="#{washingMachicneProcessBean.selectedObject.status.id}" required="true" >
+                            <f:selectItems value="#{sessionBean.getStatus(28)}"  var="status" itemLabel="#{status.nameMap.get(sessionBean.langId).name}" itemValue="#{status.id}" />
+                            <p:ajax event="change" update="slcStatus" listener="#{washingMachicneProcessBean.bringStatus()}" global="false"/>
+                        </p:selectOneMenu>
+                    </div>
+
+
+                </div>
+            </div>
+            <p:remoteCommand name="showStationBook" process="@this" oncomplete="PF('olp_station').loadContents()" actionListener="#{stationBookFilterBean.findFilterListLazyLoading([],'frmStationBookFilter','olp_station','')}" />
+        </h:panelGroup>
+
+        <p:remoteCommand name="rmtTankFill" action="#{washingMachicneTankTabBean.createTankAnimation()}" delay="100"  global="false"/>
+
+    </h:form>
+
+
+    <div class="EmptyBox10"></div>
+    <p:tabView id="tbvWashingMachicneProc" activeIndex="#{marwiz.tabIndex}" rendered="#{washingMachicneProcessBean.processType==2 and (washingMachicneProcessBean.getRendered(56, 1)
+                                                          or washingMachicneProcessBean.getRendered(57, 1) or washingMachicneProcessBean.getRendered(58, 1))}" scrollable="true" dynamic="true" cache="true">
+        <p:ajax event="tabChange" listener="#{washingMachicneProcessBean.onTabChange}" />
+
+        <p:tab id="tab56" title="#{loc.platform}" rendered="#{washingMachicneProcessBean.getRendered(56, 1)}">
+            <c:if test="#{washingMachicneProcessBean.activeIndex==56}">
+                <ui:include src="washingmachicneplatformtab.xhtml"/>
+            </c:if>
+        </p:tab>   
+        <p:tab id="tab57" title="#{loc.tank}" rendered="#{washingMachicneProcessBean.getRendered(57, 1)}">
+            <c:if test="#{washingMachicneProcessBean.activeIndex==57}">
+                <ui:include src="washingmachicnetanktab.xhtml"/>
+            </c:if>
+        </p:tab>   
+
+        <p:tab id="tab58" title="#{loc.expenseunitprices}"  rendered="#{washingMachicneProcessBean.getRendered(58, 1)}">
+            <c:if test="#{washingMachicneProcessBean.activeIndex==58}">                
+                <ui:include src="washingmachicneexpenseunitprices.xhtml"/>
+            </c:if>
+        </p:tab>   
+    </p:tabView>
+
+    <p:dialog id="dlgWashingMachicnePlatformDlg" widgetVar="dlg_washingMachicnePlatformDlg" resizable="false" width="#{washingMachicnePlatformTabBean.processType==1 ? '40%' : '55%'}" focus="dlgWashingMachicnePlatformDlg" modal="true" responsive="true" dynamic="true" closeOnEscape="true">
+        <c:if test="#{washingMachicneProcessBean.activeIndex==56}">
+            <ui:include src="/pages/automat/washingmachicne/washingmachicneplatformprocess.xhtml"/>
+        </c:if>
+    </p:dialog>
+
+    <p:dialog id="dlgWashingMachicneTankDlg" widgetVar="dlg_washingMachicneTankDlg" onShow="rmtTankFill();" resizable="false" width="30%" focus="dlgWashingMachicneTankDlg" modal="true" responsive="true" dynamic="true" closeOnEscape="true">
+        <c:if test="#{washingMachicneProcessBean.activeIndex==57}">
+            <ui:include src="/pages/automat/washingmachicne/washingmachicnetankprocess.xhtml"/>
+
+        </c:if>
+    </p:dialog>
+
+
+    <p:dialog id="dlgWashingMachicneNozlleDlg" widgetVar="dlg_washingMachicneNozlleDlg" resizable="false" width="45%" focus="dlgWashingMachicneNozlleDlg" modal="true" responsive="true" dynamic="true" closeOnEscape="true">
+        <c:if test="#{washingMachicneProcessBean.activeIndex==56}">
+            <ui:include src="/pages/automat/washingmachicne/washingmachicnenozzleprocess.xhtml"/>
+        </c:if>
+    </p:dialog>
+
+    <p:dialog id="dlgExpenseUnitPriceProc" widgetVar="dlg_expenseunitpriceproc" modal="true" resizable="false" width="40%" focus="dlgExpenseUnitPriceProc" responsive="true" dynamic="true" closeOnEscape="true">
+        <c:if test="#{washingMachicneProcessBean.activeIndex==58}">
+            <ui:include src="washingmachicneexpenseunitpriceprocess.xhtml">
+                <ui:param name="bean" value='#{washingMachicneExpenseUnitPriceBean}' />
+            </ui:include>
+        </c:if>
+    </p:dialog>  
+
+
+    <p:confirmDialog global="true" class="deleteConfirm"  widgetVar="dlgConfirmSave" showEffect="fade" hideEffect="fade"  closeOnEscape="true" responsive="true">
+        <f:facet name="message">
+            <h:outputText value="#{loc.dontforgettosendtheconfigurationforthechangingstatusinformationoftherelevantplatform} #{loc.areyousureyouwanttocontinue}"  style="white-space: pre-wrap;">
+                <i class="icon-trash Fs20 tlbrDeleteBtn" /> 
+            </h:outputText>
+        </f:facet>
+        <p:commandButton value="#{loc.yes}" actionListener="#{washingMachicnePlatformTabBean.continueSaving()}"  onclick="PF('dlgConfirmSave').hide()"   styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+        <p:commandButton value="#{loc.no}"  onclick="PF('dlgConfirmSave').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+    </p:confirmDialog>
+
+
+
+</ui:composition>

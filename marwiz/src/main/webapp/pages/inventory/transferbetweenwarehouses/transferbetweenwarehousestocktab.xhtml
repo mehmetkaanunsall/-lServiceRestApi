@@ -1,0 +1,350 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <div class="ContainerIndent"> 
+
+        <h:form id="frmTransfer" >
+            <ui:include src="/pages/general/common/datagridtoolbar.xhtml" >
+                <ui:param name="bean" value="#{transferBetweenWarehouseProcessBean}"/>   <!-- Bean -->
+                <ui:param name="update" value="frmTransfer"/> 
+                <ui:param name="btnNewId" value="false"/>  <!-- buton id yetki kontrolü için  -->
+                <ui:param name="datatable" value="tbvWarehouseTransferProc:frmWarehouseTransferStockTab:dtbWarehouseMovement" />  <!-- datatable  -->       
+                <ui:param name="dtbWidgetVar" value='warehouseMovementPF' />
+                <ui:param name="renderedToggler" value='false'/>       
+                <ui:param name="renderedExel" value='false'/>
+                <ui:param name="renderedPdf" value='false'/>
+                <ui:param name="renderedFilter" value='true'/>
+                <ui:param name="renderedUpload" value='#{transferBetweenWarehouseProcessBean.processType == 1 and transferBetweenWarehouseProcessBean.exitWarehouse.id !=0 and transferBetweenWarehouseProcessBean.entryWarehouse.id !=0 }'/>
+                <ui:param name="updateDialog" value='tbvWarehouseTransferProc:dlgQuantityFileUpload'/>
+            </ui:include>
+        </h:form>
+
+
+        <h:form id="frmWarehouseTransferStockTab" >
+
+
+            <p:dataTable id="dtbWarehouseMovement" editable="true" editMode="cell" widgetVar="warehouseMovementPF"  var="WarehouseMovement" value="#{transferBetweenWarehouseProcessBean.listOfObjects}" selection="#{transferBetweenWarehouseProcessBean.selectedObject}"  selectionMode="single"  rowKey="#{WarehouseMovement.stock.id}"
+                         rows="#{sessionBean.user.defualtGridSize}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                         rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  
+                         emptyMessage="#{loc.norecordsfound}" class="tabDatatable" lazy="true"  >
+
+                <p:ajax event="#{sessionBean.user.gridRowSelect}" resetValues="true" listener="#{transferBetweenWarehouseProcessBean.update()}" update="dlgWarehouseTransferStockProc"/> 
+
+
+                <p:ajax event="page" global="false"/>
+                <!--  <p:ajax event="filter" global="false"/> -->
+                <!--  <p:ajax event="colReorder" listener="#{transferBetweenWarehouseProcessBean.reorder}" update="frmToolbarWarehouseMovement:toggle" />     -->
+                <p:ajax event="colResize"  listener="#{transferBetweenWarehouseProcessBean.onResize}" /> 
+                <p:ajax event="cellEdit" listener="#{transferBetweenWarehouseProcessBean.onCellEdit}" process="@this"/>
+             <!--   <f:facet  name="footer"     >
+                    <p:inputText id="globalFilter" value="#{transferBetweenWarehouseProcessBean.autoCompleteValue}"  style="display: none" />
+                </f:facet> -->
+
+                <p:column headerText="#{loc.stockbarcode}" sortBy="#{WarehouseMovement.stck.barcode}" sortable="true" filterable="true"  filterBy="#{WarehouseMovement.stock.barcode}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet> 
+                    <h:outputText value="#{WarehouseMovement.stock.barcode}" />
+                </p:column>
+
+                <p:column headerText="#{loc.stockcode}" sortBy="#{WarehouseMovement.stck.code}" sortable="true" filterable="true"  filterBy="#{WarehouseMovement.stock.code}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet> 
+                    <h:outputText value="#{WarehouseMovement.stock.code}" />
+                </p:column>
+                <p:column headerText="#{loc.centerstockcode}" sortBy="#{WarehouseMovement.stck.centerProductCode}" sortable="true" filterable="true"  filterBy="#{WarehouseMovement.stock.centerProductCode}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet> 
+                    <h:outputText value="#{WarehouseMovement.stock.centerProductCode}" />
+                </p:column>
+                <p:column headerText="#{loc.stockname}" sortBy="#{WarehouseMovement.stck.name}" sortable="true" filterable="true"  filterBy="#{WarehouseMovement.stock.name}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet> 
+                    <h:outputText value="#{WarehouseMovement.stock.name}" />
+                </p:column>
+
+                <p:column headerText="#{loc.exitingwarehousecurrentamount}" sortBy="#{WarehouseMovement.iwicquantity}" sortable="true" filterable="true" filterBy="#{WarehouseMovement.exitingWarehouseCurrentAmount}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet>
+                    <h:outputText value="#{WarehouseMovement.exitingWarehouseCurrentAmount}" class="Fright">
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="unit" value="#{WarehouseMovement.stock.unit}"/>
+                        <f:attribute name="type" value="unit" />
+                    </h:outputText>
+                </p:column>
+                <p:column headerText="#{loc.entryingwarehousecurrentamount}"  sortBy="#{WarehouseMovement.iwigquantity}" sortable="true" filterable="true" filterBy="#{WarehouseMovement.entryingWarehouseCurrentAmount}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet>
+                    <h:outputText value="#{WarehouseMovement.entryingWarehouseCurrentAmount}" class="Fright">
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="unit" value="#{WarehouseMovement.stock.unit}"/>
+                        <f:attribute name="type" value="unit" />
+                    </h:outputText>
+
+                </p:column>
+
+
+
+
+                <p:column headerText="#{loc.quantity}" sortBy="#{WarehouseMovement.quantity}" sortable="true" filterable="true"  filterBy="#{WarehouseMovement.quantity}" filterMatchMode="contains">
+                    <f:facet name="filter">
+                        <p:outputLabel   rendered="false" />
+                    </f:facet> 
+
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <h:outputText value="#{WarehouseMovement.quantity}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="unit" value="#{WarehouseMovement.stock.unit}"/>
+                                <f:attribute name="type" value="unit" />
+                            </h:outputText>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputNumber value="#{WarehouseMovement.quantity}" class="editableinput"
+                                           decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? '.': ','}"  minValue="0"
+                                           thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}"
+                                           decimalPlaces="#{WarehouseMovement.stock.unit.unitRounding}"
+                                           roundMethod="D" emptyValue=""/>  
+                        </f:facet>
+                    </p:cellEditor>
+
+
+                </p:column>
+            </p:dataTable>
+
+            <p:remoteCommand name="transferSave" action="#{transferBetweenWarehouseProcessBean.remoteSave()}" delay="200" process="@this"/>
+        </h:form>
+    </div>
+
+
+    <p:dialog id="dlgQuantityFileUpload" widgetVar="dlg_quantityfileupload" modal="true" dynamic="true" resizable="false" focus="dlgQuantityFileUpload"  responsive="true" closeOnEscape="true" width="26%">
+        <h:form id="form" enctype="multipart/form-data" > 
+            <p:panelGrid id="pgrfileformat">
+                <div>     
+
+                    <table class="tableUp" style="border: 1px solid;border-color: #316996;background-color: #fbfcfd;">
+                        <colgroup>
+                            <col style="width: 50%" />
+                            <col style="width: 50%" />                                  
+                        </colgroup>
+                        <thead>
+                            <tr >
+                                <th scope="col" colspan="2" class="Fs16 TexAlLeft"><h:outputText value="#{loc.fileformattobeuploaded}" style="color: #303030 !important;"/></th>
+                            </tr>
+                            <tr >
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.barcode}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} A)" style="color:#337190" class="Fs14"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.quantity}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} B)" style="color:#337190" class="Fs14"/></th>                                                                                
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach items="#{transferBetweenWarehouseProcessBean.sampleList}" var="sample">
+                                <tr>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.stock.barcode}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.quantity}" /></td>                                          
+                                </tr>
+                            </c:forEach>                                                                                                     
+                        </tbody> 
+                    </table>
+                </div>                    
+            </p:panelGrid>
+
+            <div class="EmptyBox20" />
+
+            <p:panelGrid  id="pgrFileUpload" class="pgrResponsive">
+                <div class="ui-g">
+                    <h:panelGroup layout="block">
+                        <p:row>
+                            <p:column colspan="15" style="font-weight: bold;font-size: 16px"> <h:outputText value="#{loc.fileselectionandtransferoperations}" /></p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column colspan="8">
+                                <table style="width: 150px !important;table-layout: fixed;border: none !important;" >
+                                    <tbody>
+                                        <tr>
+                                            <p:fileUpload  update="@this,btnTransfer,txtFileName,btnClose"  allowTypes="/(\.|\/)(xls|xlsx|xls|xlsm|xlsb|xltx|xltm|xlt|xla|xlw|xlr|)$/" invalidFileMessage="#{loc.invalidfiletype}" invalidSizeMessage="#{loc.filesizecannotbegreaterthan1mb}"
+                                                           class="#{ transferBetweenWarehouseProcessBean.fileData.length()==0 ? 'fileUploadEmpty' : 20> transferBetweenWarehouseProcessBean.fileData.length() ? 'fileUploadSmall'  : 'fileUploadLong'}" label="#{loc.choosefile}" fileLimit="1"  auto="true" sizeLimit="10000000" style="width: 150px;" fileUploadListener="#{transferBetweenWarehouseProcessBean.handleFileUploadFile}"  mode="advanced"  multiple="true" dragDropSupport="false" />
+                                        </tr>
+
+                                        <tr>
+                                            <td style="width: 100px;border:none !important;"><h:outputText id="txtFileName"  styleClass="wrapLabel" value="#{transferBetweenWarehouseProcessBean.fileData}" /> </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </p:column> 
+                            <p:column  colspan="6">
+                                <c:if test="#{transferBetweenWarehouseProcessBean.fileData==''}">
+                                    <p:commandButton id="btnTransfer" icon="fa fa-exchange" disabled="#{transferBetweenWarehouseProcessBean.isUpload}" resetValues="true" value="#{loc.transfer}" update="@this,btnTransfer ,btnClose,txtFileName" actionListener="#{transferBetweenWarehouseProcessBean.convertData()}" />
+                                    <p:commandButton id="btnClose"  icon="fa fa-close" disabled="#{transferBetweenWarehouseProcessBean.isCancel}" resetValues="true" value="#{loc.remove}" update="@this,btnTransfer ,btnClose,txtFileName" actionListener="#{transferBetweenWarehouseProcessBean.clearData()}" />
+
+                                </c:if>
+                                <c:if test="#{transferBetweenWarehouseProcessBean.fileData!=''}">
+                                    <p:commandButton id="btnTransfer" icon="fa fa-exchange" disabled="#{transferBetweenWarehouseProcessBean.isUpload}" resetValues="true" value="#{loc.transfer}" update="@this,btnTransfer ,btnClose,txtFileName" actionListener="#{transferBetweenWarehouseProcessBean.convertData()}" />
+                                    <p:commandButton id="btnClose"  icon="fa fa-close" disabled="#{transferBetweenWarehouseProcessBean.isCancel}" resetValues="true" value="#{loc.remove}" update="@this,btnTransfer ,btnClose,txtFileName" actionListener="#{transferBetweenWarehouseProcessBean.clearData()}" />
+                                </c:if>
+
+                            </p:column>
+
+                        </p:row>
+                    </h:panelGroup>
+
+                </div>
+            </p:panelGrid> 
+
+        </h:form>
+    </p:dialog>
+
+
+    <p:dialog id="dlgProductView" widgetVar="dlg_productView" showEffect="fade" hideEffect="fade" resizable="false" transient="true" modal="true" closeOnEscape="true" responsive="true" width="30%"  >
+        <p:ajax event="close" update="tbvWarehouseTransferProc:form:btnTransfer" listener="#{transferBetweenWarehouseProcessBean.repeatProductShow()}" global="false"/>
+        <h:form id="frmtoolbar" prependId="false">
+            <p:toolbar>
+                <f:facet name="left">
+                    <h:outputText value="#{loc.productstobetransferredfromthefile}" class="outputTextFont Fleft MarRight8" />
+                </f:facet>
+
+                <f:facet name="right">
+                    <p:commandLink id="btnSave" disabled="#{transferBetweenWarehouseProcessBean.isSave}" title="#{loc.transfer}" process="@this"  class="Fright" update="tbvWarehouseTransferProc:frmWarehouseTransferStockTab:dtbWarehouseMovement"  actionListener="#{transferBetweenWarehouseProcessBean.saveProduct()}"  >
+                        <i class="fa fa-save Fs20 MarTop5 tlbrSaveBtn"/>                 
+                    </p:commandLink>
+                </f:facet> 
+            </p:toolbar>
+
+            <h:panelGroup id="pgrIsError" >
+                <p:separator style="margin-top: 0px !important; margin-bottom: 5px;" class="allCheckSeparator"/>
+                <p:panelGrid layout="grid" columns="1" class="allCheckPanelGrid" style="border-radius: 0px !important; border-bottom: 0px !important;">  
+                    <p:selectBooleanCheckbox value="#{transferBetweenWarehouseProcessBean.isErrorDataShow}" itemLabel="#{loc.showincorrectrecords}" class="Fleft allcheck" style="margin-top: 2px; margin-left: 5px;">
+                        <p:ajax global="false"  resetValues="true" process="@this"  update="tbvWarehouseTransferProc:frmProductView:dtbProductView" listener="#{transferBetweenWarehouseProcessBean.showErrorProductList()}"/>
+                    </p:selectBooleanCheckbox>
+                </p:panelGrid>
+            </h:panelGroup>  
+
+        </h:form>
+
+
+        <!-- Aktar butonuna bastıktan sonra ürünlerin önizleme ile gösterildiği yer  -->
+        <h:panelGroup>
+            <h:form id="frmProductView">
+                <p:dataTable  id="dtbProductView" var="viewProduct"  value="#{transferBetweenWarehouseProcessBean.excelItemList}" widgetVar="viewPdocutPF" emptyMessage="#{loc.norecordsfound}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{viewProduct.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true"
+                              rowStyleClass="#{viewProduct.type==-1 ? 'ColumnColorRed' : null}" >
+
+
+                    <p:column headerText="#{loc.barcode}" selectRow="false">
+                        <h:outputText value="#{viewProduct.stock.barcode}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.quantity}" selectRow="false">
+                        <h:outputText value="#{viewProduct.quantity}" class="Fright">
+                            <f:convertNumber type="number" maxFractionDigits="2" />
+                        </h:outputText>                                                                            
+                    </p:column>
+
+                </p:dataTable>
+            </h:form>
+        </h:panelGroup>
+    </p:dialog>
+
+    <!--Veritabanından hatalı dönen kayıtları görüntüleyen dialog -->
+    <p:dialog id="dlgProductErrorView" widgetVar="dlg_productErrorView" showEffect="fade" hideEffect="fade" resizable="false" transient="true" modal="true" closeOnEscape="true" responsive="true" width="30%"  >
+        <p:toolbar>
+            <f:facet name="left">
+                <h:outputText value="#{loc.unsavedincorrectrecords}" class="outputTextFont Fleft MarRight8" />
+            </f:facet>
+        </p:toolbar>
+
+        <h:panelGroup rendered="#{transferBetweenWarehouseProcessBean.errorList.size()!=0}">
+            <h:form id="frmProductErrorView">
+                <p:dataTable  id="dtbProductErrorView" var="viewErrorProduct"  value="#{transferBetweenWarehouseProcessBean.errorList}" widgetVar="viewErrorPdocutPF" emptyMessage="#{loc.norecordsfound}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{viewErrorProduct.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true"
+                              >
+
+                    <p:column headerText="#{loc.barcode}" selectRow="false">
+                        <h:outputText value="#{viewErrorProduct.stock.barcode}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.quantity}" selectRow="false">
+                        <h:outputText value="#{viewErrorProduct.quantity}"  class="Fright"/>
+                    </p:column>
+
+                    <p:column headerText="#{loc.errormessage}" selectRow="false">
+                        <h:outputText value="#{viewErrorProduct.errorString}" />
+                    </p:column>
+                </p:dataTable>
+            </h:form>
+        </h:panelGroup>
+    </p:dialog>
+
+
+    <script>
+        function updateDatatable() {
+            document.getElementById("tbvWarehouseTransferProc:frmWarehouseTransferStockTab:updateDatatable").click();
+        }
+    </script>
+
+    <style type="text/css">
+        .ui-fileupload-buttonbar{
+            padding: 0px !important;
+            margin-top: -35px !important;
+            margin: -20px 2px;
+        }
+
+        .fileUploadLong .ui-button{
+            margin-top: 65px !important;
+            position: relative;
+        }
+        .fileUploadSmall .ui-button{
+            margin-top: 68px !important;
+            position: relative;
+        }
+        .fileUploadEmpty .ui-button{
+            margin-top: 46px !important;
+            position: relative;
+        }
+        .wrapLabel{
+            word-wrap: break-word !important;
+        }
+        .tableUp, th, td {
+            border: 1px solid #316996;
+        }
+
+        .tableUp {
+            border-collapse: collapse;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .tableUp tr {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: .35em;
+        }
+        .pgrResponsive{
+            border-collapse: collapse;
+            margin: 0;
+            padding: 0px;
+            width: 100%;
+            table-layout: auto;
+        }
+
+
+    </style>
+
+
+
+
+
+</ui:composition>

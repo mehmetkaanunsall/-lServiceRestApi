@@ -1,0 +1,56 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+        <ui:param name="bean" value="#{paymentTypeBean}"/> 
+        <ui:param name="update" value="dlgPaymentProcess"/>
+        <ui:param name="btnNewId" value='#{paymentTypeBean.getRendered(328, 0)}'/>
+        <ui:param name="datatable" value="frmPaymenttype:dtbPaymenttype" />
+        <ui:param name="widgetvar" value="paymenttypePF" />
+        <ui:param name="form" value='frmToolbarPaymenttype' />
+        <ui:param name="fileName" value="#{loc.paymenttypedefinition}"/> 
+        <ui:param name="renderedToggler" value='true'/>
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+    </ui:include> 
+
+	
+    <h:form id="frmPaymenttype">
+
+        <p:dataTable  id="dtbPaymenttype" var="paymentType"  value="#{paymentTypeBean.listOfObjects}" widgetVar="paymenttypePF" filteredValue="#{paymentTypeBean.listOfFilteredObjects}" selection="#{paymentTypeBean.selectedObject}"  selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{paymentType.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                      reflow="true" >
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{paymentTypeBean.update()}" update="dlgPaymentProcess" global="false" /> 
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false"/>
+            <f:facet name="footer" rendered="false" >
+                <p:inputText id="globalFilter" value="#{paymentTypeBean.autoCompleteValue}"  style="display: none"  />
+            </f:facet>
+
+            <p:column id="clmCode" headerText="#{loc.integrationcode}" sortable="true" sortBy="#{paymentType.entegrationcode}" filterable="true"  filterBy="#{paymentType.entegrationcode}" filterMatchMode="contains" visible="#{paymentTypeBean.toogleList[0]}" exportable="#{paymentTypeBean.toogleList[0]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{paymentType.entegrationcode}" />
+            </p:column >
+            <p:column id="clmName" headerText="#{loc.paymenttype}" sortable="true" sortBy="#{paymentType.entegrationname}" filterable="true"  filterBy="#{paymentType.entegrationname}" filterMatchMode="contains" visible="#{paymentTypeBean.toogleList[1]}" exportable="#{paymentTypeBean.toogleList[1]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{paymentType.entegrationname}" />
+            </p:column >
+        
+        </p:dataTable>  
+    </h:form>
+
+    <p:dialog id="dlgPaymentProcess" widgetVar="dlg_paymenttypeProcess" resizable="false" transient="true" focus="dlgPaymentProcess" responsive="true" dynamic="true" modal="true" closeOnEscape="true" width="50%">
+        <ui:include src="/pages/system/paymenttype/paymenttypeprocess.xhtml" />
+    </p:dialog>
+
+
+</ui:composition>

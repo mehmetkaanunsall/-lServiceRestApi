@@ -1,0 +1,93 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <!--Kategori sayfaları için 
+    -->
+
+    <h:form id="frmCategorization">
+        <div class="ContainerIndent">
+            <p:panel class="pnlCategory">
+                <f:facet name="header">
+                    #{outputText}
+
+                   
+                    <p:commandLink class="Fright" action="#{categoryBean.createDialog(1)}" rendered="#{btnCategoryBtnParent}" process="@this" resetValues="true" update="dlgCategory" title="#{loc.addparentcategory}" >
+                        <i class="icon-plus Fs16 tlbrAddBtn"/>                 
+                    </p:commandLink>
+                     <p:commandLink title="#{loc.expandcollapse}" global="false" class="Fright">
+                        <i class="icon-sort-alt-up Fs14 tlbrAddBtn"/>
+                        <p:ajax listener="#{categoryBean.expanded()}" update="treCategory" global="false"/>
+                    </p:commandLink>
+                </f:facet>
+                <p:treeTable id="treCategory"  value="#{categoryBean.root}"  var="data"   selection="#{categoryBean.selectedCategory}" class="categoryTreeSize treeHoverIcon" style="height: 800px !important;" emptyMessage="#{loc.norecordsfound}">
+
+                    <p:column>
+
+                        <h:outputText value="#{data.name}"/>
+                        <p:commandLink class="#{sessionBean.user.isMobile?'DispInlBlock':''}" rendered="#{btnCategoryBtnChild}"  process="@this" action="#{categoryBean.createDialog(2)}" resetValues="true" update="dlgCategory" title="#{loc.addsubcategory}" >
+                            <f:setPropertyActionListener value="#{data}" target="#{categoryBean.selectedData}" />
+                            <i class="icon-plus Fs14 fltrPlusBtn"/>                 
+                        </p:commandLink>
+                        <p:commandLink class="#{sessionBean.user.isMobile?'DispInlBlock':''}" rendered="#{btnCategoryBtnEdit}" process="@this" action="#{categoryBean.createDialog(3)}" resetValues="true" update="dlgCategory" title="#{loc.edit}" >
+                            <f:setPropertyActionListener value="#{data}" target="#{categoryBean.selectedData}" />
+                            <i class="icon-pencil Fs14 fltrPlusBtn"/>                 
+                        </p:commandLink>
+                        <p:commandLink class="#{sessionBean.user.isMobile?'DispInlBlock':''}" rendered="#{btnCategoryBtnDelete}"  process="@this" title="#{loc.delete}" action="#{categoryBean.testBeforeDelete()}"  update="dlgDelete"  >
+                            <f:setPropertyActionListener value="#{data}"  target="#{categoryBean.selectedData}" />
+                            <i class="icon-cancel Fs14 fltrPlusBtn"/>                 
+                        </p:commandLink>
+                        <p:commandLink class="#{sessionBean.user.isMobile?'DispInlBlock':''}" rendered="#{btnCategoryBtnAddToItem}" process="@this" title="#{addItemText}" action="#{categoryBean.addToItem()}" resetValues="true"  update="dlgAddToItem"  >
+                            <f:setPropertyActionListener value="#{data}"  target="#{categoryBean.selectedData}" />
+                            <i class="icon-magic Fs14 fltrPlusBtn"/>                 
+                        </p:commandLink>
+
+                        <p:confirmDialog global="true" class="deleteConfirm MaxWid500"   id="dlgDelete" widgetVar="dlgDeleteCategory"  closeOnEscape="true" responsive="true">
+                            <f:facet name="message">
+                                <h:outputText value="#{loc.areyousureyouwanttodelete}"  style="white-space: pre-wrap;">
+                                    <i class="icon-trash Fs20 tlbrDeleteBtn" /> 
+                                </h:outputText>
+
+                            </f:facet>
+                            <p:commandButton value="#{loc.yes}" action="#{categoryBean.delete()}" onclick="PF('dlgDeleteCategory').hide()" process="@this" styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+                            <p:commandButton value="#{loc.no}" type="button" onclick="PF('dlgDeleteCategory').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+                        </p:confirmDialog>
+                    </p:column>
+                </p:treeTable>
+
+            </p:panel>
+        </div>
+        <p:remoteCommand name="deletecategory"  delay="500" process="@this" action="#{categoryBean.delete()}" update="frmCategorization:treCategory" />
+    </h:form>
+
+    <p:dialog id="dlgCategory" widgetVar="dlg_category" width="15%" dynamic="true" modal="true" resizable="false" responsive="true" closeOnEscape="true" > 
+        <h:form id="frmCategory">
+            <ui:include src="/pages/general/common/processtoolbar.xhtml">
+                <ui:param name="outputtext" value="#{categoryBean.processType==1 ? loc.addparentcategory : categoryBean.processType==2 ? loc.addsubcategory :  loc.editcategory}"/>
+                <ui:param name="bean" value='#{categoryBean}'/>
+                <ui:param name="update" value="frmCategorization:treCategory txtCategoryName"/>
+                <ui:param name="btnSaveId" value="true"/>
+            </ui:include>
+            <h:panelGroup layout="block">
+                <div class="ui-g divContent">
+                    <h:panelGroup rendered="#{categoryBean.processType==2}">
+                    <div class="ui-g-12 ui-md-12 ui-lg-12">
+                        <p:outputLabel value="#{loc.parentcategory}" class="FontBold Fs12" for="txtParentCategoryName"/>
+                        <p:inputText id="txtParentCategoryName" value="#{categoryBean.selectedData.name}" required="true" readonly="true" class="Wid95"/>
+                    </div>
+                    </h:panelGroup>
+                    <div class="ui-g-12 ui-md-12">
+                        <p:outputLabel value="#{categoryBean.processType==2 ? loc.subcategory :loc.categoryname}" class="FontBold Fs12" for="txtCategoryName"/>
+                        <p:inputText id="txtCategoryName" value="#{categoryBean.category.name}" required="true" class="Wid95"/>
+                    </div>
+                </div>
+
+            </h:panelGroup>
+
+        </h:form>
+    </p:dialog>  
+
+</ui:composition>

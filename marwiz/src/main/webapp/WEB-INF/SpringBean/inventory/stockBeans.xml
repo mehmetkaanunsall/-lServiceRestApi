@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                            http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://www.springframework.org/schema/tx 
+                            http://www.springframework.org/schema/tx/spring-tx.xsd">
+      
+    <bean id="stockDao" class="com.mepsan.marwiz.inventory.stock.dao.StockDao" lazy-init="true" scope="prototype" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="gfStockService" class="com.mepsan.marwiz.inventory.stock.business.GFStockService" lazy-init="true" scope="prototype" >      
+    </bean> 
+    
+    <bean id="stockService" class="com.mepsan.marwiz.inventory.stock.business.StockService" lazy-init="true" scope="prototype" >
+    </bean>
+
+    <bean id="stockTaxGroupDao" class="com.mepsan.marwiz.inventory.stock.dao.StockTaxGroupDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>    
+    </bean>
+    
+    <bean id="stockTaxGroupService" class="com.mepsan.marwiz.inventory.stock.business.StockTaxGroupService" lazy-init="true" scope="request" >       
+    </bean> 
+    
+    <bean id="stockCategorizationDao" class="com.mepsan.marwiz.inventory.stock.dao.StockCategorizationDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>    
+    </bean>
+    
+    <bean id="stockCategorizationService" class="com.mepsan.marwiz.inventory.stock.business.StockCategorizationService" lazy-init="true" scope="request" >       
+    </bean> 
+    
+    <bean id="stockAnalysisDao" class="com.mepsan.marwiz.inventory.stock.dao.StockAnalysisDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>    
+    </bean>
+    
+    <bean id="stockAnalysisService" class="com.mepsan.marwiz.inventory.stock.business.StockAnalysisService" lazy-init="true" scope="request" >       
+    </bean> 
+    
+    <bean id="stockMovementDao" class="com.mepsan.marwiz.inventory.stock.dao.StockMovementDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>    
+    </bean>
+    
+    <bean id="stockMovementService" class="com.mepsan.marwiz.inventory.stock.business.StockMovementService" lazy-init="true" scope="request" >       
+    </bean> 
+    
+    <bean id="stockAlternativeBarcodeDao" class="com.mepsan.marwiz.inventory.stock.dao.StockAlternativeBarcodeDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>    
+    </bean>
+    
+    <bean id="stockAlternativeBarcodeService" class="com.mepsan.marwiz.inventory.stock.business.StockAlternativeBarcodeService" lazy-init="true" scope="request" >       
+    </bean> 
+    
+    <bean id="stockAlternativeUnitDao" class="com.mepsan.marwiz.inventory.stock.dao.StockAlternativeUnitDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>    
+    </bean>
+    
+    <bean id="stockAlternativeUnitService" class="com.mepsan.marwiz.inventory.stock.business.StockAlternativeUnitService" lazy-init="true" scope="request" >       
+    </bean> 
+    
+    
+</beans>

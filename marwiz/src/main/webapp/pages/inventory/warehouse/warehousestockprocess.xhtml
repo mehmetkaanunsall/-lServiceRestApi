@@ -1,0 +1,84 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions" 
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmWarehouseStockProcess">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.stockprocess}"/>
+            <ui:param name="bean" value='#{warehouseStockTabBean}' />
+            <ui:param name="update" value="pgrWarehouseStockProcess" />
+            <ui:param name="btnSaveId" value='false' />     
+            <ui:param name="renderback" value='false'/>
+            <ui:param name="btnDeleteId" value='false' />
+            
+        </ui:include>
+
+        <h:panelGroup id="pgrWarehouseStockProcess" layout="block">
+            <div class="ui-g divContent">
+                <div class="ui-g-12 panelToggle">
+
+
+                    <div class="ui-g-12  ui-md-6">
+                        <p:outputLabel value="#{loc.stock}" for="txtStock" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtStock" value="#{warehouseStockTabBean.selectedObject.stock.name}" required="true"  readonly="true" placeholder="#{loc.stock} ">
+                           
+                        </p:inputText>
+                    </div>
+
+                    <div class="ui-g-12  ui-md-6">
+                        <p:outputLabel value="#{loc.balance}" for="txtBalance" class="FontBold Fs12"/>
+                        <p:inputText id="txtBalance" value="#{warehouseStockTabBean.selectedObject.quantity}" required="true" readonly="true" placeholder="#{loc.balance}" >
+                            <p:keyFilter regEx="/[\d\.\s,]/"/>
+                        </p:inputText>
+                    </div>
+
+                </div>
+            </div>
+        </h:panelGroup>
+
+        <div class="EmptyBox10" />
+    
+        <p:tabView id="tbvWarehouseStockTabShelfProc" rendered="#{warehouseStockTabBean.processType==2 and warehouseStockTabBean.getRendered(43, 1)}" scrollable="true" dynamic="true" cache="true">
+           <p:ajax event="tabChange" listener="#{warehouseStockTabBean.onTabChange}" />
+
+            <p:tab id="tab43" title="#{loc.shelves}" rendered="#{warehouseStockTabBean.getRendered(43, 1)}">
+               <c:if test="#{warehouseStockTabBean.activeIndex==43}" >
+                   <h:form id="frmStockTabShelfTab" >
+                       <div class="ContainerIndent"> 
+
+
+                           <ui:include src="/pages/general/common/tabgridtoolbar.xhtml">
+
+                               <ui:param name="bean" value="#{warehouseStockTabShelfTabBean}"/>
+                               <ui:param name="btnNewId" value="#{warehouseStockTabShelfTabBean.warehouse.isAutomat ? 'false' : warehouseStockTabShelfTabBean.getRendered(149, 0)}"/>
+                               <ui:param name="update" value="dlgWarehouseStockShelfTabProc" />
+                               <ui:param name="outputtext" value="#{loc.shelves}" />
+
+                           </ui:include>
+                           <p:dataTable id="dtbShelf"  var="ShelfStockCon" value="#{warehouseStockTabShelfTabBean.listOfWarehouseShelfStockCon}" selection="#{warehouseStockTabShelfTabBean.selectedObject}" selectionMode="single" rowKey="#{ShelfStockCon.id}"
+                                        emptyMessage="#{loc.norecordsfound}" class="tabDatatable" resizableColumns="true" >
+                               <p:ajax event="#{sessionBean.user.gridRowSelect}" resetValues="true" listener="#{warehouseStockTabShelfTabBean.createDialog(2)}" update="dlgWarehouseStockShelfTabProc"/>
+
+                               <p:column headerText="#{loc.shelfname}" sortBy="#{ShelfStockCon.warehouseShelf.name}" sortable="true">
+                                   <h:outputText value="#{ShelfStockCon.warehouseShelf.name}" />
+                               </p:column>
+                               <p:column headerText="#{loc.shelfcode}" sortBy="#{ShelfStockCon.warehouseShelf.code}" sortable="true">
+                                   <h:outputText value="#{ShelfStockCon.warehouseShelf.code}" />
+                               </p:column>
+                           </p:dataTable>
+
+                       </div>
+                   </h:form>
+               </c:if>
+            </p:tab>
+
+        </p:tabView>
+    </h:form>
+    
+
+</ui:composition>

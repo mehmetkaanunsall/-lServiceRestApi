@@ -1,0 +1,270 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:form id="frmFuelSalesReport">
+        <ui:include src="/pages/general/common/toolbarreport.xhtml">
+            <ui:param name="outputtext" value="#{loc.fuelsalesreport}" />
+            <ui:param name="bean" value="#{fuelSalesReportBean}" />
+            <ui:param name="update" value="frmFuelSalesReportDatatable:dtbFuelSalesReport pgSalesReport pgrSalesReportDatatable" />
+        </ui:include>
+
+        <h:panelGroup id="pgSalesReport" class="divContent" layout="block" transient="true">  
+            <div class="panelToggle  ui-g">
+                <div class="ui-g-12 ui-md-6 ui-lg-2">
+                    <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                    <p:calendar  id="cldStartDate" class="datepicker" value="#{fuelSalesReportBean.selectedObject.beginDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                        <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                    </p:calendar>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-2">
+                    <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                    <p:calendar  id="cldEndDate" class="datepicker" value="#{fuelSalesReportBean.selectedObject.endDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                        <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                    </p:calendar>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-2 " >
+                    <p:outputLabel value="#{loc.salesprice} (Min)"  styleClass="Fs12 FontBold"/>
+                    <p:inputNumber value="#{fuelSalesReportBean.selectedObject.minSalesPrice}"
+                                   decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}" thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                   roundMethod="D"  emptyValue="sign" symbolPosition="suffix" class="TexAlRight">
+
+                    </p:inputNumber>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-2 " >
+                    <p:outputLabel value="#{loc.salesprice} (Max)"  styleClass="Fs12 FontBold"/>
+                    <p:inputNumber value="#{fuelSalesReportBean.selectedObject.maxSalesPrice}"
+                                   decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}" thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                   roundMethod="D" emptyValue="sign" symbolPosition="suffix" class="TexAlRight">
+
+                    </p:inputNumber>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-2">
+                    <p:outputLabel value="#{loc.shiftno}" for="txtShift" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtShift" value="#{fuelSalesReportBean.selectedObject.fuelShift.shiftNo}" placeholder="#{loc.shiftno}" /> 
+                </div>    
+                <div class="ui-g-12 ui-md-6 ui-lg-2">
+                    <p:outputLabel value="#{loc.receiptno}" for="txtReceiptNo" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtReceiptNo"  value="#{fuelSalesReportBean.selectedObject.receiptNo}" placeholder="#{loc.receiptno}" /> 
+                </div>
+
+
+                <div class="ui-g-12 ui-md-12 ui-lg-6" style="padding: 0px !important">
+                    <div class="ui-g-12  ui-md-6 ui-lg-4">
+                        <p:outputLabel value="#{loc.branch}" for="slcBranch" class="FontBold Fs12"/>
+                        <p:selectCheckboxMenu  id="slcBranch"  value="#{fuelSalesReportBean.selectedObject.selectedBranchList}" 
+                                               filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                               label="#{fuelSalesReportBean.selectedObject.selectedBranchList.size()!=0 ? fuelSalesReportBean.selectedObject.selectedBranchList.size() :loc.all} #{fuelSalesReportBean.selectedObject.selectedBranchList.size()!=0 ? loc.branch : ''} #{fuelSalesReportBean.selectedObject.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                            <f:selectItems value="#{fuelSalesReportBean.listOfBranch}" itemLabel="#{branch.name}" itemValue="#{branchSetting}" var="branchSetting" />       
+                            <p:ajax oncomplete="PF('slcBranchCheckBox').show()" global="false" listener="#{fuelSalesReportBean.changeBranch()}" update="slcBranch pgSalesReport"/>
+                            <p:ajax event="toggleSelect" listener="#{fuelSalesReportBean.changeBranch()}" update="slcBranch pgSalesReport"  oncomplete="PF('slcBranchCheckBox').show()" global="false"/>
+                        </p:selectCheckboxMenu>
+                    </div>  
+                    <div class="ui-g-12 ui-md-6 ui-lg-4">
+                        <p:outputLabel value="#{loc.customer}" for="txtCustomer" styleClass="Fs12 FontBold"/>
+                        <p:inputText  id="txtCustomer" onclick="showAccountBook()" value="#{accountBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+
+                        </p:inputText> 
+                        <p:commandLink id="btnCustomer" process="@this" update="frmFuelSalesReport" actionListener="#{fuelSalesReportBean.openDialog(1)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_accountcheckbox').loadContents();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax listener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([fuelSalesReportBean.selectedObject.selectedBranchList.size() != 0 ? fuelSalesReportBean.selectedObject.selectedBranchList : fuelSalesReportBean.listOfBranch],'frmAccountBookFilterCheckbox','olp_accountcheckbox', 'accountextractreportcheckbox')}"  update="frmAccountBookFilterCheckbox" />
+                        </p:commandLink>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                        <p:outputLabel value="#{loc.salestype}" for="slcSalesType"  styleClass="Fs12 FontBold"/>
+                        <p:selectCheckboxMenu id="slcSalesType" value="#{fuelSalesReportBean.selectedObject.selectedFuelSaleTypeList}" converter="entityConverter"  widgetVar="slc_SalesType" label="#{fuelSalesReportBean.selectedObject.selectedFuelSaleTypeList.size()!=0 ? fuelSalesReportBean.selectedObject.selectedFuelSaleTypeList.size() : loc.all} #{fuelSalesReportBean.selectedObject.selectedFuelSaleTypeList.size()!=0 ? loc.salestype :''} #{fuelSalesReportBean.selectedObject.selectedFuelSaleTypeList.size()!=0 ? loc.selected :''}" filter="true" filterMatchMode="contains">
+                            <f:selectItems value="#{fuelSalesReportBean.saleTypeList}" itemLabel="#{fuelsaletype.name}" itemValue="#{fuelsaletype}" var="fuelsaletype" />       
+                            <p:ajax oncomplete="PF('slc_SalesType').show()" global="false" update="slcSalesType"/>
+                            <p:ajax event="toggleSelect"  update="slcSalesType"  oncomplete="PF('slc_SalesType').show()" global="false"/>
+                        </p:selectCheckboxMenu>
+                    </div>
+
+                </div>
+                <div class="ui-g-12 ui-md-12 ui-lg-6" style="padding: 0px !important">
+                    <div class="ui-g-12 ui-md-6 ui-lg-4">
+                        <p:outputLabel value="#{loc.pumpper}" for="txtPumper" styleClass="Fs12 FontBold"/>
+                        <p:inputText  id="txtPumper" onclick="showAttendantBook()" value="#{fuelSalesReportBean.selectedCountAttendant}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}" />   
+                        <p:commandLink id="btnPumper" process="@this" update="frmFuelSalesReport" actionListener="#{fuelSalesReportBean.openDialog(2)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_attendantcheckbox').loadContents();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax listener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([fuelSalesReportBean.selectedObject.selectedBranchList.size() != 0 ? fuelSalesReportBean.selectedObject.selectedBranchList : fuelSalesReportBean.listOfBranch],'frmAttendantBookFilter','olp_attendantcheckbox', 'employeeextractreportcheckbox')}" update="frmAttendantBookFilter" />
+                        </p:commandLink>
+                    </div> 
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-4 " >
+                        <p:outputLabel value="#{loc.plate}" for="txtPlate" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtPlate" value="#{fuelSalesReportBean.selectedObject.plate}" placeholder="#{loc.plate}" />
+                    </div>
+
+
+                </div>
+            </div>
+        </h:panelGroup>
+
+        <p:remoteCommand name="showAccountBook" process="@this" update="frmAccountBookFilterCheckbox"  action="#{fuelSalesReportBean.openDialog(1)}" oncomplete="PF('olp_accountcheckbox').show();"  actionListener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([fuelSalesReportBean.selectedObject.selectedBranchList.size() != 0 ? fuelSalesReportBean.selectedObject.selectedBranchList : fuelSalesReportBean.listOfBranch],'frmAccountBookFilterCheckbox','olp_accountcheckbox','accountextractreportcheckbox')}" />
+        <p:remoteCommand name="showAttendantBook" process="@this" update="frmAttendantBookFilter"  action="#{fuelSalesReportBean.openDialog(2)}" oncomplete="PF('olp_attendantcheckbox').show();"  actionListener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([fuelSalesReportBean.selectedObject.selectedBranchList.size() != 0 ? fuelSalesReportBean.selectedObject.selectedBranchList : fuelSalesReportBean.listOfBranch],'frmAttendantBookFilter','olp_attendantcheckbox','employeeextractreportcheckbox')}" />
+
+    </h:form>
+
+    <div class="EmptyBox20" />
+
+    <h:panelGroup id="pgrSalesReportDatatable" >
+        <h:panelGroup rendered="#{fuelSalesReportBean.isFind}">
+            <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                <ui:param name="bean" value="#{fuelSalesReportBean}"/>
+                <ui:param name="datatable" value="frmFuelSalesReportDatatable:dtbFuelSalesReport" />
+                <ui:param name="fileName" value="#{loc.fuelsalesreport}"/>
+                <ui:param name="renderedToggler" value='true'/>
+                <ui:param name="renderedExcel" value='true'/>
+                <ui:param name="renderedPdf" value='true'/>
+                <ui:param name="renderedPrint" value='true'/>
+                <ui:param name="renderedGraphic" value='false'/>
+            </ui:include>
+
+            <h:form id="frmFuelSalesReportDatatable">
+
+                <p:dataTable id="dtbFuelSalesReport" var="FuelSalesReport" widgetVar="FuelSalesReportPF" emptyMessage="#{loc.norecordsfound}" value="#{fuelSalesReportBean.listOfObjects}" selectionMode="single"
+                             rows="#{sessionBean.user.defualtGridSize}" rowKey="#{FuelSalesReport.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                             rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true" lazy="true"   
+                             >
+                    <p:ajax event="colReorder" listener="#{fuelSalesReportBean.reorder}" update="frmGridToolbar:toggle" />     
+                    <p:ajax event="colResize"  listener="#{fuelSalesReportBean.onResize}" />
+
+
+                    <p:column id="clmBranch" headerText="#{loc.branch}"  visible="#{fuelSalesReportBean.toogleList[0]}" exportable="#{fuelSalesReportBean.toogleList[0]}">
+                        <h:outputText value="#{FuelSalesReport.branch.name}"  />
+                    </p:column>
+
+                    <p:column id="clmDate" headerText="#{loc.date}" visible="#{fuelSalesReportBean.toogleList[1]}"  exportable="#{fuelSalesReportBean.toogleList[1]}">
+                        <h:outputText value="#{FuelSalesReport.processDate}"  >
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmShiftNo" headerText="#{loc.shiftno}"  visible="#{fuelSalesReportBean.toogleList[2]}" exportable="#{fuelSalesReportBean.toogleList[2]}">
+                        <h:outputText value="#{FuelSalesReport.shiftNo}"  />
+                    </p:column>
+
+
+                    <p:column id="clmCustomer" headerText="#{loc.customer}"  visible="#{fuelSalesReportBean.toogleList[3]}" exportable="#{fuelSalesReportBean.toogleList[3]}">
+                        <h:outputText value="#{FuelSalesReport.account.name}"  />
+                    </p:column>
+
+                    <p:column id="clmPlate" headerText="#{loc.plate}"  visible="#{fuelSalesReportBean.toogleList[4]}" exportable="#{fuelSalesReportBean.toogleList[4]}">
+                        <h:outputText value="#{FuelSalesReport.plate}"  />
+                    </p:column>
+
+                    <p:column id="clmProductNo" headerText="#{loc.stockcode}"  visible="#{fuelSalesReportBean.toogleList[5]}" exportable="#{fuelSalesReportBean.toogleList[5]}">
+                        <h:outputText value="#{FuelSalesReport.stockCode}" />
+                    </p:column>
+
+                    <p:column id="clmCentralProductCode" headerText="#{loc.centerstockcode}"  visible="#{fuelSalesReportBean.toogleList[6]}" exportable="#{fuelSalesReportBean.toogleList[6]}">
+                        <h:outputText value="#{FuelSalesReport.centralProductCode}" />
+                    </p:column>
+
+                    <p:column id="clmStockBarcode" headerText="#{loc.stockbarcode}"  visible="#{fuelSalesReportBean.toogleList[7]}" exportable="#{fuelSalesReportBean.toogleList[7]}">
+                        <h:outputText value="#{FuelSalesReport.stockBarcode}"  />
+                    </p:column>
+
+                    <p:column id="clmProdcutName" headerText="#{loc.stock}"  visible="#{fuelSalesReportBean.toogleList[8]}" exportable="#{fuelSalesReportBean.toogleList[8]}">
+                        <h:outputText value="#{FuelSalesReport.stockName}" />
+                    </p:column>
+
+                    <p:column id="clmReceiptNumber" headerText="#{loc.receiptno}"  visible="#{fuelSalesReportBean.toogleList[9]}" exportable="#{fuelSalesReportBean.toogleList[9]}">
+                        <h:outputText value="#{FuelSalesReport.receiptNo}" />
+                    </p:column>
+
+                    <p:column id="clmAtendantName" headerText="#{loc.pumpper}"  visible="#{fuelSalesReportBean.toogleList[10]}" exportable="#{fuelSalesReportBean.toogleList[10]}">
+                        <h:outputText value="#{FuelSalesReport.attendant}"/>
+                    </p:column>
+
+                    <p:column id="clmSaleType" headerText="#{loc.saletype}"  visible="#{fuelSalesReportBean.toogleList[11]}" exportable="#{fuelSalesReportBean.toogleList[11]}">
+                        <h:outputText value="#{FuelSalesReport.fuelSaleType.name}" />
+                    </p:column>
+
+                    <p:column id="clmLiter" headerText="#{loc.amount}" visible="#{fuelSalesReportBean.toogleList[12]}"   exportable="#{fuelSalesReportBean.toogleList[12]}">
+                        <h:outputText value="#{FuelSalesReport.stock.availableQuantity}" class="Fright" >
+                            <f:converter converterId="currencyConverter"/> >
+                            <f:attribute name="unit" value="#{FuelSalesReport.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmPrice" headerText="#{loc.unitprice}"  visible="#{fuelSalesReportBean.toogleList[13]}" exportable="#{fuelSalesReportBean.toogleList[13]}">
+                        <h:outputText value="#{FuelSalesReport.price}" class="Fright">
+                            <f:converter converterId="currencyConverter"/> >
+                            <f:attribute name="currency" value="#{FuelSalesReport.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmDiscountTotal" headerText="#{loc.discounttotal}"  visible="#{fuelSalesReportBean.toogleList[14]}" exportable="#{fuelSalesReportBean.toogleList[14]}">
+                        <h:outputText value="#{FuelSalesReport.discountTotal}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{FuelSalesReport.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmTotalMoney" headerText="#{loc.total}"  visible="#{fuelSalesReportBean.toogleList[15]}" exportable="#{fuelSalesReportBean.toogleList[15]}">
+                        <h:outputText value="#{FuelSalesReport.totalMoney}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{FuelSalesReport.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+
+                </p:dataTable>  
+            </h:form>
+        </h:panelGroup>
+    </h:panelGroup>
+
+
+    <ui:include src="/pages/general/common/accountbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{fuelSalesReportBean}' />
+        <ui:param name="for" value='frmFuelSalesReport:btnCustomer' />
+        <ui:param name="type" value='accountextractreportcheckbox' />
+        <ui:param name="parameters" value='#{[fuelSalesReportBean.selectedObject.selectedBranchList.size() != 0 ? fuelSalesReportBean.selectedObject.selectedBranchList : fuelSalesReportBean.listOfBranch]}' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmAccountBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_accountcheckbox" />
+    </ui:include>
+
+    <!--üstüne tıklayınca açılması için remote command-->
+    <!--          Kitaptan Pompacı seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/accountbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{fuelSalesReportBean}' />
+        <ui:param name="for" value='frmFuelSalesReport:btnPumper' />
+        <ui:param name="type" value='employeeextractreportcheckbox' />
+        <ui:param name="parameters" value='#{[fuelSalesReportBean.selectedObject.selectedBranchList.size() != 0 ? fuelSalesReportBean.selectedObject.selectedBranchList : fuelSalesReportBean.listOfBranch]}' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmAttendantBookFilter' /> 
+        <ui:param name="overlay" value="olp_attendantcheckbox" />
+    </ui:include>
+
+
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.fuelsalesreport}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+
+</ui:composition>

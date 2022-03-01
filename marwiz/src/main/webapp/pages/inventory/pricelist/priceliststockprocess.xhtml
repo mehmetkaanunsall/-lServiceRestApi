@@ -1,0 +1,75 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmPriceListStockProcess">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.stockprocess}"/>
+            <ui:param name="bean" value='#{priceListStockTabBean}' />
+            <ui:param name="update" value="grdPriceListProcess" />
+            <ui:param name="btnSaveId" value="#{(priceListStockTabBean.selectedPriceList.isPurchase and priceListStockTabBean.selectedPriceList.isDefault and sessionBean.getLastBranchSetting().purchaseUnitPriceUpdateOptionId==0) ? false : priceListStockTabBean.getRendered(143, 0)}" />      
+            <ui:param name="btnDeleteId" value='false' />
+            <ui:param name="btnDeleteId" value="#{(priceListStockTabBean.selectedPriceList.isPurchase and priceListStockTabBean.selectedPriceList.isDefault and sessionBean.getLastBranchSetting().purchaseUnitPriceUpdateOptionId==0) ? false : priceListStockTabBean.processType==2 ? priceListStockTabBean.getRendered(144, 0) : false}" />
+            <c:if test="#{priceListStockTabBean.processType==2}">
+                <ui:param name="renderedHistory" value="true"/>
+            </c:if>
+        </ui:include>
+        <h:panelGroup id="grdPriceListProcess" layout="block">
+
+            <div class="ui-g-12 divContent">
+                <div class="ui-g-12 ui-md-6 ui-lg-3">     
+                    <p:outputLabel value="#{loc.stock}" for="txtStock" class="Fs12 FontBold"/>
+                    <p:inputText id="txtStock" value="#{priceListStockTabBean.selectedObject.stock.name}" onclick="showBook()" class="inputPositionForBookFilter" required="true" readonly="#{facesContext.currentPhaseId.ordinal ge 4}"  placeholder="#{loc.stock} ">
+                    </p:inputText>
+                    <p:commandLink id="btnStock" class="commandLinkPositionForBookFilter" process="@this" oncomplete="PF('olp_stock').loadContents();" >
+                        <i class="fa fa-book Fs16 softgray iconPositionForBookFilter "/>   
+                        <p:ajax listener="#{stockBookFilterBean.findFilterListLazyLoading([priceListStockTabBean.selectedPriceList],'frmStockBookFilter','olp_stock','pricelist')}" />
+                    </p:commandLink>
+                </div> 
+                <div class="ui-g-12 ui-md-6 ui-lg-3"> 
+                    <p:outputLabel value="#{loc.price}" for="txtPrice" class="Fs12 FontBold"/>
+                    <p:inputNumber id="txtPrice" value="#{priceListStockTabBean.selectedObject.price}" minValue="0"
+                                   decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}" thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                   roundMethod="D"  symbolPosition="#{sessionBean.locale=='tr' ? 'p': 's'}"
+                                   required="true" class="Wid90 TexAlRight" placeholder="#{loc.price}" >                 
+                    </p:inputNumber>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">     
+                    <p:outputLabel value="#{loc.currency}" for="slcCurrency" class="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcCurrency" value="#{priceListStockTabBean.selectedObject.currency.id}" required="true" styleClass="Wid95">
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true"/>
+                        <f:selectItems value="#{sessionBean.currencies}" var="currency" itemLabel="#{currency.nameMap.get(sessionBean.langId).name}" itemValue="#{currency.id}" />
+                        <p:ajax global="false" listener="#{priceListStockTabBean.bringTagOfCurrency()}"/>
+                    </p:selectOneMenu>
+                </div> 
+                <div class="ui-g-12 ui-md-6 ui-lg-3">     
+                    <p:outputLabel value="#{loc.istaxincluded}" for="slcIsTaxIncluded" class="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcIsTaxIncluded" value="#{priceListStockTabBean.selectedObject.is_taxIncluded}" required="true">
+                        <f:selectItem itemLabel="#{loc.no}" itemValue="false" />
+                        <f:selectItem itemLabel="#{loc.yes}" itemValue="true" />
+                    </p:selectOneMenu>
+                </div> 
+
+            </div>
+        </h:panelGroup>
+        <p:remoteCommand name="showBook" process="@this" oncomplete="PF('olp_stock').loadContents()" actionListener="#{stockBookFilterBean.findFilterListLazyLoading([priceListStockTabBean.selectedPriceList],'frmStockBookFilter','olp_stock','pricelist')}" />
+    </h:form>
+
+
+    <!-- stok listesinde kitaba basıldığında stokların listendiği dialog-->
+    <ui:include src="/pages/general/common/stockbook.xhtml" >
+        <ui:param name="updateBean" value='#{priceListStockTabBean}' />
+        <ui:param name="for" value='frmPriceListStockProcess:btnStock' />
+        <ui:param name="type" value='pricelist' />
+        <ui:param name="parameters" value='#{[priceListStockTabBean.selectedPriceList]}' /> 
+        <ui:param name="columnsize" value='4' />
+        <ui:param name="form" value='frmStockBookFilter' /> 
+        <ui:param name="overlay" value="olp_stock" />
+    </ui:include>
+
+
+</ui:composition>

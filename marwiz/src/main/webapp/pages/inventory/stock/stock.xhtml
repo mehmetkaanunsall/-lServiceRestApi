@@ -1,0 +1,1575 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+
+
+
+    <!--  
+       
+       FORMAT YAPARSANIZ JAVASCRIPTEKİ &amp;&amp;  -> & amp;  & amp; OLUYOR BOZULUYOR &amp;&amp; OLARAK DÜZELTMENİZ GEREKİYOR.
+       
+       
+    -->
+    <!-- 
+        Açıklama : Stok sayfasında stokların listelendiği xhtml.
+        Yazan    : Ali Kurt
+        Bean     : stockBean
+        Sayfa    : Stoklar
+    -->  
+
+    <div class="ui-g">
+        <div class="categoryDiv open ui-g-12 ui-md-12 ui-lg-2">
+
+            <h:form id="frmCategorization">
+
+                <p:outputPanel id="ftrPanel">
+                    <c:set var="itemId" value="2" scope="request" />
+                    <p:treeTable id="treCategory"  value="#{categoryBean.root}"    var="data"  selectionMode="single" selection="#{categoryBean.selectedCategory}" class="treeHoverIcon" style="height: 668px !important;" emptyMessage="#{loc.norecordsfound}">
+
+
+                        <p:ajax event="select" delay="500" listener="#{stockBean.bringList}"  />
+
+                        <p:column headerText="#{loc.categoryname}" >
+
+                            <h:outputText value="#{data.name}" title="#{data.name}"/>    
+                        </p:column>
+                    </p:treeTable>
+
+                </p:outputPanel>
+
+            </h:form>
+
+        </div>
+        <div class="divTable ui-g-12 ui-md-12 ui-lg-10">
+            <div class="ftrOpenClose btnRotate TexAlCenter" onclick="Centrowiz.openCloseCategory();">
+                <i class="fa fa-chevron-left tlbrBackBtn Fs20" style=" margin-top: 9px;" title="#{loc.categoryopenclose}"></i>
+            </div> 
+            <h:panelGroup id="pngView">
+                <ui:include src="/pages/general/common/datagridtoolbar.xhtml" >
+                    <ui:param name="bean" value="#{stockBean}"/> 
+                    <ui:param name="btnNewId" value="#{stockBean.getRendered(122, 0)}"/>  
+                    <ui:param name="datatable" value="#{sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock' : sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1  ? 'frmStock:dtbStockFull' : 'frmStock:dtbStockNoIntegration'}" />  
+                    <ui:param name="dtbWidgetVar" value="stockPF" />  
+                    <ui:param name="fileName" value="#{loc.products}"/>
+                    <ui:param name="renderedFilter" value='false'/>
+                    <ui:param name="renderedToggler" value='true'/>
+                    <ui:param name="renderedExel" value='true'/>
+                    <ui:param name="renderedPdf" value='true'/>
+                    <ui:param name="renderedStockPage" value='true'/>
+                    <ui:param name="renderedBatchUpdate" value='#{stockBean.getRendered(123, 0)}'/>
+                    <ui:param name="renderedUpload" value='#{stockBean.getRendered(122, 0)}'/> <!--#{sessionBean.user.lastBranchSetting.isCentralIntegration ? false : true} -->
+                    <ui:param name="renderedSpecialExport" value='true'/>
+                    <ui:param name="renderedSpecialExportExcel" value='true'/>
+                </ui:include>
+
+
+                <h:form id="frmStock">
+
+                    <p:dataTable  id="#{sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'dtbStock' : sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1  ? 'dtbStockFull' : 'dtbStockNoIntegration'}" var="Stock"  value="#{stockBean.listOfObjects}" widgetVar="stockPF" 
+                                  selection="#{stockBean.selectedObject}"  selectionMode="single" emptyMessage="#{loc.norecordsfound}" rowKey="#{Stock.id}"
+                                  rowStyleClass="#{Stock.status.id==4 ? 'ColumnColorRed' : (sessionBean.user.lastBranchSetting.isCentralIntegration and Stock.stockInfo.isPassive and Stock.status.id == 3) ? 'ColumnColorOrange' : null}" paginator="true" paginatorPosition="bottom"
+                                  reflow="true" lazy="true" resizableColumns="true" resizeMode="expand" draggableColumns="true"                                   
+                                  rows="#{stockBean.isScrollView ? '80' : sessionBean.user.defualtGridSize}"   class="#{stockBean.isScrollView ? 'datatableScrollable' : 'datatableDraggable'}"
+                                  paginatorTemplate="#{stockBean.isScrollView ? '' : '{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}'} {CurrentPageReport}"
+                                  currentPageReportTemplate="#{stockBean.isScrollView ? loc.sum : ''} #{stockBean.isScrollView ? ' : ' : '{startRecord}-{endRecord}'} #{stockBean.isScrollView ? '' : loc.intotal} {totalRecords}" 
+                                  rowsPerPageTemplate="#{sessionBean.user.gridSize}"
+                                  scrollable="#{stockBean.isScrollView ? true : false}"  virtualScroll="#{stockBean.isScrollView ? true : false}" scrollHeight="558" scrollRows="40">
+
+                        <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{stockBean.goToProcess()}" /> 
+                        <p:ajax event="colReorder" listener="#{stockBean.reorder}" update="frmGridToolbar:toggle" />     
+                        <p:ajax event="colResize"  listener="#{stockBean.onResize}" />
+
+                        <p:column id='clmBarcode' width="100" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmBarcode' : sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmBarcode' : 'frmStock:dtbStockNoIntegration:clmBarcode')}" headerText="#{loc.barcode}"  sortable="true" sortBy="#{Stock.tt.stckbarcode}" >
+                            <h:outputText value="#{Stock.barcode}" />
+                        </p:column >
+
+                        <p:column id='clmName' width="150" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmName' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmName' : 'frmStock:dtbStockNoIntegration:clmName')}" headerText="#{loc.stockname}" sortable="true" sortBy="#{Stock.tt.stckname}" >
+                            <h:outputText value="#{Stock.name}" />
+                        </p:column >
+
+                        <p:column id='clmCode' width="100" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmCode' : sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmCode' : 'frmStock:dtbStockNoIntegration:clmCode')}" headerText="#{loc.stockcode}" sortable="true" sortBy="#{Stock.tt.stckcode}" >
+                            <h:outputText value="#{Stock.code}" />
+                        </p:column >
+
+                        <p:column id='clmCenterStockCode' width="100" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmCenterStockCode' : sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmCenterStockCode' : 'frmStock:dtbStockNoIntegration:clmCenterStockCode')}" headerText="#{loc.centerstockcode}" sortable="true" sortBy="#{Stock.tt.stckcenterproductcode}" >
+                            <h:outputText value="#{Stock.centerProductCode}" />
+                        </p:column >
+
+                        <p:column id='clmUnit' width="100" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmUnit' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmUnit' : 'frmStock:dtbStockNoIntegration:clmUnit')}" headerText="#{loc.unit}" sortable="true" sortBy="#{Stock.tt.guntname}" >
+                            <h:outputText value="#{Stock.unit.name}" />
+                        </p:column >
+
+                        <p:column id='clmDepartmentName' width="100" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmDepartmentName' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmDepartmentName' : 'frmStock:dtbStockNoIntegration:clmDepartmentName')}" headerText="#{loc.departmentname}" sortable="true" sortBy="#{Stock.tt.sitaxdepartment_id}" >
+                            <h:outputText value="#{Stock.stockInfo.taxDepartment.name}" />
+                        </p:column >
+
+                        <p:column id='clmBrand' width="100" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmBrand' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmBrand' : 'frmStock:dtbStockNoIntegration:clmBrand')}" headerText="#{loc.brand}" sortable="true" sortBy="#{Stock.tt.brname}" >
+                            <h:outputText value="#{Stock.brand.name}" />
+                        </p:column >
+                        <p:column id='clmSupplier' width="100" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmSupplier' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmSupplier' : 'frmStock:dtbStockNoIntegration:clmSupplier')}" headerText="#{loc.supplier}" sortable="true" sortBy="#{Stock.tt.accname}" >
+                            <h:outputText value="#{Stock.supplier.name}" />
+                        </p:column >
+                        <c:if test="#{sessionBean.user.lastBranchSetting.isCentralIntegration}">
+                            <p:column id='clmCentralSupplier' width="150" rendered="#{sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1}" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmCentralSupplier' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmCentralSupplier' : 'frmStock:dtbStockNoIntegration:clmCentralSupplier')}" headerText="#{loc.centralsupplier}" sortable="true" sortBy="#{Stock.tt.csppname}" >
+                                <h:outputText value="#{Stock.centralSupplier.name}" />
+                            </p:column >
+                            <p:column id="clmRecommendedPurchasePrice" width="150"  rendered="#{sessionBean.user.lastBranchSetting.isCentralIntegration}" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType ==1 ? 'frmStock:dtbStock:clmRecommendedPurchasePrice' : sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmRecommendedPurchasePrice' : 'frmStock:dtbStockNoIntegration:clmRecommendedPurchasePrice')}" headerText="#{loc.recommendedpurchaseprice}" sortable="true" sortBy="#{Stock.COALESCE(tt.sipurchaserecommendedprice,0)}" >
+                                <h:outputText value="#{Stock.stockInfo.purchaseRecommendedPrice}" class="Fright" >
+                                    <f:converter converterId="currencyConverter" />
+                                    <f:attribute name="type" value="currency" />
+                                    <f:attribute name="currency" value="#{Stock.stockInfo.purchaseCurrency.id>0 ? Stock.stockInfo.purchaseCurrency : sessionBean.user.lastBranch.currency}" />
+                                </h:outputText>
+                            </p:column >
+                            <p:column id="clmRecommendedSalePrice" width="150" rendered="#{sessionBean.user.lastBranchSetting.isCentralIntegration}" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmRecommendedSalePrice' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmRecommendedSalePrice' : 'frmStock:dtbStockNoIntegration:clmRecommendedSalePrice')}" headerText="#{loc.recommendedsaleprice}" sortable="true" sortBy="#{Stock.COALESCE(tt.sirecommendedprice,0)}" >
+                                <h:outputText value="#{Stock.stockInfo.recommendedPrice}" class="Fright" >
+                                    <f:converter converterId="currencyConverter" />
+                                    <f:attribute name="type" value="currency" />
+                                    <f:attribute name="currency" value="#{Stock.stockInfo.currency.id>0 ? Stock.stockInfo.currency : sessionBean.user.lastBranch.currency}" />
+                                </h:outputText>
+                            </p:column >
+                            <p:column id="clmMandatorySalePrice" width="150" rendered="#{sessionBean.user.lastBranchSetting.isCentralIntegration}" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration  ? 'frmStock:dtbStock:clmMandatorySalePrice' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmMandatorySalePrice' : 'frmStock:dtbStockNoIntegration:clmMandatorySalePrice')}" headerText="#{loc.mandatorysaleprice}" sortable="true" sortBy="#{Stock.COALESCE(tt.sisalemandatoryprice,0)}" >
+                                <h:outputText value="#{Stock.stockInfo.saleMandatoryPrice}" class="Fright" >
+                                    <f:converter converterId="currencyConverter" />
+                                    <f:attribute name="type" value="currency" />
+                                    <f:attribute name="currency" value="#{Stock.stockInfo.saleMandatoryCurrency.id>0 ? Stock.stockInfo.saleMandatoryCurrency : sessionBean.user.lastBranch.currency}" />
+                                </h:outputText>
+                            </p:column >
+                        </c:if>
+                        <p:column id='clmPurchaseQuantity' width="100" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmPurchaseQuantity' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmPurchaseQuantity' : 'frmStock:dtbStockNoIntegration:clmPurchaseQuantity')}" headerText="#{loc.purchasequantity}" sortable="true" sortBy="#{Stock.COALESCE(tt.sipurchasecount,0)}" >
+                            <h:outputText value="#{Stock.stockInfo.purchaseCount}" class="Fright" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="unit" />
+                                <f:attribute name="unit" value="#{Stock.unit}" />
+                            </h:outputText>
+                        </p:column >
+                        <p:column id='clmSaleQuantity' width="100" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmSaleQuantity' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmSaleQuantity' : 'frmStock:dtbStockNoIntegration:clmSaleQuantity')}" headerText="#{loc.salesamount}" sortable="true" sortBy="#{Stock.COALESCE(tt.sisalecount,0)}" >
+                            <h:outputText value="#{Stock.stockInfo.saleCount}" class="Fright" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="unit" />
+                                <f:attribute name="unit" value="#{Stock.unit}" />
+                            </h:outputText>
+                        </p:column >
+                        <p:column id='clmOtherQuantity' width="100"  exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmOtherQuantity' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmOtherQuantity' : 'frmStock:dtbStockNoIntegration:clmOtherQuantity')}" headerText="#{loc.otherentryexit}" sortable="true" sortBy="#{Stock.tt.otherQuantity}" >
+                            <f:facet name="header"  >
+                                <h:outputText value="#{loc.otherentryexit}" title="#{loc.warehousereceiptstocktakingvs}" >
+                                </h:outputText>
+                            </f:facet>
+                            <h:outputText value="#{Stock.otherQuantity}" class="Fright" title="#{loc.warehousereceiptstocktakingvs}" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="unit" />
+                                <f:attribute name="unit" value="#{Stock.unit}" />
+                            </h:outputText>
+                        </p:column >
+                        <p:column id='clmAvailableQuantity' width="100" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmAvailableQuantity' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmAvailableQuantity' : 'frmStock:dtbStockNoIntegration:clmAvailableQuantity')}" headerText="#{loc.availablequantity}" sortable="true" sortBy="#{Stock.tt.availablequantity}" >
+                            <h:outputText value="#{Stock.availableQuantity}" class="Fright" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="unit" />
+                                <f:attribute name="unit" value="#{Stock.unit}" />
+                            </h:outputText>
+                        </p:column >
+                        <p:column id='clmCurrentPurchasePriceWithKdv' width="150" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmCurrentPurchasePriceWithKdv' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmcurrentPurchasePriceWithKdv' : 'frmStock:dtbStockNoIntegration:clmCurrentPurchasePriceWithKdv')}" headerText="#{loc.lastpurchaseprice}(#{loc.withtax})" sortable="true" sortBy="#{Stock.tt.sicurrentpurchasepricewithkdv}" >
+                            <h:outputText value="#{Stock.stockInfo.currentPurchasePriceWithKdv}" class="Fright" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="currency" />
+                                <f:attribute name="currency" value="#{Stock.stockInfo.currentPurchaseCurrency.id>0 ? Stock.stockInfo.currentPurchaseCurrency : sessionBean.user.lastBranch.currency}" />
+                            </h:outputText>
+                        </p:column >
+                        <p:column id='clmCurrentPurchasePriceWithoutKdv' width="150" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmCurrentPurchasePriceWithoutKdv' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmCurrentPurchasePriceWithoutKdv' : 'frmStock:dtbStockNoIntegration:clmCurrentPurchasePriceWithoutKdv')}" headerText="#{loc.lastpurchaseprice}(#{loc.withouttax})" sortable="true" sortBy="#{Stock.COALESCE(tt.sicurrentpurchaseprice,0)}" >
+                            <h:outputText value="#{Stock.stockInfo.currentPurchasePrice}" class="Fright" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="currency" />
+                                <f:attribute name="currency" value="#{Stock.stockInfo.currentPurchaseCurrency.id>0 ? Stock.stockInfo.currentPurchaseCurrency : sessionBean.user.lastBranch.currency}" />
+                            </h:outputText>
+                        </p:column >
+                        <p:column id='clmCurrentSalePriceWithKdv' width="150" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmCurrentSalePriceWithKdv' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmCurrentSalePriceWithKdv' : 'frmStock:dtbStockNoIntegration:clmCurrentSalePriceWithKdv')}" headerText="#{loc.lastsaleprice}(#{loc.withtax})" sortable="true" sortBy="#{Stock.COALESCE(tt.sicurrentsaleprice,0)}" >
+                            <h:outputText value="#{Stock.stockInfo.currentSalePrice}" class="Fright" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="currency" />
+                                <f:attribute name="currency" value="#{Stock.stockInfo.currentSaleCurrency.id>0 ? Stock.stockInfo.currentSaleCurrency : sessionBean.user.lastBranch.currency}" />
+                            </h:outputText>
+                        </p:column >
+                        <p:column id='clmCurrentSalePriceWithoutKdv' width="150" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmCurrentSalePriceWithoutKdv' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmCurrentSalePriceWithoutKdv' : 'frmStock:dtbStockNoIntegration:clmCurrentSalePriceWithoutKdv')}" headerText="#{loc.lastsaleprice}(#{loc.withouttax})" sortable="true" sortBy="#{Stock.tt.sicurrentsalepricewithoutkdv}" >
+                            <h:outputText value="#{Stock.stockInfo.currentSalePriceWithoutKdv}" class="Fright" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="currency" />
+                                <f:attribute name="currency" value="#{Stock.stockInfo.currentSaleCurrency.id>0 ? Stock.stockInfo.currentSaleCurrency : sessionBean.user.lastBranch.currency}" />
+                            </h:outputText>
+                        </p:column >
+                        <p:column id='clmAvailablePurchasePriceWithKdv' width="180" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmAvailablePurchasePriceWithKdv' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmAvailablePurchasePriceWithKdv' : 'frmStock:dtbStockNoIntegration:clmAvailablePurchasePriceWithKdv')}" headerText="#{loc.availablestockpurchaseprice}(#{loc.withtax})" sortable="true" sortBy="#{Stock.tt.availablepurchasepricewithkdv}" >
+                            <h:outputText value="#{Stock.stockInfo.availablePurchasePriceWithKdv}" class="Fright" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="currency" />
+                                <f:attribute name="currency" value="#{Stock.stockInfo.currentPurchaseCurrency.id>0 ? Stock.stockInfo.currentPurchaseCurrency : sessionBean.user.lastBranch.currency}" />
+                            </h:outputText>
+                        </p:column >
+                        <p:column id='clmAvailablePurchasePriceWithoutKdv' width="180" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmAvailablePurchasePriceWithoutKdv' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmAvailablePurchasePriceWithoutKdv' : 'frmStock:dtbStockNoIntegration:clmAvailablePurchasePriceWithoutKdv')}" headerText="#{loc.availablestockpurchaseprice}(#{loc.withouttax})" sortable="true" sortBy="#{Stock.tt.availablepurchasepricewithoutkdv}" >
+                            <h:outputText value="#{Stock.stockInfo.availablePurchasePriceWithoutKdv}" class="Fright" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="currency" />
+                                <f:attribute name="currency" value="#{Stock.stockInfo.currentPurchaseCurrency.id>0 ? Stock.stockInfo.currentPurchaseCurrency : sessionBean.user.lastBranch.currency}" />
+                            </h:outputText>
+                        </p:column >
+                        <p:column id='clmAvailableSalePriceWithKdv' width="180" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmAvailableSalePriceWithKdv' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmAvailableSalePriceWithKdv' : 'frmStock:dtbStockNoIntegration:clmAvailableSalePriceWithKdv')}" headerText="#{loc.availablestocksaleprice}(#{loc.withtax})" sortable="true" sortBy="#{Stock.tt.availablesalepricewithkdv}" >
+                            <h:outputText value="#{Stock.stockInfo.availableSalePriceWithKdv}" class="Fright" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="currency" />
+                                <f:attribute name="currency" value="#{Stock.stockInfo.currentSaleCurrency.id>0 ? Stock.stockInfo.currentSaleCurrency : sessionBean.user.lastBranch.currency}" />
+                            </h:outputText>
+                        </p:column >
+                        <p:column id='clmAvailableSalePriceWithoutKdv' width="180" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmAvailableSalePriceWithoutKdv' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmAvailableSalePriceWithoutKdv' :  'frmStock:dtbStockNoIntegration:clmAvailableSalePriceWithoutKdv')}" headerText="#{loc.availablestocksaleprice}(#{loc.withouttax})" sortable="true" sortBy="#{Stock.tt.availablesalepricewithoutkdv}" >
+                            <h:outputText value="#{Stock.stockInfo.availableSalePriceWithoutKdv}" class="Fright" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="currency" />
+                                <f:attribute name="currency" value="#{Stock.stockInfo.currentSaleCurrency.id>0 ? Stock.stockInfo.currentSaleCurrency : sessionBean.user.lastBranch.currency}" />
+                            </h:outputText>
+                        </p:column >
+                        <p:column id='clmProfitPercentage' width="100" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmProfitPercentage' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmProfitPercentage' : 'frmStock:dtbStockNoIntegration:clmProfitPercentage')}" headerText="#{loc.profitpercentage}" sortable="true" sortBy="#{Stock.tt.profitPercentage}" >
+                            <h:outputText value="#{Stock.profitPercentage}" class="Fright" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="percent" />
+                            </h:outputText>
+                        </p:column >
+                        <p:column id='clmTaxGroup' width="100" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmTaxGroup' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmTaxGroup' : 'frmStock:dtbStockNoIntegration:clmTaxGroup')}" headerText="#{loc.sales} KDV" sortable="true" sortBy="#{Stock.tt.saleKdv}" >
+                            <h:outputText value="#{Stock.saleKdv}" class="Fright" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="percent" />
+                            </h:outputText>
+                        </p:column >
+                        <p:column id='clmPurchaseTaxGroup' width="100" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmPurchaseTaxGroup' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmPurchaseTaxGroup' : 'frmStock:dtbStockNoIntegration:clmPurchaseTaxGroup')}" headerText="#{loc.purchasing} KDV" sortable="true" sortBy="#{Stock.tt.purchaseKdv}" >
+                            <h:outputText value="#{Stock.purchaseKdv}" class="Fright" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="percent" />
+                            </h:outputText>
+                        </p:column >
+                        <p:column id='clmCategory' width="100" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmCategory' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmCategory' : 'frmStock:dtbStockNoIntegration:clmCategory')}" headerText="#{loc.category}" >
+                            <h:outputText value="#{Stock.category}" />
+                        </p:column >
+                        <p:column id='clmStatus' width="100" exportable="#{stockBean.getColumnVisibility(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock:clmStatus' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull:clmStatus' : 'frmStock:dtbStockNoIntegration:clmStatus')}" headerText="#{loc.statu}" sortable="true" sortBy="#{Stock.tt.sttdname}" >
+                            <h:outputText value="#{Stock.status.tag}" />
+                            <h:panelGroup rendered="#{sessionBean.user.lastBranchSetting.isCentralIntegration and Stock.stockInfo.isPassive and Stock.status.id == 3}">
+                                <p:tooltip for="btnInfoStatus" value="#{loc.itispassiveonstationbasis}"/>
+                                <p:commandLink id="btnInfoStatus" global="false">
+                                    <i class="icon-info-circled-alt Fs14" />
+                                </p:commandLink>
+                            </h:panelGroup>
+                        </p:column >
+
+
+                        <p:columnGroup id="clmColumGroup" rendered="#{stockBean.listOfTotals.size()>0}"  type="footer" >
+                            <p:column id='clmBarcode2'  >
+                                <f:facet name="footer"  >
+                                    <h:outputText value=" " />
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmName2'  >
+                                <f:facet name="footer"  >
+                                    <h:outputText value=" " />
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmCode2' >
+                                <f:facet name="footer"  >
+                                    <h:outputText value=" " />
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmCenterStockCode2' >
+                                <f:facet name="footer"  >
+                                    <h:outputText value=" " />
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmUnit2'>
+                                <f:facet name="footer"  >
+                                    <h:outputText value=" " />
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmDepartmentName2'>
+                                <f:facet name="footer"  >
+                                    <h:outputText value=" " />
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmBrand2'>
+                                <f:facet name="footer"  >
+                                    <h:outputText value=" " />
+                                </f:facet> 
+                            </p:column >   
+                            <p:column id='clmSupplier2'>
+                                <f:facet name="footer"  >
+                                    <h:outputText value=" " />
+                                </f:facet> 
+                            </p:column >   
+                            <c:if test="#{sessionBean.user.lastBranchSetting.isCentralIntegration}">
+                                <p:column id='clmCentralSupplier2' rendered="#{sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1}">
+                                    <f:facet name="footer"  >
+                                        <h:outputText value=" " >
+
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column >
+                                <p:column id='clmRecommendedPurchasePrice2' rendered="#{sessionBean.user.lastBranchSetting.isCentralIntegration}">
+                                    <f:facet name="footer"  >
+                                        <h:outputText value=" " >
+
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column >
+                                <p:column id='clmRecommendedSalePrice2' rendered="#{sessionBean.user.lastBranchSetting.isCentralIntegration}">
+                                    <f:facet name="footer"  >
+                                        <h:outputText value=" " >
+
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column >
+                                <p:column id='clmMandatorySalePrice2' rendered="#{sessionBean.user.lastBranchSetting.isCentralIntegration}">
+                                    <f:facet name="footer"  >
+                                        <h:outputText value=" " >
+
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column >
+                            </c:if>
+                            <p:column id='clmPurchaseQuantity2' >
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{stockBean.calculateTotals(1)}" class="Fright" >
+
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmSaleQuantity2'>
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{stockBean.calculateTotals(2)}" class="Fright" >
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmOtherQuantity2'>
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{stockBean.calculateTotals(12)}" class="Fright" >
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmAvailableQuantity2'>
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{stockBean.calculateTotals(3)}" class="Fright" >
+
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmCurrentPurchasePriceWithKdv2' >
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{stockBean.calculateTotals(4)}" class="Fright" >
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmCurrentPurchasePriceWithoutKdv2' >
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{stockBean.calculateTotals(5)}" class="Fright" >
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmCurrentSalePriceWithKdv2' >
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{stockBean.calculateTotals(6)}" class="Fright" >
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmCurrentSalePriceWithoutKdv2' >
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{stockBean.calculateTotals(7)}" class="Fright" >
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmAvailablePurchasePriceWithKdv2' >
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{stockBean.calculateTotals(8)}" class="Fright" >
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmAvailablePurchasePriceWithoutKdv2' >
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{stockBean.calculateTotals(9)}" class="Fright" >
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmAvailableSalePriceWithKdv2' >
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{stockBean.calculateTotals(10)}" class="Fright" >
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmAvailableSalePriceWithoutKdv2' >
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{stockBean.calculateTotals(11)}" class="Fright" >
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmProfitPercentage2' >
+                                <f:facet name="footer"  >
+                                    <h:outputText value=" " class="Fright" >
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmTaxGroup2' >
+                                <f:facet name="footer"  >
+                                    <h:outputText value=" " class="Fright" >
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmPurchaseTaxGroup2' >
+                                <f:facet name="footer"  >
+                                    <h:outputText value=" " class="Fright" >
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmCategory2'>
+                                <f:facet name="footer"  >
+                                    <h:outputText value=" " />
+                                </f:facet>
+                            </p:column >
+                            <p:column id='clmStatus2' >
+                                <f:facet name="footer"  >
+                                    <h:outputText value=" " />
+                                </f:facet>
+                            </p:column >
+                        </p:columnGroup> 
+
+
+
+                    </p:dataTable>  
+                    <p:remoteCommand name="order" delay="1000" actionListener="#{stockBean.bringOrder(sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull' : 'frmStock:dtbStockNoIntegration')}" oncomplete="updateToggle()" autoRun="true"  global="false" />
+                    <p:remoteCommand name="updateToggle"  update="frmGridToolbar:toggle" delay="500" global="false" /> 
+                </h:form>
+
+            </h:panelGroup>
+        </div>
+    </div>
+    <p:dialog  id="dlgStockRequest" widgetVar="dlg_StockRequest" transient="true" width="40%" resizable="false" focus="dlgStockRequest" dynamic="true"  responsive="true" closeOnEscape="true" modal="true">
+        <ui:include src="/pages/inventory/stockrequest/stockrequestprocess.xhtml" >
+            <ui:param name="bean" value='#{newStockRequestBean}' />
+            <c:set var="whichPage" value="stockBean" scope="request" />
+        </ui:include>
+    </p:dialog>
+
+    <!-- ////////////////////toplu güncelleme için//////////////////////// -->
+    <p:dialog  id="dlgBatchUpdate" widgetVar="dlg_BatchUpdate" transient="true" width="40%" resizable="false" focus="dlgBatchUpdate" dynamic="true"  responsive="true" closeOnEscape="true" modal="true">
+
+        <h:form id="frmBatchUpdate">  
+
+            <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+                <ui:param name="outputtext" value="#{loc.batchupdate}"/>
+                <ui:param name="bean" value='#{stockBean}' />
+                <ui:param name="update" value="pgrBatchUpdate" />
+                <ui:param name="btnSaveId" value='true' />
+                <ui:param name="renderback" value='false'/>
+                <ui:param name="btnDeleteId" value='false' /> 
+
+            </ui:include>
+
+
+            <h:panelGroup id="pgrBatchUpdate" class="divContent" layout="block">  
+                <div class="ui-g">
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-4">
+                        <p:outputLabel value="#{loc.productstobeupdated}" for="txtStock" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtStock" value="#{stockBookCheckboxFilterBean.selectedCount}" onclick="showStockBook()" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}" >
+
+                        </p:inputText>
+                        <p:commandLink id="btnStock" process="@this" update="frmStockBookFilterCheckbox pngStockBook" actionListener="#{stockBean.openDialog()}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_stockcheckbox').show();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax   listener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([stockBean.selectedCategoryList,stockBookCheckboxFilterBean.isFilter],'frmStockBookFilterCheckbox','olp_stockcheckbox','stockbatchupdate')}" />
+                        </p:commandLink>
+                    </div>
+                    <p:remoteCommand name="showStockBook" process="@this" update="frmStockBookFilterCheckbox pngStockBook" oncomplete="PF('olp_stockcheckbox').show();" action="#{stockBean.openDialog()}" actionListener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([stockBean.selectedCategoryList,stockBookCheckboxFilterBean.isFilter],'frmStockBookFilterCheckbox','olp_stockcheckbox','stockbatchupdate')}" />
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-4">
+                        <p:outputLabel value="#{loc.fieldtochange}" for="slcFieldChange" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcFieldChange" required="true"  value="#{stockBean.changeField}">
+                            <f:selectItem itemValue="0" itemLabel="#{loc.choose}" itemDisabled="true" />
+                            <c:if test="#{!sessionBean.user.lastBranchSetting.isCentralIntegration}">
+                                <f:selectItem itemValue="1" itemLabel="#{loc.unit}"  />
+                                <f:selectItem itemValue="2" itemLabel="#{loc.brand}" />
+                            </c:if>
+                            <f:selectItem itemValue="3" itemLabel="#{loc.productionplace}" />
+                            <f:selectItem itemValue="4" itemLabel="#{loc.supplier}"/>
+                            <c:if test="#{!sessionBean.user.lastBranchSetting.isCentralIntegration}">
+                                <f:selectItem itemValue="5" itemLabel="#{loc.statu}" rendered="#{!sessionBean.user.lastBranchSetting.isCentralIntegration}"/>
+                                <f:selectItem itemValue="6" itemLabel="#{loc.isservice}" rendered="#{!sessionBean.user.lastBranchSetting.isCentralIntegration}"/>
+                            </c:if>
+                            <f:selectItem itemValue="7" itemLabel="#{loc.canthestockdroptonegativebalance}" />
+                            <f:selectItem itemValue="8" itemLabel="#{loc.department}" />
+                            <c:if test="#{!sessionBean.user.lastBranchSetting.isCentralIntegration}">
+                                <f:selectItem itemValue="9" itemLabel="#{loc.stocktype}" />
+                            </c:if>
+                            <p:ajax update="pngFields" global="false"/>
+                        </p:selectOneMenu>
+                    </div>    
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-4">
+                        <h:panelGroup id="pngFields">
+                            <h:panelGroup rendered="#{stockBean.changeField==1}">
+                                <p:outputLabel value="#{loc.unit}" for="slcUnit" styleClass="Fs12 FontBold"/>
+                                <p:selectOneMenu id="slcUnit" required="true" value="#{stockBean.batchUpdateStock.unit.id}">
+                                    <f:selectItems value="#{stockBean.unitList}"  var="unit" itemLabel="#{unit.name}" itemValue="#{unit.id}" />
+                                </p:selectOneMenu>
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{stockBean.changeField==2}">
+                                <p:outputLabel value="#{loc.brand}" for="slcBrand" styleClass="Fs12 FontBold"/>
+                                <p:selectOneMenu id="slcBrand" required="true" value="#{stockBean.batchUpdateStock.brand.id}" filter="true" filterMatchMode="contains">
+                                    <f:selectItems value="#{stockBean.brandList}"  var="brand" itemLabel="#{brand.name}" itemValue="#{brand.id}" />
+                                </p:selectOneMenu>
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{stockBean.changeField==3}">
+                                <p:outputLabel value="#{loc.productionplace}" for="slcCountry" class="Fs12 FontBold"/>
+                                <p:selectOneMenu   id="slcCountry" filter="true" filterMatchMode="contains"  value="#{stockBean.batchUpdateStock.country.id}" >
+                                    <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}" /> 
+                                    <f:selectItems value="#{sessionBean.countries}" var="country" itemLabel="#{country.getName(sessionBean.langId)}" itemValue="#{country.id}"  />
+                                </p:selectOneMenu>
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{stockBean.changeField==4}">
+                                <p:outputLabel value="#{loc.supplier}" for="txtSupplier" styleClass="Fs12 FontBold"/>
+                                <p:inputText id="txtSupplier" onclick="showAccountBook()" value="#{stockBean.batchUpdateStock.supplier.name}" class="inputPositionForBookFilter" required="true" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" rendered="#{facesContext.currentPhaseId.ordinal ne 4}" placeholder="#{loc.supplier} " >
+
+                                </p:inputText>
+                                <p:commandLink id="cmdSupplier" class="commandLinkPositionForBookFilter" process="@this"  oncomplete="PF('olp_account').loadContents();" >
+                                    <i class="fa fa-book Fs16 softgray iconPositionForBookFilter "/>   
+                                    <p:ajax listener="#{accountBookFilterBean.findFilterListLazyLoading([],'frmAccountBookFilter','olp_account','stockprocess')}" global="false"/>
+                                </p:commandLink> 
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{stockBean.changeField==5}">
+                                <p:outputLabel value="#{loc.statu}" for="slcStatu" styleClass="Fs12 FontBold"/>
+                                <p:selectOneMenu id="slcStatu" required="true"  value="#{stockBean.batchUpdateStock.status.id}">
+                                    <f:selectItems value="#{sessionBean.getStatus(2)}"  var="statu" itemLabel="#{statu.nameMap.get(sessionBean.langId).name}" itemValue="#{statu.id}" />
+                                </p:selectOneMenu>
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{stockBean.changeField==6}">
+                                <p:outputLabel value="#{loc.isservice}" for="slcService" styleClass="Fs12 FontBold"/>
+                                <p:selectOneMenu id="slcService" required="true" value="#{stockBean.batchUpdateStock.isService}">
+                                    <f:selectItem itemValue="true" itemLabel="#{loc.yes}" />
+                                    <f:selectItem itemValue="false" itemLabel="#{loc.no}" />
+                                </p:selectOneMenu>
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{stockBean.changeField==7}">
+                                <p:outputLabel value="#{loc.canthestockdroptonegativebalance}" for="slcIsMınusStockLevel" styleClass="Fs12 FontBold"/>
+                                <p:selectOneMenu id="slcIsMınusStockLevel" required="true" value="#{stockBean.batchUpdateStock.stockInfo.isMinusStockLevel}">
+                                    <f:selectItem itemValue="true" itemLabel="#{loc.yes}" />
+                                    <f:selectItem itemValue="false" itemLabel="#{loc.no}" />
+                                </p:selectOneMenu>
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{stockBean.changeField==8}">
+                                <p:outputLabel value="#{loc.department}" for="slcTaxDepartment" styleClass="Fs12 FontBold"/>
+                                <p:selectOneMenu   id="slcTaxDepartment" filter="true" filterMatchMode="contains"  value="#{stockBean.batchUpdateStock.stockInfo.taxDepartment.id}" >
+                                    <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}" /> 
+                                    <f:selectItems value="#{stockBean.taxDepartmentList}" var="taxdepartment" itemLabel="#{taxdepartment.name}" itemValue="#{taxdepartment.id}"  />
+                                </p:selectOneMenu>
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{stockBean.changeField==9}">
+                                <p:outputLabel value="#{loc.stocktype}" for="slcStockType" styleClass="Fs12 FontBold"/>
+                                <p:selectOneMenu id="slcStockType" value="#{stockBean.batchUpdateStock.stockType_id}">
+                                    <f:selectItem itemValue="1" itemLabel="#{loc.normal}" />
+                                    <f:selectItem itemValue="2" itemLabel="#{loc.washing}" />
+                                    <f:selectItem itemValue="3" itemLabel="#{stockBean.specialItem==1 ? loc.starbucks : loc.coffee}" />
+                                </p:selectOneMenu>
+                            </h:panelGroup> 
+                        </h:panelGroup>
+                    </div>    
+                    <p:remoteCommand name="showAccountBook" process="@this" oncomplete="PF('olp_account').loadContents()" actionListener="#{accountBookFilterBean.findFilterListLazyLoading([],'frmAccountBookFilter','olp_account','stockprocess')}" />
+
+                </div>
+            </h:panelGroup>
+        </h:form> 
+
+    </p:dialog>
+
+    <h:panelGroup id="pngStockBook" >
+        <!--Kitaptan stok seçtirmek için açılan overlay panel-->
+        <ui:include src="/pages/general/common/stockbookcheckbox.xhtml" >
+            <ui:param name="updateBean" value="#{stockBean}" />
+            <ui:param name="for" value="frmGridToolbar:btnBatchUpdate"/>           
+            <ui:param name="type" value="stockbatchupdate" />
+            <ui:param name="parameters" value="#{[stockBean.selectedCategoryList,stockBookCheckboxFilterBean.isFilter]}" /> 
+            <ui:param name="columnsize" value='4' />     
+            <ui:param name="form" value='frmStockBookFilterCheckbox' /> 
+            <ui:param name="overlay" value="olp_stockcheckbox" />
+        </ui:include>
+    </h:panelGroup>
+    <!--Kitaptan cari seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/accountbook.xhtml" >
+        <ui:param name="updateBean" value='#{stockBean}' />
+        <ui:param name="for" value='frmBatchUpdate:cmdSupplier' />
+        <ui:param name="type" value='stockprocess' />
+        <ui:param name="parameters" value='' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmAccountBookFilter' /> 
+        <ui:param name="overlay" value="olp_account" />
+    </ui:include>
+
+
+
+
+
+    <!--/////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+    <p:dialog id="dlgStockFileUpload" widgetVar="dlg_stockfileupload" modal="true" dynamic="true" resizable="false" focus="dlgStockFileUpload"  responsive="true" closeOnEscape="true" width="95%" style="overflow-x: auto !important">
+        <h:form id="form" enctype="multipart/form-data" > 
+            <p:panelGrid id="pgrfileformat">
+                <div>               
+                    <table class="tableUp" style="border: 1px solid;border-color: #316996;background-color: #fbfcfd;">
+                        <thead>
+                            <tr >
+                                <th scope="col" colspan="15" class="Fs16 TexAlLeft"><h:outputText value="#{loc.fileformattobeuploaded}" style="color: #303030 !important;"/></th>
+                            </tr>
+                            <tr >
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.stockname}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} A)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.stockcode}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} B)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.barcode}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} C)" style="color:#337190" class="Fs12"/><h:outputText value=" (*) "  class="Fs16 fontBold red"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.unit} " style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} D)" style="color:#337190" class="Fs12"/>
+                                    <p:commandLink id="btnExpandUnit" global="false" title="#{loc.unitlist}" resetValues="true"  class ="Fright tlbrIcon"  actionListener="#{stockBean.showUnitList()}" style="margin-left: 5px;margin-right: 0px !important" >
+                                        <i class="fa fa-expand tlbrUploadBtn Fs18" style="color:#2c84b1 !important"/>
+                                    </p:commandLink>
+                                </th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.isservice} " style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} E)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.quicksale} " style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} F)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.brand} " style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} G)" style="color:#337190" class="Fs12"/>
+                                    <p:commandLink id="btnExpandBrand" global="false" title="#{loc.brandlist}" resetValues="true"  class ="Fright tlbrIcon"  actionListener="#{stockBean.showBrandList()}" style="margin-left: 5px;margin-right: 0px !important" >
+                                        <i class="fa fa-expand tlbrUploadBtn Fs18" style="color:#2c84b1 !important"/>
+                                    </p:commandLink>
+                                </th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.supplier}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} H)" style="color:#337190" class="Fs12"/>
+                                    <p:commandLink id="btnExpandSupplier" global="false" title="#{loc.supplierlist}" resetValues="true"  class ="Fright tlbrIcon"  actionListener="#{stockBean.showSupplierList()}" style="margin-left: 5px;margin-right: 0px !important" >
+                                        <i class="fa fa-expand tlbrUploadBtn Fs18" style="color:#2c84b1 !important"/>
+                                    </p:commandLink>
+                                </th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.supplierstockcode}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} I)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.productionplace}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} J)" style="color:#337190" class="Fs12"/>
+                                    <p:commandLink id="btnExpandCountry" global="false" title="#{loc.countrylist}" resetValues="true"  class ="Fright tlbrIcon"  actionListener="#{stockBean.showCountryList()}" style="margin-left: 5px;margin-right: 0px !important" >
+                                        <i class="fa fa-expand tlbrUploadBtn Fs18" style="color:#2c84b1 !important"/>
+                                    </p:commandLink>
+                                </th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.minstocklevel}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} K)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.maxstocklevel}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} L)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.canthestockdroptonegativebalance}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} M)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.department}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} N)" style="color:#337190" class="Fs12"/>
+                                    <p:commandLink id="btnTaxDepartment" global="false" title="#{loc.taxdepartmentlist}" resetValues="true"  class ="Fright tlbrIcon"  actionListener="#{stockBean.showDepartmentList()}" style="margin-left: 5px;margin-right: 0px !important" >
+                                        <i class="fa fa-expand tlbrUploadBtn Fs18" style="color:#2c84b1 !important"/>
+                                    </p:commandLink>
+                                </th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.stocktype} " style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} O)" style="color:#337190" class="Fs12"/>
+                                    <p:commandLink id="btnStockType" global="false" title="#{loc.stocktypelist}" resetValues="true"  class ="Fright tlbrIcon"  actionListener="#{stockBean.showStockTypeList()}" style="margin-left: 5px;margin-right: 0px !important" >
+                                        <i class="fa fa-expand tlbrUploadBtn Fs18" style="color:#2c84b1 !important"/>
+                                    </p:commandLink>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach items="#{stockBean.sampleList}" var="sample">
+                                <tr>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.name}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.code}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.barcode}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.unit.id}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.isServiceTemp == null ? '' : sample.isServiceTemp ?  1 :0}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.stockInfo.isQuickSaleTemp == null ? '' : sample.stockInfo.isQuickSaleTemp ? 1 :0}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.brand.id}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.supplier.id}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.supplierProductCode}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.country.id}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.stockInfo.minStockLevel}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.stockInfo.maxStockLevel}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.stockInfo.isMinusStockLevelTemp == null ? '' : sample.stockInfo.isMinusStockLevelTemp ? 1 : 0}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.stockInfo.taxDepartment.id}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.stockType_id}" /></td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                    <div class="EmptyBox10"/>
+                    <table class="tableUp" style="border: 1px solid;border-color: #316996;background-color: #fbfcfd;">
+                        <thead>
+                            <tr >
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.taxgroup} - #{loc.sale} " style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} P)" style="color:#337190" class="Fs12"/>
+                                    <p:commandLink id="btnExpandSaleTaxGroup" global="false" title="#{loc.taxgrouplist}" resetValues="true"  class ="Fright tlbrIcon"  actionListener="#{stockBean.showTaxGroupList()}" style="margin-left: 5px;margin-right: 0px !important" >
+                                        <i class="fa fa-expand tlbrUploadBtn Fs18" style="color:#2c84b1 !important"/>
+                                    </p:commandLink>
+                                </th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.taxgroup} - #{loc.purchase}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} Q)" style="color:#337190" class="Fs12"/>
+                                    <p:commandLink id="btnExpandPurchaseTaxGroup" global="false" title="#{loc.taxgrouplist}" resetValues="true"  class ="Fright tlbrIcon"  actionListener="#{stockBean.showTaxGroupList()}" style="margin-left: 5px;margin-right: 0px !important" >
+                                        <i class="fa fa-expand tlbrUploadBtn Fs18" style="color:#2c84b1 !important"/>
+                                    </p:commandLink>
+                                </th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.alternativebarcode} 1" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} R)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.equivalent} " style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} S)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.alternativebarcode} 2" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} T)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.equivalent}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} U)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.alternativebarcode} 3" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} V)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.equivalent}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} W)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.alternativebarcode} 4 " style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} X)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.equivalent} " style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} Y)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.alternativebarcode} 5 " style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} Z)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.equivalent} " style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} AA)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.parentcategory}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} AB)" style="color:#337190" class="Fs12"/>
+                                    <p:commandLink id="btnExpandParentCategory" global="false" title="#{loc.categorylist}" resetValues="true"  class ="Fright tlbrIcon"  actionListener="#{stockBean.showCategoryList()}" style="margin-left: 5px;margin-right: 0px !important" >
+                                        <i class="fa fa-expand tlbrUploadBtn Fs18" style="color:#2c84b1 !important"/>
+                                    </p:commandLink>
+                                </th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.subcategory}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} AC)" style="color:#337190" class="Fs12"/>
+                                    <p:commandLink id="btnExpandSubCategory" global="false" title="#{loc.categorylist}" resetValues="true"  class ="Fright tlbrIcon"  actionListener="#{stockBean.showCategoryList()}" style="margin-left: 5px;margin-right: 0px !important" >
+                                        <i class="fa fa-expand tlbrUploadBtn Fs18" style="color:#2c84b1 !important"/>
+                                    </p:commandLink>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach items="#{stockBean.sampleList}" var="sample">
+                                <tr>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.saleTaxGruopId}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.purchaseTaxGroupId}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.alternativeBarcode.barcode}" style="#{(sample.alternativeBarcode.barcode!=null and sample.alternativeBarcode.quantity>0) ? 'display:block':'display:none' }"/></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.alternativeBarcode.quantity}" style="#{(sample.alternativeBarcode.barcode!=null and sample.alternativeBarcode.quantity>0) ? 'display:block':'display:none' }"/></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.alternativeBarcode2.barcode}" style="#{(sample.alternativeBarcode2.barcode!=null and sample.alternativeBarcode2.quantity>0) ? 'display:block':'display:none' }"/></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.alternativeBarcode2.quantity}" style="#{(sample.alternativeBarcode2.barcode!=null and sample.alternativeBarcode2.quantity>0) ? 'display:block':'display:none' }"/></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.alternativeBarcode3.barcode}" style="#{(sample.alternativeBarcode3.barcode!=null and sample.alternativeBarcode3.quantity>0) ? 'display:block':'display:none' }"/></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.alternativeBarcode3.quantity}" style="#{(sample.alternativeBarcode3.barcode!=null and sample.alternativeBarcode3.quantity>0) ? 'display:block':'display:none' }"/></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.alternativeBarcode4.barcode}" style="#{(sample.alternativeBarcode4.barcode!=null and sample.alternativeBarcode4.quantity>0) ? 'display:block':'display:none' }"/></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.alternativeBarcode4.quantity}" style="#{(sample.alternativeBarcode4.barcode!=null and sample.alternativeBarcode4.quantity>0) ? 'display:block':'display:none' }"/></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.alternativeBarcode5.barcode}" style="#{(sample.alternativeBarcode5.barcode!=null and sample.alternativeBarcode5.quantity>0) ? 'display:block':'display:none' }"/></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.alternativeBarcode5.quantity}" style="#{(sample.alternativeBarcode5.barcode!=null and sample.alternativeBarcode5.quantity>0) ? 'display:block':'display:none' }"/></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.parentCategory.id}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.subCategoty.id}" /></td>
+                                </tr>
+                            </c:forEach>
+
+
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="6" rowspan="2"><h:outputText value="#{loc.serviceinformation}"/> <h:outputText value=" (#{loc.cell} E)" style="color:#337190" class="Fs12"/></td>
+                                <td class="TexAlLeft Fs14" colspan="8"><h:outputText value="0 : #{loc.stock}"/></td>
+                            </tr>
+
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="8"><h:outputText value="1 : #{loc.service}"/></td>
+                            </tr>
+
+
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="6" rowspan="2"><h:outputText value="#{loc.quicksaleinformation}"/> <h:outputText value=" (#{loc.cell} F)" style="color:#337190" class="Fs12"/></td>
+                                <td class="TexAlLeft Fs14" colspan="8"><h:outputText value="0 : #{loc.no}"/></td>
+                            </tr>
+
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="8"><h:outputText value="1 : #{loc.yes}"/></td>
+                            </tr>
+
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="6" rowspan="2"><h:outputText value="#{loc.canthestockdroptonegativebalance}"/> <h:outputText value=" (#{loc.cell} M)" style="color:#337190" class="Fs12"/></td>
+                                <td class="TexAlLeft Fs14" colspan="8"><h:outputText value="0 : #{loc.no}"/></td>
+                            </tr>
+
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="8"><h:outputText value="1 : #{loc.yes}"/></td>
+                            </tr>
+
+
+
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="6" rowspan="1"><h:outputText value="#{loc.iconincolumn} " class="Fs14"/><h:outputText value=" (*) " class="Fs14 fontBold red" style="margin-left: 10px"/></td>
+                                <td class="TexAlLeft Fs14" colspan="8"><h:outputText value="#{loc.itismandatorytoenterinformationintothesefields}" class="fontBold"/></td>
+                            </tr>
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="6" rowspan="1"><h:outputText value="#{loc.iconincolumn}" class="Fs14"/><i class="fa fa-expand tlbrUploadBtn Fs18" style="color:#2c84b1 !important;margin-left: 10px;"/></td>
+                                <td class="TexAlLeft Fs14" colspan="8"><h:outputText value="#{loc.liststhevaluesdefinedinthesystem} #{loc.columnwaitsforanyofthenumberinformationinthelist}"/></td>
+                            </tr>
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="6" rowspan="1"><h:outputText value="#{loc.taxgroupinformation} (#{loc.sales} - #{loc.purchase})" class="Fs14"/></td>
+                                <td class="TexAlLeft Fs14" colspan="8"><h:outputText value="#{loc.onlyonerecordofthesametypeinformationcanbeaddedtothepurchaseorsalesinformation}"/></td>
+                            </tr>
+
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="6" rowspan="1"><h:outputText value="#{loc.supplierinformation}" class="Fs14"/></td>
+                                <td class="TexAlLeft Fs14" colspan="8"><h:outputText value="#{loc.ifthesupplierinformationismissingoryoudonotwanttoadditthisfieldshouldbesenttozero}"/></td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>                    
+            </p:panelGrid>
+
+            <div class="EmptyBox20" />
+
+            <p:panelGrid  id="pgrFileUpload" class="pgrResponsive">
+                <div class="ui-g">
+                    <h:panelGroup layout="block">
+                        <p:row>
+                            <p:column colspan="6" style="font-weight: bold;font-size: 16px"> <h:outputText value="#{loc.fileselectionandtransferoperations}" /></p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column colspan="3">
+                                <table style="width: auto !important;table-layout: fixed;border: none !important;" >
+                                    <tbody>
+                                        <tr>
+                                            <td style="border: none">
+                                                <p:commandButton id="btnSampleList" class="samplebutton" value="#{loc.sampleexcelfile}" oncomplete="downloadExcelForCentral();" style="margin-left:-5px;margin-top:31px;width: 160px;height: 22px "  />
+                                                <h:commandLink id="btnExcelForCentral" title="#{loc.sampleexcelfile}" style="visibility:hidden"  class ="tlbrIcon" actionListener="#{stockBean.downloadSampleList()}">
+                                                    <i class="icon-file-excel  tlbrExcelBtn Fs23"  />
+                                                </h:commandLink>       
+                                            </td>
+                                            <td style="border: none">
+                                                <p:fileUpload  update="@this,btnTransfer,txtFileName,btnClose"  allowTypes="/(\.|\/)(xls|xlsx|xls|xlsm|xlsb|xltx|xltm|xlt|xla|xlw|xlr|)$/" invalidFileMessage="#{loc.invalidfiletype}" invalidSizeMessage="#{loc.filesizecannotbegreaterthan1mb}"
+                                                               class="#{stockBean.fileNames.length()==0 ? 'fileUploadEmpty' : 20>stockBean.fileNames.length() ? 'fileUploadSmall'  : 'fileUploadLong'}" label="#{loc.choosefile}" fileLimit="1"  auto="true" sizeLimit="10000000" style="width: 150px;" fileUploadListener="#{stockBean.handleFileUploadFile}"  mode="advanced"  multiple="true" dragDropSupport="false" />
+
+                                            </td>
+
+                                        </tr>
+
+                                        <tr>
+                                            <td style="width: 100px;border:none !important;"><h:outputText id="txtFileName"  styleClass="wrapLabel" value="#{stockBean.fileNames}" /> </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </p:column> 
+                            <p:column  colspan="2">
+                                <p:commandButton id="btnTransfer" icon="fa fa-exchange" disabled="#{stockBean.isOpenTransferBtn}" resetValues="true" value="#{loc.transfer}" update="@this,btnTransfer ,btnClose,txtFileName" actionListener="#{stockBean.convertUploadData()}" />
+                                <p:commandButton id="btnClose"  icon="fa fa-close" disabled="#{stockBean.isOpenCancelBtn}" resetValues="true" value="#{loc.remove}" update="@this,btnTransfer ,btnClose,txtFileName" actionListener="#{stockBean.clear()}" />
+                            </p:column>
+
+                        </p:row>
+                    </h:panelGroup>
+
+                </div>
+            </p:panelGrid> 
+
+        </h:form>
+    </p:dialog>
+
+    <p:dialog id="dlgProductView" widgetVar="dlg_productView" showEffect="fade" hideEffect="fade" resizable="false" transient="true" modal="true" closeOnEscape="true" responsive="true" width="95%" class=" overflow-y: auto !important; max-height: 570px;" >
+        <p:ajax event="close" update="form:btnTransfer" listener="#{stockBean.clearProducts()}" global="false"/> 
+        <h:form id="frmtoolbar" prependId="false">
+            <p:toolbar>
+                <f:facet name="left">
+                    <h:outputText value="#{loc.productstobetransferredfromthefile}" class="outputTextFont Fleft MarRight8" />
+                </f:facet>
+
+                <f:facet name="right">
+                    <p:commandLink id="btnSave" disabled="#{stockBean.isOpenSaveBtn}" title="#{loc.transfer}" process="@this"  class="Fright" update="#{sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull' : 'frmStock:dtbStockNoIntegration' }"  actionListener="#{stockBean.saveProduct()}"  >
+                        <i class="fa fa-save Fs20 MarTop5 tlbrSaveBtn"/>                 
+                    </p:commandLink>
+                </f:facet>
+            </p:toolbar>
+
+            <h:panelGroup id="pgrIsError" >
+                <p:separator style="margin-top: 0px !important; margin-bottom: 5px;" class="allCheckSeparator"/>
+                <p:panelGrid layout="grid" columns="1" class="allCheckPanelGrid" style="border-radius: 0px !important; border-bottom: 0px !important;">  
+                    <p:selectBooleanCheckbox value="#{stockBean.isOpenErrorData}" itemLabel="#{loc.showincorrectrecords}" class="Fleft allcheck" style="margin-top: 2px; margin-left: 5px;">
+                        <p:ajax global="false" resetValues="true" listener="#{stockBean.showErrorProductList()}"/>
+                    </p:selectBooleanCheckbox>
+                </p:panelGrid>
+            </h:panelGroup>
+        </h:form>
+
+        <!-- Aktar butonuna bastıktan sonra ürünlerin önizleme ile gösterildiği yer  -->
+        <h:panelGroup>
+            <h:form id="frmProductView">
+                <p:dataTable  id="dtbProductView" var="viewProduct"  value="#{stockBean.excelStockList}" widgetVar="viewPdocutPF" emptyMessage="#{loc.norecordsfound}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{viewProduct.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true"
+                              rowStyleClass="#{viewProduct.excelDataType==-1 ? 'ColumnColorRed' : null}" >
+
+
+                    <p:column headerText="#{loc.stockname}" selectRow="false">
+                        <h:outputText value="#{viewProduct.name==-1 ? '' :viewProduct.name}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.stockcode}" selectRow="false">
+                        <h:outputText value="#{viewProduct.code==-1 ? '' :viewProduct.code}" class="Fright " />
+                    </p:column>
+
+                    <p:column headerText="#{loc.stockbarcode}" selectRow="false">
+                        <h:outputText value="#{viewProduct.barcode}" class="Fright"/>
+                    </p:column>
+
+
+                    <p:column headerText="#{loc.unit}" selectRow="false">
+                        <h:outputText value="#{viewProduct.unit.id==-1 ? '' :viewProduct.unit.id}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.isservice}" selectRow="false">     
+                        <h:outputText value="#{viewProduct.isServiceTemp == null  ? '' : viewProduct.isServiceTemp ? loc.service : loc.stock}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.quicksale}" selectRow="false">
+                        <h:outputText value="#{viewProduct.stockInfo.isQuickSaleTemp == null ? '' : viewProduct.stockInfo.isQuickSaleTemp ? loc.yes :loc.no}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.brand}" selectRow="false">
+                        <h:outputText value="#{viewProduct.brand.id==-1 ?'' :viewProduct.brand.id}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.supplier}" selectRow="false">
+                        <h:outputText value="#{viewProduct.supplier.id==-1 ? '':viewProduct.supplier.id}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.supplierstockcode}" selectRow="false">
+                        <h:outputText value="#{viewProduct.supplierProductCode}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.productionplace}" selectRow="false">
+                        <h:outputText value="#{viewProduct.country.id==-1 ? '' :viewProduct.country.id}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.minstocklevel}" selectRow="false">
+                        <h:outputText value="#{viewProduct.stockInfo.minStockLevel==0 ? '' :viewProduct.stockInfo.minStockLevel}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.maxstocklevel}" selectRow="false">
+                        <h:outputText value="#{viewProduct.stockInfo.maxStockLevel==0 ? '' :viewProduct.stockInfo.maxStockLevel}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.canthestockdroptonegativebalance}" selectRow="false">
+                        <h:outputText value="#{viewProduct.stockInfo.isMinusStockLevelTemp == null ? '' : viewProduct.stockInfo.isMinusStockLevelTemp ? loc.yes : loc.no}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.department}" selectRow="false">
+                        <h:outputText value="#{viewProduct.stockInfo.taxDepartment.id==-1 ? '' :viewProduct.stockInfo.taxDepartment.id}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.stocktype}" selectRow="false">
+                        <h:outputText value="#{viewProduct.stockType_id==-1 ? '' :viewProduct.stockType_id}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.sale} #{loc.taxgroup}" selectRow="false">
+                        <h:outputText value="#{viewProduct.saleTaxGruopId==-1 ? '' :viewProduct.saleTaxGruopId}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.purchase} #{loc.taxgroup}" selectRow="false">
+                        <h:outputText value="#{viewProduct.purchaseTaxGroupId==-1 ? '' :viewProduct.purchaseTaxGroupId}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.alternativebarcode}" selectRow="false">
+                        <h:outputText value="#{viewProduct.alternativeBarcode.barcode}" style="#{(viewProduct.alternativeBarcode.barcode!=null and viewProduct.alternativeBarcode.quantity>0) ? 'display:block':'display:none' }"/>
+                    </p:column>
+                    <p:column headerText="#{loc.equivalent}" selectRow="false">
+                        <h:outputText value="#{viewProduct.alternativeBarcode.quantity==0 ? '' : viewProduct.alternativeBarcode.quantity}" style="#{(viewProduct.alternativeBarcode.barcode!=null and viewProduct.alternativeBarcode.quantity>0) ? 'display:block':'display:none' }" />
+                    </p:column>
+                    <p:column headerText="#{loc.alternativebarcode} 2" selectRow="false">
+                        <h:outputText value="#{viewProduct.alternativeBarcode2.barcode}" style="#{(viewProduct.alternativeBarcode2.barcode!=null and viewProduct.alternativeBarcode2.quantity>0) ? 'display:block':'display:none' }"/>
+                    </p:column>
+                    <p:column headerText="#{loc.equivalent}" selectRow="false">
+                        <h:outputText value="#{viewProduct.alternativeBarcode2.quantity==0 ? '' : viewProduct.alternativeBarcode2.quantity}" style="#{(viewProduct.alternativeBarcode2.barcode!=null and viewProduct.alternativeBarcode2.quantity>0) ? 'display:block':'display:none' }"/>
+                    </p:column>
+                    <p:column headerText="#{loc.alternativebarcode}3" selectRow="false">
+                        <h:outputText value="#{viewProduct.alternativeBarcode3.barcode}" style="#{(viewProduct.alternativeBarcode3.barcode!=null and viewProduct.alternativeBarcode3.quantity>0) ? 'display:block':'display:none' }"/>
+                    </p:column>
+                    <p:column headerText="#{loc.equivalent}" selectRow="false">
+                        <h:outputText value="#{viewProduct.alternativeBarcode3.quantity==0 ? '' : viewProduct.alternativeBarcode3.quantity}" style="#{(viewProduct.alternativeBarcode3.barcode!=null and viewProduct.alternativeBarcode3.quantity>0) ? 'display:block':'display:none' }"/>
+                    </p:column>
+                    <p:column headerText="#{loc.alternativebarcode} 4" selectRow="false">
+                        <h:outputText value="#{viewProduct.alternativeBarcode4.barcode}" style="#{(viewProduct.alternativeBarcode4.barcode!=null and viewProduct.alternativeBarcode4.quantity>0) ? 'display:block':'display:none' }"/>
+                    </p:column>
+                    <p:column headerText="#{loc.equivalent}" selectRow="false">
+                        <h:outputText value="#{viewProduct.alternativeBarcode4.quantity==0 ? '' : viewProduct.alternativeBarcode4.quantity}" style="#{(viewProduct.alternativeBarcode4.barcode!=null and viewProduct.alternativeBarcode4.quantity>0) ? 'display:block':'display:none' }"/>
+                    </p:column>
+                    <p:column headerText="#{loc.alternativebarcode}5" selectRow="false">
+                        <h:outputText value="#{viewProduct.alternativeBarcode5.barcode}" style="#{(viewProduct.alternativeBarcode5.barcode!=null and viewProduct.alternativeBarcode5.quantity>0) ? 'display:block':'display:none' }"/>
+                    </p:column>
+                    <p:column headerText="#{loc.equivalent}" selectRow="false">
+                        <h:outputText value="#{viewProduct.alternativeBarcode5.quantity==0 ? '' : viewProduct.alternativeBarcode5.quantity}" style="#{(viewProduct.alternativeBarcode5.barcode!=null and viewProduct.alternativeBarcode5.quantity>0) ? 'display:block':'display:none' }" />
+                    </p:column>
+                    <p:column headerText="#{loc.parentcategory}" selectRow="false">
+                        <h:outputText value="#{viewProduct.parentCategory.id ==-1 ? '' :viewProduct.parentCategory.id }" />
+                    </p:column>
+                    <p:column headerText="#{loc.subcategory}" selectRow="false">
+                        <h:outputText value="#{viewProduct.subCategoty.id ==-1 ? '' :viewProduct.subCategoty.id }" />
+                    </p:column>
+
+                </p:dataTable>
+            </h:form>
+        </h:panelGroup>
+    </p:dialog>
+
+
+    <!--Veritabanından hatalı dönen kayıtları görüntüleyen dialog -->
+    <p:dialog id="dlgProductErrorView" widgetVar="dlg_productErrorView" showEffect="fade" hideEffect="fade" resizable="false" transient="true" modal="true" closeOnEscape="true" responsive="true" width="40%"  >
+        <p:toolbar>
+            <f:facet name="left">
+                <h:outputText value="#{loc.unsavedincorrectrecords}" class="outputTextFont Fleft MarRight8" />
+            </f:facet>
+        </p:toolbar>
+
+        <h:panelGroup rendered="#{stockBean.errorList.size()!=0}">
+            <h:form id="frmProductErrorView">
+                <p:dataTable  id="dtbProductErrorView" var="viewErrorProduct"  value="#{stockBean.errorList}" widgetVar="viewErrorPdocutPF" emptyMessage="#{loc.norecordsfound}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{viewErrorProduct.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true"
+                              >
+
+                    <p:column headerText="#{loc.barcode}" selectRow="false">
+                        <h:outputText value="#{viewErrorProduct.barcode}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.errormessage}" selectRow="false">
+                        <h:outputText value="#{viewErrorProduct.errorString}" />
+                    </p:column>
+                </p:dataTable>
+            </h:form>
+        </h:panelGroup>
+    </p:dialog>
+
+
+    <p:dialog id="dlgUnitDetail" widgetVar="dlgunit_detail" modal="true" dynamic="true" height="35%" resizable="false" focus="dlgUnitDetail"  responsive="true" closeOnEscape="true" width="20%">
+        <h:panelGroup layout="block" style="#{stockBean.unitList.size()>18 ? 'height: 535px;':''}overflow-y: auto;" >
+            <div class="ui-g">
+                <table class="tableUp" style="border: 1px solid;border-color: #316996;background-color: #fbfcfd;">
+                    <thead>
+                        <tr>
+                            <th scope="col" colspan="2" class="Fs16 TexAlLeft"><h:outputText value="#{loc.unitlist}" style="color: #303030 !important;"/></th>
+                        </tr>
+                        <tr>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.unitid}" style="color:#4c4b4b;"/></th>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.name}" style="color:#4c4b4b;"/></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <c:forEach items="#{stockBean.unitList}" var="unit">
+                            <tr>
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{unit.id}" /></td>
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{unit.name}" /></td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+        </h:panelGroup>
+    </p:dialog>
+
+    <p:dialog id="dlgTaxGroupDetail" widgetVar="dlgtaxgroup_detail" modal="true" dynamic="true" height="35%" resizable="false" focus="dlgTaxGroupDetail"  responsive="true" closeOnEscape="true" width="30%">
+        <h:panelGroup layout="block" style="#{stockBean.taxGroupList.size()>18 ? 'height: 535px;':''}overflow-y: auto;" >
+            <div class="ui-g">
+                <table class="tableUp" style="border: 1px solid;border-color: #316996;background-color: #fbfcfd;">
+                    <thead>
+                        <tr>
+                            <th scope="col" colspan="4" class="Fs16 TexAlLeft"><h:outputText value="#{loc.taxgrouplist}" style="color: #303030 !important;"/></th>
+                        </tr>
+                        <tr>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.taxgroupid}" style="color:#4c4b4b;"/></th>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.name}" style="color:#4c4b4b;"/></th>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.rate}" style="color:#4c4b4b;"/></th>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.type}" style="color:#4c4b4b;"/></th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <c:forEach items="#{stockBean.taxGroupList}" var="taxgroup">
+                            <tr>
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{taxgroup.id}" /></td>
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{taxgroup.name}" /></td>                            
+                                <td class="TexAlCenter Fs14">
+                                    <h:outputText value="#{taxgroup.rate}" >
+                                        <f:converter converterId="currencyConverter" />
+                                        <f:attribute name="type" value="percent" /> 
+                                    </h:outputText>
+                                </td>                            
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{taxgroup.type.tag}" /></td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+        </h:panelGroup>
+    </p:dialog>
+
+    <p:dialog id="dlgBrandDetail" widgetVar="dlgbrand_detail" modal="true" dynamic="true" onHide="clearSearch('txtSearchBrand','tblBrand');" height="35%" resizable="false" focus="dlgBrandDetail"  responsive="true" closeOnEscape="true" width="20%">
+        <h:panelGroup layout="block" style="#{stockBean.brandList.size()>18 ? 'height: 535px;':''}overflow-y: auto;" >
+            <div class="ui-g">
+                <p:focus for="txtSearchBrand"/> 
+                <p:inputText  id="txtSearchBrand" onkeyup="searchTable('txtSearchBrand', 'tblBrand')" placeholder="#{loc.enteratleastonecharacter}" style="border-radius: 5px;border-color: #316996;"/>
+                <div class="EmptyBox10"/> 
+                <table id="tblBrand" class="tableUp" style="border: 1px solid;border-color: #316996;background-color: #fbfcfd;">
+                    <thead>
+                        <tr>
+                            <th scope="col" colspan="2" class="Fs16 TexAlLeft"><h:outputText value="#{loc.brandlist}" style="color: #303030 !important;"/></th>
+                        </tr>
+                        <tr>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.brandid}" style="color:#4c4b4b;"/></th>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.name}" style="color:#4c4b4b;"/></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <c:forEach items="#{stockBean.brandList}" var="brand">
+                            <tr>
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{brand.id}" /></td>
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{brand.name}" /></td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+        </h:panelGroup>
+    </p:dialog>
+
+    <p:dialog id="dlgDepartmentDetail" widgetVar="dlgdepartment_detail" modal="true" dynamic="true" onHide="clearSearch('txtSearchTaxDepartment','tblTaxDepartment');" height="35%" resizable="false" focus="dlgDepartmentDetail"  responsive="true" closeOnEscape="true" width="20%">
+        <h:panelGroup layout="block" style="#{stockBean.taxDepartmentList.size()>18 ? 'height: 535px;':''}overflow-y: auto;" >
+            <div class="ui-g">
+                <p:focus for="txtSearchTaxDepartment"/> 
+                <p:inputText  id="txtSearchTaxDepartment" onkeyup="searchTable('txtSearchTaxDepartment', 'tblTaxDepartment')" placeholder="#{loc.enteratleastonecharacter}" style="border-radius: 5px;border-color: #316996;"/>
+                <div class="EmptyBox10"/> 
+                <table id="tblTaxDepartment" class="tableUp" style="border: 1px solid;border-color: #316996;background-color: #fbfcfd;">
+                    <thead>
+                        <tr>
+                            <th scope="col" colspan="2" class="Fs16 TexAlLeft"><h:outputText value="#{loc.taxdepartmentlist}" style="color: #303030 !important;"/></th>
+                        </tr>
+                        <tr>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.departmentid}" style="color:#4c4b4b;"/></th>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.name}" style="color:#4c4b4b;"/></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <c:forEach items="#{stockBean.taxDepartmentList}" var="taxdepartment">
+                            <tr>
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{taxdepartment.id}" /></td>
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{taxdepartment.name}" /></td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+        </h:panelGroup>
+    </p:dialog>
+
+    <p:dialog id="dlgAccountDetail" widgetVar="dlgaccount_detail" modal="true" onHide="clearSearch('txtSearchAccount','tblAccount');"  dynamic="true" height="35%" resizable="false" focus="dlgAccountDetail"  responsive="true" closeOnEscape="true" width="40%">
+        <h:panelGroup layout="block" style="#{stockBean.accountList.size()>18 ? 'height: 535px;':''}overflow-y: auto;" >
+            <div class="ui-g">
+                <p:focus for="txtSearchAccount"/>
+                <p:inputText   id="txtSearchAccount" onkeyup="searchTable('txtSearchAccount', 'tblAccount')" placeholder="#{loc.enteratleastonecharacter}" style="border-radius: 5px;border-color: #316996;"/>
+                <div class="EmptyBox10"/>
+                <table id="tblAccount" class="tableUp" style="border: 1px solid;border-color: #316996;background-color: #fbfcfd;">
+                    <thead>
+                        <tr>
+                            <th scope="col" colspan="2" class="Fs16 TexAlLeft"><h:outputText value="#{loc.supplierlist}" style="color: #303030 !important;"/></th>
+                        </tr>
+
+                        <tr>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.supplierid}" style="color:#4c4b4b;"/></th>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.name}" style="color:#4c4b4b;"/></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <c:forEach items="#{stockBean.accountList}" var="account">
+                            <tr>
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{account.id}" /></td>
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{account.name}" /></td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+        </h:panelGroup>
+    </p:dialog>   
+
+    <p:dialog id="dlgStockTypeDetail" widgetVar="dlgstocktype_detail" modal="true" onHide="clearSearch('txtSearchStockType','tblStockType');"  dynamic="true" height="35%" resizable="false" focus="dlgStockTypeDetail"  responsive="true" closeOnEscape="true" width="20%">
+        <h:panelGroup layout="block" style="#{stockBean.stockTypeList.size()>18 ? 'height: 535px;':''}overflow-y: auto;" >
+            <div class="ui-g">                            
+                <table id="tblStockType" class="tableUp" style="border: 1px solid;border-color: #316996;background-color: #fbfcfd;">
+                    <thead>
+                        <tr>
+                            <th scope="col" colspan="2" class="Fs16 TexAlLeft"><h:outputText value="#{loc.stocktypelist}" style="color: #303030 !important;"/></th>
+                        </tr>
+
+                        <tr>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.stocktypeid}" style="color:#4c4b4b;"/></th>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.name}" style="color:#4c4b4b;"/></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <c:forEach items="#{stockBean.stockTypeList}" var="stockType">
+                            <tr>
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{stockType.stockType_id}" /></td>
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{stockType.name}" /></td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+        </h:panelGroup>
+    </p:dialog>   
+
+
+    <p:dialog id="dlgCountryDetail" widgetVar="dlgcountry_detail" modal="true" dynamic="true"  height="35%" onHide="clearSearch('txtSearchCountry','tblCountry');"  resizable="false" focus="dlgCountryDetail"  responsive="true" closeOnEscape="true" width="25%">
+        <h:panelGroup layout="block" style="#{sessionBean.countries.size()>18 ? 'height: 535px;':''}overflow-y: auto;" >
+            <div class="ui-g">
+                <p:focus for="txtSearchCountry"/>
+                <p:inputText  id="txtSearchCountry" onkeyup="searchTable('txtSearchCountry', 'tblCountry')" placeholder="#{loc.enteratleastonecharacter}" style="border-radius: 5px;border-color: #316996;"/>
+                <div class="EmptyBox10"/>
+                <table id="tblCountry" class="tableUp" style="border: 1px solid;border-color: #316996;background-color: #fbfcfd;">
+                    <thead>
+                        <tr>
+                            <th scope="col" colspan="2" class="Fs16 TexAlLeft"><h:outputText value="#{loc.countrylist}" style="color: #303030 !important;"/></th>
+                        </tr>
+                        <tr>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.countryid}" style="color:#4c4b4b;"/></th>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.name}" style="color:#4c4b4b;"/></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <c:forEach items="#{sessionBean.countries}" var="countries">
+                            <tr>
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{countries.id}" /></td>
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{countries.nameMap.get(sessionBean.langId).name}" /></td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+        </h:panelGroup>
+    </p:dialog>
+
+    <p:dialog id="dlgCategoryDetail" widgetVar="dlgcategory_detail" modal="true" dynamic="true" height="35%" resizable="false" focus="dlgCategoryDetail"  responsive="true" closeOnEscape="true" width="40%">
+        <h:panelGroup layout="block" style="#{stockBean.categoryList.size()>18 ? 'height: 535px;':''}overflow-y: auto;" >
+            <div class="ui-g">
+                <table class="tableUp" style="border: 1px solid;border-color: #316996;background-color: #fbfcfd;">
+                    <thead>
+                        <tr>
+                            <th scope="col" colspan="4" class="Fs16 TexAlLeft"><h:outputText value="#{loc.categorylist}" style="color: #303030 !important;"/></th>
+                        </tr>
+                        <tr>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.parentcategoryid}" style="color:#4c4b4b;"/></th>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.name}" style="color:#4c4b4b;"/></th>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.subcategoryid}" style="color:#4c4b4b;"/></th>
+                            <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.name}" style="color:#4c4b4b;"/></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <c:forEach items="#{stockBean.categoryList}" var="category">
+                            <tr>
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{category.id}" /></td>
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{category.name}" /></td>
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{category.parentId.id==0 ?'' :category.parentId.id}" /></td>
+                                <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value=" #{category.parentId.name}" /></td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+        </h:panelGroup>
+    </p:dialog>
+
+    <p:dialog id="dlgStockFileUploadForCentral" widgetVar="dlg_StockFileUploadForCentral" modal="true" dynamic="true" resizable="false" focus="dlgStockFileUploadForCentral"  responsive="true" closeOnEscape="true" width="80%" style="overflow-x: auto !important">
+        <h:form id="frmStockFileUploadForCentral" enctype="multipart/form-data" > 
+            <p:panelGrid id="pgrfileformat">
+                <div>               
+                    <table class="tableUp" style="border: 1px solid;border-color: #316996;background-color: #fbfcfd;">
+                        <thead>
+                            <tr >
+                                <th scope="col" colspan="12" class="Fs16 TexAlLeft"><h:outputText value="#{loc.fileformattobeuploaded}" style="color: #303030 !important;"/></th>
+                            </tr>
+                            <tr >
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.barcode}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} A)" style="color:#337190" class="Fs12"/><h:outputText value=" (*) "  class="Fs16 fontBold red"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.stockcode}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} B)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.productionplace}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} C)" style="color:#337190" class="Fs12"/>
+                                    <p:commandLink id="btnExpandCountry" global="false" title="#{loc.countrylist}" resetValues="true"  class ="Fright tlbrIcon"  actionListener="#{stockBean.showCountryList()}" style="margin-left: 5px;margin-right: 0px !important" >
+                                        <i class="fa fa-expand tlbrUploadBtn Fs18" style="color:#2c84b1 !important"/>
+                                    </p:commandLink>
+                                </th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.supplier}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} D)" style="color:#337190" class="Fs12"/>
+                                    <p:commandLink id="btnExpandSupplier" global="false" title="#{loc.supplierlist}" resetValues="true"  class ="Fright tlbrIcon"  actionListener="#{stockBean.showSupplierList()}" style="margin-left: 5px;margin-right: 0px !important" >
+                                        <i class="fa fa-expand tlbrUploadBtn Fs18" style="color:#2c84b1 !important"/>
+                                    </p:commandLink>
+                                </th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.supplierstockcode}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} E)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.quicksale} " style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} F)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.minstocklevel}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} G)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.maxstocklevel}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} H)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.canthestockdroptonegativebalance}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} I)" style="color:#337190" class="Fs12"/></th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.department}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} J)" style="color:#337190" class="Fs12"/>
+                                    <p:commandLink id="btnTaxDepartment" global="false" title="#{loc.taxdepartmentlist}" resetValues="true"  class ="Fright tlbrIcon"  actionListener="#{stockBean.showDepartmentList()}" style="margin-left: 5px;margin-right: 0px !important" >
+                                        <i class="fa fa-expand tlbrUploadBtn Fs18" style="color:#2c84b1 !important"/>
+                                    </p:commandLink>
+                                </th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.parentcategory}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} K)" style="color:#337190" class="Fs12"/>
+                                    <p:commandLink id="btnExpandParentCategory" global="false" title="#{loc.categorylist}" resetValues="true"  class ="Fright tlbrIcon"  actionListener="#{stockBean.showCategoryList()}" style="margin-left: 5px;margin-right: 0px !important" >
+                                        <i class="fa fa-expand tlbrUploadBtn Fs18" style="color:#2c84b1 !important"/>
+                                    </p:commandLink>
+                                </th>
+                                <th scope="col" class="Fs14 TexAlCenter"><h:outputText value="#{loc.subcategory}" style="color:#4c4b4b;"/> <h:outputText value=" (#{loc.cell} L)" style="color:#337190" class="Fs12"/>
+                                    <p:commandLink id="btnExpandSubCategory" global="false" title="#{loc.categorylist}" resetValues="true"  class ="Fright tlbrIcon"  actionListener="#{stockBean.showCategoryList()}" style="margin-left: 5px;margin-right: 0px !important" >
+                                        <i class="fa fa-expand tlbrUploadBtn Fs18" style="color:#2c84b1 !important"/>
+                                    </p:commandLink>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach items="#{stockBean.sampleList}" var="sample">
+                                <tr>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.barcode}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.code}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.country.id}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.supplier.id == 0 ? '' : sample.supplier.id}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.supplierProductCode}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.stockInfo.isQuickSaleTemp == null ? '' : sample.stockInfo.isQuickSaleTemp ? 1 : 0}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.stockInfo.minStockLevel}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.stockInfo.maxStockLevel}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.stockInfo.isMinusStockLevelTemp == null ? '' : sample.stockInfo.isMinusStockLevelTemp ? 1 : 0}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.stockInfo.taxDepartment.id}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.parentCategory.id}" /></td>
+                                    <td class="TexAlCenter Fs14"><h:outputText class="Fs14" value="#{sample.subCategoty.id}" /></td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                    <div class="EmptyBox10"/>
+                    <table class="tableUp" style="border: 1px solid;border-color: #316996;background-color: #fbfcfd;">
+                        <tbody>
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="6" rowspan="1"><h:outputText value="#{loc.iconincolumn} " class="Fs14"/><h:outputText value=" (*) " class="Fs14 fontBold red" style="margin-left: 10px"/></td>
+                                <td class="TexAlLeft Fs14" colspan="5"><h:outputText value="#{loc.itismandatorytoenterinformationintothesefields}" class="fontBold"/></td>
+                            </tr>
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="6" rowspan="1"><h:outputText value="#{loc.iconincolumn}" class="Fs14"/><i class="fa fa-expand tlbrUploadBtn Fs18" style="color:#2c84b1 !important;margin-left: 10px;"/></td>
+                                <td class="TexAlLeft Fs14" colspan="5"><h:outputText value="#{loc.liststhevaluesdefinedinthesystem} #{loc.columnwaitsforanyofthenumberinformationinthelist}"/></td>
+                            </tr>
+
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="6" rowspan="2"><h:outputText value="#{loc.quicksaleinformation}"/> <h:outputText value=" (#{loc.cell} F)" style="color:#337190" class="Fs12"/></td>
+                                <td class="TexAlLeft Fs14" colspan="5"><h:outputText value="0 : #{loc.no}"/></td>
+                            </tr>
+
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="5"><h:outputText value="1 : #{loc.yes}"/></td>
+                            </tr>
+
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="6" rowspan="2"><h:outputText value="#{loc.canthestockdroptonegativebalance}"/> <h:outputText value=" (#{loc.cell} I)" style="color:#337190" class="Fs12"/></td>
+                                <td class="TexAlLeft Fs14" colspan="5"><h:outputText value="0 : #{loc.no}"/></td>
+                            </tr>
+
+                            <tr>
+                                <td class="TexAlLeft Fs14" colspan="5"><h:outputText value="1 : #{loc.yes}"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>                    
+            </p:panelGrid>
+
+            <div class="EmptyBox20" />
+
+             <p:panelGrid  id="pgrFileUpload" class="pgrResponsive">
+                <div class="ui-g">
+                    <h:panelGroup layout="block">
+                        <p:row>
+                            <p:column colspan="6" style="font-weight: bold;font-size: 16px"> <h:outputText value="#{loc.fileselectionandtransferoperations}" /></p:column>
+                        </p:row>
+                        <p:row>
+                            <p:column colspan="3">
+                                <table style="width: auto !important;table-layout: fixed;border: none !important;" >
+                                    <tbody>
+                                        <tr>
+                                            <td style="border: none">
+                                                <p:commandButton id="btnSampleList" class="samplebutton" value="#{loc.sampleexcelfile}" oncomplete="downloadExcelForCentral();" style="margin-left:-5px;margin-top:31px;width: 160px;height: 22px "  />
+                                                <h:commandLink id="btnExcelForCentral" title="#{loc.sampleexcelfile}" style="visibility:hidden"  class ="tlbrIcon" actionListener="#{stockBean.downloadSampleList()}">
+                                                    <i class="icon-file-excel  tlbrExcelBtn Fs23"  />
+                                                </h:commandLink>       
+                                            </td>
+                                            <td style="border: none">
+                                                <p:fileUpload  update="@this,btnTransfer,txtFileName,btnClose"  allowTypes="/(\.|\/)(xls|xlsx|xls|xlsm|xlsb|xltx|xltm|xlt|xla|xlw|xlr|)$/" invalidFileMessage="#{loc.invalidfiletype}" invalidSizeMessage="#{loc.filesizecannotbegreaterthan1mb}"
+                                                               class="#{stockBean.fileNames.length()==0 ? 'fileUploadEmpty' : 20>stockBean.fileNames.length() ? 'fileUploadSmall'  : 'fileUploadLong'}" label="#{loc.choosefile}" fileLimit="1"  auto="true" sizeLimit="10000000"
+                                                               style="width: 150px" fileUploadListener="#{stockBean.handleFileUploadFile}"  mode="advanced"  multiple="true" dragDropSupport="false" />
+
+                                            </td>
+
+                                        </tr>
+
+                                        <tr>
+                                            <td style="width: 100px;border:none !important;"><h:outputText id="txtFileName"  styleClass="wrapLabel" value="#{stockBean.fileNames}" /> </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </p:column> 
+                            <p:column  colspan="2">
+                                <p:commandButton id="btnTransfer" icon="fa fa-exchange" disabled="#{stockBean.isOpenTransferBtn}" resetValues="true" value="#{loc.transfer}" update="@this,btnTransfer ,btnClose,txtFileName" actionListener="#{stockBean.convertUploadDataForCentral()}" />
+                                <p:commandButton id="btnClose"  icon="fa fa-close" disabled="#{stockBean.isOpenCancelBtn}" resetValues="true" value="#{loc.remove}" update="@this,btnTransfer ,btnClose,txtFileName" actionListener="#{stockBean.clear()}" />
+                            </p:column>
+
+                        </p:row>
+                    </h:panelGroup>
+
+                </div>
+            </p:panelGrid> 
+        </h:form>
+    </p:dialog>
+
+    <p:dialog id="dlgProductViewForCentral" widgetVar="dlg_ProductViewForCentral" showEffect="fade" hideEffect="fade" resizable="false" transient="true" modal="true" closeOnEscape="true" responsive="true" width="50%" class=" overflow-y: auto !important; max-height: 570px;" >
+        <p:ajax event="close" update="frmStockFileUploadForCentral:btnTransfer" listener="#{stockBean.clearProducts()}" global="false"/> 
+        <h:form id="frmToolbarForCentral">
+            <p:toolbar>
+                <f:facet name="left">
+                    <h:outputText value="#{loc.productstobetransferredfromthefile}" class="outputTextFont Fleft MarRight8" />
+                </f:facet>
+
+                <f:facet name="right">
+                    <p:commandLink id="btnSave" disabled="#{stockBean.isOpenSaveBtn}" title="#{loc.transfer}" process="@this"  class="Fright" update="#{sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1 ? 'frmStock:dtbStock' :  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType != 1 ? 'frmStock:dtbStockFull' : ''}"  actionListener="#{stockBean.saveProductForCentral()}"  >
+                        <i class="fa fa-save Fs20 MarTop5 tlbrSaveBtn"/>                 
+                    </p:commandLink>
+                </f:facet>
+            </p:toolbar>
+
+            <h:panelGroup id="pgrIsError" >
+                <p:separator style="margin-top: 0px !important; margin-bottom: 5px;" class="allCheckSeparator"/>
+                <p:panelGrid layout="grid" columns="1" class="allCheckPanelGrid" style="border-radius: 0px !important; border-bottom: 0px !important;">  
+                    <p:selectBooleanCheckbox value="#{stockBean.isOpenErrorData}" itemLabel="#{loc.showincorrectrecords}" class="Fleft allcheck" style="margin-top: 2px; margin-left: 5px;">
+                        <p:ajax global="false" resetValues="true" listener="#{stockBean.showErrorProductListForCentral()}"/>
+                    </p:selectBooleanCheckbox>
+                </p:panelGrid>
+            </h:panelGroup>
+        </h:form>
+
+        <!-- Aktar butonuna bastıktan sonra ürünlerin önizleme ile gösterildiği yer  -->
+        <h:panelGroup>
+            <h:form id="frmProductViewForCentral">
+                <p:dataTable  id="dtbProductView" var="viewProduct"  value="#{stockBean.excelStockList}" widgetVar="viewPdocutPF" emptyMessage="#{loc.norecordsfound}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{viewProduct.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true"
+                              rowStyleClass="#{viewProduct.excelDataType==-1 ? 'ColumnColorRed' : null}" >
+
+                    <p:column headerText="#{loc.stockbarcode}" selectRow="false">
+                        <h:outputText value="#{viewProduct.barcode}" class="Fright"/>
+                    </p:column>
+                    <p:column headerText="#{loc.stockcode}" selectRow="false">
+                        <h:outputText value="#{viewProduct.code == '-1'  ? '' : viewProduct.code}" class="Fright" />
+                    </p:column>
+                    <p:column headerText="#{loc.productionplace}" selectRow="false">
+                        <h:outputText value="#{viewProduct.country.id==-1 ? '' :viewProduct.country.id}" />
+                    </p:column>
+                    <p:column headerText="#{loc.supplier}" selectRow="false">
+                        <h:outputText value="#{viewProduct.supplier.id==-1 ? '':viewProduct.supplier.id}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.supplierstockcode}" selectRow="false">
+                        <h:outputText value="#{viewProduct.supplierProductCode}" />
+                    </p:column>
+                    <p:column headerText="#{loc.quicksale}" selectRow="false">
+                        <h:outputText value="#{viewProduct.stockInfo.isQuickSaleTemp == null ? '' : viewProduct.stockInfo.isQuickSaleTemp ? loc.yes :loc.no}" />
+                    </p:column>
+                    <p:column headerText="#{loc.minstocklevel}" selectRow="false">
+                        <h:outputText value="#{viewProduct.stockInfo.minStockLevel==0 ? '' :viewProduct.stockInfo.minStockLevel}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.maxstocklevel}" selectRow="false">
+                        <h:outputText value="#{viewProduct.stockInfo.maxStockLevel==0 ? '' :viewProduct.stockInfo.maxStockLevel}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.canthestockdroptonegativebalance}" selectRow="false">
+                        <h:outputText value="#{viewProduct.stockInfo.isMinusStockLevelTemp == null ? '' : viewProduct.stockInfo.isMinusStockLevelTemp ? loc.yes : loc.no}" />
+                    </p:column>
+
+                    <p:column headerText="#{loc.department}" selectRow="false">
+                        <h:outputText value="#{viewProduct.stockInfo.taxDepartment.id==-1 ? '' :viewProduct.stockInfo.taxDepartment.id}"  class="Fright" />
+                    </p:column>
+                    <p:column headerText="#{loc.parentcategory}" selectRow="false">
+                        <h:outputText value="#{viewProduct.parentCategory.id ==-1 ? '' :viewProduct.parentCategory.id }" />
+                    </p:column>
+                    <p:column headerText="#{loc.subcategory}" selectRow="false">
+                        <h:outputText value="#{viewProduct.subCategoty.id ==-1 ? '' :viewProduct.subCategoty.id }" />
+                    </p:column>
+                </p:dataTable>
+            </h:form>
+        </h:panelGroup>
+    </p:dialog>
+
+    <script type="text/javascript">
+        //<![CDATA[
+
+        function searchTable(myInput, myTable) {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById(myInput);
+            filter = input.value.toLocaleLowerCase();
+            table = document.getElementById(myTable);
+            tr = table.getElementsByTagName("tr");
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[1];
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toLocaleLowerCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        function  clearSearch(inputtext, table) {
+            document.getElementById(inputtext).value = '';
+            searchTable(inputtext, table);
+        }
+        function downloadExcel() {
+            document.getElementById("form:btnExcel").click();
+        }
+        function downloadExcelForCentral()
+        {
+            document.getElementById("frmStockFileUploadForCentral:btnExcelForCentral").click();
+        }
+
+//]]>
+
+    </script>
+
+    <style type="text/css">
+        .ui-fileupload-buttonbar{
+            padding: 0px !important;
+            margin-top: -35px !important;
+            margin: -20px 2px;
+        }
+
+        .fileUploadLong .ui-button{
+            margin-top: 46px !important;
+            position: relative;
+        }
+        .fileUploadSmall .ui-button{
+            margin-top: 46px !important;
+            position: relative;
+        }
+        .fileUploadEmpty .ui-button{
+            margin-top: 46px !important;
+            position: relative;
+        }
+        .wrapLabel{
+            word-wrap: break-word !important;
+        }
+        .tableUp, th, td {
+            border: 1px solid #316996;
+        }
+
+        .tableUp {
+            border-collapse: collapse;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .tableUp tr {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: .35em;
+        }
+        .pgrResponsive{
+            border-collapse: collapse;
+            margin: 0;
+            padding: 0px;
+            width: 100%;
+            table-layout: auto;
+        }
+
+    </style>
+</ui:composition>
+
+
+

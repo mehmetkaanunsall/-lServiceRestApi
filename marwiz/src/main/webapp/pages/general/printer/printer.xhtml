@@ -1,0 +1,84 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+        <ui:param name="bean" value="#{printerBean}"/> 
+        <ui:param name="update" value="dlgPrinterProcess"/>
+        <ui:param name="btnNewId" value='#{printerBean.getRendered(321, 0)}'/>
+        <ui:param name="datatable" value="frmPrinter:dtbPrinter" />
+        <ui:param name="widgetvar" value="printerPF" />
+        <ui:param name="form" value='frmToolbarPrinter' />
+        <ui:param name="fileName" value="#{loc.printer}"/> 
+        <ui:param name="renderedToggler" value='true'/>
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+    </ui:include>
+
+
+    <h:form id="frmPrinter">
+
+        <p:dataTable  id="dtbPrinter" var="printer"  value="#{printerBean.listOfObjects}" widgetVar="printerPF" filteredValue="#{printerBean.listOfFilteredObjects}" selection="#{printerBean.selectedObject}"  selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{printer.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                      reflow="true" >
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{printerBean.update()}" update="dlgPrinterProcess" global="false" /> 
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false"/>
+            <p:ajax event="colReorder" listener="#{printerBean.reorder}" update="frmToolbarPrinter:toggle" />     
+            <p:ajax event="colResize"  listener="#{printerBean.onResize}" /> 
+
+            <f:facet name="footer" rendered="false" >
+                <p:inputText id="globalFilter" value="#{printerBean.autoCompleteValue}"  style="display: none"  />
+            </f:facet>
+
+            <p:column id="clmName" headerText="#{loc.name}" sortable="true" sortBy="#{printer.name}" filterable="true"  filterBy="#{printer.name}" filterMatchMode="contains" visible="#{printerBean.toogleList[0]}" exportable="#{printerBean.toogleList[0]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{printer.name}" />
+            </p:column >
+
+            <p:column id="clmIpAdress" headerText="#{loc.ipaddress}" sortable="true" sortBy="#{printer.ipAddress}" filterable="true"  filterBy="#{printer.ipAddress}" filterMatchMode="contains" visible="#{printerBean.toogleList[2]}" exportable="#{printerBean.toogleList[2]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{printer.ipAddress}" />
+            </p:column >
+            <p:column id="clmPort" headerText="#{loc.port}" sortable="true" sortBy="#{printer.port}" filterable="true"  filterBy="#{printer.port}" filterMatchMode="contains" visible="#{printerBean.toogleList[3]}" exportable="#{printerBean.toogleList[3]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{printer.port}" />
+            </p:column >
+            <p:column id="clmMacAddress" headerText="#{loc.macaddress}" sortable="true" sortBy="#{printer.macAddress}" filterable="true"  filterBy="#{printer.macAddress}" filterMatchMode="contains" visible="#{printerBean.toogleList[4]}" exportable="#{printerBean.toogleList[4]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{printer.macAddress}" />
+            </p:column >
+            <p:column id="clmType" headerText="#{loc.type}" sortable="true" sortBy="#{printer.type.tag}" filterable="true"  filterBy="#{printer.type.tag}" filterMatchMode="contains" visible="#{printerBean.toogleList[1]}" exportable="#{printerBean.toogleList[1]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{printer.type.tag}" />
+            </p:column >
+            <p:column id="clmDefault" headerText="#{loc.isdefault}" sortable="true" sortBy="#{printer.isDefault}" filterable="true"  filterBy="#{printer.isDefault}" filterMatchMode="contains" visible="#{printerBean.toogleList[5]}" exportable="#{printerBean.toogleList[5]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{printer.isDefault ? loc.yes : loc.no}" />
+            </p:column >
+        </p:dataTable>  
+    </h:form>
+
+    <p:dialog id="dlgPrinterProcess" widgetVar="dlg_PrinterProcess" resizable="false" transient="true" focus="dlgPrinterProcess" responsive="true" dynamic="true" modal="true" closeOnEscape="true" width="50%">
+        <p:ajax event="close" listener="#{printerBean.closeDialog()}" global="false" />
+        <ui:include src="/pages/general/printer/printerprocess.xhtml" />
+    </p:dialog>
+
+
+</ui:composition>

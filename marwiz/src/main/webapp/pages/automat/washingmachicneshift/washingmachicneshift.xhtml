@@ -1,0 +1,76 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <ui:include src="/pages/general/common/datagridtoolbar.xhtml" >
+        <ui:param name="bean" value="#{washingMachicneShiftBean}"/> 
+        <ui:param name="update" value="dlgNewShiftConfirm"/>
+        <ui:param name="btnNewId" value="#{washingMachicneShiftBean.getRendered(55, 0)}"/>
+        <ui:param name="datatable" value="frmWashingMachicneShift:dtbWashingMachicneShift" /> 
+        <ui:param name="dtbWidgetVar" value="washingMachicneShiftPF" /> 
+        <ui:param name="fileName" value="#{loc.washingmachineshift}"/>,
+        <ui:param name="renderedFilter" value='false'/>
+        <ui:param name="renderedToggler" value='true'/>
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+        <ui:param name="renderedAdd" value='true'/>
+    </ui:include>
+
+    <h:form id="frmWashingMachicneShift">
+
+        <p:dataTable  id="dtbWashingMachicneShift" widgetVar="washingMachicneShiftPF" selectionMode="single" var="shift" rowKey="#{shift.id}" value="#{washingMachicneShiftBean.listOfObjects}"
+                      selection="#{washingMachicneShiftBean.selectedObject}" emptyMessage="#{loc.norecordsfound}"
+                      paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                      sortBy="#{shift.station.id}" reflow="true" lazy="true" rowStyleClass="#{shift.status.id == 53 ? 'ColumnColorGreen' : null}" rowsPerPageTemplate="#{sessionBean.user.gridSize}" rows="#{sessionBean.user.defualtGridSize}" >
+
+            <p:column id="clmShiftNo" headerText="#{loc.shiftno}"   visible="#{washingMachicneShiftBean.toogleList[0]}" exportable="#{washingMachicneShiftBean.toogleList[0]}">
+                <h:outputText value="#{shift.shiftNo}"/> 
+            </p:column>
+
+            <p:column id="clmStartDate" headerText="#{loc.startdate}" visible="#{washingMachicneShiftBean.toogleList[2]}"   exportable="#{washingMachicneShiftBean.toogleList[2]}">
+                <h:outputText value="#{shift.beginDate}"  >
+                    <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                </h:outputText>
+            </p:column>
+            <p:column id="clmEndDate" headerText="#{loc.enddate}"  visible="#{washingMachicneShiftBean.toogleList[3]}"   exportable="#{washingMachicneShiftBean.toogleList[3]}">
+                <h:outputText value="#{shift.endDate}"  >
+                    <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                </h:outputText>
+            </p:column>        
+
+            <p:column id="clmDetail" style="text-align: center !important; width: 80px;" headerText="#{loc.detail}" visible="#{washingMachicneShiftBean.toogleList[4]}"  exportable="false">
+                <p:commandLink title="#{loc.detail}" action="#{washingMachicneShiftBean.goToShiftDetail()}">
+                    <i class="fa fa-search Fs16"/>   
+                    <f:setPropertyActionListener value="#{shift}"  target="#{washingMachicneShiftBean.selectedConfirmShift}"  />
+                </p:commandLink> 
+            </p:column>
+        </p:dataTable>  
+    </h:form>
+
+
+
+    <p:dialog id="dlgNewShiftConfirm"  widgetVar="dlgNewShiftConfirm"  resizable="false" transient="true" focus="dlgNewShiftConfirm" closeOnEscape="true" responsive="true"  width="20%" modal="true" >
+        <h:form id="frmNewShiftName">
+            <div class="ui-g TexAlCenter" >
+                <div class="ui-g-12 ui-md-12 ui-lg-12 ">
+                    <h:outputText value="#{washingMachicneShiftBean.openShift.shiftNo} #{loc.isopen}" style=" color: #ca5959;" rendered="#{washingMachicneShiftBean.haveOpenShift}"/>
+                </div>  
+
+                <div class="ui-g-12 ui-md-12 ui-lg-12">
+                    <h:outputText value="#{washingMachicneShiftBean.message}" style="white-space: pre-wrap; color: black !important"/>
+                </div>
+
+                <div class="ui-g-12 ui-md-12 ui-lg-6 TexAlCenter">
+                    <p:commandButton actionListener="#{washingMachicneShiftBean.pressYesButtonForNewShift()}" update="frmNewShiftName"  process="@form" value="#{loc.yes}"    styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+                </div>
+                <div class="ui-g-12 ui-md-12 ui-lg-6 TexAlLeft">
+                    <p:commandButton value="#{loc.no}"  type="button" onclick="PF('dlgNewShiftConfirm').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+                </div>
+            </div>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>

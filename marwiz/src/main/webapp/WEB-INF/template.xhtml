@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+
+    <h:head>
+        <title>Marwiz</title>
+        <link rel="shortcut icon" type="image/x-icon" href="#{resource['sentinel-layout/images/centrowiz.ico']}"/>
+
+        <f:facet name="first" >
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+            <meta name="apple-mobile-web-app-capable" content="yes" />
+            <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+            <meta http-equiv="Pragma" content="no-cache" />
+            <meta http-equiv="Expires" content="0" />
+        </f:facet>       
+
+        <h:outputScript name="js/layout.js" library="sentinel-layout" />
+        <h:outputScript name="js/lang.js" library="sentinel-layout" />        
+        <h:outputScript name="js/centrowiz.js" library="sentinel-layout" /> 
+
+        <ui:insert name="head" />
+        <!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBCAwnVo4Q-zf9Bzt_J4XMHFH8HQz-dnk"></script>-->
+
+    </h:head>
+
+    <h:body id="fullbody" class="bodyColor" >    
+        <f:view locale="#{sessionBean.locale}" >
+
+            <p:ajaxStatus  onstart="PF('blockUIWidget').block();document.querySelector('.blockOverlay').style.zIndex = 10000;"  oncomplete="PF('blockUIWidget').unblock();" style="width:10px; height:10px; position:absolute; z-index: 99999; top:50%;left: 50%">
+                <f:facet  name="start"  >
+                    <p:graphicImage name="images/loading.gif"  style="opacity:0.5;" library="sentinel-layout"/>
+                </f:facet>
+
+                <f:facet name="complete">
+                    <h:outputText value="" />
+                </f:facet>
+            </p:ajaxStatus>
+            <ui:include src="topbar.xhtml" />
+
+            <ui:include  src="leftmenu.xhtml" />
+
+            <div id="layout-portlets-cover" class="fontRegular lp-cover1 bodyColor">
+                <h:form id="breadcrumb">
+                    <div class="ui-g-12 ui-lg-12 ui-md-12" style="padding: 0px !important">
+                        <div class="ui-g-12 ui-lg-12 ui-md-12" style="padding: 0px !important">
+                            <p:breadCrumb model="#{marwiz.breadCrumb.breadCrumb}" styleClass="cBreadCrumb" />
+                        </div>
+                    </div>
+                    <div class="EmptyBox5"/>
+                </h:form>
+                <ui:insert id="body" name="content">                    
+                </ui:insert>
+            </div>
+
+
+            <h:outputStylesheet name="css/font-icon-layout.css" library="sentinel-layout" />
+            <h:outputStylesheet name="css/sentinel-layout.css" library="sentinel-layout" />
+            <h:outputStylesheet name="css/core-layout.css" library="sentinel-layout" />        
+
+            <h:outputStylesheet name="css/centrowiz.css" library="sentinel-layout"  />          
+            <h:outputStylesheet class="themeColor" name="theme/#{sessionBean.user.lastTheme}.css" library="sentinel-layout"/>
+        </f:view>
+        <script>
+            $.extend($.ui.keyCode, {
+                NUMPAD_ENTER: 108
+            });
+            function doc_keyDown(e)
+            {
+                // Insert Butonuna Basıldı İse    
+                if (e.keyCode == 45) {
+                    // &amp;&amp; || $('.ui-dialog:visible').attr('aria-hidden')=='true' || $('.ui-dialog:visible').attr('aria-hidden')==undefined
+                    if ($(".ui-tabs .ui-state-active a").attr("href") == undefined) {
+                        $('#mainPanel_content .tlbrAddBtn:first').click();
+                    } else {
+                        var tabId = $(".ui-tabs .ui-state-active a").attr("href").replace(":", "\\\\:");
+                        tabId = '"' + tabId + ' .tlbrAddBtn' + '"';
+                        eval('$(' + tabId + ').click();');
+                    }
+                    // Delete Butonuna Basıldı İse    
+                } else if (e.keyCode == 46) {
+                    //herhangi bir inputa focuslandıysa bişey yapma
+                    if ($('input[type="text"]').hasClass("ui-state-focus")) {
+                    } else { //değilse silme butonunu çalıştır
+                        if ($('.ui-dialog:visible').attr('aria-hidden') == 'true' || $('.ui-dialog:visible').attr('aria-hidden') == undefined) {
+                            $('#mainPanel_content .tlbrDeleteBtn:first').click();
+                        } else if ($('.ui-dialog:visible').attr('aria-hidden') == 'false') {
+                            var dialogId = $('.ui-dialog-mask:last').attr('id').replace(":", "\\\\:").replace("_modal", "");
+                            dialogId = '"#' + dialogId + ' .tlbrDeleteBtn' + '"';
+                            eval('$(' + dialogId + ').click();');
+                        }
+                    }
+                }
+            }
+            document.addEventListener('keydown', doc_keyDown, true);
+        </script>
+        
+        <script>
+            $.extend($.ui.keyCode, {
+                NUMPAD_ENTER: 108
+            });
+           
+            $(function () {
+                init();
+            });
+            
+            function init() {
+            /*    console.log(window.navigator);
+                if (isInternetExplorer()) {
+                    $("#ddd").css("position", "relative");
+                    $("#ddd").css("display", "block");
+                } */
+                $("#layout-portlets-cover").css("min-height", ($(window).height() - 100));
+            }  
+
+            function isInternetExplorer() { 
+                const isInternetExplorer = window.navigator.userAgent.toLowerCase().match(/(?:msie |trident.+?; rv:)(\d+)/);
+                return isInternetExplorer !== null;
+            }    
+
+            $(window).bind("resize", function () {
+                init();
+            });
+        </script>
+        <style>
+            .footer {
+                position: relative;
+                display: block;
+                left: 0;
+                bottom: 0;
+                width: 100%;
+                text-align: center;
+            }                
+            @supports not (display:contents) {
+                .footer.remove{
+                    display: contents;
+                }
+                .footer { 
+                    position: -ms-device-fixed !important; 
+                    display: block !important;
+                } 
+
+            }
+
+
+
+        </style>
+    </h:body>
+    
+     <div id="ddd" class="footer page-break" >                                   
+        <h:panelGroup class="footerVersion" layout="block" style="height: 42px"> 
+            <p:separator styleClass="Wid100 "></p:separator>        
+            <p:outputLabel value="#{loc.version} : #{applicationBean.parameterMap.get('version').value}" class="Fright PaddingRight5 Fs15" style="color: #316996 !important; "/>
+        </h:panelGroup>      
+     </div>
+    <pe:blockUI widgetVar="blockUIWidget"   css="{left: '50%', right: '50%', cursor: 'wait'}" >
+
+        <p:graphicImage name="images/loading.gif"  style="opacity:0.5;" library="sentinel-layout"  />
+
+    </pe:blockUI>
+</html>

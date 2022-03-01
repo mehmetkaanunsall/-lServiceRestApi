@@ -1,0 +1,70 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+    <h:form id="frmAccountBankTab">
+        <div class="ContainerIndent">
+            <ui:include src="/pages/general/common/tabgridtoolbar.xhtml">
+
+                <ui:param name="bean" value="#{accountBankTabBean}"/>
+                <ui:param name="btnNewId" value="#{(!sessionBean.user.lastBranchSetting.isProcessPassiveAccount and accountBankTabBean.selectedAccount.status.id == 6) ? 'false' : marwiz.pageIdOfGoToPage==11 ? accountBankTabBean.getRendered(286, 0) : accountBankTabBean.getRendered(289, 0)}"/>
+                <ui:param name="update" value="dlgAccountBankProcess" />
+                <ui:param name="outputtext" value="#{loc.banks}" />
+
+            </ui:include>
+            <p:dataTable id="dtbBank"  var="bank" selectionMode="single" value="#{accountBankTabBean.listOfObjects}" widgetVar="bankPF" selection="#{accountBankTabBean.selectedObject}"
+                         rowKey="#{bank.id}" emptyMessage="#{loc.norecordsfound}" class="tabDatatable" resizableColumns="true" >
+
+                <p:ajax event="#{sessionBean.user.gridRowSelect}" resetValues="true" listener="#{accountBankTabBean.createDialog(2)}" update="dlgAccountBankProcess"  />  
+
+                <p:column id="clmBankAccountName" headerText="#{loc.accountname}"  sortable="true" sortBy="#{bank.name}">
+                    <h:outputText value="#{bank.name}"/>
+                </p:column>
+
+                <p:column id="clmAccountNumber" headerText="#{loc.accountnumber}" sortable="true" sortBy="#{bank.accountNumber}" >
+                    <h:outputText value="#{bank.accountNumber}"/>
+                </p:column>
+
+                <p:column id="clmBankName" headerText="#{loc.bankname}" sortable="true" sortBy="#{bank.bankBranch.bank.name}">
+                    <h:outputText value="#{bank.bankBranch.bank.name}" />
+                </p:column>
+
+                <p:column id="clmBranch" headerText="#{loc.branchname}" sortable="true" sortBy="#{bank.bankBranch.name}">
+                    <h:outputText value="#{bank.bankBranch.name}" />
+                </p:column>
+
+                <p:column id="clmBranchCode" headerText="#{loc.branchcode}"  sortable="true" sortBy="#{bank.bankBranch.code}" >
+                    <h:outputText value="#{bank.bankBranch.code}" />
+                </p:column>
+
+                <p:column id="clmType" headerText="#{loc.type}"  sortable="true" sortBy="#{bank.type.tag}" >
+                    <h:outputText value="#{bank.type.tag}" />
+                </p:column>
+
+                <p:column id="clmBalance" headerText="#{loc.balance}" sortable="true" sortBy="#{bank.balance}">
+                    <h:outputText value="#{bank.balance}" style="float: right;">
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="currency" value="#{bank.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                </p:column>
+               
+                <p:column id="clmCurrency" headerText="#{loc.currency}" sortBy="#{bank.currency.tag}" >
+                    <h:outputText value="#{bank.currency.tag}" />
+                </p:column>
+
+                <p:column id="clmStatu" headerText="#{loc.statu}" sortBy="#{bank.status.tag}" >
+                    <h:outputText value="#{bank.status.tag}" />
+                </p:column>
+            </p:dataTable>
+        </div>
+    </h:form>
+
+
+
+</ui:composition>

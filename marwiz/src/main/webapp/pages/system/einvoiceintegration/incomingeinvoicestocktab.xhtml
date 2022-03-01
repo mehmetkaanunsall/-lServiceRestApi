@@ -1,0 +1,277 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+
+
+    <h:form id="frmEInvoiceStokTab">
+
+        <p:dataTable id="dtbStock"  var="eInvoiceStock" value="#{incomingEInvoicesBean.listItem}" selection="#{incomingEInvoicesBean.selectedInvoiceItem}" selectionMode="single"
+                     widgetVar="eInvoiceItemPF" rowKey="#{eInvoiceStock.id}" emptyMessage="#{loc.norecordsfound}" class="tabDatatable600px"
+                     rows="#{sessionBean.user.defualtGridSize}" 
+                     paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                     rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" >
+
+            
+             <p:column id="clmEInvoiceStockCode" headerText="#{loc.einvoicestockcode}"  >
+                 <h:outputText value="#{eInvoiceStock.oldStockEntegrationCode}" />
+            </p:column>
+            
+
+            <p:column id="clmStockName" headerText="#{loc.stockname}"  >
+                <h:outputText value="#{eInvoiceStock.stock.name}" />
+                <p:commandLink id="btnStockName"   process="@this"  title="#{loc.stockmatch}" action="#{incomingEInvoicesBean.goToStock()}" rendered="#{incomingEInvoicesBean.processType==2 and eInvoiceStock.stock.id == 0}" update="dlgStock" >
+                    <i class="fa fa-link Fs15 tlbrSaveBtn  " style="float: right !important " /> 
+                    <f:setPropertyActionListener value="#{eInvoiceStock}"  target="#{incomingEInvoicesBean.selectedInvoiceItem}"  />
+                </p:commandLink>
+
+                <p:commandLink id="btnStockName1" resetValues="true"  process="@this"  title="#{loc.stockmatched}" action="#{incomingEInvoicesBean.goToStock()}" rendered="#{incomingEInvoicesBean.processType==2 and eInvoiceStock.stock.id != 0}" update="dlgStock" >
+                    <i class="Fs15 icon-ok green " style="float: right !important "  /> 
+                    <f:setPropertyActionListener value="#{eInvoiceStock}"  target="#{incomingEInvoicesBean.selectedInvoiceItem}"  />
+                </p:commandLink>
+            </p:column>
+
+
+
+            <p:column id="clmAmount" headerText="#{loc.amount}"  >
+                <h:outputText value="#{eInvoiceStock.quantity}"   >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="unit" value="#{sessionBean.user.lastBranchSetting.branch.currencyrounding}"/>
+                    <f:attribute name="type" value="currencyRounding" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmStockUnitCode" headerText="#{loc.unit}"  >
+                <h:outputText value="#{eInvoiceStock.unit.sortName}" />
+                <p:commandLink id="btnUnitName"  process="@this" rendered="#{incomingEInvoicesBean.processType == 2 and eInvoiceStock.unit.id == 0}" title="#{loc.unitmatch}" action="#{incomingEInvoicesBean.goToStockUnit()}" update="dlgStockUnit">
+                    <i class="fa fa-link Fs15 tlbrSaveBtn " style="float: right !important "  /> 
+                    <f:setPropertyActionListener value="#{eInvoiceStock}"  target="#{incomingEInvoicesBean.selectedInvoiceItem}"  />
+                </p:commandLink>
+                <p:commandLink id="btnUnitName1"  process="@this" rendered="#{incomingEInvoicesBean.processType == 2 and eInvoiceStock.unit.id != 0}" title="#{loc.unitmatched}" action="#{incomingEInvoicesBean.goToStockUnit()}" update="dlgStockUnit">
+                    <i class="Fs15 icon-ok green " style="float: right !important "  /> 
+                    <f:setPropertyActionListener value="#{eInvoiceStock}"  target="#{incomingEInvoicesBean.selectedInvoiceItem}"  />
+                </p:commandLink>
+            </p:column>
+ 
+
+            <p:column id="clmUnitPrice" headerText="#{loc.unitprice}"  >
+                <h:outputText value="#{eInvoiceStock.unitPrice}" style="float: right;" rendered="#{eInvoiceStock.unitPrice>0}">
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{eInvoiceStock.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmDiscountRate"  headerText="#{loc.discountrate}"   >
+                <h:outputText value="#{eInvoiceStock.discountRate}" style="float: right;" rendered="#{eInvoiceStock.discountRate>0}">
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="type" value="percent" />
+                </h:outputText>
+                <h:outputText value="-" style="float: right;"  rendered="#{eInvoiceStock.discountRate== 0}"/>
+            </p:column>
+
+            <p:column headerText="#{loc.discountamount}" >
+                <h:outputText value="#{eInvoiceStock.discountPrice}" style="float: right;" rendered="#{eInvoiceStock.discountPrice>0}">
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{eInvoiceStock.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+                <h:outputText value="-" style="float: right;" rendered="#{eInvoiceStock.discountPrice==0}"/>
+            </p:column>
+
+            <p:column id="clmInterimPrice" headerText="#{loc.taxfreeamount}"  >
+                <h:outputText value="#{eInvoiceStock.totalPrice}" style="float: right;" rendered="#{eInvoiceStock.totalPrice>0}">
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{eInvoiceStock.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+                <h:outputText value="-" style="float: right;" rendered="#{eInvoiceStock.totalPrice==0}"/>
+            </p:column>
+
+            <p:column id="clmTaxRate" headerText="#{loc.taxrate}" >
+                <h:outputText value="#{eInvoiceStock.taxRate}" style="float: right;" rendered="#{eInvoiceStock.taxRate>0}" >
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="type" value="percent" />
+                </h:outputText>
+                <h:outputText value="-" style="float: right;" rendered="#{eInvoiceStock.taxRate==0}"/>
+            </p:column> 
+
+            <p:column id="clmTaxPrice" headerText="#{loc.taxprice}" >
+                <h:outputText value="#{eInvoiceStock.totalTax}" style="float: right;" rendered="#{eInvoiceStock.totalTax>0}">
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{eInvoiceStock.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+                <h:outputText value="-" style="float: right;" rendered="#{eInvoiceStock.totalTax==0}"/>
+            </p:column>
+
+            <p:column id="clmPrice" headerText="#{loc.totalprice}" >
+                <h:outputText value="#{eInvoiceStock.totalMoney}" style="float: right;" rendered="#{eInvoiceStock.totalMoney>0}">
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="currency" value="#{eInvoiceStock.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText> 
+                <h:outputText value="-" style="float: right;" rendered="#{eInvoiceStock.totalMoney==0}"/>
+            </p:column>
+
+            <p:columnGroup type="footer" class="Fright">
+
+                <!-- stokların toplam tutarı -->
+                <p:row>
+                    <p:column colspan="2" style="text-align:right; font-weight: bold; " priority="1">
+                        <f:facet name="footer"  >
+                            <h:outputText value="#{loc.totalamount} " style="text-align:right; font-weight: bold; " />
+                        </f:facet>
+                    </p:column>
+                    <p:column colspan="2" style="text-align:right; font-weight: bold; " priority="1">
+                        <f:facet name="footer"  >
+                            <h:outputText value="#{incomingEInvoicesBean.totalAmountText()}" style="font-weight: bold; " />
+                        </f:facet>
+                    </p:column>
+                    <p:column colspan="#{sessionBean.lastBranchSetting.isForeignCurrency ? 6 : 6}" style="text-align:right; font-weight: bold; " priority="1">
+                        <f:facet name="footer"  >
+                            <h:outputText value="#{loc.subtotal} " style="text-align:right; font-weight: bold; " />
+                        </f:facet>
+                    </p:column> 
+                    <p:column colspan="1" style="text-align:right; font-weight: bold; ">
+                        <f:facet name="footer"  >
+                            <h:outputText  style="text-align:right; font-weight: bold; " value="#{incomingEInvoicesBean.sumTotalPrice()}" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{incomingEInvoicesBean.selectedObject.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+
+                </p:row>
+
+                <!-- stokların ıskonto toplamı -->
+                <p:row >
+                    <p:column colspan="#{sessionBean.lastBranchSetting.isForeignCurrency ? 3 : 3}" style="text-align:right;" priority="1">
+                        <f:facet  name="footer" >
+                            <h:outputText value="#{loc.invoicebaseddiscount}" style="text-align:right; font-weight: bold; " />
+                        </f:facet>
+                    </p:column>
+
+                    <p:column colspan="2" style="text-align:right;">
+                        <f:facet name="footer" >
+                            <h:outputText id="txtInvoiceDiscount" rendered="#{incomingEInvoicesBean.selectedObject.discountRate==0}" style="text-align:right; font-weight: bold; " value="#{incomingEInvoicesBean.selectedObject.discountPrice}" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{incomingEInvoicesBean.selectedObject.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+
+                            <h:outputText id="txtInvoiceRate" rendered="#{incomingEInvoicesBean.selectedObject.discountRate>0}" style="text-align:right; font-weight: bold; " value="#{incomingEInvoicesBean.selectedObject.discountRate}" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="percent" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column> 
+                    <p:column colspan="3" style="text-align:right;" priority="1">
+                        <f:facet  name="footer" >
+                            <h:outputText value="#{loc.penbaseddiscount}" style="text-align:right; font-weight: bold; " />
+                        </f:facet>
+                    </p:column>
+
+                    <p:column colspan="1" style="text-align:right;">
+                        <f:facet name="footer" >
+                            <h:outputText id="txtPenDiscount" style="text-align:right; font-weight: bold; " value="#{incomingEInvoicesBean.totalDiscount}" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{incomingEInvoicesBean.selectedObject.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column> 
+                    <p:column colspan="1" style="text-align:right;" priority="1">
+                        <f:facet  name="footer" >
+                            <h:outputText value="#{loc.totaldiscount}" style="text-align:right; font-weight: bold; " />
+                        </f:facet>
+                    </p:column>
+
+                    <p:column colspan="1" style="text-align:right;">
+                        <f:facet name="footer" >
+                            <h:outputText id="txtDiscount" style="text-align:right; font-weight: bold; " value="#{incomingEInvoicesBean.selectedObject.discountPrice}" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{incomingEInvoicesBean.selectedObject.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column> 
+                </p:row>
+
+                <!-- vergi oranlarının ayrı ayrı gosterılmesı-->
+                <p:row>
+                    <p:column colspan="9" rendered="#{sessionBean.lastBranchSetting.isForeignCurrency}" style="text-align:right;" priority="1">
+                        <f:facet name="footer">
+                            <h:outputText value="#{loc.taxamountwithexchange}: #{incomingEInvoicesBean.taxRates}" style="text-align:right; font-weight: bold; " />
+                        </f:facet>
+                    </p:column>
+                    <p:column colspan="#{sessionBean.lastBranchSetting.isForeignCurrency ? 2 : 10}" style="text-align:right;" priority="1">
+                        <f:facet name="footer" >
+                            <h:outputText value=" #{loc.totaltaxprice}" style="text-align:right; font-weight: bold; " />
+                        </f:facet>
+                    </p:column>
+                    <!-- toplam vergı -->
+                    <p:column colspan="1" style="text-align:right;">
+                        <f:facet name="footer" >
+                            <h:outputText  style="text-align:right; font-weight: bold; " value="#{incomingEInvoicesBean.selectedObject.totalTax}" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{incomingEInvoicesBean.selectedObject.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+                </p:row>
+
+                <!-- yuvarlama miktarı -->
+                <p:row  >
+                    <p:column colspan="#{sessionBean.lastBranchSetting.isForeignCurrency ? 10 : 10}" style="text-align:right;" priority="1">
+                        <f:facet name="footer" >
+                            <h:outputText value="#{loc.roundingprice} " style="text-align:right; font-weight: bold; " />
+                        </f:facet>
+                    </p:column>
+
+                    <p:column colspan="1" style="text-align:right;" >
+                        <f:facet name="footer" >
+                            <h:outputText  style="text-align:right; font-weight: bold; " value="#{incomingEInvoicesBean.selectedObject.roundingPrice}" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{incomingEInvoicesBean.selectedObject.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+                </p:row>
+                <!-- ödenecek tutar -->
+                <p:row  >
+                    <p:column colspan="#{sessionBean.lastBranchSetting.isForeignCurrency ? 10 : 10}" style="text-align:right;" priority="1">
+                        <f:facet name="footer" >
+                            <h:outputText value="#{loc.grandtotal} " style="text-align:right; font-weight: bold; " />
+                        </f:facet>
+                    </p:column>
+
+                    <p:column colspan="1" style="text-align:right;" >
+                        <f:facet name="footer" >
+                            <h:outputText  style="text-align:right; font-weight: bold; " value="#{incomingEInvoicesBean.selectedObject.totalMoney}" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{incomingEInvoicesBean.selectedObject.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </f:facet>
+                    </p:column>
+                </p:row>
+            </p:columnGroup>
+
+
+        </p:dataTable>
+
+    </h:form>
+
+
+
+
+</ui:composition> 

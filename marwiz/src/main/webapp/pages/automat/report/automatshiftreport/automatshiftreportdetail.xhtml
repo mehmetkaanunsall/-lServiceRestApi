@@ -1,0 +1,243 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+    <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+        <ui:param name="bean" value="#{automatShiftReportDetailBean}"/>
+        <ui:param name="datatable" value="frmShiftDetailReportDatatable:dtbShiftDetailReport" />
+        <ui:param name="outputText" value="#{loc.shift}-#{automatShiftReportDetailBean.selectedObject.shift.shiftNo}"/>
+        <ui:param name="renderedOutputText" value='true'/>
+        <ui:param name="fileName" value="#{loc.detailshiftreport}"/>
+        <ui:param name="renderedBack" value='true'/>
+        <ui:param name="renderedToggler" value='true'/>
+        <ui:param name="renderedExcel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+        <ui:param name="renderedPrint" value='true'/>
+    </ui:include>
+
+
+    <h:form id="frmShiftDetailReportDatatable">
+
+        <p:dataTable  id="dtbShiftDetailReport" selectionMode="single" class="dtbReport" var="ShiftDetailReport" value="#{automatShiftReportDetailBean.listOfObjects}"  selection="#{automatShiftReportDetailBean.selectedObject}"  widgetVar="shiftDetailReportPF" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{ShiftDetailReport.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true" lazy="true">
+
+
+            <p:column id="clmStartDate" headerText="#{loc.date}"  visible="#{automatShiftReportDetailBean.toogleList[0]}"   exportable="#{automatShiftReportDetailBean.toogleList[0]}">
+                <h:outputText value="#{ShiftDetailReport.saleDateTime}"  >
+                    <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmPlatform" headerText="#{loc.platformno}" visible="#{automatShiftReportDetailBean.toogleList[1]}" exportable="#{automatShiftReportDetailBean.toogleList[1]}" >
+                <h:outputText value="#{ShiftDetailReport.platformNo}" />
+            </p:column>
+            <p:column id="clmnWashingMachine" headerText="#{loc.washingmachicne}" visible="#{automatShiftReportDetailBean.toogleList[2]}" exportable="#{automatShiftReportDetailBean.toogleList[2]}">
+                <h:outputText value="#{ShiftDetailReport.washingMachine.name}"  />
+            </p:column>
+
+            <p:column id="clmMacAddress" headerText="#{loc.macaddress}" visible="#{automatShiftReportDetailBean.toogleList[3]}" exportable="#{automatShiftReportDetailBean.toogleList[3]}">
+                <h:outputText value="#{ShiftDetailReport.macAddress}"  />
+            </p:column>
+            <p:column id="clmPaymentType" headerText="#{loc.paymenttype}" visible="#{automatShiftReportDetailBean.toogleList[4]}" exportable="#{automatShiftReportDetailBean.toogleList[4]}">
+                <h:outputText value="#{ShiftDetailReport.paymentType==0 ? loc.cash : ShiftDetailReport.paymentType==1 ? loc.mobilepayment : ShiftDetailReport.paymentType==2? loc.barcode : 'OPT'}"  />
+            </p:column> 
+            <p:column id="clmDiscountPrice" headerText="#{loc.discounttotal}" visible="#{automatShiftReportDetailBean.toogleList[5]}" exportable="#{automatShiftReportDetailBean.toogleList[5]}" >
+                <h:outputText value="#{ShiftDetailReport.discountPrice}" style="float: right;" >
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="currency"  value="#{ShiftDetailReport.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+            <p:column id="clmPrice" headerText="#{loc.totalofproduct}" visible="#{automatShiftReportDetailBean.toogleList[6]}" exportable="#{automatShiftReportDetailBean.toogleList[6]}" >
+
+                <h:outputText value="#{ShiftDetailReport.totalPrice}" style="float: right;" >
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="currency"  value="#{ShiftDetailReport.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+
+            </p:column>
+            <p:column id="clmTaxPrice" headerText="#{loc.taxtotal}" visible="#{automatShiftReportDetailBean.toogleList[7]}" exportable="#{automatShiftReportDetailBean.toogleList[7]}" >
+                <h:outputText value="#{ShiftDetailReport.taxPrice}" style="float: right;" >
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="currency"  value="#{ShiftDetailReport.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+            <p:column id="clmSalesPrice" headerText="#{loc.overalltotal}" visible="#{automatShiftReportDetailBean.toogleList[8]}" exportable="#{automatShiftReportDetailBean.toogleList[8]}" >
+                <h:outputText value="#{ShiftDetailReport.totalMoney}" style="float: right;" >
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="currency"  value="#{ShiftDetailReport.currency}" />
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:column>
+            <p:columnGroup type="footer" rendered="#{automatShiftReportDetailBean.listOfObjects.rowCount>0}">
+                <ui:repeat value="#{automatShiftReportDetailBean.listOfTotals}" var="totals" >
+                    <p:row>
+                        <p:column colspan="#{automatShiftReportDetailBean.toogleList.size()-automatShiftReportDetailBean.countToggle-1}" style="text-align:right" >
+                            <f:facet name="footer" >
+                                <h:outputText value="#{loc.sum} : " class="FontBold" style="font-size: 15px;  color: #565656;"/>
+                            </f:facet>
+                        </p:column>
+                        <p:column>
+                            <f:facet name="footer" >
+                                <h:outputText value="#{totals.totalMoney}" class="Fright FontBold" style="font-size: 15px;  color: #565656;">
+                                    <f:converter converterId="currencyConverter" />
+                                    <f:attribute name="currency" value="#{totals.currency}"/>
+                                    <f:attribute name="type" value="currency" />
+                                </h:outputText>
+                            </f:facet>
+                        </p:column>
+                    </p:row>
+                </ui:repeat>
+            </p:columnGroup>
+        </p:dataTable>  
+    </h:form>
+
+
+    <p:dialog id="dlgShiftSales" widgetVar="dlg_ShiftSales" resizable="false" style="max-height: 85%; overflow-y: auto;" width="60%" focus="dlgShiftSales" modal="true" responsive="true" dynamic="true" closeOnEscape="true">
+        <h:form id="frmSalesReportDetail">
+            <p:toolbar >
+                <f:facet name="left">
+                    <h:outputText value=" #{loc.automatshiftsales}" class="outputTextFont Fleft MarRight8" />
+                </f:facet>
+                <f:facet name="right">
+                    <p:commandLink id="btnPrinter"     title="#{loc.print}" >  
+                        <i class="icon-print Fs20 tlbrSaveBtn"/>  
+                        <p:printer target="frmSalesReportDetail" /> 
+                    </p:commandLink>
+                </f:facet>
+            </p:toolbar>
+
+            <p:panelGrid id="grdSalesReport" columns="2" class="Wid100 reportPanelGrid">
+
+                <h:outputText value="#{loc.saledate}" />
+                <h:outputText value="#{automatShiftReportDetailBean.selectedObject.saleDateTime}" >
+                    <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                </h:outputText>
+                <h:outputText value="#{loc.shiftno}" />
+                <h:outputText value="#{automatShiftReportDetailBean.selectedObject.shift.shiftNo}" />
+                <h:outputText value="#{loc.macaddress}" />
+                <h:outputText value="#{automatShiftReportDetailBean.selectedObject.macAddress}" />
+                <h:outputText value="#{loc.discountamount}" />
+                <h:outputText value="#{automatShiftReportDetailBean.selectedObject.discountPrice}"  style="float: right">
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="currency"  value="#{automatShiftReportDetailBean.selectedObject.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+                <h:outputText value="#{loc.sum}" />
+                <h:outputText value="#{automatShiftReportDetailBean.selectedObject.totalPrice}"  style="float: right">
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="currency"  value="#{automatShiftReportDetailBean.selectedObject.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+                <h:outputText value="#{loc.taxprice}" />
+                <h:outputText value="#{automatShiftReportDetailBean.selectedObject.taxPrice}"  style="float: right">
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="currency"  value="#{automatShiftReportDetailBean.selectedObject.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+                <h:outputText value="#{loc.overalltotal}" />
+                <h:outputText value="#{automatShiftReportDetailBean.selectedObject.totalMoney}"  style="float: right">
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="currency"  value="#{automatShiftReportDetailBean.selectedObject.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+            </p:panelGrid>
+            <div class="EmptyBox10"/>
+            <div class="ui-g-12 ui-md-12 ui-lg-12" style="padding: 0 !important">
+                <ui:include src="/pages/general/common/tabgridtoolbar.xhtml" >
+                    <ui:param name="outputtext" value="#{loc.stocksofsales}"/>
+                    <ui:param name="bean" value='#{automatShiftReportDetailBean}' />
+                    <ui:param name="update"  value="" />
+                </ui:include>
+                <p:dataTable id="dtbSaleItem" class="dtbReport dialogDatatable" var="saleItem"  widgetVar="saleItemPF" value="#{automatShiftReportDetailBean.shiftSaleItemList}" 
+                             rowKey="#{saleItem.id}" emptyMessage="#{loc.norecordsfound}" resizableColumns="true" >
+
+
+                    <p:column id="clmTank" headerText="#{loc.tankno}">
+                        <h:outputText value="#{saleItem.tankNo}" />
+                    </p:column>
+                    <p:column id="clmNozzleNo" headerText="#{loc.uscnozzleno}">
+                        <h:outputText value="#{saleItem.nozzleNo}" />
+                    </p:column>
+                    <p:column id="clmStockCode" headerText="#{loc.stockcode}">
+                        <h:outputText  value="#{saleItem.stock.code}"/>
+                    </p:column>
+                    <p:column id="clmCenterStockCode" headerText="#{loc.centerstockcode}">
+                        <h:outputText  value="#{saleItem.stock.centerProductCode}"/>
+                    </p:column>
+                    <p:column id="clmBarcode" headerText="#{loc.stockbarcode}">
+                        <h:outputText  value="#{saleItem.stock.barcode}" />
+                    </p:column>
+                    <p:column id="clmStock" headerText="#{loc.stock}">
+                        <h:outputText value="#{saleItem.stock.name}" />
+                    </p:column>
+                    <p:column id="clmQuantity" headerText="#{loc.quantity}">
+                        <h:outputText value="#{saleItem.quantity}" style="float: right">
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="unit" value="#{saleItem.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmUnitPrice" headerText="#{loc.unitprice}">
+                        <h:outputText value="#{saleItem.unitPrice}" style="float: right">
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{automatShiftReportDetailBean.selectedObject.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmTotalOfProduct" headerText="#{loc.totalofproduct}">
+                        <h:outputText value="#{saleItem.totalPrice}" style="float: right">
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{automatShiftReportDetailBean.selectedObject.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmOverallTotal" headerText="#{loc.overalltotal}">
+                        <h:outputText value="#{saleItem.totalMoney}" style="float: right">
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{automatShiftReportDetailBean.selectedObject.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                </p:dataTable>
+            </div>
+        </h:form>
+    </p:dialog>
+
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.detailshiftreport}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+
+
+</ui:composition>
+
+
+

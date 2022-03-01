@@ -1,0 +1,52 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+
+    <h:form id="frmTaxDepartmentProcess" >  
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="bean" value='#{taxDepartmentBean}' />
+            <ui:param name="outputtext" value="#{loc.cashregisterdepartmentprocesses}"/>
+            <ui:param name="update" value="pgrTaxDepartment" />
+            <ui:param name="btnSaveId" value="#{taxDepartmentBean.getRendered(293, 0)}" />
+            <ui:param name="btnDeleteId" value='false' /> 
+            <c:if test="#{taxDepartmentBean.processType==2}">
+                <ui:param name="btnDeleteId" value='#{taxDepartmentBean.getRendered(294, 0)}' /> 
+                <ui:param name="btnTestBeforeDeleteId" value="true" />
+            </c:if>
+            <c:if test="#{taxDepartmentBean.processType == 2}">
+                <ui:param name="renderedHistory" value="true" />
+            </c:if>
+        </ui:include>
+
+        <h:panelGroup id="pgrTaxDepartment" layout="block">
+            <div class="ui-g divContent">    
+                <p:focus for="txtDepartmentNo"/>
+                <div class="ui-g-12 ui-md-6 ui-lg-4">
+                    <p:outputLabel value="#{loc.departmentno}" for="txtDepartmentNo" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtDepartmentNo" value="#{taxDepartmentBean.selectedObject.departmentNo}" required="true" placeholder="#{loc.departmentno} "/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-4">
+                    <p:outputLabel value="#{loc.name}" for="txtName" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtName" value="#{taxDepartmentBean.selectedObject.name}" required="true" placeholder="#{loc.name} "/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-4">
+                    <p:outputLabel value="#{loc.taxgroup}" for="slcTaxGroup" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcTaxGroup" value="#{taxDepartmentBean.selectedObject.taxGroup.id}" required="true" >
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}"  itemDisabled="true"/>
+                        <f:selectItems value="#{taxDepartmentBean.listOfTaxGroup}"  var="taxGroup" itemLabel="#{taxGroup.name}" itemValue="#{taxGroup.id}" />
+                    </p:selectOneMenu>
+                </div>
+
+            </div>
+        </h:panelGroup>
+    </h:form>  
+
+</ui:composition> 
+

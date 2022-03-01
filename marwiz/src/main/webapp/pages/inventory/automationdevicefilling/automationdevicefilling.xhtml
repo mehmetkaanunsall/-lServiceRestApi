@@ -1,0 +1,86 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+        <ui:param name="bean" value="#{automationDeviceFillingBean}"/> 
+        <ui:param name="update" value="dlgAutomationDeviceFillingProcess"/>
+        <ui:param name="datatable" value="frmAutomationDeviceFilling:dtbAutomationDeviceFilling" />
+        <ui:param name="widgetvar" value="automationDeviceFillingPF" />
+        <ui:param name="form" value='frmToolbarAutomationDeviceFilling' />
+        <ui:param name="fileName" value="#{loc.automationdevicefillingprocesses}"/> 
+        <ui:param name="renderedToggler" value='true'/>
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+    </ui:include>
+
+
+    <h:form id="frmAutomationDeviceFilling">
+
+        <p:dataTable  id="dtbAutomationDeviceFilling" var="automationDevice"  value="#{automationDeviceFillingBean.listOfObjects}" widgetVar="automationDeviceFillingPF" filteredValue="#{automationDeviceFillingBean.listOfFilteredObjects}" selection="#{automationDeviceFillingBean.selectedObject}"  selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{automationDevice.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  
+                      reflow="true">
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{automationDeviceFillingBean.update()}" update="dlgAutomationDeviceFillingProcess" global="false" /> 
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false"/>
+
+
+            <f:facet name="footer" rendered="false" >
+                <p:inputText id="globalFilter" value="#{automationDeviceFillingBean.autoCompleteValue}"  style="display: none"  />
+            </f:facet>
+
+            <p:column id="clmDefinition" headerText="#{loc.definition}" sortable="true" sortBy="#{automationDevice.name}" filterable="true"  filterBy="#{automationDevice.name}" filterMatchMode="contains" visible="#{automationDeviceFillingBean.toogleList[0]}" exportable="#{automationDeviceFillingBean.toogleList[0]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{automationDevice.name}" />
+            </p:column >
+
+
+            <p:column id="clmProtocol" headerText="#{loc.protocol}" sortable="true" sortBy="#{automationDevice.protocol.name}" filterable="true"  filterBy="#{automationDevice.protocol.name}" filterMatchMode="contains" visible="#{automationDeviceFillingBean.toogleList[1]}" exportable="#{automationDeviceFillingBean.toogleList[1]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{automationDevice.protocol.name}" />
+            </p:column >
+
+            <p:column id="clmBrand" headerText="#{loc.brand}" sortable="true" sortBy="#{automationDevice.brand.name}" filterable="true"  filterBy="#{automationDevice.brand.name}" filterMatchMode="contains" visible="#{automationDeviceFillingBean.toogleList[2]}" exportable="#{automationDeviceFillingBean.toogleList[2]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{automationDevice.brand.name}" />
+            </p:column >
+            <p:column id="clmIpAdress" headerText="#{loc.ipadress}" sortable="true" sortBy="#{automationDevice.ipadress}" filterable="true"  filterBy="#{automationDevice.ipadress}" filterMatchMode="contains" visible="#{automationDeviceFillingBean.toogleList[3]}" exportable="#{automationDeviceFillingBean.toogleList[3]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{automationDevice.ipadress}" />
+            </p:column >
+
+            <p:column id="clmMacAddress" headerText="#{loc.macaddress}" sortable="true" sortBy="#{automationDevice.macAddress}" filterable="true"  filterBy="#{automationDevice.macAddress}" filterMatchMode="contains" visible="#{automationDeviceFillingBean.toogleList[4]}" exportable="#{automationDeviceFillingBean.toogleList[4]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{automationDevice.macAddress}" />
+            </p:column >
+
+        </p:dataTable>  
+    </h:form>
+
+    <p:dialog id="dlgAutomationDeviceFillingProcess" widgetVar="dlg_AutomationDeviceFillingProcess" resizable="false" transient="true" style="max-height: 75%; overflow-y: auto;" focus="dlgAutomationDeviceFillingProcess" responsive="true" dynamic="true" modal="true" closeOnEscape="true" width="50%">
+        <ui:include src="automationdevicefillingprocess.xhtml" />
+    </p:dialog>
+
+    <p:dialog  id="dlgShelfFillingProcess" widgetVar="dlg_ShelfFillingProcess" modal="true" transient="true" width="40%" resizable="false" focus="dlgShelfFillingProcess" dynamic="true"  responsive="true" closeOnEscape="true">
+        <c:if test="#{automationDeviceFillingBean.activeIndex==68}"> 
+            <ui:include src="automationdevicefillingshelfprocess.xhtml"/>
+        </c:if>
+    </p:dialog>
+
+
+</ui:composition>
+

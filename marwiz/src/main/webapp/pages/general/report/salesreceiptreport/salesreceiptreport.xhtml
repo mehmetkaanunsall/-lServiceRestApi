@@ -1,0 +1,523 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmSalesReport">
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.salesreceiptreport}"/>
+            <ui:param name="bean" value='#{salesReceiptReportBean}' />
+            <ui:param name="update" value="frmSalesReportDatatable:dtbSalesReport pgSalesReport pgrSalesReportDatatable" />
+            <ui:param name="renderedBack" value="#{salesReceiptReportBean.isSafe}"/>
+        </ui:include>
+
+        <h:panelGroup id="pgSalesReport" class="divContent" layout="block" transient="true">  
+            <div class="panelToggle  ui-g">
+                <div class="ui-g-12 ui-md-6 ui-lg-2">
+                    <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                    <p:calendar  id="cldStartDate" class="datepicker" value="#{salesReceiptReportBean .selectedObject.beginDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                        <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                    </p:calendar>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-2">
+                    <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                    <p:calendar  id="cldEndDate" class="datepicker" value="#{salesReceiptReportBean.selectedObject.endDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                        <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                    </p:calendar>
+                </div>
+
+                <div class="ui-g-12 ui-md-6 ui-lg-2 " >
+                    <p:outputLabel value="#{loc.salesprice} (Min)"  styleClass="Fs12 FontBold"/>
+                    <p:inputNumber value="#{salesReceiptReportBean.selectedObject.minSalesPrice}"
+                                   decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}" thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                   roundMethod="D"  emptyValue="sign" symbolPosition="suffix" class="TexAlRight">
+
+                    </p:inputNumber>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-2 " >
+                    <p:outputLabel value="#{loc.salesprice} (Max)"  styleClass="Fs12 FontBold"/>
+                    <p:inputNumber value="#{salesReceiptReportBean.selectedObject.maxSalesPrice}"
+                                   decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}" thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                   roundMethod="D" emptyValue="sign" symbolPosition="suffix" class="TexAlRight">
+
+                    </p:inputNumber>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-2">
+                    <p:outputLabel value="#{loc.shiftno}" for="txtShift" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtShift" value="#{salesReceiptReportBean.selectedObject.shiftNo}" placeholder="#{loc.shiftno}" /> 
+                </div>    
+                <div class="ui-g-12 ui-md-6 ui-lg-2">
+                    <p:outputLabel value="#{loc.invoice} #{loc.documentnumber} / #{loc.receiptno}" for="txtReceiptNo" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtReceiptNo"  value="#{salesReceiptReportBean.selectedObject.receipt.receiptNo}" placeholder="#{loc.invoice} #{loc.documentnumber} / #{loc.receiptno}" /> 
+                </div>
+                <div class="ui-g-12 ui-md-12 ui-lg-6" style="padding: 0px !important">
+                    <div class="ui-g-12 ui-md-6  ui-lg-4">
+                        <p:outputLabel value="#{loc.customer}" for="txtCustomer" class="FontBold Fs12"/>
+                        <p:inputText  id="txtCustomer" onclick="showAccountBook()" value="#{salesReceiptReportBean.selectedObject.account.name}" class="inputPositionForBookFilter"  readonly="true" placeholder="#{loc.all}">   
+                        </p:inputText>
+                        <p:commandLink id="btnCustomer" process="@this" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_account').loadContents();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax listener="#{accountBookFilterBean.findFilterListLazyLoading([salesReceiptReportBean.selectedBranchList.size() != 0 ? salesReceiptReportBean.selectedBranchList : salesReceiptReportBean.listOfBranch],'frmAccountBookFilter','olp_account','report')}" />
+                        </p:commandLink>
+                    </div>  
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                        <p:outputLabel value="#{loc.paymenttype}" for="slcSalesType"  styleClass="Fs12 FontBold"/>
+                        <p:selectCheckboxMenu id="slcSalesType" value="#{salesReceiptReportBean.selectedObject.saleTypeList}"  widgetVar="slc_SalesType" label="#{salesReceiptReportBean.selectedObject.saleTypeList.size()!=0 ? salesReceiptReportBean.selectedObject.saleTypeList.size() : loc.all} #{salesReceiptReportBean.selectedObject.saleTypeList.size()!=0 ? loc.salestype :''} #{salesReceiptReportBean.selectedObject.saleTypeList.size()!=0 ? loc.selected :''}" filter="true" filterMatchMode="contains">
+                            <f:selectItems var="salesType" value="#{salesReceiptReportBean.salesTypeList}" itemLabel="#{salesType.nameMap.get(sessionBean.langId).name}" itemValue="#{salesType.id}" />
+                            <p:ajax update="slcSalesType" oncomplete="PF('slc_SalesType').show()" global="false"/>
+                            <p:ajax event="toggleSelect" update="slcSalesType" oncomplete="PF('slc_SalesType').show()" global="false"/>
+                        </p:selectCheckboxMenu>
+                    </div>
+
+                    <div class="ui-g-12  ui-md-6 ui-lg-4">
+                        <p:outputLabel value="#{loc.branch}" for="slcBranch" class="FontBold Fs12"/>
+                        <p:selectCheckboxMenu  id="slcBranch"  value="#{salesReceiptReportBean.selectedBranchList}" 
+                                               filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                               label="#{salesReceiptReportBean.selectedBranchList.size()!=0 ? salesReceiptReportBean.selectedBranchList.size() :loc.all} #{salesReceiptReportBean.selectedBranchList.size()!=0 ? loc.branch : ''} #{salesReceiptReportBean.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                            <f:selectItems value="#{salesReceiptReportBean.listOfBranch}" itemLabel="#{branchSetting.branch.name}" itemValue="#{branchSetting}" var="branchSetting" />       
+                            <p:ajax oncomplete="PF('slcBranchCheckBox').show()" global="false" listener="#{salesReceiptReportBean.changeBranch()}" update="slcBranch pgSalesReport"/>
+                            <p:ajax event="toggleSelect" listener="#{salesReceiptReportBean.changeBranch()}" update="slcBranch pgSalesReport"  oncomplete="PF('slcBranchCheckBox').show()" global="false"/>
+                        </p:selectCheckboxMenu>
+                    </div>  
+                </div>
+                <div class="ui-g-12 ui-md-12 ui-lg-6" style="padding: 0px !important">
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.cashier}" for="txtCashier"  styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtCashier" onclick="showBookUser()" value="#{userBookCheckboxFilterBean.selectedCount}" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" class="inputPositionForBookFilter" placeholder="#{loc.all}" >
+                        </p:inputText>
+                        <p:commandLink id="btnCashier" process="@this" actionListener="#{salesReceiptReportBean.openDialog()}" update="frmUserBookFilterCheckbox"  class="commandLinkPositionForBookFilter" oncomplete="PF('olp_user').loadContents();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax   listener="#{userBookCheckboxFilterBean.findFilterList([],'frmUserBookFilterCheckbox','olp_user','reportcheckbox')}" />
+                        </p:commandLink>
+                    </div> 
+                    <div class="ui-g-12 ui-md-6 ui-lg-3" >
+                        <p:outputLabel value="#{loc.cashregisterreceipt}" for="slcCashRegisterReceipt"  styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcCashRegisterReceipt" value="#{salesReceiptReportBean.selectedObject.cashRegisterReceipt}">
+                            <f:selectItem itemLabel="#{loc.all}" itemValue="0"/>
+                            <f:selectItem itemLabel="#{loc.withcashregisterreceipt}" itemValue="1"/>
+                            <f:selectItem itemLabel="#{loc.withoutcashregisterreceipt}" itemValue="2"/>
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-3" >
+                        <p:outputLabel value="#{loc.isthecardoperation}" for="slcIsCardOperation"  styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcIsCardOperation" value="#{salesReceiptReportBean.selectedObject.saleType.id}">
+                            <f:selectItem itemLabel="#{loc.all}" itemValue="0"/>
+                            <f:selectItem itemLabel="#{loc.yes}" itemValue="1"/>
+                            <f:selectItem itemLabel="#{loc.no}" itemValue="2"/>
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-3" >
+                        <p:outputLabel value="#{loc.subtotals}" for="slcSubTotals"  styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcSubTotals" value="#{salesReceiptReportBean.selectedObject.subTotal}">
+                            <f:selectItem itemLabel="#{loc.nott}" itemValue="0"/>
+                            <f:selectItem itemLabel="#{loc.customer}" itemValue="1"/>
+                            <f:selectItem itemLabel="#{loc.date}" itemValue="2"/>
+                            <p:ajax listener="#{salesReceiptReportBean.updatePaginator()}" update="frmSalesReportDatatable:dtbSalesReport pgSalesReport pgrSalesReportDatatable" global="false"/>
+                        </p:selectOneMenu>
+                    </div>
+
+                </div>
+            </div>
+        </h:panelGroup>
+        <p:remoteCommand name="showAccountBook" process="@this" oncomplete="PF('olp_account').loadContents();" actionListener="#{accountBookFilterBean.findFilterListLazyLoading([salesReceiptReportBean.selectedBranchList.size() != 0 ? salesReceiptReportBean.selectedBranchList : salesReceiptReportBean.listOfBranch],'frmAccountBookFilter','olp_account','report')}" />
+        <p:remoteCommand name="showBookUser" process="@this" update="frmUserBookFilterCheckbox"  action="#{salesReceiptReportBean.openDialog()}" oncomplete="PF('olp_user').show();"  actionListener="#{userBookCheckboxFilterBean.findFilterList([],'frmUserBookFilterCheckbox','olp_user','reportcheckbox')}" />
+
+    </h:form>
+    <div class="EmptyBox20" />
+
+    <h:panelGroup id="pgrSalesReportDatatable" >
+        <h:panelGroup rendered="#{salesReceiptReportBean.isFind}">
+            <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                <ui:param name="bean" value="#{salesReceiptReportBean}"/>
+                <ui:param name="datatable" value="frmSalesReportDatatable:dtbSalesReport" />
+                <ui:param name="fileName" value="#{loc.salesreceiptreport}"/>
+                <ui:param name="renderedToggler" value='true'/>
+                <ui:param name="renderedExcel" value='true'/>
+                <ui:param name="renderedPdf" value='true'/>
+                <ui:param name="renderedPrint" value='true'/>
+                <ui:param name="renderedGraphic" value='false'/>
+            </ui:include>
+
+            <h:form id="frmSalesReportDatatable">
+
+                <p:dataTable  id="dtbSalesReport"  var="SalesReport"  value="#{salesReceiptReportBean.listOfObjects}" selection="#{salesReceiptReportBean.selectedSaleReport}" selectionMode="single"  widgetVar="salesReportPF" emptyMessage="#{loc.norecordsfound}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{SalesReport.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" reflow="true" lazy="true" 
+                              sortBy="#{salesReceiptReportBean.selectedObject.subTotal==1 ? SalesReport.account.id : 
+                                        (salesReceiptReportBean.selectedObject.subTotal==2 ? SalesReport.saleDate : '')}" 
+                              expandableRowGroups="#{salesReceiptReportBean.selectedObject.subTotal!=0 ? 'true' : 'false'}" 
+                              class="#{salesReceiptReportBean.selectedObject.subTotal!=0 ? 'rowGroupTable' : 'dtbReport'}" >
+
+                    <p:ajax event="colReorder" listener="#{salesReceiptReportBean.reorder}" update="frmGridToolbar:toggle" />     
+                    <p:ajax event="colResize"  listener="#{salesReceiptReportBean.onResize}" />
+                    <p:headerRow rendered="#{salesReceiptReportBean.selectedObject.subTotal!=0}" >
+                        <p:column colspan="8">
+                            <h:outputText value="#{SalesReport.account.name}" rendered="#{salesReceiptReportBean.selectedObject.subTotal==1}" />
+                            <h:outputText value="#{SalesReport.saleDate}" rendered="#{salesReceiptReportBean.selectedObject.subTotal==2}" >
+                                <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat}"/>
+                            </h:outputText>
+                            <h:outputText value="  /  #{loc.salecount} : #{SalesReport.subTotalCount}  /  #{loc.totalprice} : " />
+                            <h:outputText value="#{SalesReport.subTotalMoney}">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{SalesReport.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                    </p:headerRow>
+
+                    <p:ajax event="#{sessionBean.user.gridRowSelect}"  update="dlgSalesDetail" listener="#{salesReceiptReportBean.createSalesDetailDialog()}" />
+
+                    <p:column id="clmDate" headerText="#{loc.date}" visible="#{salesReceiptReportBean.toogleList[0]}"  exportable="#{salesReceiptReportBean.toogleList[0]}">
+                        <h:outputText value="#{SalesReport.processDate}"  >
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmBranch" headerText="#{loc.branch}"  visible="#{salesReceiptReportBean.toogleList[1]}" exportable="#{salesReceiptReportBean.toogleList[1]}">
+                        <h:outputText value="#{SalesReport.branchSetting.branch.name}"  />
+                    </p:column>
+
+                    <p:column id="clmCustomer" headerText="#{loc.customer}"  visible="#{salesReceiptReportBean.toogleList[2]}" exportable="#{salesReceiptReportBean.toogleList[2]}">
+                        <h:outputText value="#{SalesReport.account.name}"  />
+                    </p:column>
+                    <p:column id="clmCashier" headerText="#{loc.cashier}"  visible="#{salesReceiptReportBean.toogleList[3]}" exportable="#{salesReceiptReportBean.toogleList[3]}">
+                        <h:outputText value="#{SalesReport.user.fullName}"  />
+                    </p:column>
+                    <p:column id="clmReceiptNumber" headerText="#{loc.invoice} #{loc.documentnumber} / #{loc.receiptno}"  visible="#{salesReceiptReportBean.toogleList[4]}" exportable="#{salesReceiptReportBean.toogleList[4]}">
+                        <h:outputText value="#{SalesReport.receipt.id == 0 ? SalesReport.invoice.documentNumber : SalesReport.receipt.receiptNo}"  />
+                    </p:column>
+                    <p:column id="clmOpetCard" headerText="#{loc.isthecardoperation}" visible="#{salesReceiptReportBean.toogleList[5]}"   exportable="#{salesReceiptReportBean.toogleList[5]}">
+                        <h:outputText value="#{SalesReport.saleType.id==81 ? loc.yes : loc.no}" />
+                    </p:column>
+                    <p:column id="clmTrxNo" headerText="#{loc.trxno}" visible="#{salesReceiptReportBean.toogleList[6]}"   exportable="#{salesReceiptReportBean.toogleList[6]}">
+                        <h:outputText value="#{SalesReport.transactionNo}" />
+                    </p:column>
+                    <p:column id="clmDiscount" headerText="#{loc.discountamount}"  visible="#{salesReceiptReportBean.toogleList[7]}" exportable="#{salesReceiptReportBean.toogleList[7]}">
+                        <h:outputText value="#{SalesReport.totalDiscount}" class="Fright" >
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{SalesReport.currency}" />
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmTotal" headerText="#{loc.sum}"  visible="#{salesReceiptReportBean.toogleList[8]}" exportable="#{salesReceiptReportBean.toogleList[8]}">
+                        <h:outputText value="#{SalesReport.totalPrice}" class="Fright" >
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{SalesReport.currency}" />
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmTotalTax" headerText="#{loc.taxprice}"  visible="#{salesReceiptReportBean.toogleList[9]}" exportable="#{salesReceiptReportBean.toogleList[9]}">
+                        <h:outputText value="#{SalesReport.totalTax}" class="Fright" >
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{SalesReport.currency}" />
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmTotalMoney" headerText="#{loc.overalltotal}"  visible="#{salesReceiptReportBean.toogleList[10]}" exportable="#{salesReceiptReportBean.toogleList[10]}">
+                        <h:outputText value="#{SalesReport.totalMoney}" class="Fright">
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{SalesReport.currency}" />
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:summaryRow rendered="#{salesReceiptReportBean.selectedObject.subTotal!=0}" >
+                        <p:column colspan="#{salesReceiptReportBean.toogleList.size()-salesReceiptReportBean.countToggle-1}" style="text-align:right">
+                            <h:outputText value="#{loc.totalprice}:" />
+                        </p:column>
+                        <p:column>
+                            <h:outputText value="#{SalesReport.subTotalMoney}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{SalesReport.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                    </p:summaryRow>
+                    <p:columnGroup type="footer" class="Fright">
+                        <p:row>
+                            <p:column colspan="#{salesReceiptReportBean.toogleList.size()-salesReceiptReportBean.countToggle-5}" style="text-align:right; font-weight: bold; " priority="1">
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{loc.operationcountwithcard} : #{salesReceiptReportBean.calculateCardOperationCount()} #{loc.piece}" style="text-align:right; font-weight: bold; font-size: 15px; " />
+                                </f:facet>
+                            </p:column>
+                            <p:column colspan="5" style="text-align:right; font-weight: bold; ">
+                                <f:facet name="footer"  >     
+                                    <h:outputText  style="text-align:right; font-weight: bold; font-size: 15px; " value="" />
+                                </f:facet>
+                            </p:column>
+                        </p:row>
+                        <ui:repeat value="#{salesReceiptReportBean.listOfTotals}" var="totals" >
+                            <p:row>
+                                <p:column colspan="#{salesReceiptReportBean.toogleList.size()-salesReceiptReportBean.countToggle-1}" style="text-align:right; font-weight: bold; " priority="1">
+                                    <f:facet name="footer"  >
+                                        <h:outputText value="#{loc.totaldiscount} :" style="text-align:right; font-weight: bold; font-size: 15px; " />
+                                    </f:facet>
+                                </p:column>
+                                <p:column colspan="1" style="text-align:right; font-weight: bold; ">
+                                    <f:facet name="footer"  >     
+                                        <h:panelGroup rendered="#{salesReceiptReportBean.listOfTotals.size()>1}">
+                                            <h:outputText value="(#{totals.branchSetting.branch.name})" />
+                                            <h:outputText value="12" style="visibility: hidden"/>
+                                        </h:panelGroup>
+                                        <h:outputText  style="text-align:right; font-weight: bold; font-size: 15px; " value="(#{totals.discountCount} #{loc.piece})" />
+                                        <h:outputText  style="text-align:right; font-weight: bold; font-size: 15px; " value=" " />
+                                        <h:outputText  style="text-align:right; font-weight: bold; font-size: 15px; " value="#{totals.totalDiscount}" >
+                                            <f:converter converterId="currencyConverter" />
+                                            <f:attribute name="currency" value="#{totals.currency}"/>
+                                            <f:attribute name="type" value="currency" />
+                                        </h:outputText>
+                                       
+                                    </f:facet>
+                                </p:column>
+                            </p:row>
+                        </ui:repeat>
+                        <ui:repeat value="#{salesReceiptReportBean.listOfTotals}" var="totals" >
+                            <p:row>
+                                <p:column colspan="#{salesReceiptReportBean.toogleList.size()-salesReceiptReportBean.countToggle-1}" style="text-align:right; font-weight: bold; " priority="1">
+                                    <f:facet name="footer"  >
+                                        <h:outputText value="#{loc.sum} :" style="text-align:right; font-weight: bold; font-size: 15px; " />
+                                    </f:facet>
+                                </p:column>
+                                <p:column colspan="1" style="text-align:right; font-weight: bold; ">
+                                    <f:facet name="footer"  >     
+                                        <h:panelGroup rendered="#{salesReceiptReportBean.listOfTotals.size()>1}">
+                                            <h:outputText value="(#{totals.branchSetting.branch.name})" />
+                                            <h:outputText value="12" style="visibility: hidden"/>
+                                        </h:panelGroup>
+
+                                        <h:outputText  style="text-align:right; font-weight: bold; font-size: 15px; " value="#{totals.totalMoney}" >
+                                            <f:converter converterId="currencyConverter" />
+                                            <f:attribute name="currency" value="#{totals.currency}"/>
+                                            <f:attribute name="type" value="currency" />
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column>
+                            </p:row>
+                        </ui:repeat>
+                    </p:columnGroup> 
+                </p:dataTable>  
+            </h:form>
+        </h:panelGroup>
+    </h:panelGroup>
+
+
+
+    <p:dialog id="dlgSalesDetail" widgetVar="dlg_SalesDetail" resizable="false" style="max-height: 85%; overflow-y: auto;" width="60%" focus="dlgSalesDetail" modal="true" responsive="true" dynamic="true" closeOnEscape="true">
+        <h:form id="frmSalesReportDetail">
+            <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+                <ui:param name="bean" value='#{salesReceiptReportBean}' />
+                <ui:param name="outputtext" value="#{loc.salesdetail}"/>
+                <ui:param name="update" value="" />
+                <ui:param name="btnSaveId" value="false" />
+                <ui:param name="btnDeleteId" value='false' /> 
+            </ui:include>
+
+            <p:panelGrid id="grdSalesReport" columns="2" class="Wid100 reportPanelGrid">
+
+                <h:outputText value="#{loc.saledate}" />
+                <h:outputText value="#{salesReceiptReportBean.selectedSaleReport.processDate}" >
+                    <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                </h:outputText>
+                <h:outputText value="#{loc.shiftno}" />
+                <h:outputText value="#{salesReceiptReportBean.selectedSaleReport.shiftNo}" />
+                <h:outputText value="#{loc.posname}" />
+                <h:outputText value="#{salesReceiptReportBean.selectedSaleReport.pointOfSale.name}" />
+                <h:outputText value="#{loc.pos} #{loc.macaddress}" />
+                <h:outputText value="#{salesReceiptReportBean.selectedSaleReport.posMacAddress}" />
+                <h:outputText value="#{loc.customer}" />
+                <h:outputText value="#{salesReceiptReportBean.selectedSaleReport.account.name}" />
+                <h:outputText value="#{loc.salesstatus}" rendered="#{sessionBean.lastBranchSetting.paroUrl.length() gt 0 ? true:false}"/>
+                <h:outputText value="#{salesReceiptReportBean.selectedSaleReport.isOnline ? loc.online : loc.offline}" rendered="#{sessionBean.lastBranchSetting.paroUrl.length() gt 0 ? true:false}"/>
+                <h:outputText value="#{loc.discounttype}" />
+                <h:outputText value="#{salesReceiptReportBean.selectedSaleReport.discountType.id==0 ? '-' :  salesReceiptReportBean.selectedSaleReport.discountType.tag}" />
+                <h:outputText value="#{loc.bottomdiscountamount}" />
+                <h:outputText value="#{salesReceiptReportBean.selectedSaleReport.discountPrice}"  style="float: right">
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="currency"  value="#{salesReceiptReportBean.selectedSaleReport.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+                <h:outputText value="#{loc.productbaseddiscountamount}" />
+                <h:outputText value="#{salesReceiptReportBean.calculateProductBasedDiscount()}"  style="float: right">
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="currency"  value="#{salesReceiptReportBean.selectedSaleReport.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+                <h:outputText value="#{loc.totaldiscountamount}" />
+                <h:outputText value="#{salesReceiptReportBean.selectedSaleReport.totalDiscount}"  style="float: right">
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="currency"  value="#{salesReceiptReportBean.selectedSaleReport.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+                <h:outputText value="#{loc.sum}" />
+                <h:outputText value="#{salesReceiptReportBean.selectedSaleReport.totalPrice}"  style="float: right">
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="currency"  value="#{salesReceiptReportBean.selectedSaleReport.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+                <h:outputText value="#{loc.taxprice}" />
+                <h:outputText value="#{salesReceiptReportBean.selectedSaleReport.totalTax}"  style="float: right">
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="currency"  value="#{salesReceiptReportBean.selectedSaleReport.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+                <h:outputText value="#{loc.overalltotal}" />
+                <h:outputText value="#{salesReceiptReportBean.selectedSaleReport.totalMoney}"  style="float: right">
+                    <f:converter converterId="currencyConverter"  />
+                    <f:attribute name="currency"  value="#{salesReceiptReportBean.selectedSaleReport.currency}"/>
+                    <f:attribute name="type" value="currency" />
+                </h:outputText>
+                <h:outputText value="#{loc.invoice} #{loc.documentnumber} / #{loc.receiptno}" />
+                <h:outputText value="#{salesReceiptReportBean.selectedSaleReport.invoice.id != 0 ? salesReceiptReportBean.selectedSaleReport.invoice.documentNumber : salesReceiptReportBean.selectedSaleReport.receipt.receiptNo}" />
+            </p:panelGrid>
+            <div class="EmptyBox10"/>
+            <div class="ui-g-12 ui-md-12 ui-lg-12" style="padding: 0 !important">
+                <ui:include src="/pages/general/common/tabgridtoolbar.xhtml" >
+                    <ui:param name="outputtext" value="#{loc.stocksofsales}"/>
+                    <ui:param name="bean" value='#{salesReceiptReportBean}' />
+                    <ui:param name="update"  value="" />
+                </ui:include>
+                <p:dataTable id="dtbSaleItem" class="dtbReport dialogDatatable" var="saleItem"  widgetVar="saleItemPF" value="#{salesReceiptReportBean.saleItemList}" 
+                             rowKey="#{saleItem.id}" emptyMessage="#{loc.norecordsfound}" resizableColumns="true" >
+
+
+                    <p:column id="clmStockCode" headerText="#{loc.stockcode}">
+                        <h:outputText  value="#{saleItem.stock.code}"/>
+                    </p:column>
+                    <p:column id="clmCenterStockCode" headerText="#{loc.centerstockcode}">
+                        <h:outputText  value="#{saleItem.stock.centerProductCode}"/>
+                    </p:column>
+                    <p:column id="clmBarcode" headerText="#{loc.stockbarcode}">
+                        <h:outputText  value="#{saleItem.stock.barcode}" />
+                    </p:column>
+                    <p:column id="clmStock" headerText="#{loc.stock}">
+                        <h:outputText value="#{saleItem.stock.name}" />
+                    </p:column>
+                    <p:column id="clmQuantity" headerText="#{loc.quantity}">
+                        <h:outputText value="#{saleItem.quantity}" style="float: right">
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="unit" value="#{saleItem.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmUnitPrice" headerText="#{loc.unitprice}">
+                        <h:outputText value="#{saleItem.unitPrice}" style="float: right">
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{saleItem.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmDiscountPrice" headerText="#{loc.discountamount}">
+                        <h:outputText value="#{saleItem.discountPrice}" style="float: right">
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{saleItem.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmTotalOfProduct" headerText="#{loc.totalofproduct}">
+                        <h:outputText value="#{saleItem.totalPrice}" style="float: right">
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{saleItem.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmTotalTax" headerText="#{loc.taxprice}">
+                        <h:outputText value="#{saleItem.totalTax}" style="float: right">
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{saleItem.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmOverallTotal" headerText="#{loc.overalltotal}">
+                        <h:outputText value="#{saleItem.totalMoney}" style="float: right">
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{saleItem.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmManagerDiscount" headerText="#{loc.managerdiscount}">
+                        <h:outputText value="#{saleItem.managerUserData.id==0 ? '' : saleItem.managerUserData.fullName}" />
+                    </p:column>
+                    <p:columnGroup type="footer" class="Fright" >
+                        <c:forEach items="#{salesReceiptReportBean.listOfTotalSaleType}" var="salePayment">
+                            <p:row>
+                                <p:column colspan="9" style="text-align:right; font-weight: bold;">
+                                    <f:facet name="footer"  >
+                                        <h:outputText value="#{salePayment.type.tag} :" style="text-align:right; font-weight: bold; color: #303030" />
+                                    </f:facet>
+                                </p:column>
+                                <p:column style="text-align:right; font-weight: bold;">
+                                    <f:facet name="footer"  >
+                                        <h:outputText value="#{salePayment.price}" style="text-align:right; font-weight: bold; color: #303030" >
+                                            <f:converter converterId="currencyConverter"  />
+                                            <f:attribute name="currency"  value="#{salePayment.currency}"/>
+                                            <f:attribute name="type" value="currency" />
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column>
+                                <p:column style="text-align:right; font-weight: bold;">
+
+                                </p:column>
+                            </p:row>
+                        </c:forEach>
+                    </p:columnGroup> 
+                </p:dataTable>
+            </div>
+        </h:form>
+    </p:dialog>
+
+
+
+
+
+    <!--Kitaptan kasiyer seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/userbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{salesReceiptReportBean}' />
+        <ui:param name="for" value='frmSalesReport:btnCashier' />
+        <ui:param name="type" value='reportcheckbox' />
+        <ui:param name="parameters" value='' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmUserBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_user" />
+    </ui:include>
+
+
+
+    <ui:include src="/pages/general/common/accountbook.xhtml" >
+        <ui:param name="updateBean" value='#{salesReceiptReportBean}' />
+        <ui:param name="for" value='frmSalesReport:btnCustomer' />
+        <ui:param name="type" value='report' />
+        <ui:param name="parameters" value='#{[salesReceiptReportBean.selectedBranchList.size() != 0 ? salesReceiptReportBean.selectedBranchList : salesReceiptReportBean.listOfBranch]}' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmAccountBookFilter' /> 
+        <ui:param name="overlay" value="olp_account" />
+    </ui:include>
+
+
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.salesreceiptreport}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+</ui:composition>

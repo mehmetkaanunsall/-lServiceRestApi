@@ -1,0 +1,1117 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmSapAgreement">
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.sapagreementprocess}"/> 
+            <ui:param name="bean" value='#{sapAgreementBean}' />
+            <ui:param name="update" value="frmSapAgreement pgrSapAgreementProcess frmTables:dtbPosSales" />
+        </ui:include>
+
+        <h:panelGroup id="pgSapAgreementProcess" class="divContent" layout="block" transient="true">  
+            <div class="panelToggle  ui-g">
+                <div class="ui-g-12 ui-md-6 ui-lg-2">
+                    <p:outputLabel value="#{loc.date}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                    <p:calendar  id="cldStartDate" class="datepicker" value="#{sapAgreementBean.date}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat}" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                        <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                    </p:calendar>
+                </div>
+
+            </div>
+        </h:panelGroup>
+    </h:form>
+
+    <div class="EmptyBox20" /> 
+
+    <h:panelGroup id="pgrSapAgreementProcess" >
+        <h:panelGroup rendered="#{sapAgreementBean.isFind and sapAgreementBean.isView}">
+
+            <p:toolbar>
+
+                <f:facet name="right">
+                    <h:outputText  rendered="True"   class="outputTextFont Fleft MarRight8" ></h:outputText>
+
+                    <p:commandLink class="Fleft" rendered="#{sapAgreementBean.isSend and sapAgreementBean.getRendered(353, 0)}" title="#{loc.canceltransfer}" actionListener="#{sapAgreementBean.canceltransfer()}"  >
+                        <i class="icon-cancel Fs20 tlbrUploadBtn MarRight5" style="margin-top: 5px;" />      
+                    </p:commandLink>
+
+                    <p:commandLink class="Fleft" rendered="#{!sapAgreementBean.isSend and sapAgreementBean.isThereInMarwiz}" title="#{loc.send}" actionListener="#{sapAgreementBean.sendIntegration()}"  >
+                        <i class="fa fa-paper-plane Fs20 tlbrUploadBtn MarRight5" style="margin-top: 5px;" />      
+                    </p:commandLink>
+
+                    <p:commandLink id="btnSave" title="#{loc.save}" actionListener="#{sapAgreementBean.save()}" rendered="#{!sapAgreementBean.isSend}" class="Fleft" >
+                        <i class="fa fa-save Fs20  MarTop5 tlbrSaveBtn"/>                 
+                    </p:commandLink>
+
+                    <p:commandLink title="#{loc.delete}" rendered="#{sapAgreementBean.isThereInMarwiz and !sapAgreementBean.isSend}" class="Fright" id="btnDelete"    update="pgrSapAgreementProcess" actionListener="#{sapAgreementBean.deleteConfirm()}"  > 
+                        <i class="icon-trash Fs20 MarRight1 tlbrDeleteBtn" /> 
+                    </p:commandLink>
+
+
+                </f:facet>  
+
+
+            </p:toolbar>
+
+
+
+            <div class="divContent ui-g-12"> 
+
+
+                <h:form id="frmTables" >
+                    <div class="ui-g-12">
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+
+                            <p:fieldset  legend="#{loc.fueloil}" toggleable="true" class="detailFieldSet" style="margin-bottom:10px;height: 100%;" rendered="true">
+
+                                <p:dataTable  id="dtbFueloil" var="Fueloil"  value="#{sapAgreementBean.listOfFuel}" widgetVar="fueloilPF" emptyMessage="#{loc.norecordsfound}"
+                                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{Fueloil.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true" >
+
+                                    <p:column id="clmStckName" headerText="#{loc.stock}" >
+                                        <h:outputText value="#{Fueloil.stock.name}"  /> 
+                                    </p:column>
+                                    <p:column id="clmUnitPrice" headerText="#{loc.unitprice}" >
+                                        <h:outputText  value="#{Fueloil.unitPrice}" class="Fright">
+                                            <f:converter converterId="currencyConverter" />
+                                            <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                            <f:attribute name="type" value="currency" />
+                                        </h:outputText> 
+                                    </p:column>
+                                    <p:column id="clmQuantity" headerText="#{loc.quantity}" >
+                                        <h:outputText value="#{Fueloil.quantity}" class="Fright" >
+                                            <f:converter converterId="currencyConverter" />
+                                            <f:attribute name="unit" value="#{sessionBean.user.lastBranchSetting.branch.currencyrounding}"/>
+                                            <f:attribute name="type" value="liter" /> 
+                                        </h:outputText> 
+                                    </p:column>
+                                    <p:column id="clmTotalPrice" headerText="#{loc.totalprice}" >
+                                        <h:outputText  value="#{Fueloil.totalMoney}" class="Fright">
+                                            <f:converter converterId="currencyConverter" />
+                                            <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                            <f:attribute name="type" value="currency" />
+                                        </h:outputText> 
+                                    </p:column>
+
+                                    <c:if test="#{sapAgreementBean.listOfFuel.size()>1}" >
+                                        <p:columnGroup  type="footer" class="Fright" > 
+                                            <h:panelGroup id="pngTotalFuel">
+                                                <p:row>
+
+                                                    <p:column colspan="2" style="text-align:right; font-weight: bold; ">
+                                                        <f:facet name="footer"  >
+                                                            <h:outputText value="#{loc.sum} :" class="FontBold" style="font-size: 15px; color: #565656;  margin-right: 20px" />
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:column colspan="1" style="text-align:right; font-weight: bold;">
+                                                        <f:facet name="footer"  >
+                                                            <h:outputText value="#{loc.quantity}: " class=""/> 
+                                                            <h:outputText value="#{sapAgreementBean.totalFuelLiter}" class="">
+                                                                <f:converter converterId="currencyConverter" />
+                                                                <f:attribute name="unit" value="#{sessionBean.user.lastBranchSetting.branch.currencyrounding}"/>
+                                                                <f:attribute name="type" value="liter" />               
+                                                            </h:outputText>
+
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                    <p:column colspan="1" style="text-align:right; font-weight: bold;">
+                                                        <f:facet name="footer"  >
+                                                            <h:outputText value="#{loc.total}: " class=""/> 
+                                                            <h:outputText value="#{sapAgreementBean.totalFuelTotalMoney}" class="">
+                                                                <f:converter converterId="currencyConverter"  />
+                                                                <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}" />
+                                                                <f:attribute name="type" value="currency" /> 
+                                                            </h:outputText>
+
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                </p:row>         
+                                            </h:panelGroup>
+                                        </p:columnGroup>
+                                    </c:if>
+                                </p:dataTable> 
+                            </p:fieldset>
+                        </div> 
+
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+
+
+
+                            <p:fieldset legend="#{loc.paymenttypes} - #{loc.poscollections}" toggleable="true" class="incomeFieldSet" style="margin-bottom:10px;height: 100%;" rendered="true">
+
+                                <div class="ui-g-12 ui-md-6 ui-lg-6" >
+                                    <p:toolbar>
+
+                                        <f:facet name="left">
+                                            <h:outputText value="#{loc.paymenttypes}" rendered="True"   class="outputTextFont Fleft MarRight8" ></h:outputText>
+                                        </f:facet>
+                                    </p:toolbar>
+
+                                    <p:dataTable  id="dtbPaymentTypes" var="paymentTypes"  value="#{sapAgreementBean.listOfPaymentTypes}" widgetVar="paymentTypesPF" emptyMessage="#{loc.norecordsfound}"
+                                                  rows="#{sessionBean.user.defualtGridSize}" rowKey="#{paymentTypes.paymentType.id}"  style="height: 238px;overflow-y: auto;"  editable="true" editMode="cell" reflow="true" >
+
+                                        <p:column id="clmSerialNo" headerText="#{loc.paymenttype}" >
+                                            <h:outputText value="#{paymentTypes.paymentType.entegrationname}"  />  
+                                        </p:column>
+
+
+                                        <p:column  id="clmTotal" headerText="#{loc.total}" >
+
+                                            <p:cellEditor rendered="#{paymentTypes.paymentType.entegrationcode == '30'}" >
+                                                <f:facet name="output">
+                                                    <h:outputText  value="#{paymentTypes.totalMoney}" class="Fright">
+                                                        <f:converter converterId="currencyConverter" />
+                                                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                                        <f:attribute name="type" value="currency" />
+                                                    </h:outputText> 
+                                                </f:facet>
+                                                <f:facet name="input" >
+                                                    <p:inputNumber  value="#{paymentTypes.totalMoney}" class="editableinput"
+                                                                    decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? '.': ','}"  minValue="0"
+                                                                    thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}"
+                                                                    decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}"
+                                                                    roundMethod="D" emptyValue="">
+                                                        <p:ajax listener="#{sapAgreementBean.cellEditPaymentTypes(paymentTypes)}" update="frmTables:dtbPaymentTypes frmTables:fldNonPosCollection frmTables:fldSum frmTables:dtbEndDay" />
+                                                    </p:inputNumber>
+                                                </f:facet>
+                                            </p:cellEditor>
+
+                                            <h:outputText rendered="#{paymentTypes.paymentType.entegrationcode != '30'}"  value="#{paymentTypes.totalMoney}" class="Fright">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText> 
+
+                                        </p:column>
+
+
+
+                                        <p:columnGroup id="clmGroup" type="footer" class="Fright" > 
+
+                                            <p:row >
+                                                <p:column colspan="1" style="text-align:right; font-weight: bold; ">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText value="#{loc.sum} :" class="FontBold" style="font-size: 15px; color: #565656;  margin-right: 20px" />
+                                                    </f:facet>
+                                                </p:column>
+
+                                                <p:column colspan="1" style="text-align:right; font-weight: bold;">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText value="#{loc.total}: " class=""/> 
+                                                        <h:outputText id="rowTotal" value="#{sapAgreementBean.totalPaymentTypes}" class="">
+                                                            <f:converter converterId="currencyConverter"  />
+                                                            <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}" />
+                                                            <f:attribute name="type" value="currency" /> 
+                                                        </h:outputText>
+
+                                                    </f:facet>
+                                                </p:column>
+                                            </p:row>    
+
+                                        </p:columnGroup>
+
+
+
+                                    </p:dataTable> 
+                                </div>
+                                <div class="ui-g-12 ui-md-6 ui-lg-6" >
+                                    <p:toolbar>
+
+                                        <f:facet name="left">
+                                            <h:outputText value="#{loc.poscollections}" rendered="True"   class="outputTextFont Fleft MarRight8" ></h:outputText>
+                                        </f:facet>
+                                    </p:toolbar>
+
+
+
+
+                                    <p:dataTable  id="dtbPosSales" var="posSales"  widgetVar="posSalesPF" emptyMessage="#{loc.norecordsfound}" value="#{sapAgreementBean.listOfBankGroupPosSales}" 
+                                                  rowIndexVar="rowIndex" rowKey="#{posSales.id}"  style="height: 238px;overflow-y: auto;" >  
+
+                                        <p:column id="clmBranch" headerText="#{loc.bank}">
+                                            <h:outputText value="#{posSales.bankName}" />
+                                        </p:column>
+
+                                        <p:column  id="clmTotal" headerText="#{loc.total}" >
+                                            <h:outputText  value="#{posSales.posDailyEnd}" class="Fright">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText> 
+                                        </p:column>
+
+
+                                        <p:column id="clmDetail" style="text-align: center !important; width: 80px;" headerText="#{loc.detail}"  >
+                                            <p:commandLink title="#{loc.detail}" action="#{sapAgreementBean.goToShiftDetail()}">
+                                                <i class="fa fa-search Fs16"/>   
+                                                <f:setPropertyActionListener value="#{posSales}"  target="#{sapAgreementBean.selectedPosSales}"  />
+                                            </p:commandLink> 
+                                        </p:column>
+                                        <p:columnGroup  type="footer" class="Fright" > 
+                                            <h:panelGroup id="pngTotalFuel">
+                                                <p:row>
+
+                                                    <p:column colspan="2" style="text-align:right; font-weight: bold; ">
+                                                        <f:facet name="footer"  >
+                                                            <h:outputText value="#{loc.sum} :" class="FontBold" style="font-size: 15px; color: #565656;  margin-right: 20px" />
+                                                        </f:facet>
+                                                    </p:column>
+
+
+                                                    <p:column colspan="1" style="text-align:right; font-weight: bold;">
+                                                        <f:facet name="footer"  >
+                                                            <h:outputText value="#{loc.total}: " class=""/> 
+                                                            <h:outputText id="rowTotal" value="#{sapAgreementBean.totalPosSalesMoney}" class="">
+                                                                <f:converter converterId="currencyConverter"  />
+                                                                <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}" />
+                                                                <f:attribute name="type" value="currency" /> 
+                                                            </h:outputText>
+
+                                                        </f:facet>
+                                                    </p:column>
+
+                                                </p:row>         
+                                            </h:panelGroup>
+                                        </p:columnGroup>
+
+                                    </p:dataTable> 
+
+                                </div>
+
+
+                            </p:fieldset>
+
+                        </div>
+
+
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+
+                            <p:fieldset legend="#{loc.zreports}" toggleable="true" class="detailFieldSet" style="margin-bottom:10px;height: 100%;" rendered="true">
+
+
+
+
+                                <div class="ui-g-12 ui-md-6 ui-lg-6">
+                                    <p:toolbar>
+
+                                        <f:facet name="left">
+                                            <h:outputText value="#{loc.fueloil} #{loc.zreports}" rendered="True"   class="outputTextFont Fleft MarRight8" ></h:outputText>
+                                        </f:facet>
+                                    </p:toolbar> 
+
+
+                                    <p:dataTable  id="dtbFuelOilZReports" var="fuelOilZReports"  value="#{sapAgreementBean.listOfFuelOilZSeries}" widgetVar="fuelOilZReportsPF"  emptyMessage="#{loc.norecordsfound}"
+                                                  rows="#{sessionBean.user.defualtGridSize}" rowKey="#{fuelOilZReports.zSeries.id}" editable="true" editMode="cell"   style="height: 275px;overflow-y: auto;" reflow="true"  >
+
+
+                                        <p:column id="clmSerialNo"  headerText="#{loc.zserialno}" >
+                                            <h:outputText value="#{fuelOilZReports.zSeries.number}"  />  
+                                        </p:column>
+
+                                        <p:column id="clmQuantity"  headerText="#{loc.quantity}" >
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <h:outputText value="#{fuelOilZReports.quantity}" class="Fright" >
+                                                        <f:converter converterId="currencyConverter" />
+                                                        <f:attribute name="unit" value="#{sessionBean.user.lastBranch.currencyrounding}"/>
+                                                        <f:attribute name="type" value="" /> 
+                                                    </h:outputText> 
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputNumber  value="#{fuelOilZReports.quantity}" class="editableinput"
+                                                                    decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? '.': ','}"  minValue="0"
+                                                                    thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}"
+                                                                    decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}"
+                                                                    roundMethod="D" emptyValue="">
+                                                        <p:ajax listener="#{sapAgreementBean.cellEditFuelZSeries(fuelOilZReports)}" update="frmTables:dtbFuelOilZReports frmTables:fldNonPosCollection frmTables:fldSum frmTables:dtbEndDay" /> 
+                                                    </p:inputNumber>
+                                                </f:facet>
+                                            </p:cellEditor>
+
+                                        </p:column>
+                                        <p:column  id="clmTurpak" style="border-top: 0px !important; border-bottom: 0px !important; border-left: 0px !important; background-color: #ECEFF1; text-align: center"  headerText="TURPAK"  >
+                                            <h:outputText  value="#{fuelOilZReports.totalFuelLiter}" >
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="unit" value="#{sessionBean.user.lastBranch.currencyrounding}"/>
+                                                <f:attribute name="type" value="" />
+                                            </h:outputText>
+                                        </p:column>
+
+                                        <p:column  id="clmDifference" style="border-top: 0px !important; border-bottom: 0px !important; border-left: 0px !important; background-color: #ECEFF1; text-align: center"  headerText="#{loc.difference}"  >
+                                            <h:outputText  value="#{fuelOilZReports.difference}" >
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="unit" value="#{sessionBean.user.lastBranch.currencyrounding}"/>
+                                                <f:attribute name="type" value="" />
+                                            </h:outputText> 
+                                        </p:column>
+
+                                        <p:column id="clmTotal"  headerText="#{loc.total}"  >
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <h:outputText value="#{fuelOilZReports.totalMoney}" class="Fright" >
+                                                        <f:converter converterId="currencyConverter" />
+                                                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                                        <f:attribute name="type" value="currency" /> 
+                                                    </h:outputText> 
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputNumber  value="#{fuelOilZReports.totalMoney}" class="editableinput"
+                                                                    decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? '.': ','}"  minValue="0"
+                                                                    thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}"
+                                                                    decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}"
+                                                                    roundMethod="D" emptyValue="">
+                                                        <p:ajax listener="#{sapAgreementBean.cellEditFuelZSeries(fuelOilZReports)}" update="frmTables:dtbFuelOilZReports frmTables:fldNonPosCollection frmTables:fldSum frmTables:dtbEndDay" /> 
+
+                                                    </p:inputNumber>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column> 
+
+
+                                        <p:columnGroup id="clmGroup" type="footer" class="Fright" > 
+
+                                            <p:row >
+                                                <p:column colspan="3" style="text-align:right; font-weight: bold; ">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText value="#{loc.sum} :" class="FontBold" style="font-size: 15px; color: #565656;  margin-right: 20px" />
+                                                    </f:facet>
+                                                </p:column>
+
+                                                <p:column colspan="1" style="text-align:right; font-weight: bold;">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText value="#{loc.quantity}: " class=""/> 
+                                                        <h:outputText id="rowQuantity" value="#{sapAgreementBean.totalFuelZSeriesQuantity}" class="">
+                                                            <f:converter converterId="currencyConverter"  />
+                                                            <f:attribute name="unit"  value="#{sessionBean.user.lastBranch.currencyrounding}" />
+                                                            <f:attribute name="type" value="" /> 
+                                                        </h:outputText>
+                                                    </f:facet>
+                                                </p:column>
+
+                                                <p:column colspan="1" style="text-align:right; font-weight: bold;">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText value="#{loc.total}: " class=""/> 
+                                                        <h:outputText id="rowTotalMoney" value="#{sapAgreementBean.totalFuelZSeriesTotalMoney}" class="">
+                                                            <f:converter converterId="currencyConverter"  />
+                                                            <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}" />
+                                                            <f:attribute name="type" value="currency" /> 
+                                                        </h:outputText>
+
+                                                    </f:facet>
+                                                </p:column>
+                                            </p:row>    
+                                        </p:columnGroup>
+
+                                    </p:dataTable> 
+
+                                </div>
+
+                                <div class="ui-g-12 ui-md-6 ui-lg-6" >
+                                    <p:toolbar>
+
+                                        <f:facet name="left">
+                                            <h:outputText value="#{loc.market} #{loc.zreports}" rendered="True"   class="outputTextFont Fleft MarRight8" ></h:outputText>
+                                        </f:facet>
+                                    </p:toolbar>
+
+                                    <p:dataTable  id="dtbMarketZReports" var="marketZReports"  value="#{sapAgreementBean.listOfMarketZSeries}" widgetVar="marketZReportsPF"  emptyMessage="#{loc.norecordsfound}"
+                                                  rows="#{sessionBean.user.defualtGridSize}" rowKey="#{marketZReports.id}" style="height: 275px;overflow-y: auto;"  editable="true" editMode="cell" rowsPerPageTemplate="#{sessionBean.user.gridSize}" reflow="true"  >
+
+                                        <p:column id="clmSerialNo" headerText="#{loc.zserialno}" >
+                                            <h:outputText value="#{marketZReports.zSeries.number}"  />  
+                                        </p:column>
+                                        <p:column  id="clmMarwiz" style="border-top: 0px !important; border-bottom: 0px !important; border-left: 0px !important; background-color: #ECEFF1; text-align: center"  headerText="MARWIZ"  >
+                                            <h:outputText  value="#{marketZReports.totalMarket}" >
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>
+                                        </p:column>
+                                        <p:column  id="clmDifferenceMarket" style="border-top: 0px !important; border-bottom: 0px !important; border-left: 0px !important; background-color: #ECEFF1; text-align: center"  headerText="#{loc.difference}"  >
+                                            <h:outputText  value="#{marketZReports.difference}" >
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>
+                                        </p:column>
+                                        <p:column  id="clmTotal" headerText="#{loc.total}" >
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <h:outputText  value="#{marketZReports.totalMoney}" class="Fright">
+                                                        <f:converter converterId="currencyConverter" />
+                                                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                                        <f:attribute name="type" value="currency" />
+                                                    </h:outputText> 
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputNumber value="#{marketZReports.totalMoney}" class="editableinput" onclick="this.setSelectionRange(0, this.value.length)"
+                                                                   decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? '.': ','}"  minValue="0"
+                                                                   thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}"
+                                                                   decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}"
+                                                                   roundMethod="D" emptyValue="">
+                                                        <p:ajax listener="#{sapAgreementBean.cellEditMarketZSeries(marketZReports)}" update="frmTables:fldNonPosCollection frmTables:fldSum frmTables:dtbEndDay frmTables:dtbMarketZReports" /> 
+
+                                                    </p:inputNumber>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+                                        <p:columnGroup id="clmGroup" type="footer" class="Fright" > 
+
+                                            <p:row >
+                                                <p:column colspan="3" style="text-align:right; font-weight: bold; ">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText value="#{loc.sum} :" class="FontBold" style="font-size: 15px; color: #565656;  margin-right: 20px" />
+                                                    </f:facet>
+                                                </p:column>
+
+                                                <p:column colspan="1" style="text-align:right; font-weight: bold;">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText value="#{loc.total}: " class=""/> 
+                                                        <h:outputText id="rowTotal" value="#{sapAgreementBean.totalMarketZSeries}" class="">
+                                                            <f:converter converterId="currencyConverter"  />
+                                                            <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}" />
+                                                            <f:attribute name="type" value="currency" /> 
+                                                        </h:outputText>
+
+                                                    </f:facet>
+                                                </p:column>
+                                            </p:row>    
+
+                                        </p:columnGroup>
+
+
+
+                                    </p:dataTable> 
+                                </div>
+
+
+                            </p:fieldset>
+
+                        </div>
+
+
+
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+
+                            <p:fieldset legend="#{loc.outlay} - #{loc.exchangeentries}" toggleable="true" class="totalFieldSet" style="margin-bottom:10px;height: 100%;" rendered="true">
+
+                                <div class="ui-g-12 ui-md-6 ui-lg-6">
+                                    <p:toolbar>
+                                        <f:facet name="left">
+                                            <h:outputText value="#{loc.outlay}" rendered="True"   class="outputTextFont Fleft MarRight8" ></h:outputText>
+                                        </f:facet>
+                                    </p:toolbar>
+                                    <p:dataTable  id="dtbSapAgreementProcessExpense" var="SapAgreementExpense"  value="#{sapAgreementBean.listOfExpense}" widgetVar="sapAgreementProcessExpensePF" selection="#{sapAgreementBean.selectedObject}" selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                                                  rows="#{sessionBean.user.defualtGridSize}" rowKey="#{SapAgreementExpense.id}" style="height: 145px;overflow-y: auto;"   editable="true" editMode="cell"    rowsPerPageTemplate="#{sessionBean.user.gridSize}" reflow="true"  >
+
+                                        <p:column id="clmDescription" headerText="#{loc.description}" >
+                                            <h:outputText value="#{SapAgreementExpense.expenseDefinition}"  /> 
+                                        </p:column>
+
+
+                                        <p:column id="clmTotal" headerText="#{loc.total}"  >
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <h:outputText value="#{SapAgreementExpense.totalMoney}" class="Fright">
+                                                        <f:converter converterId="currencyConverter" />
+                                                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                                        <f:attribute name="type" value="currency" /> 
+                                                    </h:outputText>
+                                                </f:facet>
+                                                <f:facet name="input">
+
+                                                    <p:inputNumber value="#{SapAgreementExpense.totalMoney}" class="editableinput"
+                                                                   decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? '.': ','}"  minValue="0"
+                                                                   thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}"
+                                                                   decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}"
+                                                                   roundMethod="D" emptyValue="">  
+                                                        <p:ajax listener="#{sapAgreementBean.cellEditExpense(SapAgreementExpense)}" update="frmTables:dtbSapAgreementProcessExpense frmTables:fldNonPosCollection frmTables:fldSum frmTables:dtbEndDay" /> 
+
+                                                    </p:inputNumber>
+                                                </f:facet>
+                                            </p:cellEditor>
+
+
+                                        </p:column>
+                                        <p:columnGroup id="clmGroup" type="footer" class="Fright" > 
+
+                                            <p:row >
+                                                <p:column colspan="1" style="text-align:left; font-weight: bold; ">
+                                                    <f:facet name="footer"  >
+                                                        <c:if test="#{sapAgreementBean.listFuelTestSales.size() > 0}" >
+
+                                                            <h:outputText value="#{loc.sum} #{loc.fuels} #{loc.testsales} ->   #{loc.quantity} : " class="FontBold" style="font-size: 15px; color: #990000;  margin-right: 20px" />
+                                                            <h:outputText id="quantity" value="#{sapAgreementBean.testSalesQuantityTotal}" class="FontBold" style="font-size: 15px; color: #990000;  margin-right: 20px">
+                                                                <f:converter converterId="currencyConverter"  />
+                                                                <f:attribute name="unit"  value="#{sessionBean.user.lastBranchSetting.branch.currencyrounding}" />
+                                                                <f:attribute name="type" value="liter" /> 
+                                                            </h:outputText>
+                                                            <h:outputText value=" / " class="FontBold" style="font-size: 15px; color: #990000;  margin-right: 20px"/>
+                                                            <h:outputText value="#{loc.total} : " class="FontBold" style="font-size: 15px; color: #990000;  margin-right: 20px"/>
+                                                            <h:outputText  value="#{sapAgreementBean.testSalesTotalMoneyTotal}" class="FontBold" style="font-size: 15px; color: #990000;  margin-right: 20px">
+                                                                <f:converter converterId="currencyConverter" />
+                                                                <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                                                <f:attribute name="type" value="currency" />
+                                                            </h:outputText> 
+                                                            <p:commandLink title="#{loc.fueltestsaledetails}" action="#{sapAgreementBean.goToFuelTestSalesDetail}" >
+                                                                <i class="fa fa-search Fs16" />   
+
+                                                                <p:ajax />
+                                                            </p:commandLink> 
+                                                        </c:if>
+                                                    </f:facet>
+
+
+                                                </p:column>
+
+
+                                                <p:column colspan="1" style="text-align:right; font-weight: bold;">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText value="#{loc.total}: " class=""/> 
+                                                        <h:outputText id="rowExpense" value="#{sapAgreementBean.totalExpense}" class="">
+                                                            <f:converter converterId="currencyConverter"  />
+                                                            <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}" />
+                                                            <f:attribute name="type" value="currency" /> 
+                                                        </h:outputText>
+
+                                                    </f:facet>
+                                                </p:column>
+                                            </p:row>    
+
+                                        </p:columnGroup>
+
+
+                                    </p:dataTable> 
+                                </div> 
+
+
+
+
+
+
+
+                                <div class="ui-g-12 ui-md-6 ui-lg-6" >
+                                    <p:toolbar>
+
+                                        <f:facet name="left">
+                                            <h:outputText value="#{loc.exchangeentries}" rendered="True"   class="outputTextFont Fleft MarRight8" ></h:outputText>
+                                        </f:facet>
+                                    </p:toolbar>
+
+                                    <p:dataTable  id="dtbExchangeEntries" var="ExchangeEntries"  value="#{sapAgreementBean.listOfExchangeEntries}" widgetVar="exchangeEntriesPF"  selectionMode="single" selection="#{sapAgreementBean.selectedObject}" emptyMessage="#{loc.norecordsfound}"
+                                                  rows="#{sessionBean.user.defualtGridSize}" rowKey="#{ExchangeEntries.exchange.currency.id}" style="height: 145px;overflow-y: auto;" editable="true" editMode="cell"  rowsPerPageTemplate="#{sessionBean.user.gridSize}"   reflow="true" >
+
+                                        <p:column id="clmcurrencyname" headerText="#{loc.exchangetype}" >
+                                            <h:outputText value="#{ExchangeEntries.exchange.currency.code}"  /> 
+                                        </p:column>
+                                        <p:column id="clmQuantity" headerText="#{loc.quantity}" >
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <h:outputText value="#{ExchangeEntries.quantity}" class="Fright" >
+                                                        <f:converter converterId="currencyConverter" />
+                                                        <f:attribute name="unit" value="#{sessionBean.user.lastBranchSetting.branch.currencyrounding}"/>
+                                                        <f:attribute name="type" value="" /> 
+                                                    </h:outputText> 
+                                                </f:facet>
+                                                <f:facet name="input">
+
+                                                    <p:inputNumber value="#{ExchangeEntries.quantity}" class="editableinput"
+                                                                   decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? '.': ','}"  minValue="0"
+                                                                   thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}"
+                                                                   decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}"
+                                                                   roundMethod="D" emptyValue="">
+                                                        <p:ajax listener="#{sapAgreementBean.cellEditExchange(ExchangeEntries)}" update="frmTables:dtbExchangeEntries frmTables:fldNonPosCollection frmTables:fldSum frmTables:dtbEndDay" /> 
+
+                                                    </p:inputNumber>
+                                                </f:facet>
+                                            </p:cellEditor>
+
+                                        </p:column>
+                                        <p:column id="clmExchangeRate" headerText="#{loc.exchangerate}" >
+
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <h:outputText  value="#{ExchangeEntries.exchange.buying}" class="Fright">
+                                                        <f:converter converterId="currencyConverter" />
+                                                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                                        <f:attribute name="type" value="currency" />
+                                                    </h:outputText> 
+                                                </f:facet>
+                                                <f:facet name="input">
+
+                                                    <p:inputNumber value="#{ExchangeEntries.exchange.buying}" class="editableinput"
+                                                                   decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? '.': ','}"  minValue="0"
+                                                                   thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}"
+                                                                   decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}"
+                                                                   roundMethod="D" emptyValue="">
+                                                        <p:ajax listener="#{sapAgreementBean.cellEditExchange(ExchangeEntries)}" update="frmTables:dtbExchangeEntries frmTables:fldNonPosCollection frmTables:fldSum frmTables:dtbEndDay" /> 
+
+                                                    </p:inputNumber>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+
+
+                                        <p:column id="clmTotal" headerText="#{loc.total}" >
+
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <h:outputText  value="#{ExchangeEntries.totalMoney}" class="Fright">
+                                                        <f:converter converterId="currencyConverter" />
+                                                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                                        <f:attribute name="type" value="currency" />
+                                                    </h:outputText> 
+                                                </f:facet>
+                                                <f:facet name="input">
+
+                                                    <p:inputNumber value="#{ExchangeEntries.totalMoney}" class="editableinput"
+                                                                   decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? '.': ','}"  minValue="0"
+                                                                   thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}"
+                                                                   decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}"
+                                                                   roundMethod="D" emptyValue="">
+                                                        <p:ajax listener="#{sapAgreementBean.cellEditExchange(ExchangeEntries)}" update="frmTables:dtbExchangeEntries frmTables:fldNonPosCollection frmTables:fldSum frmTables:dtbEndDay" /> 
+
+                                                    </p:inputNumber>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+
+
+
+                                        <p:columnGroup id="clmGroup" type="footer" class="Fright" > 
+
+                                            <p:row >
+                                                <p:column colspan="2" style="text-align:right; font-weight: bold; ">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText value="#{loc.sum} :" class="FontBold" style="font-size: 15px; color: #565656;  margin-right: 20px" />
+                                                    </f:facet>
+                                                </p:column>
+
+
+                                                <p:column colspan="1" style="text-align:right; font-weight: bold;">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText value="#{loc.quantity}: " class=""/> 
+                                                        <h:outputText id="rowQuantity" value="#{sapAgreementBean.totalExchangeQuantity}" class="">
+                                                            <f:converter converterId="currencyConverter"  />
+                                                            <f:attribute name="unit"  value="#{sessionBean.user.lastBranch.currencyrounding}" />
+                                                            <f:attribute name="type" value="" /> 
+                                                        </h:outputText>
+
+                                                    </f:facet>
+                                                </p:column>
+
+                                                <p:column colspan="1" style="text-align:right; font-weight: bold;">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText value="#{loc.total}: " class=""/> 
+                                                        <h:outputText id="rowTotalMoney" value="#{sapAgreementBean.totalExchangeTotalMoney}" class="">
+                                                            <f:converter converterId="currencyConverter"  />
+                                                            <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}" />
+                                                            <f:attribute name="type" value="currency" /> 
+                                                        </h:outputText>
+
+                                                    </f:facet>
+                                                </p:column>
+                                            </p:row>    
+
+                                        </p:columnGroup>
+
+
+                                    </p:dataTable> 
+                                </div>
+                            </p:fieldset>
+                        </div>
+
+
+
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+
+                            <p:fieldset legend="#{loc.safetransfers} - #{loc.senttothebank} - Gün Sonu" toggleable="true" class="totalBalanceFieldSet" style="margin-bottom:10px;height: 100%;" rendered="true">
+
+                                <div class="ui-g-12 ui-md-6 ui-lg-4">
+                                    <p:toolbar>
+                                        <f:facet name="left">
+                                            <h:outputText value="#{loc.safetransfers}" rendered="True"   class="outputTextFont Fleft MarRight8" ></h:outputText>
+                                        </f:facet>
+                                    </p:toolbar>
+                                    <p:dataTable  id="dtbSapAgreementSafeTransfer" var="SapAgreementSafeTransfer"  value="#{sapAgreementBean.listOfSafeTransfer}" widgetVar="sapAgreementSafeTransferPF"  selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                                                  rows="#{sessionBean.user.defualtGridSize}" rowKey="#{SapAgreementSafeTransfer.id}" style="height: 140px;overflow-y: auto;"  rowsPerPageTemplate="#{sessionBean.user.gridSize}" reflow="true" >
+
+                                        <p:column id="clmDescription" headerText="#{loc.currency}" >
+                                            <h:outputText value="#{SapAgreementSafeTransfer.currency.code}"  /> 
+                                        </p:column>
+
+
+                                        <p:column id="clmTotal" headerText="#{loc.quantity}"  >
+                                            <h:outputText value="#{SapAgreementSafeTransfer.totalMoney}" class="Fright">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currencyrounding}"/>
+                                                <f:attribute name="type" value="" /> 
+                                            </h:outputText>
+
+                                        </p:column>
+
+                                    </p:dataTable> 
+                                </div> 
+
+
+
+
+
+
+
+                                <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                                    <p:toolbar>
+
+                                        <f:facet name="left">
+                                            <h:outputText value="#{loc.senttothebank}" rendered="True"   class="outputTextFont Fleft MarRight8" ></h:outputText>
+                                        </f:facet>
+                                    </p:toolbar>
+
+                                    <p:dataTable  id="dtbSentTotheBank" var="BankSend"  value="#{sapAgreementBean.listOfSendToBank}" widgetVar="bankSendPF" selection="#{sapAgreementBean.selectedObject}" selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                                                  rows="#{sessionBean.user.defualtGridSize}" rowKey="#{BankSend.currency.id}" style="height: 140px;overflow-y: auto;" editable="true" editMode="cell"  rowsPerPageTemplate="#{sessionBean.user.gridSize}" reflow="true" >
+
+                                        <p:column id="clmcurrencyname" headerText="#{loc.currency}" >
+                                            <h:outputText value="#{BankSend.currency.code}"  /> 
+                                        </p:column>
+                                        <p:column id="clmQuantity" headerText="#{loc.quantity}" >
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <h:outputText value="#{BankSend.totalMoney}" class="Fright" >
+                                                        <f:converter converterId="currencyConverter" />
+                                                        <f:attribute name="currency" value="#{sessionBean.user.lastBranchSetting.branch.currencyrounding}"/>
+                                                        <f:attribute name="type" value="" /> 
+                                                    </h:outputText> 
+                                                </f:facet>
+                                                <f:facet name="input">
+
+                                                    <p:inputNumber value="#{BankSend.totalMoney}" class="editableinput"
+                                                                   decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? '.': ','}"  minValue="0"
+                                                                   thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}"
+                                                                   decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}"
+                                                                   roundMethod="D" emptyValue="">
+                                                        <p:ajax listener="#{sapAgreementBean.cellEditBankSend(BankSend)}" update="frmTables:dtbEndDay frmTables:dtbSentTotheBank" /> 
+
+                                                    </p:inputNumber>
+                                                </f:facet>
+                                            </p:cellEditor>
+
+                                        </p:column>
+
+                                    </p:dataTable> 
+                                </div>
+
+                                <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                                    <p:toolbar>
+
+                                        <f:facet name="left">
+                                            <h:outputText value="#{loc.dayend}" rendered="True"   class="outputTextFont Fleft MarRight8" ></h:outputText>
+                                        </f:facet>
+                                    </p:toolbar>
+
+                                    <p:dataTable  id="dtbEndDay" var="EndDay"  value="#{sapAgreementBean.listOfEndDay}" widgetVar="endDayPF" selection="#{sapAgreementBean.selectedObject}" selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                                                  rows="#{sessionBean.user.defualtGridSize}" rowKey="#{EndDay.currency.id}" style="height: 140px;overflow-y: auto;"   rowsPerPageTemplate="#{sessionBean.user.gridSize}" reflow="true" >
+
+                                        <p:column id="clmcurrencyname" headerText="#{loc.currency}" >
+                                            <h:outputText value="#{EndDay.currency.code}"  /> 
+                                        </p:column>
+                                        <p:column id="clmQuantity" headerText="#{loc.quantity}" >
+
+                                            <h:outputText value="#{EndDay.endDayTotal}" class="Fright" >
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value="#{sessionBean.user.lastBranchSetting.branch.currencyrounding}"/>
+                                                <f:attribute name="type" value="" /> 
+                                            </h:outputText> 
+
+
+                                        </p:column>
+
+
+
+
+
+
+
+
+                                    </p:dataTable> 
+                                </div>
+
+
+                            </p:fieldset>
+                        </div>
+
+                        <div class="ui-g-12 ui-md-12 ui-lg-12" >
+                            <div class="ui-g-12 ui-md-12 ui-lg-8">
+                                <p:fieldset legend="#{loc.sum} #{loc.sales}" toggleable="true" class="incomeFieldSet" style="margin-bottom:10px;height: 97%;" rendered="true">
+                                    <div class="ui-g-12 ui-md-12 ui-lg-12" >
+                                        <p:panel style="height: 80px;">                                        
+                                            <div class="ui-g" style="min-height: 80px;">
+                                                <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                                                    <p:outputLabel  value="#{loc.market}" styleClass="Fs13 FontBold" />
+                                                    <p:inputText  value="#{sapAgreementBean.totalMarketSales}" readonly="true" style="text-align:  right">
+                                                        <f:converter converterId="currencyConverter"  />
+                                                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                                        <f:attribute name="type" value="currency" />
+                                                    </p:inputText>
+                                                </div>
+                                                <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                                                    <p:outputLabel  value="#{loc.fueloil}" styleClass="Fs13 FontBold" />
+                                                    <p:inputText  value="#{sapAgreementBean.totalFuelTotalMoney}" readonly="true" style="text-align:  right">
+                                                        <f:converter converterId="currencyConverter"  />
+                                                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                                        <f:attribute name="type" value="currency" />
+                                                    </p:inputText>
+                                                </div>
+
+                                                <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                                                    <p:outputLabel  value="#{loc.sum}" styleClass="Fs13 FontBold" />
+                                                    <p:inputText  value="#{sapAgreementBean.totalMarketSales + sapAgreementBean.totalFuelTotalMoney}" readonly="true" style="text-align:  right">
+                                                        <f:converter converterId="currencyConverter"  />
+                                                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                                        <f:attribute name="type" value="currency" />
+                                                    </p:inputText>
+                                                </div>
+                                            </div>
+                                        </p:panel>
+                                    </div>
+
+                                </p:fieldset>
+                            </div>
+
+
+                            <div class="ui-g-12 ui-md-12 ui-lg-4">
+                                <p:fieldset legend="#{loc.poscollections}" toggleable="true" class="detailFieldSet" style="margin-bottom:10px;height: 97%;" rendered="true">
+                                    <div class="ui-g-12 ui-md-12 ui-lg-12" >
+                                        <p:panel style="height: 80px;">                                        
+                                            <div class="ui-g" style="min-height: 80px;">
+                                                <div class="ui-g-12 ui-md-12 ui-lg-12" >
+                                                    <p:outputLabel  value="#{loc.sum} : " styleClass="Fs13 FontBold" />
+                                                    <p:inputText  value="#{sapAgreementBean.totalPosSalesMoney}" readonly="true" style="text-align:  right">
+                                                        <f:converter converterId="currencyConverter"  />
+                                                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                                        <f:attribute name="type" value="currency" />
+                                                    </p:inputText>
+                                                </div>
+
+                                            </div>
+                                        </p:panel>
+                                    </div>
+
+                                </p:fieldset>
+                            </div>
+                        </div>
+
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+                            <p:fieldset id="fldNonPosCollection" legend="#{loc.nonposcollections}" toggleable="true" class="totalFieldSet" style="margin-bottom:10px;height: 97%;" rendered="true">
+                                <div class="ui-g-12 ui-md-12 ui-lg-12" >
+                                    <p:panel style="height: 120px;">                                        
+                                        <div class="ui-g" style="min-height: 100px;">
+                                            <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                                                <p:outputLabel  value="Nakit" styleClass="Fs13 FontBold" />
+                                                <p:inputText  value="#{sapAgreementBean.cashPayment}" readonly="true" style="text-align:  right">
+                                                    <f:converter converterId="currencyConverter"  />
+                                                    <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                                    <f:attribute name="type" value="currency" />
+                                                </p:inputText>
+                                            </div>
+                                            <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                                                <p:outputLabel  value="#{loc.cashforforeigncurrency}" styleClass="Fs13 FontBold" />
+                                                <p:inputText  value="#{sapAgreementBean.totalExchangeTotalMoney}" readonly="true" style="text-align:  right">
+                                                    <f:converter converterId="currencyConverter"  />
+                                                    <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                                    <f:attribute name="type" value="currency" />
+                                                </p:inputText>
+                                            </div>
+
+                                            <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                                                <p:outputLabel  value="#{loc.marketreturn}" styleClass="Fs13 FontBold" />
+                                                <p:inputText  value="#{sapAgreementBean.totalMarketSaleReturn}" readonly="true" style="text-align:  right">
+                                                    <f:converter converterId="currencyConverter"  />
+                                                    <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                                    <f:attribute name="type" value="currency" />
+                                                </p:inputText>
+                                            </div>
+
+                                            <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                                                <p:outputLabel  value="#{loc.paymenttypessum}" styleClass="Fs13 FontBold" />
+                                                <p:inputText  value="#{sapAgreementBean.totalPaymentTypes}" readonly="true" style="text-align:  right">
+                                                    <f:converter converterId="currencyConverter"  />
+                                                    <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                                    <f:attribute name="type" value="currency" />
+                                                </p:inputText>
+                                            </div>
+                                            <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                                                <p:outputLabel  value="#{loc.outlay}" styleClass="Fs13 FontBold" />
+                                                <p:inputText  value="#{sapAgreementBean.totalExpense}" readonly="true" style="text-align:  right">
+                                                    <f:converter converterId="currencyConverter"  />
+                                                    <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                                    <f:attribute name="type" value="currency" />
+                                                </p:inputText>
+                                            </div>
+
+                                            <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                                                <p:outputLabel  value="#{loc.sum}" styleClass="Fs13 FontBold" />
+                                                <p:inputText  value="#{sapAgreementBean.nonPosCollection}" readonly="true" style="text-align:  right">
+                                                    <f:converter converterId="currencyConverter"  />
+                                                    <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                                    <f:attribute name="type" value="currency" />
+                                                </p:inputText>
+                                            </div>
+                                        </div>
+                                    </p:panel>
+                                </div>
+
+                            </p:fieldset>
+                        </div>
+
+
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+                            <p:fieldset id="fldSum" legend="#{loc.sum}" toggleable="true" class="totalBalanceFieldSet" style="margin-bottom:10px;height: 97%;" rendered="true">
+                                <div class="ui-g-12 ui-md-12 ui-lg-12" >
+                                    <p:panel style="height: 120px;">                                        
+                                        <div class="ui-g" style="min-height: 100px;">
+                                            <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                                                <p:outputLabel  value="#{loc.totalcollection}" styleClass="Fs13 FontBold" />
+                                                <p:inputText  value="#{sapAgreementBean.totalCollection}" readonly="true" style="text-align:  right">
+                                                    <f:converter converterId="currencyConverter"  />
+                                                    <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                                    <f:attribute name="type" value="currency" />
+                                                </p:inputText>
+                                            </div>
+
+
+                                            <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                                                <p:outputLabel  value="#{loc.automationsalesdifference}" styleClass="Fs13 FontBold" />
+                                                <p:inputText  value="#{sapAgreementBean.automationSaleDifference}" readonly="true" style="text-align:  right">
+                                                    <f:converter converterId="currencyConverter"  />
+                                                    <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                                    <f:attribute name="type" value="currency" />
+                                                </p:inputText>
+                                            </div>
+
+                                            <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                                                <p:outputLabel  value="#{loc.marketsaledifference}" styleClass="Fs13 FontBold" />
+                                                <p:inputText  value="#{sapAgreementBean.differenceMarket}" readonly="true" style="text-align:  right">
+                                                    <f:converter converterId="currencyConverter"  />
+                                                    <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                                    <f:attribute name="type" value="currency" />
+                                                </p:inputText>
+                                            </div>
+
+                                            <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                                                <p:outputLabel  value="#{loc.salescollection}" styleClass="Fs13 FontBold" />
+                                                <p:inputText  value="#{sapAgreementBean.saleCollection}" readonly="true" style="text-align:  right">
+                                                    <f:converter converterId="currencyConverter"  />
+                                                    <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                                    <f:attribute name="type" value="currency" />
+                                                </p:inputText>
+                                            </div>
+
+                                            <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                                                <p:outputLabel  value="#{loc.turnover} #{loc.automationsalesdifference}" styleClass="Fs13 FontBold" />
+                                                <p:inputText  value="#{sapAgreementBean.transferAutomationSaleDifference}" readonly="true" style="text-align:  right">
+                                                    <f:converter converterId="currencyConverter"  />
+                                                    <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                                    <f:attribute name="type" value="currency" />
+                                                </p:inputText>
+                                            </div>
+
+                                            <div class="ui-g-12 ui-md-6 ui-lg-4" >
+                                                <p:outputLabel  value="#{loc.turnover} #{loc.marketsaledifference}" styleClass="Fs13 FontBold" />
+                                                <p:inputText  value="#{sapAgreementBean.transferMarketSaleDifference}" readonly="true" style="text-align:  right">
+                                                    <f:converter converterId="currencyConverter"  />
+                                                    <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                                    <f:attribute name="type" value="currency" />
+                                                </p:inputText>
+                                            </div>
+                                        </div>
+                                    </p:panel>
+                                </div>
+
+                            </p:fieldset>
+                        </div>
+
+                    </div> 
+
+                </h:form>
+            </div> 
+
+        </h:panelGroup>
+
+    </h:panelGroup>
+
+    <p:dialog id="dlgPosSalesDetail" widgetVar="dlg_possalesdetail" modal="true" resizable="false" width="60%" focus="dlgPosSalesDetail" responsive="true" dynamic="true" closeOnEscape="true">
+        <ui:include src="sapagreementpossaledetail.xhtml">
+            <ui:param name="bean" value='#{sapAgreementBean}' />
+        </ui:include>
+    </p:dialog>
+
+    <p:dialog id="dlgFuelTestSalesDetail" widgetVar="dlg_fueltestsalesdetail" modal="true" resizable="false" width="60%" focus="dlgFuelTestSalesDetail" responsive="true" dynamic="true" closeOnEscape="true">
+        <ui:include src="sapagreementfueltestsalesdetail.xhtml">
+            <ui:param name="bean" value='#{sapAgreementBean}' />
+        </ui:include>
+    </p:dialog>
+
+
+    <p:confirmDialog id="dlgConfirmDelete" global="true"  class="deleteConfirm" widgetVar="dlg_Confirm" showEffect="fade" hideEffect="fade"  width="20%" closeOnEscape="true" responsive="true">
+        <f:facet name="message">
+            <h:outputText value="#{loc.recordeddatawillbedeletedandupdateddatawillberetrievedfromsap} #{loc.areyousureyouwanttocontinue}"  style="white-space: pre-wrap;">
+                <i class="icon-trash Fs20 tlbrDeleteBtn" /> 
+            </h:outputText>
+        </f:facet>
+        <div class="ui-g-12 ui-md-12 ui-lg-6"> 
+            <p:commandButton value="#{loc.yes}" action="#{sapAgreementBean.delete()}" async="true"   onclick="PF('dlg_Confirm').hide()"   styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+        </div>
+        <div class="ui-g-12 ui-md-12 ui-lg-6"> 
+            <p:commandButton value="#{loc.no}"   onclick="PF('dlg_Confirm').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+        </div>
+    </p:confirmDialog>
+
+
+
+    <p:confirmDialog id="dlgConfirmDayEnd" global="true"  class="deleteConfirm" widgetVar="dlg_ConfirmDayEnd" width="20%" showEffect="fade" hideEffect="fade"  closeOnEscape="true" responsive="true">
+        <f:facet name="message">
+            <h:outputText value="#{loc.theendofdayamountsareasfollows} #{loc.areyousureyouwanttocontinue}"  style="white-space: pre-wrap;">
+                <i class="icon-trash Fs20 tlbrDeleteBtn" /> 
+            </h:outputText>
+        </f:facet>
+
+        <ui:include src="dayenddetail.xhtml">
+            <ui:param name="bean" value='#{sapAgreementBean}' />
+        </ui:include>
+
+        <div class="EmptyBox20" />
+        <div class="ui-g-12 ui-md-12 ui-lg-6"> 
+            <p:commandButton value="#{loc.yes}" action="#{sapAgreementBean.dayEndYes()}" async="true"   onclick="PF('dlg_ConfirmDayEnd').hide()"   styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+        </div>
+        <div class="ui-g-12 ui-md-12 ui-lg-6">
+            <p:commandButton value="#{loc.no}"   onclick="PF('dlg_Confirm').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+        </div>
+    </p:confirmDialog>
+
+  <p:confirmDialog id="dlgConfirmCancel" global="true"  class="deleteConfirm" widgetVar="dlg_ConfirmCancel" showEffect="fade" hideEffect="fade"  width="20%" closeOnEscape="true" responsive="true">
+        <f:facet name="message">
+            <h:outputText value="#{loc.thesendingofthereconciliationdataonthisdatetosapwillbecancelled} #{loc.areyousureyouwanttocontinue}"  style="white-space: pre-wrap;">
+                <i class="icon-trash Fs20 tlbrDeleteBtn" /> 
+            </h:outputText>
+        </f:facet>
+        <div class="ui-g-12 ui-md-12 ui-lg-6"> 
+            <p:commandButton value="#{loc.yes}" action="#{sapAgreementBean.cancelTransferYes()}" async="true"   onclick="PF('dlg_ConfirmCancel').hide()"   styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+        </div>
+        <div class="ui-g-12 ui-md-12 ui-lg-6"> 
+            <p:commandButton value="#{loc.no}"   onclick="PF('dlg_ConfirmCancel').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+        </div>
+    </p:confirmDialog>
+
+
+
+    <p:growl id="grwSapAgreementProcessMessage" showDetail="true" globalOnly="true" life="10000"/> 
+
+</ui:composition>

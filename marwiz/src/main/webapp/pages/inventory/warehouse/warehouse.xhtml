@@ -1,0 +1,71 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+        <ui:param name="bean" value="#{warehouseBean}"/>   <!-- Bean -->
+        <ui:param name="update" value=""/>  <!-- Yeni butonuna basınca açılacak sayfa  -->
+        <ui:param name="btnNewId" value="#{warehouseBean.getRendered(145, 0)}"/>  <!-- buton id yetki kontrolü için  -->
+        <ui:param name="datatable" value="frmWareHouse:dtbWareHouse" />  <!-- datatable  -->       
+        <ui:param name="widgetvar" value='wareHousePF' />
+        <ui:param name="form" value='frmToolbarWareHouse' />
+        <ui:param name="fileName" value="#{loc.warehouses}"/> 
+        <ui:param name="renderedToggler" value='false'/>       
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+    </ui:include>
+
+
+    <h:form id="frmWareHouse">
+
+        <p:dataTable  id="dtbWareHouse" var="WareHouse"  value="#{warehouseBean.listOfObjects}" widgetVar="wareHousePF" selection="#{warehouseBean.selectedObject}" filteredValue="#{warehouseBean.listOfFilteredObjects}" selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{WareHouse.id}" paginator="true" 
+                      paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" 
+                      paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                      reflow="true" rowStyleClass="#{WareHouse.status.id==14 ? 'ColumnColorRed' : null}">
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{marwiz.goToPage('/pages/inventory/warehouse/warehouseprocess.xhtml',warehouseBean.selectedObject, 0, 28)}"  />  
+
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false"/>
+            <p:ajax event="colReorder" listener="#{warehouseBean.reorder}" update="frmToolbarWareHouse:toggle" />     
+            <p:ajax event="colResize"  listener="#{warehouseBean.onResize}" /> 
+
+            <f:facet name="footer" rendered="false" >
+                <p:inputText id="globalFilter" value="#{warehouseBean.autoCompleteValue}"  style="display: none"  />
+            </f:facet>
+
+            <p:column id="clmName" headerText="#{loc.warehousename}" sortable="true" sortBy="#{WareHouse.name}" filterable="true"  filterBy="#{WareHouse.name}" filterMatchMode="contains" visible="#{warehouseBean.toogleList[0]}" exportable="#{warehouseBean.toogleList[0]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{WareHouse.name}" />
+            </p:column >
+
+            <p:column id="clmCode" headerText="#{loc.warehousecode}" sortable="true" sortBy="#{WareHouse.code}" filterable="true"  filterBy="#{WareHouse.code}" filterMatchMode="contains" visible="#{warehouseBean.toogleList[1]}" exportable="#{warehouseBean.toogleList[1]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{WareHouse.code}"/>
+            </p:column>
+
+            <p:column id="clmStatus" headerText="#{loc.statu}" sortable="true" sortBy="#{WareHouse.status.tag}" filterable="true"  filterBy="#{WareHouse.status.tag}" filterMatchMode="contains" visible="#{warehouseBean.toogleList[2]}" exportable="#{warehouseBean.toogleList[2]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{WareHouse.status.tag}" />
+            </p:column>
+
+        </p:dataTable>  
+    </h:form>
+
+   
+
+</ui:composition>
+
+
+

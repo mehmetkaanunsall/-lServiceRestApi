@@ -1,0 +1,443 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmStationSalesSummaryReport">
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.stationsalessummaryreport}"/>
+            <ui:param name="bean" value='#{stationSalesSummaryReportBean}' />
+            <ui:param name="update" value="pgrStationSalesSummaryReport" />
+        </ui:include>
+
+        <h:panelGroup id="pgStationSalesSummaryReport" class="divContent" layout="block" transient="true">  
+            <div class="panelToggle  ui-g">
+                <div class="ui-g-12 ui-md-6 ui-lg-2">
+                    <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                    <p:calendar  id="cldStartDate" class="datepicker" value="#{stationSalesSummaryReportBean.selectedObject.beginDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                        <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                    </p:calendar>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-2">
+                    <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                    <p:calendar  id="cldEndDate" class="datepicker" value="#{stationSalesSummaryReportBean.selectedObject.endDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                        <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                    </p:calendar>
+                </div>
+
+
+                <div class=" ui-g-12 ui-md-6 ui-lg-2 ">
+                    <p:outputLabel value="#{loc.branch}" for="slcBranch" class="FontBold Fs12"/>
+                    <p:selectCheckboxMenu  id="slcBranch"  value="#{stationSalesSummaryReportBean.selectedBranchList}" 
+                                           filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                           label="#{stationSalesSummaryReportBean.selectedBranchList.size()!=0 ? stationSalesSummaryReportBean.selectedBranchList.size() :loc.all} #{stationSalesSummaryReportBean.selectedBranchList.size()!=0 ? loc.branch : ''} #{stationSalesSummaryReportBean.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                        <f:selectItems value="#{stationSalesSummaryReportBean.listOfBranch}" itemLabel="#{branchSetting.branch.name}" itemValue="#{branchSetting}" var="branchSetting" />       
+                        <p:ajax oncomplete="PF('slcBranchCheckBox').show()" global="false"  update=" slcBranch"/>
+                        <p:ajax event="toggleSelect"  update=" slcBranch"  oncomplete="PF('slcBranchCheckBox').show()" global="false"/>
+                    </p:selectCheckboxMenu>
+                </div>   
+                <div class="ui-g-6" style="padding-top: 23px !important;">
+                    <h:panelGroup id="pgrWarning" layout="grid" class="MarLeft5" >
+                        <i class="fa fa-warning Fs18 TexAlLeft MarLeft5" style="color:#125aa7 !important;border: transparent !important;"></i>
+                        <h:outputText value=" " class="Fs16 FontBold" style="border: transparent !important;"/> 
+                        <h:outputText value="#{loc.warning} :" class="Fs16 FontBold" style="border: transparent !important;"/>
+                        <h:outputText value=" #{loc.nonclosingshiftcalculationsarenotincludedinthereport}" style="border: transparent !important;" />
+                    </h:panelGroup>            
+                </div>
+            </div>
+
+
+        </h:panelGroup>
+    </h:form>
+
+    <div class="EmptyBox20" />
+
+    <h:panelGroup id="pgrStationSalesSummaryReport">
+        <h:panelGroup rendered="#{stationSalesSummaryReportBean.isFind}">
+            <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                <ui:param name="outputtext" value="#{loc.stationsalessummaryreport}"/>
+                <ui:param name="bean" value='#{stationSalesSummaryReportBean}' />
+                <ui:param name="renderedExcel" value="false" />
+                <ui:param name="renderedPdf" value="false" />
+                <ui:param name="renderedPrint" value="false" />
+                <ui:param name="renderedPrintSummary" value="false" />
+                <ui:param name="renderedReportPdf" value="true"/>
+                <ui:param name="renderedReportExcel" value="true"/>
+                <ui:param name="printSummaryField" value="frmFieldSet"/>
+            </ui:include>
+            <div class="divContent ui-g-12">
+
+                <h:form id="frmFieldSet" >
+                    <div class="ui-g-12">
+                        <div class="ui-g-12 ui-md-6 ui-lg-6">
+                            <p:fieldset legend="#{loc.fuelsales}" toggleable="true" class="incomeFieldSet" style="margin-bottom:10px;height: 97%;" rendered="true">
+                                <p:dataTable  id="dtbFuelSales" var="FuelSales" widgetVar="fuelSalesPF"  value="#{stationSalesSummaryReportBean.listOfFuelSales}" emptyMessage="#{loc.norecordsfound}"
+                                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{FuelSales.id}"  reflow="true" style="height: 238px;overflow-y: auto;" >
+
+
+                                    <p:column id="clmBranch" headerText="#{loc.branch}" filterable="false">
+                                        <h:outputText value="#{FuelSales.branchSetting.branch.name}" />
+                                    </p:column> 
+
+                                    <p:column id="clmStockName" headerText="#{loc.stockname}" filterable="false">
+                                        <h:outputText value="#{FuelSales.fuelStockName}" />
+                                    </p:column> 
+
+
+                                    <p:column id="clmSalesLT" headerText="#{loc.salesamount}" filterable="false" class="TexAlRight">
+                                        <h:outputText value="#{FuelSales.fuelStockQuantity}" >
+
+                                        </h:outputText>
+                                    </p:column> 
+
+                                    <p:column id="clmUnitPrice" headerText="#{loc.unitprice}" filterable="false" class="TexAlRight">
+                                        <h:outputText value="#{FuelSales.fuelStockUnitPrice}" >
+                                            <f:converter converterId="currencyConverter"  />
+                                            <f:attribute name="currency"  value="#{FuelSales.branchSetting.branch.currency}"/>
+                                            <f:attribute name="type" value="currency" />
+                                        </h:outputText>
+                                    </p:column> 
+
+                                    <p:column id="clmTotal" headerText="#{loc.total}" filterable="false" class="TexAlRight">
+                                        <h:outputText value="#{FuelSales.fuelStockSalesTotal}" >
+                                            <f:converter converterId="currencyConverter"  />
+                                            <f:attribute name="currency"  value="#{FuelSales.branchSetting.branch.currency}"/>
+                                            <f:attribute name="type" value="currency" />
+                                        </h:outputText>
+                                    </p:column> 
+
+                                    <p:columnGroup type="footer" >
+                                        <ui:repeat value="#{stationSalesSummaryReportBean.currencyTotalsFuelSales.entrySet().toArray()}" var="entry" >
+                                            <p:row>
+                                                <p:column colspan="2" class="TexAlLeft">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText value="#{loc.sum}:" class="FontBold" style="font-size: 15px; color: #565656;" />
+                                                    </f:facet>
+                                                </p:column>
+                                                <p:column colspan="1">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{stationSalesSummaryReportBean.currencyTotalsFuelSales.get(entry.key).fuelStockQuantity}" >
+
+                                                        </h:outputText>
+                                                    </f:facet>
+                                                </p:column>
+                                                <p:column colspan="1">
+                                                    <f:facet name="footer">
+                                                        <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="" />
+                                                    </f:facet>
+                                                </p:column>              
+
+                                                <p:column colspan="1">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{stationSalesSummaryReportBean.currencyTotalsFuelSales.get(entry.key).fuelStockSalesTotal}" >
+                                                            <f:converter converterId="currencyConverter" />
+                                                            <f:attribute name="currency" value="#{stationSalesSummaryReportBean.currencyTotalsFuelSales.get(entry.key).branchSetting.branch.currency}"/>
+                                                            <f:attribute name="type" value="currency" />
+                                                        </h:outputText>
+                                                    </f:facet>
+                                                </p:column>
+
+                                            </p:row>
+                                        </ui:repeat>
+                                    </p:columnGroup>
+
+
+                                </p:dataTable>  
+                            </p:fieldset>
+                        </div>
+
+                        <div class="ui-g-12 ui-md-6 ui-lg-6">
+                            <p:fieldset legend="#{loc.fuelcollections}" toggleable="true" class="incomeFieldSet" style="margin-bottom:10px;height: 97%;" rendered="true">
+                                <p:dataTable  id="dtbCollections" var="FuelCollections" widgetVar="fuelCollectionsPF"  value="#{stationSalesSummaryReportBean.listOfFuelCollections}" emptyMessage="#{loc.norecordsfound}"
+                                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{FuelCollections.id}"  reflow="true" style="height: 238px;overflow-y: auto;" >
+
+
+                                    <p:column id="clmBranch" headerText="#{loc.branch}" filterable="false">
+                                        <h:outputText value="#{FuelCollections.branchSetting.branch.name}" />
+                                    </p:column> 
+
+                                    <p:column id="clmFuelCollectionName" headerText="#{loc.collectiontype}" filterable="false">
+                                        <h:outputText value="#{FuelCollections.fuelCollectionName}" />
+                                    </p:column> 
+
+                                    <p:column id="clmSalesLT" headerText="#{loc.total}" filterable="false" class="TexAlRight">
+                                        <h:outputText value="#{FuelCollections.fuelCollectionSalesTotal}" class="TexAlRight" >
+                                            <f:converter converterId="currencyConverter"  />
+                                            <f:attribute name="currency"  value="#{FuelCollections.branchSetting.branch.currency}"/>
+                                            <f:attribute name="type" value="currency" />
+                                        </h:outputText>
+                                    </p:column> 
+                                    <p:columnGroup type="footer" class="Fright">     
+                                        <p:row>
+                                            <p:column colspan="2" class="TexAlLeft">
+                                                <f:facet name="footer"  >
+                                                    <h:outputText value="#{loc.sum}:" class="FontBold" style="font-size: 15px; color: #565656;" />
+                                                </f:facet>
+                                            </p:column>
+
+                                            <p:column colspan="1">
+                                                <f:facet name="footer"  >
+                                                    <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{stationSalesSummaryReportBean.fuelCollectionTotalMoney}" >
+                                                        <f:converter converterId="currencyConverter"  />
+                                                        <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                                                        <f:attribute name="type" value="currency" />
+                                                    </h:outputText>
+                                                </f:facet>
+                                            </p:column>
+                                        </p:row>
+                                    </p:columnGroup> <p:columnGroup type="footer" >
+                                        <ui:repeat value="#{stationSalesSummaryReportBean.currencyTotalsFuelCollection.entrySet().toArray()}" var="entry" >
+                                            <p:row>
+                                                <p:column colspan="2" class="TexAlLeft">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText value="#{loc.sum}:" class="FontBold" style="font-size: 15px; color: #565656;" />
+                                                    </f:facet>
+                                                </p:column>
+
+                                                <p:column colspan="1">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{stationSalesSummaryReportBean.currencyTotalsFuelCollection.get(entry.key).fuelCollectionSalesTotal}" >
+                                                            <f:converter converterId="currencyConverter" />
+                                                            <f:attribute name="currency" value="#{stationSalesSummaryReportBean.currencyTotalsFuelCollection.get(entry.key).branchSetting.branch.currency}"/>
+                                                            <f:attribute name="type" value="currency" />
+                                                        </h:outputText>
+                                                    </f:facet>
+                                                </p:column>
+
+                                            </p:row>
+                                        </ui:repeat>
+                                    </p:columnGroup>
+
+                                </p:dataTable>  
+                            </p:fieldset>
+                        </div>
+
+                        <div class="ui-g-12 ui-md-6 ui-lg-6" >
+                            <p:fieldset  legend="#{loc.marketsales}" toggleable="true" class="expenseFieldSet" style="margin-bottom:10px;height: 97%;">
+                                <p:dataTable  id="dtbMarketSales" var="MarketSales" widgetVar="marketSalesPF"  value="#{stationSalesSummaryReportBean.listOfMarketSales}" emptyMessage="#{loc.norecordsfound}"
+                                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{MarketSales.id}"  reflow="true" style="height: 238px;overflow-y: auto;" >
+
+
+                                    <p:column id="clmBranch" headerText="#{loc.branch}" filterable="false">
+                                        <h:outputText value="#{MarketSales.branchSetting.branch.name}" />
+                                    </p:column> 
+
+
+                                    <p:column id="clmStockName" headerText="#{loc.sales}" filterable="false">
+                                        <h:outputText value="#{MarketSales.salesTypeName}" />
+                                    </p:column> 
+
+                                    <p:column id="clmQuantity" headerText="#{loc.quantity}" filterable="false" class="TexAlRight">
+                                        <h:outputText value="#{MarketSales.marketSalesQuantity}" />
+                                    </p:column>  
+
+                                    <p:column id="clmTotal" headerText="#{loc.total}" filterable="false" class="TexAlRight">
+                                        <h:outputText value="#{MarketSales.marketSaleTotalMoney}" class="TexAlRight">
+                                            <f:converter converterId="currencyConverter"  />
+                                            <f:attribute name="currency"  value="#{MarketSales.currency}"/>
+                                            <f:attribute name="type" value="currency" />
+                                        </h:outputText>
+                                    </p:column> 
+
+
+
+                                    <p:columnGroup type="footer" >
+                                        <ui:repeat value="#{stationSalesSummaryReportBean.currencyTotalsMarketSales.entrySet().toArray()}" var="entry" >
+                                            <p:row>
+                                                <p:column colspan="2" class="TexAlLeft">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText value="#{loc.sum}:" class="FontBold" style="font-size: 15px; color: #565656;" />
+                                                    </f:facet>
+                                                </p:column>
+
+                                                <p:column colspan="1">
+                                                    <f:facet name="footer">
+                                                        <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="" />
+                                                    </f:facet>
+                                                </p:column>              
+
+                                                <p:column colspan="1">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{stationSalesSummaryReportBean.currencyTotalsMarketSales.get(entry.key).marketSaleTotalMoney}" >
+                                                            <f:converter converterId="currencyConverter" />
+                                                            <f:attribute name="currency" value="#{stationSalesSummaryReportBean.currencyTotalsMarketSales.get(entry.key).currency}"/>
+                                                            <f:attribute name="type" value="currency" />
+                                                        </h:outputText>
+                                                    </f:facet>
+                                                </p:column>
+
+                                            </p:row>
+                                        </ui:repeat>
+                                    </p:columnGroup>
+
+                                </p:dataTable>  
+                            </p:fieldset>
+                        </div>
+
+
+                        <div class="ui-g-12 ui-md-6 ui-lg-6" >
+                            <p:fieldset  legend="#{loc.marketcollections}" toggleable="true" class="expenseFieldSet" style="margin-bottom:10px;height: 97%;">
+                                <p:dataTable  id="dtbMarketCollections" var="MarketCollections" widgetVar="marketCollectionsPF"  value="#{stationSalesSummaryReportBean.listOfMarketCollections}" emptyMessage="#{loc.norecordsfound}"
+                                              rows="#{sessionBean.user.defualtGridSize}"  reflow="true" style="height: 238px;overflow-y: auto;" >
+
+                                    <p:column id="clmBranch" headerText="#{loc.branch}" filterable="false">
+                                        <h:outputText value="#{MarketCollections.branchSetting.branch.name}" />
+                                    </p:column> 
+
+                                    <p:column id="clmCollectionType" headerText="#{loc.collectiontype}" filterable="false">
+                                        <h:outputText value="#{MarketCollections.marketCollectionTypeName}" />
+                                    </p:column> 
+
+                                    <p:column id="clmTotal" headerText="#{loc.total}" filterable="false" class="TexAlRight">
+                                        <h:outputText value="#{MarketCollections.marketCollectionTotalMoney}" class="TexAlRight">
+                                            <f:converter converterId="currencyConverter"  />
+                                            <f:attribute name="currency"  value="#{MarketCollections.branchSetting.branch.currency}"/>
+                                            <f:attribute name="type" value="currency" />
+                                        </h:outputText>
+                                    </p:column> 
+
+
+                                    <p:columnGroup type="footer" >
+                                        <ui:repeat value="#{stationSalesSummaryReportBean.currencyTotalsMarketCollection.entrySet().toArray()}" var="entry" >
+                                            <p:row>
+                                                <p:column colspan="2" class="TexAlLeft">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText value="#{loc.sum}:" class="FontBold" style="font-size: 15px; color: #565656;" />
+                                                    </f:facet>
+                                                </p:column>
+
+
+                                                <p:column colspan="1">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{stationSalesSummaryReportBean.currencyTotalsMarketCollection.get(entry.key).marketCollectionTotalMoney}" >
+                                                            <f:converter converterId="currencyConverter" />
+                                                            <f:attribute name="currency" value="#{stationSalesSummaryReportBean.currencyTotalsMarketCollection.get(entry.key).branchSetting.branch.currency}"/>
+                                                            <f:attribute name="type" value="currency" />
+                                                        </h:outputText>
+                                                    </f:facet>
+                                                </p:column>
+
+                                            </p:row>
+                                        </ui:repeat>
+                                    </p:columnGroup>
+
+
+                                </p:dataTable> 
+                            </p:fieldset>
+                        </div>
+
+
+                        <div class="ui-g-12 ui-md-6 ui-lg-6" >
+                            <p:fieldset  legend="#{loc.totalsales}" toggleable="true" class="totalFieldSet" style="margin-bottom:10px;height: 97%;">
+                                <p:dataTable  id="dtbTotalSales" var="TotalSales" widgetVar="totalSalesPF"  value="#{stationSalesSummaryReportBean.listOfTotalSales}" emptyMessage="#{loc.norecordsfound}"
+                                              rows="#{sessionBean.user.defualtGridSize}"  reflow="true" style="height: 238px;overflow-y: auto;" >
+
+
+                                    <p:column id="clmSalesType" headerText="#{loc.sales}" filterable="false">
+                                        <h:outputText value="#{TotalSales.totalSalesName}" />
+                                    </p:column> 
+
+                                    <p:column id="clmTotal" headerText="#{loc.total}" filterable="false" class="TexAlRight">
+                                        <h:outputText value="#{TotalSales.totalSalesPrice}" class="TexAlRight">
+                                            <f:converter converterId="currencyConverter"  />
+                                            <f:attribute name="currency"  value="#{TotalSales.currency}"/>
+                                            <f:attribute name="type" value="currency" />
+                                        </h:outputText>
+                                    </p:column> 
+
+
+
+
+                                    <p:columnGroup type="footer" >
+                                        <ui:repeat value="#{stationSalesSummaryReportBean.currencyTotalsSales.entrySet().toArray()}" var="entry" >
+                                            <p:row>
+                                                <p:column colspan="1" class="TexAlLeft">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText value="#{loc.sum}:" class="FontBold" style="font-size: 15px; color: #565656;" />
+                                                    </f:facet>
+                                                </p:column>
+
+
+                                                <p:column colspan="1">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{stationSalesSummaryReportBean.currencyTotalsSales.get(entry.key).totalSalesPrice}" >
+                                                            <f:converter converterId="currencyConverter" />
+                                                            <f:attribute name="currency" value="#{stationSalesSummaryReportBean.currencyTotalsSales.get(entry.key).currency}"/>
+                                                            <f:attribute name="type" value="currency" />
+                                                        </h:outputText>
+                                                    </f:facet>
+                                                </p:column>
+
+                                            </p:row>
+                                        </ui:repeat>
+                                    </p:columnGroup>
+
+                                </p:dataTable> 
+                            </p:fieldset>
+                        </div>
+
+                        <div class="ui-g-12 ui-md-6 ui-lg-6" >
+                            <p:fieldset  legend="#{loc.totalcollections}" toggleable="true" class="totalFieldSet" style="margin-bottom:10px;height: 97%;">
+                                <p:dataTable  id="dtbTotalCollections" var="TotalCollections" widgetVar="totalCollectionsPF"  value="#{stationSalesSummaryReportBean.listOfTotalCollections}" emptyMessage="#{loc.norecordsfound}"
+                                              rows="#{sessionBean.user.defualtGridSize}"  reflow="true" style="height: 238px;overflow-y: auto;" >
+
+
+                                    <p:column id="clmBranch" headerText="#{loc.branch}" filterable="false">
+                                        <h:outputText value="#{TotalCollections.branchName}" />
+                                    </p:column> 
+
+                                    <p:column id="clmCollectionType" headerText="#{loc.collectiontype}" filterable="false">
+                                        <h:outputText value="#{TotalCollections.totalCollectionName}" />
+                                    </p:column> 
+
+
+
+                                    <p:column id="clmTotal" headerText="#{loc.total}" filterable="false" class="TexAlRight">
+                                        <h:outputText value="#{TotalCollections.totalCollectionPrice}" class="TexAlRight">
+                                            <f:converter converterId="currencyConverter"  />
+                                            <f:attribute name="currency"  value="#{TotalCollections.currency}"/>
+                                            <f:attribute name="type" value="currency" />
+                                        </h:outputText>
+                                    </p:column> 
+
+
+                                    <p:columnGroup type="footer" >
+                                        <ui:repeat value="#{stationSalesSummaryReportBean.currencyTotalsCollection.entrySet().toArray()}" var="entry" >
+                                            <p:row>
+                                                <p:column colspan="2" class="TexAlLeft">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText value="#{loc.sum}:" class="FontBold" style="font-size: 15px; color: #565656;" />
+                                                    </f:facet>
+                                                </p:column>
+
+
+                                                <p:column colspan="1">
+                                                    <f:facet name="footer"  >
+                                                        <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{stationSalesSummaryReportBean.currencyTotalsCollection.get(entry.key).totalCollectionPrice}" >
+                                                            <f:converter converterId="currencyConverter" />
+                                                            <f:attribute name="currency" value="#{stationSalesSummaryReportBean.currencyTotalsCollection.get(entry.key).currency}"/>
+                                                            <f:attribute name="type" value="currency" />
+                                                        </h:outputText>
+                                                    </f:facet>
+                                                </p:column>
+
+                                            </p:row>
+                                        </ui:repeat>
+                                    </p:columnGroup>
+
+
+                                </p:dataTable> 
+                            </p:fieldset>
+                        </div>
+                    </div>
+                </h:form>
+            </div>
+
+        </h:panelGroup>
+
+    </h:panelGroup>
+
+</ui:composition>

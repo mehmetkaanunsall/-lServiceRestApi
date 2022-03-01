@@ -1,0 +1,380 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmOfficalAccounting">
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.officialaccountingintegrationprocess}"/>
+            <ui:param name="bean" value='#{officialAccountingBean}' />
+            <ui:param name="update" value="frmOfficalAccountingDatatable:dtbOfficalAccounting pgOfficalAccounting pgrOfficalAccountingDatatable" />
+            <ui:param name="renderedIntegration" value="#{(officialAccountingBean.cardType==1 and officialAccountingBean.firstSelect == 0 ) or (officialAccountingBean.cardType==2 and officialAccountingBean.secondSelect == 0)}" />
+        </ui:include>
+
+        <h:panelGroup id="pgOfficalAccounting" class="divContent" layout="block" transient="true">  
+            <div class="panelToggle  ui-g">
+
+                <div class="#{officialAccountingBean.isFind and officialAccountingBean.cardType==1 ? 'ui-g-12 ui-md-3 ui-lg-3' : 'ui-g-12 ui-md-2 ui-lg-2'}">
+                    <p:outputLabel value="#{loc.cardtype}" for="slcCardTypeExit" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcCardTypeExit" value="#{officialAccountingBean.cardType}" >
+                        <f:selectItem itemValue="1" itemLabel="#{loc.definitioncard}" />
+                        <f:selectItem itemValue="2" itemLabel="#{loc.processcard}" />
+                        <p:ajax event="change" listener="#{officialAccountingBean.changeCardType()}" update="pgOfficalAccounting"/>
+                    </p:selectOneMenu>
+                </div>
+
+
+
+                <h:panelGroup rendered="#{officialAccountingBean.cardType==1}" >
+                    <div class="#{officialAccountingBean.isFind and officialAccountingBean.cardType==1 ? 'ui-g-12 ui-md-3 ui-lg-3' : 'ui-g-12 ui-md-2 ui-lg-2'}">
+                        <p:outputLabel value="#{loc.integrationtype}" for="slcEntryExit" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcEntryExit" value="#{officialAccountingBean.firstSelect}" >
+                            <f:selectItem itemValue="0" itemLabel="#{loc.all}" />
+                            <f:selectItem itemValue="1" itemLabel="#{loc.account} #{loc.card}"   />
+                            <f:selectItem itemValue="2" itemLabel="#{loc.stock} #{loc.card}" />
+                            <f:selectItem itemValue="3" itemLabel="#{loc.safe} #{loc.card}" />
+                            <f:selectItem itemValue="4" itemLabel="#{loc.bank} #{loc.card}" />
+                            <f:selectItem itemValue="5" itemLabel="#{loc.warehouse} #{loc.card}" />
+                            <p:ajax event="change"  process="@this" async="true" update="pgOfficalAccounting" listener="#{officialAccountingBean.changeProcessType()}" global="false" />
+                        </p:selectOneMenu>
+                    </div>
+                </h:panelGroup>
+
+                <h:panelGroup rendered="#{officialAccountingBean.cardType==2}" >
+                    <div class="ui-g-12  ui-md-2 ui-lg-2">
+                        <p:outputLabel value="#{loc.processtype}" for="slcTypeExit" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcTypeExit" value="#{officialAccountingBean.secondSelect}" >
+                            <f:selectItem itemValue="0" itemLabel="#{loc.all}"  />
+                            <f:selectItem itemValue="1" itemLabel="#{loc.financingdocument}"  />
+                            <f:selectItem itemValue="2" itemLabel="#{loc.transferreceipt}"  />
+                            <f:selectItem itemValue="3" itemLabel="#{loc.chequeandbill}"  />
+                            <f:selectItem itemValue="4" itemLabel="#{loc.invoice}"  />
+                            <f:selectItem itemValue="5" itemLabel="#{loc.waybill}"  />
+                            <f:selectItem itemValue="6" itemLabel="#{loc.warehousereceipts}"  />
+                            <p:ajax event="change"  process="@this" async="true" update="pgOfficalAccounting" listener="#{officialAccountingBean.changeProcessType()}" global="false" />
+                        </p:selectOneMenu>
+                    </div>
+                </h:panelGroup>
+
+                <!--   <div class="ui-g-12  ui-md-2 ui-lg-2">
+                       <p:outputLabel value="#{loc.branch}" for="slcBranch1" class="FontBold Fs12"/>
+                       <p:selectOneMenu  id="slcBranch1"  value="#{officialAccountingBean.selectedBranch.branch.id}" >
+                           <f:selectItems value="#{officialAccountingBean.listOfBranch}" itemLabel="#{branchSetting.branch.name}" itemValue="#{branchSetting.branch.id}" var="branchSetting" />       
+                           <p:ajax global="false"  process="@this" async="true"  update="frmOfficalAccounting" listener="#{officialAccountingBean.changeBranch()}"/>
+                       </p:selectOneMenu>
+                   </div>  -->
+
+
+                <h:panelGroup>
+                    <div class="ui-g-12  ui-md-6 ui-lg-2" >
+                        <p:outputLabel value="#{loc.branch}" for="slcBranch" class="FontBold Fs12" />
+                        <p:selectCheckboxMenu  id="slcBranch"  value="#{officialAccountingBean.selectedBranchList}" 
+                                               filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                               label="#{officialAccountingBean.selectedBranchList.size()!=0 ? officialAccountingBean.selectedBranchList.size() :loc.all} #{officialAccountingBean.selectedBranchList.size()!=0 ? loc.branch : ''} #{officialAccountingBean.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                            <f:selectItems value="#{officialAccountingBean.listOfBranch}" itemLabel="#{branchSetting.branch.name}" itemValue="#{branchSetting}" var="branchSetting" />       
+                            <p:ajax oncomplete="PF('slcBranchCheckBox').show()" global="false" listener="#{officialAccountingBean.changeBranch()}" update="frmOfficalAccounting" />
+                            <p:ajax event="toggleSelect" listener="#{officialAccountingBean.changeBranch()}" update="frmOfficalAccounting"  oncomplete="PF('slcBranchCheckBox').show()" global="false"/>
+                        </p:selectCheckboxMenu>
+                    </div>     
+                </h:panelGroup>
+
+
+
+
+                <h:panelGroup id="pngDate" >
+                    <h:panelGroup rendered="#{officialAccountingBean.cardType==2}" >
+                        <div class="ui-g-12 ui-md-6 ui-lg-6">
+                            <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                            <p:calendar id="cldStartDate" class="datepicker" value="#{officialAccountingBean.begin}"  
+                                        required="true"  pattern="#{sessionBean.user.lastBranch.dateFormat} #{officialAccountingBean.isRetail? '' : 'HH:mm:ss'}"   beforeShow="dpClearButton"  timeControlType="select" showOn="button" 
+                                        showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20">
+                                <p:ajax event="dateSelect" update="cldEndDate cldStartDate pngDate" listener="#{officialAccountingBean.changeProcessType()}" resetValues="true" global="false"/>
+                            </p:calendar>
+                        </div>
+                        <div class="ui-g-12 ui-md-6 ui-lg-6">
+                            <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold" />
+                            <p:calendar id="cldEndDate" class="datepicker" value="#{officialAccountingBean.end}" required="true" mindate="#{officialAccountingBean.begin}" maxdate="#{officialAccountingBean.maxDate}"
+                                        pattern="#{sessionBean.user.lastBranch.dateFormat} #{officialAccountingBean.isRetail? '' : 'HH:mm:ss'}"  beforeShow="dpClearButton"  timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20">
+                                <p:ajax event="dateSelect"  process="@this" async="true" update="cldEndDate"  resetValues="true" global="false"/>
+                            </p:calendar>
+                        </div>
+                    </h:panelGroup>
+                </h:panelGroup>
+
+                <h:panelGroup rendered="#{(officialAccountingBean.processType==6 or officialAccountingBean.processType==9 or (officialAccountingBean.cardType==2 and officialAccountingBean.secondSelect == 0)) and officialAccountingBean.cardType!=1}" >
+                    <div class="ui-g-12 ui-md-3 ui-lg-2">
+                        <p:panelGrid layout="grid" columns="1" class="pngCheckBoxReport"  >
+                            <p:selectBooleanCheckbox itemLabel="#{loc.retail}" value="#{officialAccountingBean.isRetail}">
+                                <p:ajax event="change"  process="@this" async="true" update="cldEndDate cldStartDate pgOfficalAccounting slcBranch" listener="#{officialAccountingBean.changeProcessType()}" global="false" />
+                            </p:selectBooleanCheckbox>
+                        </p:panelGrid>
+                    </div>
+                </h:panelGroup>
+
+                <h:panelGroup  >
+                    <div class="#{officialAccountingBean.cardType==1 ? 'ui-g-12 ui-md-3 ui-lg-3' : 'ui-g-12 ui-md-3 ui-lg-2'}">
+                        <p:panelGrid layout="grid" columns="1" class="pngCheckBoxReport"  >
+                            <p:selectBooleanCheckbox itemLabel="#{loc.sent}" value="#{officialAccountingBean.isSend}">
+                                <p:ajax event="change"  process="@this" async="true" update="pgOfficalAccounting" listener="#{officialAccountingBean.changeIsSend()}" global="false" />
+                            </p:selectBooleanCheckbox>
+                        </p:panelGrid>
+                    </div>
+                </h:panelGroup>
+
+
+
+
+
+
+
+                <h:panelGroup rendered="#{officialAccountingBean.isFind}">
+                    <h:panelGroup rendered="#{officialAccountingBean.cardType==1}" >
+                        <div class="ui-g-12 ui-md-3 ui-lg-3">
+                            <p:panel style="margin-top: 5%"  >
+                                <h:outputText  value="#{loc.record} : " class="FontBold Fs15" style="color : #175787 !important"/>
+                                <h:outputText  value="#{officialAccountingBean.totalCount.notDeletedCount}" class="FontBold Fs15"/>
+                            </p:panel>
+                        </div>
+                        <div class="ui-g-12 ui-md-3 ui-lg-3">
+                            <p:panel style="margin-top: 5%" >
+                                <h:outputText  value="#{loc.deletedrecord} : " class="FontBold Fs15" style="color :#f95d5d  !important"/>
+                                <h:outputText  value="#{officialAccountingBean.totalCount.deletedCount}" class="FontBold Fs15"/>
+                            </p:panel>
+                        </div>
+                        <div class="ui-g-12 ui-md-3 ui-lg-3">
+                            <p:panel style="margin-top: 5%">
+                                <h:outputText  value="#{loc.sent} : " class="FontBold Fs15" style="color : #488e48 !important"/>
+                                <h:outputText  value="#{officialAccountingBean.totalCount.sendCount}" class="FontBold Fs15"/>
+                            </p:panel>
+                        </div>
+                        <div class="ui-g-12 ui-md-3 ui-lg-3">
+                            <p:panel style="margin-top: 5%">
+                                <h:outputText  value="#{loc.notsent} : " class="FontBold Fs15" style="color :#f95d5d  !important"/>
+                                <h:outputText  value="#{officialAccountingBean.totalCount.notSendCount}" class="FontBold Fs15" />
+                            </p:panel>
+                        </div>
+                    </h:panelGroup>
+                </h:panelGroup>
+
+
+
+
+
+            </div>
+        </h:panelGroup>
+
+
+
+    </h:form>
+    <div class="EmptyBox20" />
+
+    <h:panelGroup id="pgrOfficalAccountingDatatable" >
+        <h:panelGroup rendered="#{officialAccountingBean.isFind}">
+            <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+                <ui:param name="bean" value="#{officialAccountingBean}"/>  
+                <ui:param name="btnNewId" value="false"/>  
+                <ui:param name="datatable" value="frmOfficalAccountingDatatable:dtbOfficalAccounting" />  <!-- datatable  -->
+                <ui:param name="widgetvar" value="officialaccountingPF" />  <!--   datatable WidgetVar  -->
+                <ui:param name="form" value='frmToolbarProcess' />
+                <ui:param name="fileName" value="#{loc.officialintegrationprocess}"/>
+                <ui:param name="renderedIntegration" value='true'/>
+            </ui:include>
+
+            <h:form id="frmOfficalAccountingDatatable">
+
+                <p:dataTable  id="dtbOfficalAccounting"  widgetVar="officialaccountingPF" var="official"  value="#{officialAccountingBean.listOfObjects}" 
+                              filteredValue="#{officialAccountingBean.listOfFilteredObjects}" selection="#{officialAccountingBean.listOfSelected}"  emptyMessage="#{loc.norecordsfound}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{official.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"
+                              reflow="true" >
+
+                    <p:ajax event="page" global="false"/>
+                    <p:ajax event="filter" global="false"/>
+                    <p:ajax event="rowSelectCheckbox" listener="#{officialAccountingBean.check}"  global="false"  />
+                    <p:ajax event="rowUnselectCheckbox" listener="#{officialAccountingBean.unCheck}"  global="false" />
+                    <p:ajax event="toggleSelect" global="false" listener="#{officialAccountingBean.checkAll()}" update="dtbOfficalAccounting" />
+
+                    <f:facet  name="footer">
+                        <p:inputText id="globalFilter" value="#{officialAccountingBean.autoCompleteValue}"  style="display: none" />
+                    </f:facet>
+
+                    <p:column selectionMode="multiple" style="width:26px; text-align:center;" selectRow="false"/>
+
+                    <p:column id="clmBranch" visible="true"  selectRow="false"  headerText="#{loc.branchname}" sortable="true"  sortBy="#{official.branchSetting.branch.name}" filterable="true"  filterBy="#{official.branchSetting.branch.name}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.branchSetting.branch.name}" />
+                    </p:column>
+
+                    <!-- Account -->
+                    <p:column id="clmName" visible="#{officialAccountingBean.processType==1}"  selectRow="false"  headerText="#{loc.accountname}" sortable="true"  sortBy="#{official.account.name}" filterable="true"  filterBy="#{official.account.name}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.account.name}" />
+                    </p:column>
+                    <p:column id="clmTaxNo" visible="#{officialAccountingBean.processType==1}" selectRow="false"  headerText="#{loc.taxno}" sortable="true"  sortBy="#{official.account.taxNo}" filterable="true"  filterBy="#{official.account.taxNo}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.account.taxNo}" />
+                    </p:column>
+                    <p:column id="clmAccountCode" visible="#{officialAccountingBean.processType==1}" selectRow="false"  headerText="#{loc.accountcode}" sortable="true"  sortBy="#{official.account.code}" filterable="true"  filterBy="#{official.account.code}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.account.code}" />
+                    </p:column>
+                    <!-- Account -->
+
+                    <!-- Stock -->
+                    <p:column id="clmStockName" visible="#{officialAccountingBean.processType==2}"  selectRow="false"  headerText="#{loc.stockname}" sortable="true"  sortBy="#{official.stock.name}" filterable="true"  filterBy="#{official.stock.name}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.stock.name}" />
+                    </p:column>
+                    <p:column id="clmStockBarcode" visible="#{officialAccountingBean.processType==2}"  selectRow="false"  headerText="#{loc.stockbarcode}" sortable="true"  sortBy="#{official.stock.barcode}" filterable="true"  filterBy="#{official.stock.barcode}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.stock.barcode}" />
+                    </p:column>
+                    <!-- Stock -->
+
+                    <!-- Safe -->
+                    <p:column id="clmSafeName" visible="#{officialAccountingBean.processType==3}"  selectRow="false"  headerText="#{loc.safename}" sortable="true"  sortBy="#{official.safe.name}" filterable="true"  filterBy="#{official.safe.name}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.safe.name}" />
+                    </p:column>
+                    <p:column id="clmSafeCode" visible="#{officialAccountingBean.processType==3}"  selectRow="false"  headerText="#{loc.safecode}" sortable="true"  sortBy="#{official.safe.code}" filterable="true"  filterBy="#{official.safe.code}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.safe.code}" />
+                    </p:column>
+                    <!-- Safe -->
+
+                    <!-- BankAccount -->
+                    <p:column id="clmBankAccountName" visible="#{officialAccountingBean.processType==4}"  selectRow="false"  headerText="#{loc.bankaccount}" sortable="true"  sortBy="#{official.bankAccount.name}" filterable="true"  filterBy="#{official.bankAccount.name}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.bankAccount.name}" />
+                    </p:column>
+                    <p:column id="clmAccountNumber" visible="#{officialAccountingBean.processType==4}"  selectRow="false"  headerText="#{loc.accountnumber}" sortable="true"  sortBy="#{official.bankAccount.accountNumber}" filterable="true"  filterBy="#{official.bankAccount.accountNumber}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.bankAccount.accountNumber}" />
+                    </p:column>
+                    <p:column id="clmBankName" visible="#{officialAccountingBean.processType==4}"  selectRow="false"  headerText="#{loc.bankname}" sortable="true"  sortBy="#{official.bankAccount.bankBranch.bank.name}" filterable="true"  filterBy="#{official.bankAccount.bankBranch.bank.name}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.bankAccount.bankBranch.bank.name}" />
+                    </p:column>
+                    <!-- BankAccount -->
+
+                    <!-- Warehouse -->
+                    <p:column id="clmWarehouseName" visible="#{officialAccountingBean.processType==5}"  selectRow="false"  headerText="#{loc.warehousename}" sortable="true"  sortBy="#{official.warehouse.name}" filterable="true"  filterBy="#{official.warehouse.name}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.warehouse.name}" />
+                    </p:column>
+                    <p:column id="clmWarehouseCode" visible="#{officialAccountingBean.processType==5}"  selectRow="false"  headerText="#{loc.warehousecode}" sortable="true"  sortBy="#{official.warehouse.code}" filterable="true"  filterBy="#{official.warehouse.code}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.warehouse.code}" />
+                    </p:column>
+                    <!-- Warehouse -->
+
+                    <!-- Cari Fiş veya Stok Fiş -->
+                    <p:column id="clmType" visible="#{officialAccountingBean.cardType==2}"  selectRow="false"  headerText="#{loc.movementtype}" sortable="true"  sortBy="#{officialAccountingBean.getFinancingType(official.typeId)}" filterable="true"  filterBy="#{officialAccountingBean.getFinancingType(official.typeId)}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{officialAccountingBean.getFinancingType(official.typeId)}" />
+                    </p:column>
+                    <p:column id="clmMovementDate" visible="#{officialAccountingBean.cardType==2}"  selectRow="false"  headerText="#{loc.processdate}" sortable="true"  sortBy="#{official.financingDocument.documentDate}" filterable="true"  filterBy="#{official.financingDocument.documentDate}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.financingDocument.documentDate}" >
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmDocumentNumber" visible="#{officialAccountingBean.cardType==2}"  selectRow="false"  headerText="#{loc.documentnumber}" sortable="true"  sortBy="#{official.financingDocument.documentNumber}" filterable="true"  filterBy="#{official.financingDocument.documentNumber}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.financingDocument.documentNumber}" />
+                    </p:column>
+                    <p:column id="clmShiftNo" visible="#{officialAccountingBean.selectedBranch.isErpUseShift and officialAccountingBean.isRetail}"  selectRow="false"  headerText="#{loc.shiftno}" sortable="true"  sortBy="#{official.shiftNo}" filterable="true"  filterBy="#{official.shiftNo}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.shiftNo }" />
+                    </p:column>
+
+                    <p:column id="clmTotal" rendered="#{(officialAccountingBean.cardType ==2 and (officialAccountingBean.secondSelect==1 or officialAccountingBean.secondSelect==2 or officialAccountingBean.secondSelect==3)) or (officialAccountingBean.cardType ==2 and officialAccountingBean.secondSelect==4)}" visible="#{officialAccountingBean.cardType==2}"  selectRow="false"  headerText="#{loc.totalprice}" sortable="true"  sortBy="#{official.financingDocument.price}" filterable="true"  filterBy="#{official.financingDocument.price}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.financingDocument.price}" style="float: right;" >
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmDescr" visible="#{officialAccountingBean.cardType==2}"  selectRow="false"  headerText="#{loc.description}" sortable="true"  sortBy="#{official.financingDocument.description}" filterable="true"  filterBy="#{official.financingDocument.description}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.financingDocument.description}" />
+                    </p:column>
+                    <!-- Cari Fiş veya Stok Fiş -->
+
+                    <p:column id="clmDate"  selectRow="false"  headerText="#{loc.senddate}" sortable="true"  sortBy="#{official.sendDate}" filterable="true"  filterBy="#{official.sendDate}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{official.sendDate}"  >
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmSend" headerText="#{loc.sent}" class="TexAlCenter" sortable="true"  sortBy="#{official.isSend}" filterable="true"  filterBy="#{official.isSend}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <p:commandLink global="false" class="MarLeft-5" >
+                            <i class="Fs16 #{official.isSend ? 'icon-ok green' :'icon-cancel red'} "/> 
+                        </p:commandLink>
+                    </p:column>
+
+                    <p:column id="clmSendDescription"  selectRow="false"  headerText="#{loc.senddesc}" sortable="true"  sortBy="#{official.response}" filterable="true"  filterBy="#{official.response}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText  value="#{official.response}" />
+                    </p:column>
+
+                </p:dataTable>  
+            </h:form>
+        </h:panelGroup>
+    </h:panelGroup>
+
+
+
+
+
+</ui:composition>

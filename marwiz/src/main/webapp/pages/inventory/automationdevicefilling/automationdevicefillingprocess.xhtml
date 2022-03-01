@@ -1,0 +1,75 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+
+    <h:form id="frmAutomationDeviceFillingProcess" >  
+
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="bean" value='#{automationDeviceFillingBean}' />
+            <ui:param name="outputtext" value="#{loc.automationdeviceprocesses}"/>
+            <ui:param name="update" value="pgrAutomationDeviceFillingProcess" />
+        </ui:include>
+
+        <h:panelGroup id="pgrAutomationDeviceFillingProcess" layout="block">
+            <div class="ui-g divContent">    
+                <p:focus for="txtName"/>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.type}" for="txtType" class="Fs12 FontBold"/>
+                    <p:inputText id="txtType" value="#{automationDeviceFillingBean.selectedObject.deviceType.tag}" required="true" placeholder="#{loc.type} " readonly="true"/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.definition}" for="txtName" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtName" value="#{automationDeviceFillingBean.selectedObject.name}" required="true" placeholder="#{loc.definition}" readonly="true"/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.protocol}" for="txtProtocol" class="Fs12 FontBold"/>
+                    <p:inputText id="txtProtocol" value="#{automationDeviceFillingBean.selectedObject.protocol.name}" required="true" placeholder="#{loc.type}" readonly="true"/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.brand}" for="txtBrand" class="Fs12 FontBold"/>
+                    <p:inputText id="txtBrand" value="#{automationDeviceFillingBean.selectedObject.brand.name}" required="true" placeholder="#{loc.type}" readonly="true"/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.ipadress}" for="txtName" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtIpAdress" value="#{automationDeviceFillingBean.selectedObject.ipadress}" required="true" placeholder="#{loc.ipadress}" readonly="true"/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.port}" for="txtPort" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtPort" value="#{automationDeviceFillingBean.selectedObject.port}" required="true" placeholder="#{loc.port}" readonly="true"/>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-3">
+                    <p:outputLabel value="#{loc.macaddress}" for="txtMacAddress" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtMacAddress" value="#{automationDeviceFillingBean.selectedObject.macAddress}" required="true" placeholder="#{loc.macaddress}" readonly="true"/>
+                </div>
+                <div class="ui-g-12 ui-md-12 ui-lg-12">
+                    <p:outputLabel value="#{loc.description}" for="txtDescription" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtDescription" value="#{automationDeviceFillingBean.selectedObject.description}"  placeholder="#{loc.definition}" readonly="true"/>
+                </div>
+
+            </div>
+        </h:panelGroup>
+    </h:form>    
+    <div class="EmptyBox10"/>
+    <h:panelGroup id="pngAutomationDeviceFillingTab">
+        <p:tabView id="tbvAutomationDeviceFillingProcess" rendered="#{automationDeviceFillingBean.getRendered(68, 1) or automationDeviceFillingBean.getRendered(69, 1)}" scrollable="true" dynamic="true" cache="true">
+            <p:ajax event="tabChange"  listener="#{automationDeviceFillingBean.onTabChange}" />
+            <p:tab id ="tab68" title="#{loc.shelves}" rendered="#{automationDeviceFillingBean.getRendered(68, 1)}">
+                <c:if test="#{automationDeviceFillingBean.activeIndex==68}"> 
+                    <ui:include src="automationdevicefillingshelftab.xhtml"/>
+                </c:if>
+            </p:tab>
+            <p:tab id ="tab69" title="#{loc.movements}" rendered="#{automationDeviceFillingBean.getRendered(69, 1)}">
+                <c:if test="#{automationDeviceFillingBean.activeIndex==69}"> 
+                    <ui:include src="automationdevicefillingmovementtab.xhtml"/>
+                </c:if>
+            </p:tab>
+        </p:tabView>
+    </h:panelGroup>
+
+</ui:composition> 

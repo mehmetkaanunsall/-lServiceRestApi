@@ -1,0 +1,28 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <h:form id="#{form}">  
+        
+        <ui:include src="/pages/general/common/tabgridtoolbar.xhtml">
+            <ui:param name="bean" value="#{bean}"/>
+            <ui:param name="btnNewId" value="false"/>
+            <ui:param name="update" value="#{formDialog}" />
+            <ui:param name="outputtext" value="#{outputtext}" />
+
+        </ui:include>
+        <p:dataTable  id="dtbFilter" var="data"   value="#{filterBean.dataList}"  selection="#{filterBean.selectedData}"  selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="10" rowKey="#{data.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      reflow="true" class="tabDatatable" rowsPerPageTemplate="10,15,20" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                      >
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" resetValues="true"  update="#{filterBean.update}"  oncomplete="#{filterBean.dialogId}" listener="#{updateBean.updateAllInformation()}" />
+            <p:column  headerText="#{header}" sortBy="#{value}" >
+                <h:outputText value=" #{value}" />
+            </p:column>
+            <p:column rendered="#{rendercolumn2}"  headerText="#{header2}" sortBy="#{value2}" >
+                <h:outputText value=" #{value2}" />
+            </p:column>
+        </p:dataTable>  
+    </h:form>
+</ui:composition>

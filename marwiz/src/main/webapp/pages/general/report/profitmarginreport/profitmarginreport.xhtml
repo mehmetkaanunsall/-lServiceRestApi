@@ -1,0 +1,956 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+
+
+    <h:form id="frmProfitMargin">
+
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.profitlossreport}"/>
+            <ui:param name="bean" value='#{profitMarginReportBean}' />
+            <ui:param name="update" value="frmProfitMarginDatatable:dtbProfitMargin pgrProfitMarginDatatable cldStartDate cldEndDate slcType slcReportType" />
+        </ui:include>
+
+        <h:panelGroup id="pgrProfitMargin" layout="block" transient="true">  
+            <div class="divContent ui-g-12">
+                <div class="panelToggle ui-g">
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldStartDate" value="#{profitMarginReportBean.selectedObject.beginDate}" class="datepicker"  required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat}" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldEndDate" value="#{profitMarginReportBean.selectedObject.endDate}" class="datepicker" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat}" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.calculationtype}" for="slcType" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcType" value="#{profitMarginReportBean.selectedObject.calculationType}">
+                            <f:selectItem itemLabel="#{loc.weightedaverage}" itemValue="false" />
+                            <f:selectItem itemLabel="FIFO" itemValue="true" />
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-1">
+                        <p:outputLabel value="#{loc.reporttype}" for="slcReportType" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcReportType" value="#{profitMarginReportBean.selectedObject.reportType}">
+                            <f:selectItem itemLabel="#{loc.detail}" itemValue="false" />
+                            <f:selectItem itemLabel="#{loc.summary}" itemValue="true" />
+                            <p:ajax global="false" update="frmProfitMargin:pngReportType frmProfitMargin:pngReportTypeForStockSitu frmProfitMargin:pnlUpdateStockSitu frmProfitMargin:pnlUpdate frmProfitMargin:pngStockService" listener="#{profitMarginReportBean.resetList()}"/>
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="ui-g-12  ui-md-6 ui-lg-1">
+                        <p:outputLabel value="#{loc.branch}" for="slcBranch" class="FontBold Fs12"/>
+                        <p:selectCheckboxMenu  id="slcBranch"  value="#{profitMarginReportBean.selectedObject.selectedBranchList}" 
+                                               filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                               label="#{profitMarginReportBean.selectedObject.selectedBranchList.size()!=0 ? profitMarginReportBean.selectedObject.selectedBranchList.size() :loc.all} #{profitMarginReportBean.selectedObject.selectedBranchList.size()!=0 ? loc.branch : ''} #{profitMarginReportBean.selectedObject.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                            <f:selectItems value="#{profitMarginReportBean.listOfBranch}" itemLabel="#{branchSetting.branch.name}" itemValue="#{branchSetting}" var="branchSetting" />       
+                            <p:ajax oncomplete="PF('slcBranchCheckBox').show()" global="false" listener="#{profitMarginReportBean.changeBranch()}" update="slcBranch frmProfitMargin:txtCategory,frmProfitMargin:btnStock,frmProfitMargin:btnCategory,frmProfitMargin:txtStock"/>
+                            <p:ajax event="toggleSelect" listener="#{profitMarginReportBean.changeBranch()}" update="slcBranch frmProfitMargin:txtCategory,frmProfitMargin:btnStock,frmProfitMargin:btnCategory,frmProfitMargin:txtStock"  oncomplete="PF('slcBranchCheckBox').show()" global="false"/>
+                        </p:selectCheckboxMenu>
+                    </div>
+
+                    <p:panel id="pnlUpdate" class="#{profitMarginReportBean.selectedObject.reportType ? 'ui-g-12 ui-md-6 ui-lg-2' : 'ui-g-12 ui-md-6 ui-lg-4'} panelGridNoBorder" style="margin-top: -5px !important; padding: 0px !important">
+                        <h:panelGroup id="pngReportType">
+                            <div class="#{profitMarginReportBean.selectedObject.reportType ? 'ui-g-12 ui-md-12 ui-lg-12' : 'ui-g-12 ui-md-12 ui-lg-6'}">
+                                <p:outputLabel value="#{loc.stock} #{loc.category}" for="txtCategory"  styleClass="Fs12 FontBold"/>
+                                <p:inputText id="txtCategory"  onclick="showCategoryBook()" value="#{categoryBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter"  readonly="true"  placeholder="#{loc.all}" >
+                                </p:inputText>
+                                <p:commandLink id="btnCategory"  process="@this" update="frmCategoryBookFilter" action="#{profitMarginReportBean.openDialog(2)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_Category').loadContents();">
+                                    <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                    <p:ajax   listener="#{categoryBookCheckboxFilterBean.findFilterList([2,profitMarginReportBean.branchId],'frmCategoryBookFilter','olp_Category','profitMarginReportCheckbox')}" />
+
+                                </p:commandLink>
+                            </div>
+                            <h:panelGroup rendered="#{!profitMarginReportBean.selectedObject.reportType}">
+                                <div class="ui-g-12 ui-md-12 ui-lg-6">
+                                    <p:outputLabel value="#{loc.stock}" for="txtStock" styleClass="Fs12 FontBold"/>
+                                    <p:inputText id="txtStock"  value="#{stockBookCheckboxFilterBean.selectedCount}" onclick="showStockBook()" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}" >
+
+                                    </p:inputText>
+                                    <p:commandLink id="btnStock"  process="@this" update="frmStockBookFilterCheckbox" actionListener="#{profitMarginReportBean.openDialog(1)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_stockcheckbox').show();">
+                                        <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                        <p:ajax   listener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([profitMarginReportBean.selectedObject.selectedBranchList.size() != 0 ? profitMarginReportBean.selectedObject.selectedBranchList : profitMarginReportBean.listOfBranch],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckboxwithbranch')}" />
+                                    </p:commandLink>
+                                </div>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </p:panel>
+                    <p:panel id="pnlUpdateStockSitu" class="#{profitMarginReportBean.selectedObject.reportType ? 'DispNone' : 'ui-g-12 ui-md-6 ui-lg-2'} panelGridNoBorder" style="margin-top: -5px !important; padding: 0px !important">
+                        <h:panelGroup id="pngReportTypeForStockSitu">
+                            <h:panelGroup rendered="#{!profitMarginReportBean.selectedObject.reportType}">
+                                <div class="ui-g-12 ui-md-12 ui-lg-12">
+                                    <p:outputLabel value="#{loc.stocksituation}" for="slcStockSituation" styleClass="Fs12 FontBold"/>
+                                    <p:selectOneMenu id="slcStockSituation" value="#{profitMarginReportBean.selectedObject.isAllStock}">
+                                        <f:selectItem itemLabel="#{loc.all}" itemValue="true" />
+                                        <f:selectItem itemLabel="#{loc.dontshowstockwithoutmovement}" itemValue="false" />
+                                    </p:selectOneMenu>
+                                </div>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </p:panel>
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.tax}" for="slcTax" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcTax" value="#{profitMarginReportBean.selectedObject.isTaxIncluded}">
+                            <f:selectItem itemLabel="#{loc.istaxincluded}" itemValue="true" />
+                            <f:selectItem itemLabel="#{loc.taxexcluding}" itemValue="false" />
+                        </p:selectOneMenu>
+                    </div>
+                    <p:panel id ="pngStockService" class="#{profitMarginReportBean.selectedObject.reportType ? 'DispNone' : 'ui-g-12 ui-md-12 ui-lg-4'}  panelGridNoBorder" style="margin-top: -5px !important; padding: 0px !important">
+                        <h:panelGroup rendered="#{!profitMarginReportBean.selectedObject.reportType}">
+                            <div class="ui-g-12 ui-md-12 ui-lg-12">
+                                <p:panelGrid layout="grid" columns="1" class="pngCheckBoxReport" style="margin-top: 18px !important" > 
+                                    <p:selectBooleanCheckbox  value="#{profitMarginReportBean.selectedObject.isExcludingServiceStock}" itemLabel="#{loc.excludeservicestocks}" class="Fleft" styleClass="Fs13">
+                                    </p:selectBooleanCheckbox>
+                                </p:panelGrid>
+                            </div>
+                        </h:panelGroup>
+                    </p:panel>
+                    
+                    <div class="ui-g-12 ui-md-12 ui-lg-4">
+                        <p:panelGrid layout="grid" columns="1" class="pngCheckBoxReport" style="margin-top: 18px !important" > 
+                            <p:selectBooleanCheckbox  value="#{profitMarginReportBean.selectedObject.isCalculateStockTaking}" itemLabel="#{loc.beginingofperiodandendofperiodiscalculatedfromstocktaking}" class="Fleft" styleClass="Fs13">
+                            </p:selectBooleanCheckbox>
+                        </p:panelGrid>
+                    </div>  
+                </div>
+            </div>
+        </h:panelGroup>
+        <p:remoteCommand name="showStockBook" process="@this" update="frmStockBookFilterCheckbox" oncomplete="PF('olp_stockcheckbox').show();" action="#{profitMarginReportBean.openDialog(1)}" actionListener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([profitMarginReportBean.selectedObject.selectedBranchList.size() != 0 ? profitMarginReportBean.selectedObject.selectedBranchList : profitMarginReportBean.listOfBranch],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckboxwithbranch')}" />
+        <p:remoteCommand name="showCategoryBook" process="@this" update="frmCategoryBookFilter" action="#{profitMarginReportBean.openDialog(2)}" oncomplete="PF('olp_Category').loadContents();" actionListener="#{categoryBookCheckboxFilterBean.findFilterList([2,profitMarginReportBean.branchId],'frmCategoryBookFilter','olp_Category','profitMarginReportCheckbox')}" />
+    </h:form>
+    <div class="EmptyBox20" />
+    <h:panelGroup id="pgrProfitMarginDatatable" >
+        <h:panelGroup rendered="#{profitMarginReportBean.isFind}">
+            <h:form id="frmTotalAmount">
+                <p:fieldset id="fldTotal" legend="#{loc.sum}" toggleable="true" class="incomeFieldSet" style="margin-bottom:10px;">
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtWarehouseStartAmount" value="#{loc.stockexistingamountinbeginningofperiod}" class="Fs15 FontBold"/>
+                        <p:inputText id="txtWarehouseStartAmount" value="#{profitMarginReportBean.warehouseStartQuantity}" readonly="true" style="text-align:  right">
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtWarehouseStartPrice" value="#{loc.stockexistingpriceinbeginningofperiod}" class="Fs15 FontBold"/>
+                        <p:inputText id="txtWarehouseStartPrice" value="#{profitMarginReportBean.warehouseStartPrice}" readonly="true" style="text-align:  right">
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtTPurchaseQuantity" value="#{loc.purchasequantity}" class="Fs15 FontBold"/>
+                        <p:inputText id="txtTPurchaseQuantity" value="#{profitMarginReportBean.beginToEndPurchaseQuantity}" readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtBeginToEndPurchasePrice" value="#{loc.purchaseamount}" class="Fs15 FontBold"/>
+                        <p:inputText id="txtBeginToEndPurchasePrice" value="#{profitMarginReportBean.beginToEndPurchasePrice}" readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtTPurchaseReturnQuantity" value="#{loc.returnamount}" class="Fs15 FontBold"/>
+                        <p:inputText id="txtTPurchaseReturnQuantity" value="#{profitMarginReportBean.beginToEndPurchaseReturnQuantity}" readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtBeginToEndPurchaseReturnPrice" value="#{loc.returnprice}" class="Fs15 FontBold"/>
+                        <p:inputText id="txtBeginToEndPurchaseReturnPrice" value="#{profitMarginReportBean.beginToEndPurchaseReturnPrice}" readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtTSaleQuantityIncZ" value="#{loc.salesamount} (#{loc.includingZ})" class="Fs15 FontBold"/>
+                        <p:inputText id="txtTSaleQuantityIncZ" value="#{profitMarginReportBean.totalZSalesQuantity}" readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtBeginToEndSalesPriceIncZ" value="#{loc.salesprice} (#{loc.includingZ})" class="Fs15 FontBold"/>
+                        <p:inputText id="txtBeginToEndSalesPriceIncZ" value="#{profitMarginReportBean.totalZSalesPrice}" readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtTSaleQuantityExcZ" value="#{loc.salesamount} (#{loc.excludingZ})" class="Fs15 FontBold"/>
+                        <p:inputText id="txtTSaleQuantityExcZ" value="#{profitMarginReportBean.totalExcludingZSalesQuantity}" readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtBeginToEndSalesPriceExcZ" value="#{loc.salesprice} (#{loc.excludingZ})" class="Fs15 FontBold"/>
+                        <p:inputText id="txtBeginToEndSalesPriceExcZ" value="#{profitMarginReportBean.totalExcludingZSalesPrice}" readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtTSaleQuantity" value="#{loc.salesamount} (#{loc.sum})" class="Fs15 FontBold"/>
+                        <p:inputText id="txtTSaleQuantity" value="#{profitMarginReportBean.beginToEndSalesQuantity}" readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtBeginToEndSalesPrice" value="#{loc.salesprice} (#{loc.sum})" class="Fs15 FontBold"/>
+                        <p:inputText id="txtBeginToEndSalesPrice" value="#{profitMarginReportBean.beginToEndSalesPrice}" readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtPurchasecost" value="#{loc.purchasecost}" class="Fs15 FontBold"/>
+                        <p:inputText id="txtPurchasecost" value="#{profitMarginReportBean.totalPurchasePrice}" readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtStockTakingQuantity" value="#{loc.stocktakingdifferencequantityincurrentofperiod}" class="Fs15 FontBold"/>
+                        <p:inputText id="txtStockTakingQuantity" value="#{profitMarginReportBean.totalStockTakingQuantity}" readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtStockTakingPrice" value="#{loc.stocktakingdifferencepriceincurrentofperiod}" class="Fs15 FontBold"/>
+                        <p:inputText id="txtStockTakingPrice" value="#{profitMarginReportBean.totalStockTakingPrice}" readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtDifferencePrice" value="#{loc.differenceprice}" class="Fs15 FontBold"/>
+                        <p:inputText id="txtDifferencePrice" value="#{profitMarginReportBean.totalDifferencePrice}" readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtPMargin" value="#{loc.profitmargin}" class="Fs15 FontBold"/>
+                        <p:inputText id="txtPMargin"  value="#{profitMarginReportBean.profitMargin}"  readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtPPercentage" value="#{loc.profitpercentage}" class="Fs15 FontBold"/>
+                        <p:inputText id="txtPPercentage"  value="#{profitMarginReportBean.profitPercentage}"  readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="profit" value="#{loc.totalstockprofit}" class="Fs15 FontBold"/>
+                        <p:inputText id="profit" value="#{profitMarginReportBean.totalStockProfit}" readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtWarehouseEndQuantity" value="#{loc.stockexistingamountinendofperiod}" class="Fs15 FontBold"/>
+                        <p:inputText id="txtWarehouseEndQuantity" value="#{profitMarginReportBean.warehouseEndQuantity}" readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="txtWarehouseEndPrice" value="#{loc.stockexistingpriceinendofperiod}" class="Fs15 FontBold"/>
+                        <p:inputText id="txtWarehouseEndPrice" value="#{profitMarginReportBean.warehouseEndPrice}" readonly="true" style="text-align:  right">
+
+                        </p:inputText>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="totalIncome" value="#{loc.totalofincome}" class="Fs15 FontBold" />
+                        <p:inputText id="totalIncome" value="#{profitMarginReportBean.totalIncome}" readonly="true" style="text-align:  right">
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </p:inputText>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="totalExpense" value="#{loc.totalofexpense}" class="Fs15 FontBold"/>
+                        <p:inputText id="totalExpense" value="#{profitMarginReportBean.totalExpense}" readonly="true" style="text-align:  right">
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-12 ui-md-4 ui-lg-2">
+                        <p:outputLabel for="tprofit" value="#{loc.totalprofit}" class="Fs15 FontBold"/>
+                        <p:inputText id="tprofit" value="#{profitMarginReportBean.totalProfit}" readonly="true" style="text-align:  right">
+                        </p:inputText>
+                    </div>
+
+                </p:fieldset>
+                <p:remoteCommand name="updateFieldSet" update="frmTotalAmount:fldTotal" delay="2"/>
+            </h:form>
+            <div class="EmptyBox20"/>
+
+            <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                <ui:param name="bean" value="#{profitMarginReportBean}"/>
+                <ui:param name="datatable" value="#{profitMarginReportBean.selectedObject.reportType ? '' : 'frmProfitMarginDatatable:dtbProfitMargin'}" />
+                <ui:param name="fileName" value="#{loc.profitlossreport}"/>
+                <ui:param name="renderedToggler" value='#{profitMarginReportBean.selectedObject.reportType ? false : true}'/>
+                <ui:param name="renderedExcel" value='true'/>
+                <ui:param name="renderedPdf" value='true'/>
+                <ui:param name="renderedPrint" value='true'/>
+                <ui:param name="renderedGraphic" value='false'/>
+            </ui:include>
+            <h:panelGroup rendered="#{!profitMarginReportBean.selectedObject.reportType}">
+                <h:form id="frmProfitMarginDatatable" >
+                    <p:dataTable  id="dtbProfitMargin" var="profitMarginReport" widgetVar="profitMarginPF" emptyMessage="#{loc.norecordsfound}" value="#{profitMarginReportBean.listOfObjects}" 
+                                  rows="#{sessionBean.user.defualtGridSize}" rowKey="#{profitMarginReport.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                                  rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true" lazy="true" 
+                                  rowStyleClass="#{(profitMarginReportBean.selectedObject.calculationType and profitMarginReportBean.controlPurchase(profitMarginReport.purchaseQuantity)) or (!profitMarginReportBean.selectedObject.calculationType and profitMarginReportBean.controlPurchase(profitMarginReportBean.calculateProfit(3, profitMarginReport.totalSalesPrice, profitMarginReport.totalPurchasePrice, profitMarginReport.quantity))) ? 'ColumnColorRed' : null}"
+                                  >
+
+                        <p:column id="clmBranch" headerText="#{loc.branch}" visible="#{profitMarginReportBean.toogleList[0]}" exportable="#{profitMarginReportBean.toogleList[0]}">
+                            <h:outputText  value="#{profitMarginReport.branchSetting.branch.name}"/>
+                        </p:column>
+
+                        <p:column id="clmStockCode" headerText="#{loc.stockcode}" visible="#{profitMarginReportBean.toogleList[1]}" exportable="#{profitMarginReportBean.toogleList[1]}">
+                            <h:outputText  value="#{profitMarginReport.stock.code}"/>
+                        </p:column>
+                        <p:column id="clmCenterStockCode" headerText="#{loc.centerstockcode}" visible="#{profitMarginReportBean.toogleList[2]}" exportable="#{profitMarginReportBean.toogleList[2]}">
+                            <h:outputText  value="#{profitMarginReport.stock.centerProductCode}"/>
+                        </p:column>
+                        <p:column id="clmBarcode" headerText="#{loc.stockbarcode}" visible="#{profitMarginReportBean.toogleList[3]}" exportable="#{profitMarginReportBean.toogleList[3]}">
+                            <h:outputText  value="#{profitMarginReport.stock.barcode}"/>
+                        </p:column>
+                        <p:column id="clmStock" headerText="#{loc.stock}" visible="#{profitMarginReportBean.toogleList[4]}" exportable="#{profitMarginReportBean.toogleList[4]}">
+                            <h:outputText  value="#{profitMarginReport.stock.name}"/>
+                        </p:column>
+                        <p:column id="clmCentralSupplier" headerText="#{loc.centralsupplier}" visible="#{profitMarginReportBean.toogleList[5]}" exportable="#{profitMarginReportBean.toogleList[5]}">
+                            <h:outputText  value="#{profitMarginReport.stock.centralSupplier.name}"/>
+                        </p:column>
+                        <p:column id="clmSupplier" headerText="#{loc.supplier}"  visible="#{profitMarginReportBean.toogleList[6]}" exportable="#{profitMarginReportBean.toogleList[6]}">
+                            <h:outputText  value="#{profitMarginReport.stock.supplier.name}"/>
+                        </p:column>
+                        <p:column id="clmBrand" headerText="#{loc.brand}"  visible="#{profitMarginReportBean.toogleList[7]}" exportable="#{profitMarginReportBean.toogleList[7]}">
+                            <h:outputText  value="#{profitMarginReport.stock.brand.name}"/>
+                        </p:column>
+                        <p:column id="clmExistingAmountInBeginningOfPeriod" headerText="#{loc.stockexistingamountinbeginningofperiod}" visible="#{profitMarginReportBean.toogleList[8]}" exportable="#{profitMarginReportBean.toogleList[8]}">
+                            <h:outputText  value="#{profitMarginReport.warehouseStartQuantity}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="unit" value="#{profitMarginReport.stock.unit}"/>
+                                <f:attribute name="type" value="unit" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmExistingPriceInBeginningOfPeriod" headerText="#{loc.stockexistingpriceinbeginningofperiod}" visible="#{profitMarginReportBean.toogleList[9]}" exportable="#{profitMarginReportBean.toogleList[9]}">
+                            <h:outputText  value="#{profitMarginReport.warehouseStartPrice}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{profitMarginReport.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmPurchaseAmountInPeriod" headerText="#{loc.purchasequantity}" visible="#{profitMarginReportBean.toogleList[10]}" exportable="#{profitMarginReportBean.toogleList[10]}">
+                            <h:outputText  value="#{profitMarginReport.beginToEndPurchaseQuantity}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="unit" value="#{profitMarginReport.stock.unit}"/>
+                                <f:attribute name="type" value="unit" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmPurchasePriceInPeriod" headerText="#{loc.purchaseamount}" visible="#{profitMarginReportBean.toogleList[11]}" exportable="#{profitMarginReportBean.toogleList[11]}">
+                            <h:outputText  value="#{profitMarginReport.beginToEndPurchasePrice}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{profitMarginReport.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmPurchaseReturnAmountInPeriod" headerText="#{loc.returnamount}" visible="#{profitMarginReportBean.toogleList[12]}" exportable="#{profitMarginReportBean.toogleList[12]}">
+                            <h:outputText  value="#{profitMarginReport.beginToEndPurchaseReturnQuantity}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="unit" value="#{profitMarginReport.stock.unit}"/>
+                                <f:attribute name="type" value="unit" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmPurchaseReturnPriceInPeriod" headerText="#{loc.returnprice}" visible="#{profitMarginReportBean.toogleList[13]}" exportable="#{profitMarginReportBean.toogleList[13]}">
+                            <h:outputText  value="#{profitMarginReport.beginToEndPurchaseReturnPrice}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{profitMarginReport.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmSalesAmountInPeriodIncZSales" headerText="#{loc.salesamount}(#{loc.includingZ})" visible="#{profitMarginReportBean.toogleList[14]}" exportable="#{profitMarginReportBean.toogleList[14]}">
+                            <h:outputText  value="#{profitMarginReport.zSalesQuantity}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="unit" value="#{profitMarginReport.stock.unit}"/>
+                                <f:attribute name="type" value="unit" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmSalesPriceInPeriodIncZSales" headerText="#{loc.salesprice}(#{loc.includingZ})" visible="#{profitMarginReportBean.toogleList[15]}" exportable="#{profitMarginReportBean.toogleList[15]}">
+                            <h:outputText  value="#{profitMarginReport.zSalesPrice}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{profitMarginReport.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmSalesAmountInPeriodExcZSales" headerText="#{loc.salesamount}(#{loc.excludingZ})" visible="#{profitMarginReportBean.toogleList[16]}" exportable="#{profitMarginReportBean.toogleList[16]}">
+                            <h:outputText  value="#{profitMarginReportBean.substractSalePriceQuantity(profitMarginReport.beginToEndSalesQuantity, profitMarginReport.zSalesQuantity)}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="unit" value="#{profitMarginReport.stock.unit}"/>
+                                <f:attribute name="type" value="unit" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmSalesPriceInPeriodExcZSales" headerText="#{loc.salesprice}(#{loc.excludingZ})" visible="#{profitMarginReportBean.toogleList[17]}" exportable="#{profitMarginReportBean.toogleList[17]}">
+                            <h:outputText  value="#{profitMarginReportBean.substractSalePriceQuantity(profitMarginReport.beginToEndSalesPrice, profitMarginReport.zSalesPrice)}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{profitMarginReport.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmSalesAmountInPeriod" headerText="#{loc.salesamount}(#{loc.sum})" visible="#{profitMarginReportBean.toogleList[18]}" exportable="#{profitMarginReportBean.toogleList[18]}">
+                            <h:outputText  value="#{profitMarginReport.beginToEndSalesQuantity}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="unit" value="#{profitMarginReport.stock.unit}"/>
+                                <f:attribute name="type" value="unit" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmSalesPriceInPeriod" headerText="#{loc.salesprice}(#{loc.sum})" visible="#{profitMarginReportBean.toogleList[19]}" exportable="#{profitMarginReportBean.toogleList[19]}">
+                            <h:outputText  value="#{profitMarginReport.beginToEndSalesPrice}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{profitMarginReport.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmCostOfStock" headerText="#{loc.purchasecost}" visible="#{profitMarginReportBean.toogleList[20]}" exportable="#{profitMarginReportBean.toogleList[20]}">
+                            <h:outputText  value="#{profitMarginReport.totalPurchasePrice}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{profitMarginReport.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmStockTakingQuantity" headerText="#{loc.stocktakingdifferencequantityincurrentofperiod}" visible="#{profitMarginReportBean.toogleList[21]}" exportable="#{profitMarginReportBean.toogleList[21]}">
+                            <h:outputText  value="#{profitMarginReport.stockTakingQuantity}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="unit" value="#{profitMarginReport.stock.unit}"/>
+                                <f:attribute name="type" value="unit" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmStockTakingPrice" headerText="#{loc.stocktakingdifferencepriceincurrentofperiod}" visible="#{profitMarginReportBean.toogleList[22]}" exportable="#{profitMarginReportBean.toogleList[22]}">
+                            <h:outputText  value="#{profitMarginReport.stockTakingPrice}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{profitMarginReport.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmDifferencePrice" headerText="#{loc.differenceprice}" visible="#{profitMarginReportBean.toogleList[23]}" exportable="#{profitMarginReportBean.toogleList[23]}">
+                            <h:outputText  value="#{profitMarginReport.differencePrice}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{profitMarginReport.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmProfitMargin" headerText="#{loc.profitmargin}" visible="#{profitMarginReportBean.toogleList[24]}" exportable="#{profitMarginReportBean.toogleList[24]}">
+                            <h:outputText  value="#{profitMarginReportBean.calculateProfit(0, profitMarginReport.totalSalesPrice,profitMarginReport.totalPurchasePrice, profitMarginReport.quantity)}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value=""/>
+                                <f:attribute name="type" value="percent" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmProfitPercentage" headerText="#{loc.profitpercentage}" visible="#{profitMarginReportBean.toogleList[25]}" exportable="#{profitMarginReportBean.toogleList[25]}">
+                            <h:outputText  value="#{profitMarginReportBean.calculateProfit(1, profitMarginReport.totalSalesPrice, profitMarginReport.totalPurchasePrice, profitMarginReport.quantity)}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value=""/>
+                                <f:attribute name="type" value="percent" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmTotalProfit" headerText="#{loc.totalprofit}" visible="#{profitMarginReportBean.toogleList[26]}" exportable="#{profitMarginReportBean.toogleList[26]}">
+                            <h:outputText  value="#{profitMarginReportBean.calculateProfit(2, profitMarginReport.totalSalesPrice, profitMarginReport.totalPurchasePrice, profitMarginReport.quantity)}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{profitMarginReport.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmExistingAmountInEndOfPeriod" headerText="#{loc.stockexistingamountinendofperiod}" visible="#{profitMarginReportBean.toogleList[27]}" exportable="#{profitMarginReportBean.toogleList[27]}">
+                            <h:outputText  value="#{profitMarginReport.warehouseEndQuantity}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="unit" value="#{profitMarginReport.stock.unit}"/>
+                                <f:attribute name="type" value="unit" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmExistingPriceInEndOfPeriod" headerText="#{loc.stockexistingpriceinendofperiod}" visible="#{profitMarginReportBean.toogleList[28]}" exportable="#{profitMarginReportBean.toogleList[28]}">
+                            <h:outputText  value="#{profitMarginReport.warehouseEndPrice}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{profitMarginReport.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+
+
+                        <p:columnGroup type="footer" rendered="#{profitMarginReportBean.listOfObjects.rowCount>0}">
+                            <ui:repeat value="#{profitMarginReportBean.listOfTotals}" var="totals" >
+                                <p:row>
+                                    <p:column  style="text-align:right" visible="#{profitMarginReportBean.toogleList[0]}">
+                                    </p:column>
+                                    <p:column  style="text-align:right" visible="#{profitMarginReportBean.toogleList[1]}">
+                                    </p:column>
+                                    <p:column  style="text-align:right" visible="#{profitMarginReportBean.toogleList[2]}">
+                                    </p:column>
+                                    <p:column  style="text-align:right" visible="#{profitMarginReportBean.toogleList[3]}">
+                                    </p:column>
+                                    <p:column  style="text-align:right" visible="#{profitMarginReportBean.toogleList[4]}">
+                                    </p:column>
+                                    <p:column  style="text-align:right" visible="#{profitMarginReportBean.toogleList[5]}">
+                                    </p:column>
+                                    <p:column  style="text-align:right" visible="#{profitMarginReportBean.toogleList[6]}">
+                                    </p:column>
+                                    <p:column  style="text-align:right" visible="#{profitMarginReportBean.toogleList[7]}">
+                                    </p:column>
+                                    <p:column  style="text-align:right" visible="#{profitMarginReportBean.toogleList[8]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{totals.overallWarehouseStartQuantity}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="type" value="" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[9]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{totals.overallTotalWarehouseStartPrice}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value="#{totals.currency}"/>
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[10]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{totals.overallBeginToEndPurchaseQuantity}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="type" value="" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[11]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{totals.overallBeginToEndPurchasePrice}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value="#{totals.currency}"/>
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[12]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{totals.overallBeginToEndPurchaseReturnQuantity}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="type" value="" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[13]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{totals.overallBeginToEndPurchaseReturnPrice}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value="#{totals.currency}"/>
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[14]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{totals.overallZSalesQuantity}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="type" value="" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[15]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{totals.overallZSalesPrice}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value="#{totals.currency}"/>
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[16]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{profitMarginReportBean.substractSalePriceQuantity(totals.overallBeginToEndSalesQuantity, totals.overallZSalesQuantity)}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="type" value="" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[17]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{profitMarginReportBean.substractSalePriceQuantity(totals.overallBeginToEndSalesPrice, totals.overallZSalesPrice)}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value="#{totals.currency}"/>
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[18]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{totals.overallBeginToEndSalesQuantity}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="type" value="" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[19]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{totals.overallBeginToEndSalesPrice}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value="#{totals.currency}"/>
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[20]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{totals.overallTotalPurchase}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value="#{totals.currency}"/>
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[21]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{totals.overallStockTakingQuantity}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="type" value="" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[22]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{totals.overallStockTakingPrice}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value="#{totals.currency}"/>
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[23]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{totals.overallDifferencePrice}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value="#{totals.currency}"/>
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[24]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{profitMarginReportBean.calculateProfit(0, totals.tempOverallTotalSales, totals.overallTotalPurchase, totals.overallQuantity)}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value=""/>
+                                                <f:attribute name="type" value="percent" />
+                                            </h:outputText>
+                                        </f:facet >
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[25]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{profitMarginReportBean.calculateProfit(1, totals.tempOverallTotalSales, totals.overallTotalPurchase, totals.overallQuantity)}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value=""/>
+                                                <f:attribute name="type" value="percent" />
+                                            </h:outputText>
+                                        </f:facet >
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[26]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{profitMarginReportBean.calcTotalProfit(totals.tempOverallTotalSales,totals.overallTotalPurchase)}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter"  />
+                                                <f:attribute name="currency"  value="#{totals.currency}"/>
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>
+                                        </f:facet >
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[27]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{totals.overallWarehouseEndQuantity}" class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter"  />
+                                                <f:attribute name="type" value="" />
+                                            </h:outputText>
+                                        </f:facet >
+                                    </p:column>
+                                    <p:column visible="#{profitMarginReportBean.toogleList[28]}">
+                                        <f:facet name="footer" >
+                                            <h:outputText value="#{totals.overallTotalWarehouseEndPrice}"  class="Fright FontBold" style="color: #565656;">
+                                                <f:converter converterId="currencyConverter"  />
+                                                <f:attribute name="currency"  value="#{totals.currency}"/>
+                                                <f:attribute name="type" value="currency" />
+                                            </h:outputText>
+                                        </f:facet >
+                                    </p:column>
+                                </p:row>
+                            </ui:repeat>
+                        </p:columnGroup>
+
+                    </p:dataTable>  
+
+                </h:form>
+            </h:panelGroup>
+            <h:panelGroup rendered="#{profitMarginReportBean.selectedObject.reportType}">
+                <h:form id="frmCategoryProfit">
+
+
+                    <p:treeTable id="ttbCategoryProfit"  class="treeBankAndBranch" widgetVar="categoryProfitPF"  value="#{profitMarginReportBean.rootCategory}"  var="categoryProfit" selectionMode="single" rowStyleClass="#{categoryProfit.categorization.id == -1 ? 'ColumnColorFooter' : null}">    
+
+                        <p:column id="clmBranchName"  headerText="#{loc.branch}" >
+                            <h:outputText value="#{categoryProfit.branchSetting.branch.name}"/>
+                        </p:column>
+
+                        <p:column id="clmCategoryName1"  headerText="#{loc.category}" sortable="true">
+                            <h:outputText value="#{categoryProfit.categorization.id==-1 ? loc.sum : categoryProfit.categorization.name}" />
+                        </p:column>
+
+                        <p:column id="clmExistingAmountInBeginningOfPeriod1" headerText="#{loc.stockexistingamountinbeginningofperiod}">
+                            <h:outputText  value="#{categoryProfit.warehouseStartQuantity}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmExistingPriceInBeginningOfPeriod1" headerText="#{loc.stockexistingpriceinbeginningofperiod}">
+                            <h:outputText  value="#{categoryProfit.warehouseStartPrice}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{categoryProfit.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmPurchaseAmountInPeriod1" headerText="#{loc.purchasequantity}" >
+                            <h:outputText  value="#{categoryProfit.beginToEndPurchaseQuantity}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmPurchasePriceInPeriod1" headerText="#{loc.purchaseamount}">
+                            <h:outputText  value="#{categoryProfit.beginToEndPurchasePrice}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{categoryProfit.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmPurchaseAmountInReturnPeriod1" headerText="#{loc.returnamount}" >
+                            <h:outputText  value="#{categoryProfit.beginToEndPurchaseReturnQuantity}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmPurchasePriceInReturnPeriod1" headerText="#{loc.returnprice}">
+                            <h:outputText  value="#{categoryProfit.beginToEndPurchaseReturnPrice}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{categoryProfit.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmSalesAmountInPeriod1Z" headerText="#{loc.salesamount}(#{loc.includingZ})" >
+                            <h:outputText  value="#{categoryProfit.zSalesQuantity}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmSalesPriceInPeriod1Z" headerText="#{loc.salesprice}(#{loc.includingZ})" >
+                            <h:outputText  value="#{categoryProfit.zSalesPrice}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{categoryProfit.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmSalesAmountInPeriod1ExcZ" headerText="#{loc.salesamount}(#{loc.excludingZ})" >
+                            <h:outputText  value="#{profitMarginReportBean.substractSalePriceQuantity(categoryProfit.beginToEndSalesQuantity, categoryProfit.zSalesQuantity)}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmSalesPriceInPeriod1ExcZ" headerText="#{loc.salesprice}(#{loc.excludingZ})" >
+                            <h:outputText  value="#{profitMarginReportBean.substractSalePriceQuantity(categoryProfit.beginToEndSalesPrice, categoryProfit.zSalesPrice)}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{categoryProfit.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmSalesAmountInPeriod1" headerText="#{loc.salesamount}(#{loc.sum})" >
+                            <h:outputText  value="#{categoryProfit.beginToEndSalesQuantity}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmSalesPriceInPeriod1" headerText="#{loc.salesprice}(#{loc.sum})" >
+                            <h:outputText  value="#{categoryProfit.beginToEndSalesPrice}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{categoryProfit.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmCostOfStock1" headerText="#{loc.purchasecost}" >
+                            <h:outputText  value="#{categoryProfit.totalPurchasePrice}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{categoryProfit.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmStockTakingQuantity1" headerText="#{loc.stocktakingdifferencequantityincurrentofperiod}" >
+                            <h:outputText  value="#{categoryProfit.stockTakingQuantity}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmStockTakingPrice1" headerText="#{loc.stocktakingdifferencepriceincurrentofperiod}" >
+                            <h:outputText  value="#{categoryProfit.stockTakingPrice}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{categoryProfit.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmDifferencePrice1" headerText="#{loc.differenceprice}" >
+                            <h:outputText  value="#{categoryProfit.differencePrice}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{categoryProfit.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmProfitMargin1" headerText="#{loc.profitmargin}">
+                            <h:outputText  value="#{profitMarginReportBean.calculateProfit(0, categoryProfit.tempOverallTotalSales,categoryProfit.totalPurchasePrice, categoryProfit.quantity)}" rendered="#{categoryProfit.categorization.id!=-1}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value=""/>
+                                <f:attribute name="type" value="percent" />
+                            </h:outputText>
+                            <h:outputText  value="#{categoryProfit.profitMargin}" rendered="#{categoryProfit.categorization.id==-1}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value=""/>
+                                <f:attribute name="type" value="percent" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmProfitPercentage1" headerText="#{loc.profitpercentage}">
+                            <h:outputText  value="#{profitMarginReportBean.calculateProfit(1, categoryProfit.tempOverallTotalSales, categoryProfit.totalPurchasePrice, categoryProfit.quantity)}"  rendered="#{categoryProfit.categorization.id!=-1}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value=""/>
+                                <f:attribute name="type" value="percent" />
+                            </h:outputText>
+                            <h:outputText  value="#{categoryProfit.profitPercentage}"  rendered="#{categoryProfit.categorization.id==-1}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value=""/>
+                                <f:attribute name="type" value="percent" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmTotalProfit1" headerText="#{loc.totalprofit}" >
+                            <h:outputText  value="#{profitMarginReportBean.calculateProfit(2, categoryProfit.tempOverallTotalSales, categoryProfit.totalPurchasePrice, categoryProfit.quantity)}" rendered="#{categoryProfit.categorization.id!=-1}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{categoryProfit.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                            <h:outputText  value="#{categoryProfit.totalProfit}" rendered="#{categoryProfit.categorization.id==-1}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{categoryProfit.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmExistingAmountInEndOfPeriod1" headerText="#{loc.stockexistingamountinendofperiod}">
+                            <h:outputText  value="#{categoryProfit.warehouseEndQuantity}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="type" value="" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column id="clmExistingPriceInEndOfPeriod1" headerText="#{loc.stockexistingpriceinendofperiod}">
+                            <h:outputText  value="#{categoryProfit.warehouseEndPrice}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{categoryProfit.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+                    </p:treeTable>
+
+                </h:form>
+            </h:panelGroup>
+            <div class="EmptyBox20"/>
+
+            <h:form id="frmExpense">
+                <ui:include src="/pages/general/common/tabgridtoolbar.xhtml">
+                    <ui:param name="bean" value="#{profitMarginReportBean}"/>
+                    <ui:param name="btnNewId" value="false"/>
+                    <ui:param name="update" value="" />
+                    <ui:param name="outputtext" value="#{loc.incomeexpense}" />
+                </ui:include>
+
+                <p:treeTable id="dtbExpense"  class="treeBankAndBranch" widgetVar="expensePF"  value="#{profitMarginReportBean.root}"  var="incomeExpense" selectionMode="single" rowStyleClass="#{incomeExpense.id == -1 ? 'ColumnColorFooter' : null}" >    
+                    <p:column id="clmName"  headerText="#{loc.incomeexpense}" sortable="true" sortBy="#{incomeExpense.name}">
+                        <h:outputText value="#{incomeExpense.name}" rendered="#{incomeExpense.id!=-1}"/>
+                        <h:outputText value="#{incomeExpense.name}" rendered="#{incomeExpense.id==-1}" class="Fright"/>
+                    </p:column>
+                    <p:column id="clmIncomeExpense"  headerText="#{loc.type}" sortable="true" sortBy="#{incomeExpense.isIncome}">
+                        <h:outputText value="#{incomeExpense.isIncome ? loc.income : loc.expense}" rendered="#{incomeExpense.id!=-1}"/>
+                    </p:column>
+                    <p:column id="clmMovPrice" headerText="#{loc.total}" sortable="true" sortBy="#{incomeExpense.totalExchagePrice}" >
+                        <h:panelGroup rendered="#{incomeExpense.id != -1}">
+                            <h:panelGroup rendered="#{incomeExpense.parentId.id > 0}">
+                                <h:outputText value="#{incomeExpense.totalExchagePrice}" class="Fright" style="#{incomeExpense.isIncome ? 'color: #2db12d' : 'color: #d42121'}">
+                                    <f:converter converterId="currencyConverter" />
+                                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                    <f:attribute name="type" value="currency" />
+                                </h:outputText>
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{incomeExpense.parentId.id == null}">
+                                <h:outputText value="#{profitMarginReportBean.calculateIncomeExpense(incomeExpense.id)}" class="Fright" style="#{incomeExpense.isIncome ? 'color: #2db12d' : ' color: #d42121'}"/>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{incomeExpense.id == -1}">
+                            <h:outputText value="#{incomeExpense.totalExchagePrice}" class="Fright" style="#{incomeExpense.isIncome ? 'color: #2db12d' : 'color: #d42121'}">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </h:panelGroup>
+                    </p:column>
+                </p:treeTable>
+
+            </h:form>
+        </h:panelGroup>
+    </h:panelGroup>
+
+
+
+
+    <!--Kitaptan stok seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/stockbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{profitMarginReportBean}' />
+        <ui:param name="for" value='frmProfitMargin:btnStock' />
+        <ui:param name="type" value='reportcheckboxwithbranch' />   
+        <ui:param name="parameters" value='#{[profitMarginReportBean.selectedObject.selectedBranchList.size() != 0 ? profitMarginReportBean.selectedObject.selectedBranchList : profitMarginReportBean.listOfBranch]}' /> 
+        <ui:param name="columnsize" value='4' /> 
+        <ui:param name="form" value='frmStockBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_stockcheckbox" />
+    </ui:include>
+
+    <p:overlayPanel id="olpCategory" widgetVar="olp_Category" showEvent="none" modal="true" transient="true" for="frmProfitMargin:btnCategory"  my="right top" at="left bottom" dismissable="true" hideEffect="blind" showCloseIcon="true" class="Wid30">
+        <ui:include src="/pages/general/common/categorybookcheckbox.xhtml">
+            <ui:param name="updateBean" value='#{profitMarginReportBean}' />
+            <ui:param name="type" value='profitMarginReportCheckbox' />
+            <ui:param name="parameters" value='#{[2,profitMarginReportBean.branchId]}' /> 
+            <ui:param name="form" value='frmCategoryBookFilter' /> 
+        </ui:include>
+    </p:overlayPanel>
+
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.profitlossreport}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+</ui:composition>

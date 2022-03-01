@@ -1,0 +1,287 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmCustomerAgreements">
+
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.customeragreements}"/>
+            <ui:param name="bean" value='#{customerAgreementsBean}' />
+            <ui:param name="update" value="pgrCustomerAgreementsDatatable pgrCustomerAgreements" />
+        </ui:include>
+
+        <h:panelGroup id="pgrCustomerAgreements"  transient="true">  
+            <div class="ui-g divContent">
+                <div class="panelToggle ui-g-12">
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.branch}" for="slcBranch" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcBranch" value="#{customerAgreementsBean.selectedAgreement.branchSetting.branch.id}">
+                            <f:selectItem itemValue="#{null}" itemLabel="#{loc.choose}" itemDisabled="true"/>
+                            <f:selectItems value="#{customerAgreementsBean.listOfBranch}" var="branch" itemValue="#{branch.id}" itemLabel="#{branch.name}" />
+                            <p:ajax listener="#{customerAgreementsBean.changeBranch()}" update="frmCustomerAgreements:txtCustomer frmCustomerAgreements:btnCustomer" />
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldStartDate" value="#{customerAgreementsBean.selectedAgreement.beginDate}" class="datepicker" timeControlType="select"  required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat}" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldEndDate" value="#{customerAgreementsBean.selectedAgreement.endDate}" class="datepicker" timeControlType="select" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat}" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.invoicetype}" for="slcTax" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcTax" value="#{customerAgreementsBean.selectedAgreement.invoiceType}">
+                            <f:selectItem itemLabel="#{loc.uninvoiced}"  itemValue="0" />
+                            <f:selectItem itemLabel="#{loc.invoiced}" itemValue="1" />
+                            <f:selectItem itemLabel="#{loc.all}" itemValue="2"/>
+                        </p:selectOneMenu>
+                    </div>
+
+                    <!-- cari kitabı-->
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.current}" for="txtCustomer" styleClass="Fs12 FontBold"/>
+                        <p:inputText  id="txtCustomer" onclick="showAccountBook()" value="#{accountBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+
+                        </p:inputText>
+                        <p:commandLink id="btnCustomer" process="@this" update="frmAccountBookFilterCheckbox" actionListener="#{customerAgreementsBean.openDialog()}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_accountcheckbox').loadContents();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax listener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([customerAgreementsBean.selectedAgreement.branchSetting.branch],'frmAccountBookFilterCheckbox','olp_accountcheckbox', 'customeragreement')}" />
+                        </p:commandLink>
+                    </div>
+
+                    <!--checkbox-->
+                    <div class="ui-g-12 ui-md-6 ui-lg-3" >
+                        <p:outputLabel  value="#{loc.invoicetype}" for="pgrCredit" styleClass="Fs12 FontBold" style="visibility: hidden;"/>
+                        <p:panelGrid id="pgrCredit" layout="grid" columns="1" class="pngCheckBoxReport" style="margin-top: 0px !important" >
+                            <p:selectBooleanCheckbox id="blChkCredit" value="#{customerAgreementsBean.selectedAgreement.chcCredit}"  itemLabel="#{loc.showonreceiptbasis}"> 
+                                <p:ajax global="false" update="frmCustomerAgreements:pngCredit frmCustomerAgreements:pngPlate" listener="#{customerAgreementsBean.changeReportType()}"/>
+                            </p:selectBooleanCheckbox>
+                        </p:panelGrid>
+                    </div>
+
+                    <h:panelGroup id="pngCredit" >
+                        <h:panelGroup rendered="#{customerAgreementsBean.selectedAgreement.chcCredit}">
+                            <div class="ui-g-12 ui-md-6 ui-lg-3">
+                                <p:outputLabel value="#{loc.postpaidtype}" for="slcCredit" styleClass="Fs12 FontBold"  />
+                                <p:selectOneMenu id="slcCredit" value="#{customerAgreementsBean.selectedAgreement.creditType}" >
+                                    <f:selectItem itemLabel="#{loc.market}"  itemValue="1" />
+                                    <f:selectItem itemLabel="#{loc.fueloil}" itemValue="2"/> 
+                                    <p:ajax global="false" update="frmCustomerAgreements:pngPlate" listener="#{customerAgreementsBean.changeReportType()}"/>
+                                </p:selectOneMenu>
+                            </div>
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+                    <h:panelGroup id="pngPlate">
+                        <h:panelGroup rendered="#{customerAgreementsBean.selectedAgreement.creditType==2 and customerAgreementsBean.selectedAgreement.chcCredit}" >
+                            <div class="ui-g-12 ui-md-6 ui-lg-3" >
+                                <p:outputLabel value="#{loc.plate}" for="txtAccountName" styleClass="Fs12 FontBold"  />
+                                <p:inputText id="txtAccountName" value="#{customerAgreementsBean.selectedAgreement.plate}"  placeholder="#{loc.plate}" />
+                            </div>
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+
+                </div>
+            </div>
+            <p:remoteCommand name="showAccountBook" process="@this" oncomplete="PF('olp_accountcheckbox').loadContents();" update="frmAccountBookFilterCheckbox" action="#{customerAgreementsBean.openDialog()}" actionListener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([customerAgreementsBean.selectedAgreement.branchSetting.branch],'frmAccountBookFilterCheckbox','olp_accountcheckbox', 'customeragreement')}" />
+        </h:panelGroup>
+    </h:form>
+    <div class="EmptyBox20" />
+    <h:panelGroup id="pgrCustomerAgreementsDatatable" >
+        <h:panelGroup rendered="#{customerAgreementsBean.isFind}">
+            <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+                <ui:param name="bean" value="#{customerAgreementsBean}"/> 
+                <ui:param name="update" value=""/>
+                <ui:param name="btnNewId" value='false'/>
+                <ui:param name="datatable" value="frmCustomerAgreementsDatatable:dtbCustomerAgreements" />
+                <ui:param name="widgetvar" value="customerAgreementsPF" />
+                <ui:param name="form" value='frmToolbarCustomerAgreement' />
+                <ui:param name="fileName" value="#{loc.customeragreements}"/> 
+                <ui:param name="renderedToggler" value='true'/>
+                <ui:param name="renderedExel" value='true'/>
+                <ui:param name="renderedPdf" value='true'/>
+                <ui:param name="btnCustomerAgreements" value="#{customerAgreementsBean.selectedAgreement.chcCredit ? true : false}"/>
+
+            </ui:include>
+            <h:form id="frmCustomerAgreementsDatatable" >
+                <p:dataTable  id= "dtbCustomerAgreements" var="customerAgreements" widgetVar="customerAgreementsPF"  value="#{customerAgreementsBean.listOfObjects}" filteredValue="#{customerAgreementsBean.listOfFilteredObjects}" selection="#{customerAgreementsBean.selectedObject}" selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{customerAgreementsBean.selectedAgreement.chcCredit ? customerAgreements.rowNumberId : customerAgreements.account.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true"  
+                              resizableColumns="true" draggableColumns="true"     >
+
+                    <p:ajax event="#{sessionBean.user.gridRowSelect}" resetValues="true" global="false" listener="#{customerAgreementsBean.goToProcess()}"/>
+                    <p:ajax event="page" global="false"/>
+                    <p:ajax event="filter" global="false" />
+                    <p:ajax event="colReorder" listener="#{customerAgreementsBean.reorder}" update="frmToolbarCustomerAgreement:toggle" />     
+                    <p:ajax event="colResize"  listener="#{customerAgreementsBean.onResize}" /> 
+
+                    <f:facet  name="footer">
+                        <p:inputText id="globalFilter" value="#{customerAgreementsBean.autoCompleteValue}"  style="display: none" />
+                    </f:facet>
+
+                    <p:column id="clmInvoiceGeneration" rendered="#{customerAgreementsBean.selectedAgreement.chcCredit}" class="TexAlCenter" visible="#{customerAgreementsBean.toogleList[0]}" exportable="false" toggleable="false">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet> 
+                        <f:facet name="header">
+                            <p:selectBooleanCheckbox value="#{customerAgreementsBean.selectedAgreement.checkAll}">
+                                <p:ajax listener="#{customerAgreementsBean.selectAllCheckbox()}" global="false"/>
+                            </p:selectBooleanCheckbox>
+                        </f:facet>
+                        <p:selectBooleanCheckbox   value="#{customerAgreements.isCheck}" rendered="#{!customerAgreements.isIsInvoice()}">
+                            <p:ajax listener="#{customerAgreementsBean.checkAccount(customerAgreements)}" global="false"/>
+                        </p:selectBooleanCheckbox>
+                    </p:column>
+
+                    <p:column id="clmInvoiceType" headerText="#{loc.invoicestatus}" rendered="#{customerAgreementsBean.selectedAgreement.invoiceType==2 and !customerAgreementsBean.selectedAgreement.chcCredit}" sortable="true" sortBy="#{customerAgreements.isInvoice}" visible="#{customerAgreementsBean.toogleList[1]}" exportable="#{customerAgreementsBean.toogleList[1]}">
+                        <f:facet name="filter"> 
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{customerAgreements.isInvoice ? loc.invoiced:loc.uninvoiced}"  >
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmCreditDueDate" rendered="#{customerAgreementsBean.selectedAgreement.chcCredit}"  headerText="#{loc.postpaiddate}" sortable="true" sortBy="#{customerAgreements.creditDate}" filterable="true"  filterBy="#{customerAgreements.creditDate}" filterMatchMode="contains" visible="#{customerAgreementsBean.toogleList[2]}" exportable="#{customerAgreementsBean.toogleList[2]}" >
+                        <f:facet name="filter"> 
+                            <p:outputLabel   rendered="false" />
+                        </f:facet> 
+                        <h:outputText value="#{customerAgreements.creditDate}">
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat}" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmCustomer"  headerText="#{loc.customer}" sortable="true" sortBy="#{customerAgreements.account.name}" filterable="true"  filterBy="#{customerAgreements.account.name}" filterMatchMode="contains" visible="#{customerAgreementsBean.toogleList[3]}" exportable="#{customerAgreementsBean.toogleList[3]}">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet> 
+                        <h:outputText value="#{customerAgreements.account.name}" />
+                    </p:column> 
+
+                    <p:column id="clmPlate" headerText="#{loc.plate}" rendered="#{customerAgreementsBean.selectedAgreement.creditType==2}" sortable="true" sortBy="#{customerAgreements.plate}" filterable="true" filterBy="#{customerAgreements.plate}" filterMatchMode="contains" visible="#{customerAgreementsBean.toogleList[4]}" exportable="#{customerAgreementsBean.toogleList[4]}">
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{customerAgreements.plate}" />
+                    </p:column>
+
+                    <p:column id="clmStockName" headerText="#{loc.stock}" rendered="#{customerAgreementsBean.selectedAgreement.creditType==2}" sortable="true" sortBy="#{customerAgreements.stockName}" filterable="true" filterBy="#{customerAgreements.stockName}" filterMatchMode="contains" visible="#{customerAgreementsBean.toogleList[5]}" exportable="#{customerAgreementsBean.toogleList[5]}" >
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{customerAgreements.stock.name}" />
+                    </p:column>
+
+                    <p:column id="clmAmount" headerText="#{loc.amount}" rendered="#{customerAgreementsBean.selectedAgreement.creditType==2}" sortable="true" sortBy="#{customerAgreements.liter}" filterable="true" filterBy="#{customerAgreements.liter}" filterMatchMode="contains" visible="#{customerAgreementsBean.toogleList[6]}" exportable="false" >
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+
+                        <h:outputText value="#{customerAgreements.liter}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit"  value="#{customerAgreements.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+
+                    </p:column>
+
+                    <p:column id="clmUnitPrice" headerText="#{loc.unitprice}" rendered="#{customerAgreementsBean.selectedAgreement.creditType==2}" sortable="true" sortBy="#{customerAgreements.unitPrice}" filterable="true" filterBy="#{customerAgreements.unitPrice}" filterMatchMode="contains" visible="#{customerAgreementsBean.toogleList[7]}" exportable="false" >
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{customerAgreements.unitPrice}" class="Fright" >
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{customerAgreements.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmSaleAmount"  headerText="#{loc.total}" sortable="true" sortBy="#{customerAgreements.money}" filterable="true"  filterBy="#{customerAgreements.money}" filterMatchMode="contains" visible="#{customerAgreementsBean.toogleList[8]}" exportable="false" >
+                        <f:facet name="filter">
+                            <p:outputLabel   rendered="false" />
+                        </f:facet>
+                        <h:outputText value="#{customerAgreements.money}" class="Fright">
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{customerAgreements.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column> 
+                    <!--excel pdf için-->
+                    <p:column id="clmAmount2" headerText="#{loc.amount}" rendered="#{customerAgreementsBean.selectedAgreement.creditType==2}" exportable="#{customerAgreementsBean.toogleList[6]}" visible="false" toggleable="false" >
+                        <h:outputText value="#{customerAgreements.liter}" >
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmUnitPrice2" headerText="#{loc.unitprice}" rendered="#{customerAgreementsBean.selectedAgreement.creditType==2}" exportable="#{customerAgreementsBean.toogleList[7]}" visible="false" toggleable="false" >
+                        <h:outputText value="#{customerAgreements.unitPrice}" class="Fright" >
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id ="clmSaleAmount2" headerText="#{loc.total}"  exportable="#{customerAgreementsBean.toogleList[8]}" visible="false" toggleable="false" >
+                        <h:outputText value="#{customerAgreements.money}" class="Fright">
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                        <f:facet name="footer">
+                            <h:outputText value="#{customerAgreementsBean.totalMoney}" style="color: gray" />
+                        </f:facet>
+                    </p:column>
+
+                    <p:columnGroup type="footer"  class="Fright" >
+                        <p:row>
+                            <p:column colspan="#{customerAgreementsBean.toogleList.size()-customerAgreementsBean.countToggle}" style="text-align:right; font-weight: bold; " headerText="#{loc.amount}"  >
+                                <f:facet name="footer"  >
+                                    <h:outputText value="#{loc.sum }   :   " style="text-align:right; font-weight: bold; " />
+
+                                    <h:outputText  style="text-align:right; font-weight: bold;" value="#{customerAgreementsBean.totalMoney.equals('') ? '0' : customerAgreementsBean.totalMoney}" /> 
+                                </f:facet> 
+                            </p:column>  
+                        </p:row>
+                    </p:columnGroup>
+                </p:dataTable>
+            </h:form>
+        </h:panelGroup>
+    </h:panelGroup>
+
+    <ui:include src="/pages/general/common/accountbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{customerAgreementsBean}' />
+        <ui:param name="for" value='frmCustomerAgreements:btnCustomer' />
+        <ui:param name="type" value='customeragreement' />
+        <ui:param name="parameters" value='#{[customerAgreementsBean.selectedAgreement.branchSetting.branch]}' />
+        <ui:param name="columnsize" value='3' /> 
+        <ui:param name="form" value='frmAccountBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_accountcheckbox" />
+    </ui:include>
+
+
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.customeragreements}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+
+    </script>
+
+</ui:composition>

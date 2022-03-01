@@ -1,0 +1,31 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions" 
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+    <p:focus for="txtProtocolName"/>
+    <p:growl id="grwProtocol" showDetail="true" globalOnly="true" life="5000"/>
+    <h:panelGroup id="pgrProtocolProcess" layout="block">
+        <div class="ui-g-12 divContent">
+
+            <div class="ui-g-12  ui-md-6">
+                <p:outputLabel value="#{loc.itsname}" for="txtProtocolName" class="FontBold Fs12"/>
+                <p:inputText id="txtProtocolName" value="#{protocolBean.selectedObject.name}" class="Wid95" required="true" placeholder="#{loc.itsname}"/>
+            </div>
+
+            <div class="ui-g-12  ui-md-6">
+                <p:outputLabel value="#{loc.itsnumber}" for="txtProtocolNo" class="FontBold Fs12"/>
+                <p:inputText id="txtProtocolNo" value="#{protocolBean.selectedObject.protocolNo}" class="Wid95" required="true" placeholder="#{loc.itsnumber}">
+                    <p:keyFilter regEx="/[0-9]/" />
+                </p:inputText>
+            </div>
+
+        </div>
+    </h:panelGroup>
+
+</ui:composition>

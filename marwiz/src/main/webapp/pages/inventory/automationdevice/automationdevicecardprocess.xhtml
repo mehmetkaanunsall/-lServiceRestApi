@@ -1,0 +1,57 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmCardProcess">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.cardprocesses}"/>
+            <ui:param name="bean" value='#{automationDeviceCardTabBean}' />
+            <ui:param name="update" value="grdCardProcess" />
+            <ui:param name="btnSaveId" value="#{automationDeviceCardTabBean.getRendered(227, 0)}" />      
+            <ui:param name="btnDeleteId" value="#{automationDeviceCardTabBean.processType==2 and automationDeviceCardTabBean.getRendered(228, 0)}" />
+        </ui:include>
+        <h:panelGroup id="grdCardProcess" layout="block">
+            <div class="ui-g-12 divContent">
+                <p:focus for="txtCardNo"/>
+                <div class="#{automationDeviceCardTabBean.automationDevice.deviceType.id==111 ? 'ui-g-12 ui-md-6 ui-lg-4' : 'ui-g-12 ui-md-6 ui-lg-3'}">
+                    <p:outputLabel value="#{loc.cardno}" for="txtCardNo" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtCardNo" value="#{automationDeviceCardTabBean.selectedObject.rfNo}" required="true" placeholder="#{loc.cardno} ">
+                    </p:inputText>
+                </div>
+
+                <div class="#{automationDeviceCardTabBean.automationDevice.deviceType.id==111 ? 'ui-g-12 ui-md-6 ui-lg-4' : 'ui-g-12 ui-md-6 ui-lg-3'}">
+                    <p:outputLabel value="#{loc.name}" for="txtName" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtName" value="#{automationDeviceCardTabBean.selectedObject.name}" placeholder="#{loc.name} ">
+                    </p:inputText>
+                </div>
+
+                <h:panelGroup rendered="#{automationDeviceCardTabBean.automationDevice.deviceType.id!=111}">
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.cardtype}" for="slcCardType" class="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcCardType" value="#{automationDeviceCardTabBean.selectedObject.type.id}"  required="true" styleClass="Wid95"> 
+                            <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true"  noSelectionOption="true" />
+                            <f:selectItems value="#{sessionBean.getTypes(31)}"  var="types" itemLabel="#{types.nameMap.get(sessionBean.langId).name}" itemValue="#{types.id}" />
+                            <p:ajax event="change" update="slcCardType" listener="#{automationDeviceCardTabBean.bringType()}" global="false"/>
+                        </p:selectOneMenu>
+                    </div> 
+                </h:panelGroup>
+
+
+                <div class="#{automationDeviceCardTabBean.automationDevice.deviceType.id==111 ? 'ui-g-12 ui-md-6 ui-lg-4' : 'ui-g-12 ui-md-6 ui-lg-3'}">
+                    <p:outputLabel value="#{loc.statu}" for="slcStatu" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcStatu" value="#{automationDeviceCardTabBean.selectedObject.status.id}" required="true" styleClass="Wid95">
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true"  noSelectionOption="true" />
+                        <f:selectItems value="#{sessionBean.getStatus(31)}" itemLabel="#{Statu.nameMap.get(sessionBean.langId).name}" itemValue="#{Statu.id}" var="Statu"/>
+                        <p:ajax event="change" update="slcStatu" listener="#{automationDeviceCardTabBean.bringStatus()}" global="false"/>
+                    </p:selectOneMenu>
+                </div>    
+            </div>
+        </h:panelGroup>
+    </h:form>
+
+</ui:composition>
+

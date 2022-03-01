@@ -1,0 +1,251 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+
+
+    <h:form id="frmFreeStockReport">
+
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.freestockreport}"/>
+            <ui:param name="bean" value='#{freeStockReportBean}' />
+            <ui:param name="update" value="frmFreeStockReportDatatable:dtbFreeStockReport pgrFreeStockReportDatatable pgrFreeStockReport" />
+        </ui:include>
+
+        <h:panelGroup id="pgrFreeStockReport" layout="block" transient="true">  
+            <div class="ui-g divContent">
+                <div class="panelToggle ui-g-12">
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldStartDate" value="#{freeStockReportBean.selectedObject.beginDate}" class="datepicker" timeControlType="select"  required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldEndDate" value="#{freeStockReportBean.selectedObject.endDate}" class="datepicker" timeControlType="select" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <h:panelGroup id="pgrBranch">
+                        <h:panelGroup>
+                            <div class="ui-g-12 ui-md-6 ui-lg-2 ">
+                                <p:outputLabel value="#{loc.branch}" for="slcBranch" class="FontBold Fs12"/>
+                                <p:selectCheckboxMenu  id="slcBranch" value="#{freeStockReportBean.selectedBranchList}" 
+                                                       filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                                       label="#{freeStockReportBean.selectedBranchList.size()!=0 ? freeStockReportBean.selectedBranchList.size() :loc.all} #{freeStockReportBean.selectedBranchList.size()!=0 ? loc.branch : ''} #{freeStockReportBean.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                                    <f:selectItems value="#{freeStockReportBean.listOfBranch}" itemLabel="#{branchSetting.branch.name}" itemValue="#{branchSetting}" var="branchSetting" />       
+                                    <p:ajax oncomplete="PF('slcBranchCheckBox').show()" global="false" listener="#{freeStockReportBean.changeBranch()}" update="frmFreeStockReport:txtCategory, frmFreeStockReport:btnCategory, frmFreeStockReport:txtStock, frmFreeStockReport:btnStock, slcBranch, pngSupplier"/>
+                                    <p:ajax event="toggleSelect" listener="#{freeStockReportBean.changeBranch()}" update="frmFreeStockReport:txtCategory, frmFreeStockReport:btnCategory, frmFreeStockReport:txtStock, frmFreeStockReport:btnStock, slcBranch, pngSupplier"  oncomplete="PF('slcBranchCheckBox').show()" global="false"/>
+                                </p:selectCheckboxMenu>
+                            </div>    
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.stock}" for="txtStock" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtStock" onclick="showStockBook()" value="#{stockBookCheckboxFilterBean.selectedCount}"  class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}" >
+                        </p:inputText>     
+                        <p:commandLink id="btnStock" process="@this" update="frmStockBookFilterCheckbox" actionListener="#{freeStockReportBean.openDialog(1)}" class="commandLinkPositionForBookFilter btnDisableButton" oncomplete="PF('olp_stockcheckbox').show();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax   listener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([freeStockReportBean.selectedBranchList.size() != 0 ? freeStockReportBean.selectedBranchList : freeStockReportBean.listOfBranch],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckboxwithbranch')}" />
+                        </p:commandLink>
+                    </div>   
+
+                    <div class="ui-g-12 ui-md-6  ui-lg-2">
+                        <p:outputLabel value="#{loc.stock} #{loc.category}" for="txtCategory"  styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtCategory" onclick="showCategoryBook()" value="#{categoryBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter"  readonly="#{facesContext.currentPhaseId.ordinal ge 4}"  placeholder="#{loc.all}" >
+                        </p:inputText>
+                        <p:commandLink id="btnCategory" process="@this" update="frmCategoryBookFilter" action="#{freeStockReportBean.openDialog(2)}" class="commandLinkPositionForBookFilter btnDisableButton" oncomplete="PF('olp_Category').loadContents();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax   listener="#{categoryBookCheckboxFilterBean.findFilterList([2],'frmCategoryBookFilter','olp_Category','freeStockReportCheckbox')}" />
+                        </p:commandLink>
+
+                    </div>
+                    <h:panelGroup id="pngSupplier">
+                    <h:panelGroup rendered="#{freeStockReportBean.isCentralSupplier}">
+                        <div class="ui-g-12 ui-md-6 ui-lg-2">
+                            <p:outputLabel value="#{loc.centralsupplier}" for="txtCentralSupplier"  styleClass="Fs12 FontBold"/>
+                            <p:commandLink id="cmdCentralSupplier" resetValues="true" process="@this" global="false" title="#{loc.supplier}" actionListener="#{freeStockReportBean.centralOrLocalSupplier(0)}" update="pngSupplier"  >
+                                <i class="fa fa-refresh Fs14 tlbrAddBtn"/>                 
+                            </p:commandLink>
+
+                            <p:inputText  id="txtCentralSupplier" onclick="showCentralSupplierBook()" value="#{centralSupplierBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+
+                            </p:inputText>
+                            <p:commandLink id="btnCentralSupplier" process="@this" actionListener="#{freeStockReportBean.openDialog(3)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_centralsuppliercheckbox').loadContents();">
+                                <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                <p:ajax listener="#{centralSupplierBookCheckboxFilterBean.findFilterListLazyLoading([],'frmCentralSupplierBookFilterCheckbox','olp_centralsuppliercheckbox', 'reportcheckbox')}" />
+                            </p:commandLink>
+                        </div>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{!freeStockReportBean.isCentralSupplier}">
+                        <div class="ui-g-12 ui-md-6 ui-lg-2">
+                            <p:outputLabel value="#{loc.supplier}" for="txtSupplier"  styleClass="Fs12 FontBold"/>
+                            <p:commandLink id="clmSupplier" resetValues="true" process="@this" rendered="#{freeStockReportBean.isCentralSupplierIconView}" global="false" title="#{loc.centralsupplier}" actionListener="#{freeStockReportBean.centralOrLocalSupplier(1)}" update="pngSupplier"  >
+                                <i class="fa fa-refresh Fs14 tlbrAddBtn"/>                 
+                            </p:commandLink>
+
+                            <p:inputText  id="txtSupplier" onclick="showAccountBook()" value="#{accountBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+
+                            </p:inputText>
+                            <p:commandLink id="btnSupplier" process="@this" actionListener="#{freeStockReportBean.openDialog(4)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_accountcheckbox').loadContents();">
+                                <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                <p:ajax listener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([freeStockReportBean.selectedBranchList.size() != 0 ? freeStockReportBean.selectedBranchList : freeStockReportBean.listOfBranch],'frmAccountBookFilterCheckbox','olp_accountcheckbox', 'supplierCheckboxReport')}" />
+                            </p:commandLink>
+                        </div>
+                    </h:panelGroup>
+                    </h:panelGroup>
+                </div>
+            </div>
+        </h:panelGroup>
+        <p:remoteCommand name="showStockBook" process="@this" update="frmStockBookFilterCheckbox" oncomplete="PF('olp_stockcheckbox').show();" action="#{freeStockReportBean.openDialog(1)}" actionListener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([freeStockReportBean.selectedBranchList.size() != 0 ? freeStockReportBean.selectedBranchList : freeStockReportBean.listOfBranch],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckboxwithbranch')}" />
+        <p:remoteCommand name="showCategoryBook" process="@this" update="frmCategoryBookFilter" action="#{freeStockReportBean.openDialog(2)}" oncomplete="PF('olp_Category').loadContents();" actionListener="#{categoryBookCheckboxFilterBean.findFilterList([2],'frmCategoryBookFilter','olp_Category','freeStockReportCheckbox')}" />
+        <p:remoteCommand name="showCentralSupplierBook" process="@this" oncomplete="PF('olp_centralsuppliercheckbox').loadContents();" action="#{freeStockReportBean.openDialog(3)}" actionListener="#{centralSupplierBookCheckboxFilterBean.findFilterListLazyLoading([],'frmCentralSupplierBookFilterCheckbox','olp_centralsuppliercheckbox', 'reportcheckbox')}" />
+        <p:remoteCommand name="showAccountBook" process="@this" oncomplete="PF('olp_accountcheckbox').loadContents();" action="#{freeStockReportBean.openDialog(4)}" actionListener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([freeStockReportBean.selectedBranchList.size() != 0 ? freeStockReportBean.selectedBranchList : freeStockReportBean.listOfBranch],'frmAccountBookFilterCheckbox','olp_accountcheckbox', 'supplierCheckboxReport')}" />
+
+    </h:form>
+    <div class="EmptyBox20" />
+    <h:panelGroup id="pgrFreeStockReportDatatable" >
+        <h:panelGroup rendered="#{freeStockReportBean.isFind}">
+            <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                <ui:param name="bean" value="#{freeStockReportBean}"/>
+                <ui:param name="datatable" value="frmFreeStockReportDatatable:dtbFreeStockReport" />
+                <ui:param name="fileName" value="#{loc.freestockreport}"/>
+                <ui:param name="renderedToggler" value='true'/>
+                <ui:param name="renderedExcel" value='true'/>
+                <ui:param name="renderedPdf" value='true'/>
+                <ui:param name="renderedPrint" value='true'/>
+                <ui:param name="renderedGraphic" value='false'/>
+            </ui:include>
+            <h:form id="frmFreeStockReportDatatable" >
+                <p:dataTable  id="dtbFreeStockReport" var="freeStockReport" widgetVar="freeStockReportPF" emptyMessage="#{loc.norecordsfound}" value="#{freeStockReportBean.listOfObjects}" 
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{freeStockReport.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true" lazy="true"
+                              >
+                    <p:ajax event="colReorder" listener="#{freeStockReportBean.reorder}" update="frmGridToolbar:toggle" />     
+                    <p:ajax event="colResize"  listener="#{freeStockReportBean.onResize}" />
+
+                    <p:column id="clmDate" headerText="#{loc.processdate}"  visible="#{freeStockReportBean.toogleList[0]}"   exportable="#{freeStockReportBean.toogleList[0]}">
+                        <h:outputText value="#{freeStockReport.invoice.invoiceDate}"  >
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmBranchName" headerText="#{loc.branch}" visible="#{freeStockReportBean.toogleList[1]}" exportable="#{freeStockReportBean.toogleList[1]}">
+                        <h:outputText value="#{freeStockReport.branchSetting.branch.name}"/>
+                    </p:column>
+                    <p:column id="clmStockCode" headerText="#{loc.stockcode}" visible="#{freeStockReportBean.toogleList[2]}" exportable="#{freeStockReportBean.toogleList[2]}">
+                        <h:outputText  value="#{freeStockReport.stock.code}"/>
+                    </p:column>
+                    <p:column id="clmCenterStockCode" headerText="#{loc.centerstockcode}" visible="#{freeStockReportBean.toogleList[3]}" exportable="#{freeStockReportBean.toogleList[3]}">
+                        <h:outputText  value="#{freeStockReport.stock.centerProductCode}"/>
+                    </p:column>
+                    <p:column id="clmBarcode" headerText="#{loc.stockbarcode}" visible="#{freeStockReportBean.toogleList[4]}" exportable="#{freeStockReportBean.toogleList[4]}">
+                        <h:outputText  value="#{freeStockReport.stock.barcode}" />
+                    </p:column>
+                    <p:column id="clmStock" headerText="#{loc.stock}" visible="#{freeStockReportBean.toogleList[5]}" exportable="#{freeStockReportBean.toogleList[5]}">
+                        <h:outputText value="#{freeStockReport.stock.name}" />
+                    </p:column>
+                    <p:column id="clmCategory" headerText="#{loc.stockcategory}"  visible="#{freeStockReportBean.toogleList[6]}" exportable="#{freeStockReportBean.toogleList[6]}">
+                        <h:outputText  value="#{freeStockReport.category}"/>
+                    </p:column>
+                    <p:column id="clmCentralSupplier" headerText="#{loc.centralsupplier}" visible="#{freeStockReportBean.toogleList[7]}" exportable="#{freeStockReportBean.toogleList[7]}">
+                        <h:outputText  value="#{freeStockReport.stock.centralSupplier.name}"/>
+                    </p:column>
+                    <p:column id="clmSupplier" headerText="#{loc.supplier}"  visible="#{freeStockReportBean.toogleList[8]}" exportable="#{freeStockReportBean.toogleList[8]}">
+                        <h:outputText  value="#{freeStockReport.stock.supplier.name}"/>
+                    </p:column>
+                    <p:column id="clmBrand" headerText="#{loc.brand}"  visible="#{freeStockReportBean.toogleList[9]}" exportable="#{freeStockReportBean.toogleList[9]}">
+                        <h:outputText  value="#{freeStockReport.stock.brand.name}"/>
+                    </p:column>
+                    <p:column id="clmInvoiceNo" headerText="#{loc.invoice} #{loc.documentnumber}" visible="#{freeStockReportBean.toogleList[10]}"   exportable="#{freeStockReportBean.toogleList[10]}">
+                        <h:outputText value="#{freeStockReport.invoice.documentSerial}#{freeStockReport.invoice.documentNumber}" />
+                    </p:column>
+                    <p:column id="clmQuantity" headerText="#{loc.quantity}" visible="#{freeStockReportBean.toogleList[11]}"   exportable="#{freeStockReportBean.toogleList[11]}">
+                        <h:outputText value="#{freeStockReport.quantity}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value="#{freeStockReport.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmProcess" headerText="#{loc.process}" visible="#{freeStockReportBean.toogleList[12]}" exportable="#{freeStockReportBean.toogleList[12]}">
+                        <h:outputText value="#{freeStockReport.invoice.isPurchase ? loc.purchase : loc.sales}#{freeStockReport.invoice.type.id==27 ? '/' : ''}#{freeStockReport.invoice.type.id==27 ? loc.return : ''}" />
+                    </p:column>
+                </p:dataTable>  
+            </h:form>
+        </h:panelGroup>
+    </h:panelGroup>
+
+
+    <!--Kitaptan stok seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/stockbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{freeStockReportBean}' />
+        <ui:param name="for" value='frmFreeStockReport:btnStock' />
+        <ui:param name="type" value='reportcheckboxwithbranch' />
+        <ui:param name="parameters" value='#{[freeStockReportBean.selectedBranchList.size() != 0 ? freeStockReportBean.selectedBranchList : freeStockReportBean.listOfBranch]}' /> 
+        <ui:param name="columnsize" value='4' /> 
+        <ui:param name="form" value='frmStockBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_stockcheckbox" />
+    </ui:include>
+
+    <p:overlayPanel id="olpCategory" widgetVar="olp_Category" showEvent="none" modal="true" transient="true" for="frmFreeStockReport:btnCategory"  my="right top" at="left bottom" dismissable="true" hideEffect="blind" showCloseIcon="true" class="Wid30">
+        <ui:include src="/pages/general/common/categorybookcheckbox.xhtml">
+            <ui:param name="updateBean" value='#{freeStockReportBean}' />
+            <ui:param name="type" value='freeStockReportCheckbox' />
+            <ui:param name="parameters" value='#{[2]}' /> 
+            <ui:param name="form" value='frmCategoryBookFilter' /> 
+        </ui:include>
+    </p:overlayPanel>
+
+     <!--Kitaptan merkezi tedarikçi seçtirmek için açılan overlay panel-->
+     <ui:include src="/pages/general/common/centralsupplierbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{freeStockReportBean}' />
+        <ui:param name="for" value='frmFreeStockReport:btnCentralSupplier' />
+        <ui:param name="type" value='reportcheckbox' />
+        <ui:param name="parameters" value='' /> 
+        <ui:param name="columnsize" value='1' /> 
+        <ui:param name="form" value='frmCentralSupplierBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_centralsuppliercheckbox" />
+    </ui:include>
+     
+     <!--Kitaptan tedarikçi seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/accountbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{freeStockReportBean}' />
+        <ui:param name="for" value='frmFreeStockReport:btnSupplier' />
+        <ui:param name="type" value='supplierCheckboxReport' />
+        <ui:param name="parameters" value='#{[freeStockReportBean.selectedBranchList.size() != 0 ? freeStockReportBean.selectedBranchList : freeStockReportBean.listOfBranch]}' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmAccountBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_accountcheckbox" />
+    </ui:include>
+
+
+
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.freestockreport}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+</ui:composition>

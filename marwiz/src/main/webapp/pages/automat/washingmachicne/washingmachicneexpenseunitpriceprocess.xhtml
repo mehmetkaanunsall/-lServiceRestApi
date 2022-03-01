@@ -1,0 +1,64 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions" 
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:form id="frmExpenseUnitPriceProcess">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.expenseunitpriceprocess}"/>
+            <ui:param name="bean" value='#{washingMachicneExpenseUnitPriceBean}' />
+            <ui:param name="update" value="pgrUnitDefinitionProcess" />
+            <ui:param name="btnSaveId" value="#{washingMachicneExpenseUnitPriceBean.getRendered(249, 0)}" />     
+            <ui:param name="renderback" value='false'/>
+            <ui:param name="btnDeleteId" value='false' />
+            <ui:param name="dtbWidgetVar" value="expenseunitPF" />
+            <c:if test="#{washingMachicneExpenseUnitPriceBean.processType==2}">               
+                <ui:param name="btnDeleteId" value="#{washingMachicneExpenseUnitPriceBean.getRendered(250, 0)}" />
+            </c:if>   
+            <ui:param name="pageId" value="751"/>
+            <ui:param name="privateDelete" value="true"/>
+        </ui:include>
+
+        <h:panelGroup id="pgrUnitDefinitionProcess" layout="block">
+            <div class="ui-g divContent">
+
+                <div class="ui-g-12 ui-md-6 ui-lg-6">     
+                    <p:outputLabel value="#{loc.stock}" for="txtStock" class="Fs12 FontBold"/>
+                    <p:inputText id="txtStock" value="#{washingMachicneExpenseUnitPriceBean.selectedObject.stock.name}" onclick="showBook()" class="inputPositionForBookFilter" required="true" readonly="#{facesContext.currentPhaseId.ordinal ge 4}"  placeholder="#{loc.stock} ">
+                    </p:inputText>
+                    <p:commandLink id="btnStock"  class="commandLinkPositionForBookFilter" process="@this" oncomplete="PF('olp_stock').loadContents();" >
+                        <i class="fa fa-book Fs16 softgray iconPositionForBookFilter "/>   
+                        <p:ajax listener="#{stockBookFilterBean.findFilterListLazyLoading([],'frmStockBookFilter','olp_stock','washingmachineservice')}"  />
+                    </p:commandLink>
+                </div>  
+     
+                <div class="ui-g-12 ui-md-4 ui-lg-6" >
+                    <p:outputLabel id="outpnlUnitPrices" value="#{loc.unitprice} (#{washingMachicneExpenseUnitPriceBean.selectedObject.stock.unit.sortName})"  for="txtUnitPrices"   styleClass="Fs12 FontBold"/>
+                    <p:inputNumber id="txtUnitPrices" value="#{washingMachicneExpenseUnitPriceBean.selectedObject.unitPrice}"
+                                   decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1? '.': ','}" thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1? ',': '.'}" 
+                                   symbol="#{washingMachicneExpenseUnitPriceBean.selectedObject.currency.code}" required="true" decimalPlaces="3"
+                                   roundMethod="D"  emptyValue="sign" symbolPosition="suffix" class="TexAlRight">
+                    </p:inputNumber>
+                </div>
+
+            </div>
+            <p:remoteCommand name="showBook" process="@this" oncomplete="PF('olp_stock').loadContents()" actionListener="#{stockBookFilterBean.findFilterListLazyLoading([],'frmStockBookFilter','olp_stock','washingmachineservice')}" />
+        </h:panelGroup>
+
+    </h:form>
+
+    <!-- stok listesinde kitaba basıldığında stokların listendiği dialog-->
+    <ui:include src="/pages/general/common/stockbook.xhtml" >
+        <ui:param name="updateBean" value='#{washingMachicneExpenseUnitPriceBean}' />
+        <ui:param name="for" value='frmExpenseUnitPriceProcess:btnStock' />
+        <ui:param name="type" value='washingmachineservice' />
+        <ui:param name="parameters" value='#{[]}' /> 
+        <ui:param name="columnsize" value='2' />
+        <ui:param name="form" value='frmStockBookFilter' /> 
+        <ui:param name="overlay" value="olp_stock" />
+    </ui:include>
+
+</ui:composition>

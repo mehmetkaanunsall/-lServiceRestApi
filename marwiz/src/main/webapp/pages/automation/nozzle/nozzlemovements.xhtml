@@ -1,0 +1,115 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+    <h:form id="frmNozzleMovement" style="padding: 5px 6px 0px 6px;"  >
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.movements}"/>
+            <ui:param name="selectedObjectName" value=""/>
+            <ui:param name="bean" value='#{nozzleMovementBean}' />
+            <ui:param name="update" value="" />
+            <ui:param name="btnSaveId" value="false" />
+            <ui:param name="renderback" value='false'/>
+            <ui:param name="btnDeleteId" value='false' /> 
+            <ui:param name="renderSelectedObject" value='false'/>
+            <ui:param name="renderedFindReport" value='true'/>
+        </ui:include>
+
+
+        <h:panelGroup id="pgrMovementProcess" layout="block" transient="true">  
+            <div class="ui-g divContent">
+                <div class="ui-g-12">
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldStartDate" class="datepicker" value="#{nozzleMovementBean.beginDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldEndDate" class="datepicker" value="#{nozzleMovementBean.endDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                </div>  
+            </div>
+        </h:panelGroup>
+    </h:form>
+
+    <div class="EmptyBox20" />
+
+    <h:panelGroup id="pgrMovementDatatableProcess">
+        <div class="ui-g">
+
+            <div class="ui-g-12 ui-md-12 ui-lg-12">
+                <h:form id="frmNozzleMovementDatatable"   >
+                    <ui:include src="/pages/general/common/tabgridtoolbar.xhtml">
+                        <ui:param name="bean" value="#{nozzleMovementBean}"/>
+                        <ui:param name="btnNewId" value="false"/>
+                        <ui:param name="update" value="" />
+                        <ui:param name="outputtext" value="#{loc.movements}" />
+
+                    </ui:include>
+
+                    <p:dataTable id="dtbMovement" var="items" value="#{nozzleMovementBean.listOfObjects}"  selectionMode="single"   selection="#{nozzleMovementBean.selectedObject}"
+                                 rowKey="#{items.id}" emptyMessage="#{loc.norecordsfound}" class="tabDatatable"  rows="#{sessionBean.user.defualtGridSize}"
+                                 paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                                 rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                                 reflow="true" lazy="true"> 
+
+                        <p:column id="clmDate" headerText="#{loc.date}" >
+                            <h:outputText value="#{items.processDate}" >
+                                <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" />
+                            </h:outputText>
+                        </p:column>
+
+                        <p:column id="clmNozzleName" headerText="#{loc.nozzlename}"   >
+                            <h:outputText value="#{items.nozzle.name}" >
+                            </h:outputText>
+                        </p:column>
+
+
+                        <p:column id="clmDocumentNumber" headerText="#{loc.documentnumber}">
+                            <h:outputText value="#{items.receiptNo}" />
+                        </p:column>
+                        
+                         <p:column id="clmShiftNo" headerText="#{loc.shiftno}"   >
+                            <h:outputText value="#{items.fuelShift.shiftNo}" />
+                        </p:column>
+
+                        <p:column id="clmEntry" headerText="#{loc.liter}"   >
+                            <h:outputText value="#{items.differentIndex}"  class="Fright" >
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="unit" value="#{items.stock.unit}"/>
+                                <f:attribute name="type" value="unit" />
+                            </h:outputText>
+                        </p:column>
+
+                        <p:column id="clmUser" headerText="#{loc.user}" >
+                            <h:outputText  value="#{items.userCreated.fullName}">
+                            </h:outputText>
+                        </p:column>
+
+                        <p:column id="clmProcessType" headerText="#{loc.processtype}" >
+                            <h:outputText  value="#{loc.sale}">
+                            </h:outputText>
+                        </p:column>
+
+                        
+                    </p:dataTable>
+                </h:form>
+            </div>
+
+        </div>
+    </h:panelGroup>
+
+
+
+
+</ui:composition>
+

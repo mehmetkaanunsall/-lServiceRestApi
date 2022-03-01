@@ -1,0 +1,44 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+                xmlns:pe="http://primefaces.org/ui/extensions">
+    
+    <h:form id="frmOrderRelatedRecors">
+        <div class="ContainerIndent">
+            <ui:include src="/pages/general/common/tabgridtoolbar.xhtml">
+                <ui:param name="bean" value="#{orderRelatedRecordBean}" />
+                <ui:param name="update" value="" />
+                <ui:param name="outputtext" value="#{loc.relatedrecords}" />
+            </ui:include>
+            <p:dataTable id="dtbOrderRelatedRecors" var="orderRelatedRecord" value="#{orderRelatedRecordBean.listOfObject}" selectionMode="single" widgetVar="recordPF" 
+                         rows="#{sessionBean.user.defualtGridSize}" rowKey="#{orderRelatedRecord.id}" emptyMessage="#{loc.norecordsfound}" selection="#{orderRelatedRecordBean.selectedObject}"
+                         paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                         rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                         reflow="true" frozenRows="0"  scrollWidth="100%">
+                <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{orderRelatedRecordBean.goToPage()}"/> 
+                
+                <p:column id="clmDocumentNumber" headerText="#{loc.documentnumber}">
+                    <h:outputText value="#{orderRelatedRecord.documentNumber}" />
+                </p:column>
+
+                <p:column id="clmType" headerText="#{loc.type}">
+                    <h:outputText value="#{orderRelatedRecord.documentType==0 ? loc.waybill : loc.invoice }" class="Fright" />
+                </p:column>
+
+                <p:column id="clmDate" headerText="#{loc.documentdate}">
+                    <h:outputText value="#{orderRelatedRecord.documentDate }" class="Fright" >
+                        <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" />
+                    </h:outputText>
+                </p:column>
+                
+            </p:dataTable>
+            
+        </div>
+        
+        
+    </h:form>
+</ui:composition>

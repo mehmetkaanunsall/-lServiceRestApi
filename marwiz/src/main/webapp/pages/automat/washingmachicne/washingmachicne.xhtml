@@ -1,0 +1,108 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+        <ui:param name="bean" value="#{washingMachicnesBean}"/>  
+        <ui:param name="btnNewId" value="#{washingMachicnesBean.getRendered(235, 0)}"/>  
+        <ui:param name="datatable" value='frmWashingMachicnes:dtbWashingMachicnes'/>
+        <ui:param name="widgetvar" value='washingMachicnesPF' />
+        <ui:param name="form" value='frmToolbarProcess' />
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+        <ui:param name="fileName" value="#{loc.washingmachicnes}"/>
+    </ui:include>
+
+
+    <h:form id="frmWashingMachicnes">
+        <p:dataTable  id="dtbWashingMachicnes" var="WashingMachicne" widgetVar="washingMachicnesPF"  value="#{washingMachicnesBean.listOfObjects}"  selection="#{washingMachicnesBean.selectedObject}" selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" filteredValue="#{washingMachicnesBean.listOfFilteredObjects}" rowKey="#{WashingMachicne.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" rowStyleClass="#{WashingMachicne.status.id==52 ? 'ColumnColorRed' : null}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true" >
+
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{marwiz.goToPage('/pages/automat/washingmachicne/washingmachicneprocess.xhtml', washingMachicnesBean.selectedObject, 1, 120)}"  />
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false"/>
+
+            <f:facet  name="footer">
+                <p:inputText id="globalFilter" value="#{washingMachicnesBean.autoCompleteValue}"  style="display: none" />
+            </f:facet>
+            <p:column id="clmName" headerText="#{loc.name}" sortable="true"  sortBy="#{WashingMachicne.name}" filterable="true"  filterBy="#{WashingMachicne.name}" filterMatchMode="contains" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{WashingMachicne.name}" />
+            </p:column>
+
+            <p:column id="clmCode" headerText="#{loc.code}" sortable="true" sortBy="#{WashingMachicne.code}" filterable="true"  filterBy="#{WashingMachicne.code}" filterMatchMode="contains" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{WashingMachicne.code}" />
+            </p:column>
+
+            <p:column id="clmMacAddress" headerText="#{loc.macaddress}" sortable="true" sortBy="#{WashingMachicne.macAddress}" filterable="true"  filterBy="#{WashingMachicne.macAddress}" filterMatchMode="contains" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{WashingMachicne.macAddress}" />
+            </p:column>
+
+            <p:column id="clmIpAddress" headerText="#{loc.ipaddress}" sortable="true" sortBy="#{WashingMachicne.ipAddress}" filterable="true"  filterBy="#{WashingMachicne.ipAddress}" filterMatchMode="contains" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{WashingMachicne.ipAddress}" />
+            </p:column>
+
+            <p:column id="clmPort" headerText="#{loc.port}" sortable="true" sortBy="#{WashingMachicne.port}"  filterable="true"  filterBy="#{WashingMachicne.port}" filterMatchMode="contains" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{WashingMachicne.port}" />
+            </p:column>
+
+            <p:column headerText="#{loc.electricunitprice} (kW)" sortBy="#{WashingMachicne.electricUnitPrice}"  sortable="true" filterable="true"  filterBy="#{WashingMachicne.electricUnitPrice}" filterMatchMode="contains" class="TexAlRight">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText  value="#{WashingMachicne.electricUnitPrice} #{sessionBean.user.lastBranch.currency.code}" >
+                    <f:convertNumber type="number" groupingUsed="true" minFractionDigits="4" pattern="#0.000"/>
+                </h:outputText>
+            </p:column>
+
+            <p:column headerText="#{loc.waterunitprice} (LT)" sortBy="#{WashingMachicne.waterUnitPrice}"  sortable="true" filterable="true"  filterBy="#{WashingMachicne.waterUnitPrice}" filterMatchMode="contains" class="TexAlRight">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText  value="#{WashingMachicne.waterUnitPrice} #{sessionBean.user.lastBranch.currency.code}" >
+                    <f:convertNumber type="number" groupingUsed="true" minFractionDigits="4" pattern="#0.000"/>
+                </h:outputText>
+            </p:column> 
+
+            <p:column id="clmVersion" headerText="#{loc.version}" sortable="true" sortBy="#{WashingMachicne.version}"  filterable="true"  filterBy="#{WashingMachicne.version}" filterMatchMode="contains" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{WashingMachicne.version}" />
+            </p:column>
+
+            <p:column id="clmDescription" headerText="#{loc.description}" sortable="true" sortBy="#{WashingMachicne.description}" filterable="true"  filterBy="#{WashingMachicne.description}" filterMatchMode="contains" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{WashingMachicne.description}" />
+            </p:column>
+
+            <p:column id="clmStatus" headerText="#{loc.statu}" sortable="true" sortBy="#{WashingMachicne.status.tag}" filterable="true"  filterBy="#{WashingMachicne.status.tag}" filterMatchMode="contains" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{WashingMachicne.status.tag}" />
+            </p:column>
+        </p:dataTable>  
+    </h:form>
+
+</ui:composition>

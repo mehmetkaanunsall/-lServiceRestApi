@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/beans/spring-context-4.2.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+        
+   
+  
+ 
+     <!--  
+  <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"  scope="singleton" >
+        <property name="driverClassName" value="org.postgresql.Driver"/>
+        <property name="url" value="jdbc:postgresql://192.168.102.91:5432/marwiz"/>
+        <property name="username" value="postgres"/>
+        <property name="password" value="APsS_W7gxT"/>                
+  </bean>
+   
+ 
+  -->
+  
+  
+<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean" >
+
+        <property name="jndiName" value="marwizDS" />
+ 
+        <property name="lookupOnStartup" value="false"/>
+ 
+        <property name="cache" value="true"/>
+ 
+        <property name="proxyInterface" value="javax.sql.DataSource"/>  
+
+    </bean>  
+  
+</beans>  

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                            http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://www.springframework.org/schema/context
+                            http://www.springframework.org/schema/context/spring-context.xsd
+                            http://www.springframework.org/schema/tx 
+                            http://www.springframework.org/schema/tx/spring-tx.xsd">
+    
+                            
+    <bean id="sapIntegrationDao" class="com.mepsan.marwiz.system.sapintegration.dao.SapIntegrationDao" lazy-init="true" scope="prototype">
+        <property name="dataSource" ref="dataSource"/>
+    </bean> 
+   
+    <bean id="sapIntegrationService" class="com.mepsan.marwiz.system.sapintegration.business.SapIntegrationService" lazy-init="true" scope="prototype">
+       
+    </bean> 
+    
+    <bean id="integrationForSapDao" class="com.mepsan.marwiz.system.sapintegration.dao.IntegrationForSapDao" lazy-init="true" scope="prototype">
+        <property name="dataSource" ref="dataSource"/>
+    </bean> 
+   
+    <bean id="integrationForSapService" class="com.mepsan.marwiz.system.sapintegration.business.IntegrationForSapService" lazy-init="true" scope="prototype">
+       
+    </bean> 
+    
+</beans>
+

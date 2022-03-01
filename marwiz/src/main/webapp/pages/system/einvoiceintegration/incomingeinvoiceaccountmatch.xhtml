@@ -1,0 +1,41 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">  
+
+
+    <h:form id="frmIncomingEInvoiceAccountProcess" >  
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.accountprocesses}"/>
+            <ui:param name="bean" value='#{incomingEInvoicesBean}' />
+            <ui:param name="update" value="frmIncomingEInvoiceAccountProcess:pgrIncomingEInvoiceAccountProcess" />
+            <ui:param name="btnSaveId" value="false" />
+            <ui:param name="btnDeleteId" value="false" />
+        </ui:include>
+
+        <h:panelGroup id="pgrIncomingEInvoiceAccountProcess" layout="block">
+
+            <div class="ui-g-12 divContent">
+                <div class="ui-g-12 ">     
+                    <div class="ui-g-12 ui-md-12 ui-lg-12">
+                        <p:outputLabel value="#{loc.current}" for="txtAccountName" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtAccountName" onclick="showBook()" value="#{incomingEInvoicesBean.selectedObject.account.id == 0 ? incomingEInvoicesBean.selectedObject.account.title : incomingEInvoicesBean.selectedObject.oldAccountName}" class="inputPositionForBookFilter" required="true" 
+                                     readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.currentname}">
+                        </p:inputText>
+                        <p:commandLink id="btnAccountName"  class="commandLinkPositionForBookFilter" process="@this" oncomplete="PF('olp_account').loadContents();" >
+                            <i class="fa fa-book Fs16 softgray iconPositionForBookFilter "/>   
+                            <p:ajax listener="#{accountBookFilterBean.findFilterListLazyLoading([],'frmAccountBookFilter','olp_account','')}" global="false" />
+                        </p:commandLink>
+                    </div>
+                </div>
+            </div>
+
+        </h:panelGroup>
+
+        <p:remoteCommand name="showBook"   process="@this" oncomplete="PF('olp_account').loadContents();" actionListener="#{accountBookFilterBean.findFilterListLazyLoading([],'frmAccountBookFilter','olp_account','')}" global="false" />
+
+    </h:form>
+
+</ui:composition>

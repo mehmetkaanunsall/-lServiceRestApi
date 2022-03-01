@@ -1,0 +1,353 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+
+
+    <h:form id="frmAccountExtract">
+
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{accountExtractBean.pageId==102 ? loc.employeeextract : loc.currentextract}"/>
+            <ui:param name="bean" value='#{accountExtractBean}' />
+            <ui:param name="update" value="frmAccountExtractDatatable:dtbExtract pgrExtractDatatable pgrExtract" />
+        </ui:include>
+
+        <h:panelGroup id="pgrExtract" layout="block" transient="true">  
+            <div class="ui-g divContent">
+                <div class="panelToggle ui-g-12">
+
+                    <h:panelGroup id="pnlWhereBranch"  >
+                        <h:panelGroup   >
+                            <div class="ui-g-12 ui-md-6 ui-lg-2 ">
+                                <p:outputLabel value="#{loc.branch}" for="slcBranch" class="FontBold Fs12"/>
+                                <p:selectCheckboxMenu  id="slcBranch"  value="#{accountExtractBean.selectedBranchList}" 
+                                                       filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                                       label="#{accountExtractBean.selectedBranchList.size()!=0 ? accountExtractBean.selectedBranchList.size() :loc.all} #{accountExtractBean.selectedBranchList.size()!=0 ? loc.branch : ''} #{accountExtractBean.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                                    <f:selectItems value="#{accountExtractBean.listOfBranch}" itemLabel="#{branch.name}" itemValue="#{branch}" var="branch" />       
+                                    <p:ajax oncomplete="PF('slcBranchCheckBox').show()" listener="#{accountExtractBean.changeBranch()}" global="false" update="pgrExtract slcBranch"/>
+                                    <p:ajax event="toggleSelect" update="pgrExtract slcBranch" listener="#{accountExtractBean.changeBranch()}" oncomplete="PF('slcBranchCheckBox').show()" global="false"/>
+                                </p:selectCheckboxMenu>
+                            </div>    
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{accountExtractBean.pageId==102 ? loc.employee : loc.current}" for="txtCustomer"  styleClass="Fs12 FontBold"/>
+                        <p:inputText  id="txtCustomer" onclick="showAccountBook()" value="#{accountBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+                        </p:inputText>
+                        <p:commandLink id="btnCustomer" process="@this" actionListener="#{accountExtractBean.openDialog(1)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_accountcheckbox').loadContents();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax listener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([accountExtractBean.selectedBranchList.size() != 0 ? accountExtractBean.selectedBranchList : accountExtractBean.listOfBranch],'frmAccountBookFilterCheckbox','olp_accountcheckbox', accountExtractBean.pageId==72 ? 'accountextractreportcheckbox' : 'employeeextractreportcheckbox')}" />
+                        </p:commandLink>
+                    </div>
+
+                    <h:panelGroup id="pnlWhere"  >
+                        <h:panelGroup rendered="#{!accountExtractBean.isDetail}"  >
+                            <div class="ui-g-12 ui-md-6  ui-lg-2">
+                                <p:outputLabel value="#{accountExtractBean.pageId==102 ? loc.employee : loc.current} #{loc.category}" for="txtCategory"  styleClass="Fs12 FontBold"/>
+                                <p:inputText id="txtCategory" onclick="showCategoryBook()" value="#{categoryBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter"  readonly="true"  placeholder="#{loc.all}" >
+                                </p:inputText>
+                                <p:commandLink id="btnCategory" process="@this" update="frmCategoryBookFilter" action="#{accountExtractBean.openDialog(2)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_Category').loadContents();">
+                                    <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                    <p:ajax   listener="#{categoryBookCheckboxFilterBean.findFilterList([accountExtractBean.pageId==102 ? 26 : 3],'frmCategoryBookFilter','olp_Category','accountExtract')}" />
+                                </p:commandLink>
+                            </div>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{accountExtractBean.isDetail}"  >
+                            <div class="ui-g-12 ui-md-6 ui-lg-2">
+                                <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                                <p:calendar  id="cldStartDate" value="#{accountExtractBean.selectedObject.beginDate}" class="datepicker" timeControlType="select"  required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                                    <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                                </p:calendar>
+                            </div>
+                            <div class="ui-g-12 ui-md-6 ui-lg-2">
+                                <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                                <p:calendar  id="cldEndDate" value="#{accountExtractBean.selectedObject.endDate}" class="datepicker" timeControlType="select" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                                    <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                                </p:calendar>
+                            </div>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{!accountExtractBean.isDetail}"  >
+                            <div class="ui-g-12 ui-md-6 ui-lg-2 " >
+                                <p:outputLabel value="#{loc.balance} (Min)"  styleClass="Fs12 FontBold"/>
+                                <p:inputNumber value="#{accountExtractBean.selectedObject.balance}"
+                                               decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}" thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                               roundMethod="D"  emptyValue="sign" symbolPosition="suffix" class="TexAlRight">
+
+                                </p:inputNumber>
+                            </div>
+                        </h:panelGroup>
+
+
+
+                        <h:panelGroup rendered="#{accountExtractBean.isDetail}" >
+                            <div class="ui-g-12 ui-md-6 ui-lg-2" >
+                                <p:outputLabel value="#{loc.termdate}" for="cldTermDate" class="Fs12 FontBold"/> <!--style="visibility: hidden;"-->
+                                <p:calendar  id="cldTermDate" class="datepicker" value="#{accountExtractBean.selectedObject.termDate}" beforeShow="dpClearButton"  pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.termdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                                    <p:ajax event="valueChange" update="cldTermDate frmAccountExtract:pnlWhere" resetValues="true" listener="#{accountExtractBean.termDateUpdate()}"  global="false"/>
+                                    <p:ajax event="dateSelect" update="frmAccountExtract:pnlWhere" listener="#{accountExtractBean.termDateUpdate()}" global="false"/>
+                                </p:calendar> 
+                            </div>
+
+
+                            <div class="ui-g-12 ui-md-6 ui-lg-2">
+                                <p:outputLabel value="#{loc.processtype}" for="slcTermDateOpType" class="Fs12 FontBold" />
+                                <p:selectOneMenu id="slcTermDateOpType" value="#{accountExtractBean.selectedObject.termDateOpType}" required="#{accountExtractBean.selectedObject.termDate != null}" >
+                                    <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}"  />
+                                    <f:selectItem itemLabel="#{loc.smallsymbol}" itemValue="1"/>
+                                    <f:selectItem itemLabel="#{loc.equalssymbol}" itemValue="2"/>
+                                    <f:selectItem itemLabel="#{loc.bigsymbol}" itemValue="3"/>
+                                </p:selectOneMenu>
+                            </div>  
+
+                        </h:panelGroup>
+
+
+
+                    </h:panelGroup>
+
+                </div>
+            </div>
+        </h:panelGroup>
+        <p:remoteCommand name="showAccountBook" process="@this" oncomplete="PF('olp_accountcheckbox').loadContents();" action="#{accountExtractBean.openDialog(1)}" actionListener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([accountExtractBean.selectedBranchList.size() != 0 ? accountExtractBean.selectedBranchList : accountExtractBean.listOfBranch],'frmAccountBookFilterCheckbox','olp_accountcheckbox', accountExtractBean.pageId==72 ? 'accountextractreportcheckbox' : 'employeeextractreportcheckbox')}" />
+        <p:remoteCommand name="showCategoryBook" process="@this" update="frmCategoryBookFilter" action="#{accountExtractBean.openDialog(2)}" oncomplete="PF('olp_Category').loadContents();" actionListener="#{categoryBookCheckboxFilterBean.findFilterList([accountExtractBean.pageId==102 ? 26 : 3],'frmCategoryBookFilter','olp_Category','accountExtract')}" />
+
+    </h:form>
+    <div class="EmptyBox20" />
+    <h:panelGroup id="pgrExtractDatatable" >
+        <h:panelGroup rendered="#{accountExtractBean.isFind}">
+            <c:if test="#{!accountExtractBean.isDetail}">
+                <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                    <ui:param name="bean" value="#{accountExtractBean}"/>   <!-- Bean -->
+                    <ui:param name="datatable" value="frmAccountExtractDatatable:dtbExtract" />  <!-- datatable  -->
+                    <ui:param name="fileName" value="#{loc.currentextract}"/>
+                    <ui:param name="renderedToggler" value='true'/>
+                    <ui:param name="renderedExcel" value='true'/>
+                    <ui:param name="renderedPdf" value='true'/>
+                    <ui:param name="renderedPrint" value='true'/>
+                    <ui:param name="renderedGraphic" value='false'/>
+                    <ui:param name="renderedOutputText" value="true"/>
+                    <ui:param name="outputText" value="#{loc.lastsituation}"/>
+                </ui:include>
+            </c:if> 
+            <h:form id="frmAccountExtractDatatable" >
+                <c:if test="#{accountExtractBean.isDetail}">
+                    <p:toolbar style="height: 28px;" >
+                        <f:facet name="left"> 
+                            <p:commandLink title="#{loc.back}" class="Fleft" rendered="#{accountExtractBean.isBack}"   immediate="true"  >
+                                <i class="icon-reply-outline Fs20 tlbrBackBtn"/>    
+                                <f:actionListener  binding="#{accountExtractBean.goToBack()}"/>
+                            </p:commandLink>
+                            <h:outputText value="#{loc.lastsituation}" class="outputTextFont Fleft MarRight8" ></h:outputText>
+                        </f:facet>
+                    </p:toolbar>      
+                </c:if>
+                <p:dataTable  id="dtbExtract" var="accountExtract" widgetVar="extractPF" emptyMessage="#{loc.norecordsfound}" value="#{accountExtractBean.listOfObjects}" selection="#{accountExtractBean.selectedAccountExtract}" selectionMode="single"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{accountExtract.account_branch_con_id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true" lazy="true"
+                              >
+
+                    <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{accountExtractBean.seeAccountExtractDetail()}" />
+
+                    <p:ajax event="colReorder" listener="#{accountExtractBean.reorder}" update="frmGridToolbar:toggle" />     
+                    <p:ajax event="colResize"  listener="#{accountExtractBean.onResize}" />
+                    
+                    <p:column id="clmBranch" headerText="#{loc.branch}" visible="#{accountExtractBean.toogleList[0]}" exportable="#{accountExtractBean.toogleList[0]}" sortable="true" sortBy="#{accountExtract.br.name}">
+                        <h:outputText  value="#{accountExtract.branch.name}"/>
+                    </p:column>
+
+                    <p:column id="clmAccount" headerText="#{accountExtractBean.pageId==102 ? loc.employee : loc.account}" sortable="true" sortBy="#{accountExtract.name}" visible="#{accountExtractBean.toogleList[1]}" exportable="#{accountExtractBean.toogleList[1]}" >
+                        <h:outputText  value="#{accountExtract.name}"/>
+                    </p:column>
+                    <p:column id="clmDebtAmount" headerText="#{loc.debtamount}" sortable="true" sortBy="#{accountExtract.outComing}" visible="#{accountExtractBean.toogleList[2]}" exportable="#{accountExtractBean.toogleList[2]}">
+                        <h:outputText value="#{accountExtract.outComing}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmCreditBalance" headerText="#{loc.creditbalance}" sortable="true" sortBy="#{accountExtract.inComing}" visible="#{accountExtractBean.toogleList[3]}" exportable="#{accountExtractBean.toogleList[3]}">
+                        <h:outputText  value="#{accountExtract.inComing}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmBalance" headerText="#{loc.balance}" sortable="true" sortBy="#{accountExtract.balance}" visible="#{accountExtractBean.toogleList[4]}" exportable="#{accountExtractBean.toogleList[4]}">
+                        <h:outputText  value="#{accountExtract.balance}" class="Fright" style="#{0 > accountExtract.balance ? 'color: #d42121' : 'color: #2db12d'}">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:columnGroup id="clmColumGroup" rendered="#{!accountExtractBean.isDetail}"  type="footer" >
+                        <ui:repeat value="#{accountExtractBean.listOfTotals}" var="totals" >
+                            <p:row>
+                                
+                                <p:column visible="#{accountExtractBean.toogleList[0]}" exportable="#{accountExtractBean.toogleList[0]}">
+                                    <f:facet name="footer"  >
+                                        <h:outputText value="" class="FontBold" />
+                                    </f:facet>
+                                </p:column>
+                                <p:column visible="#{accountExtractBean.toogleList[1]}" exportable="#{accountExtractBean.toogleList[1]}">
+                                    <f:facet name="footer"  >
+                                        <h:outputText value="#{loc.sum}" class="FontBold" />
+                                    </f:facet>
+                                </p:column>
+
+                                <p:column  visible="#{accountExtractBean.toogleList[2]}" exportable="#{accountExtractBean.toogleList[2]}">
+                                    <f:facet name="footer"  >
+                                        <h:outputText value="#{totals.outComing}" class="Fright FontBold">
+                                            <f:converter converterId="currencyConverter" />
+                                            <f:attribute name="type" value="" />
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column>
+
+                                <p:column visible="#{accountExtractBean.toogleList[3]}" exportable="#{accountExtractBean.toogleList[3]}">
+                                    <f:facet name="footer"  >
+                                        <h:outputText value="#{totals.inComing}" class="Fright FontBold">
+                                            <f:converter converterId="currencyConverter" />
+                                            <f:attribute name="type" value="" />
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column>
+
+                                <p:column visible="#{accountExtractBean.toogleList[4]}" exportable="#{accountExtractBean.toogleList[4]}">
+                                    <f:facet name="footer"  >
+                                        <h:outputText value="#{totals.balance}" class="Fright FontBold">
+                                            <f:converter converterId="currencyConverter" />
+                                            <f:attribute name="type" value="" />
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column>
+                            </p:row>
+                        </ui:repeat>
+                    </p:columnGroup>
+                </p:dataTable>  
+            </h:form>
+            <div class="EmptyBox10"/>
+
+            <h:panelGroup id="pngDetail">
+                <c:if test="#{accountExtractBean.isDetail}">
+                    <div class="EmptyBox10"/>
+                    <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                        <ui:param name="bean" value="#{accountMovementTabBean}"/>
+                        <ui:param name="datatable" value="frmMovementDataTable:dtbMovement" />
+                        <ui:param name="fileName" value=""/>
+                        <ui:param name="renderedToggler" value='false'/>
+                        <ui:param name="renderedExcel" value='true'/>
+                        <ui:param name="renderedPdf" value='true'/>
+                        <ui:param name="renderedPrint" value='true'/>
+                        <ui:param name="renderedGraphic" value='false'/>
+                    </ui:include>
+                    <c:if test="#{accountExtractBean.findCount!=1}">
+                        #{accountMovementTabBean.init()}
+                    </c:if>
+                    <ui:include src="/pages/general/account/accountmovementdatatable.xhtml">
+                        <ui:param name="type" value="accountExtract"/>
+                    </ui:include>
+                </c:if>
+            </h:panelGroup>
+        </h:panelGroup>
+    </h:panelGroup>
+
+    <p:confirmDialog id="dlgRelatedRecordInfo" global="true"  class="deleteConfirm controlDelete" severity="alert" widgetVar="dlg_RelatedRecordInfo" closeOnEscape="true" width="20%" responsive="true">
+        <c:if test="#{accountExtractBean.isDetail}">
+            <f:facet name="message">
+                <p:panel class="divContent">
+                    <div class="ui-g">
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+                            <h:outputText value="#{accountMovementTabBean.deleteControlMessage}" style="color:black !important"/>
+                        </div>
+                        <div class="ui-g-12 ui-md-12 ui-lg-12">
+                            <h:outputText value="#{accountMovementTabBean.deleteControlMessage1}" style="color:black !important"/>
+                        </div>
+                        <h:panelGroup rendered="#{accountMovementTabBean.response != -106}">
+                            <div class="ui-g-12 ui-md-12 ui-lg-6">
+                                <h:outputText value="#{accountMovementTabBean.deleteControlMessage2}" class="Fright"/>
+                            </div>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{accountMovementTabBean.response == -106}">
+                            <div class="ui-g-12 ui-md-12 ui-lg-12">
+                                <h:outputText value="#{accountMovementTabBean.deleteControlMessage2}"/>
+                            </div>
+                        </h:panelGroup>
+                        <div class="ui-g-12 ui-md-12 ui-lg-6">
+                            <p:commandLink value="#{accountMovementTabBean.relatedRecord}" class="Fleft cmdRelatedRecord" title="#{loc.gotorelatedrecord}" actionListener="#{accountMovementTabBean.goToRelatedRecordBefore()}"/>
+                        </div>
+                    </div>
+                </p:panel>
+            </f:facet>
+        </c:if>
+    </p:confirmDialog>
+
+
+
+    <!--Kitaptan cari seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/accountbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{accountExtractBean}' />
+        <ui:param name="for" value='frmAccountExtract:btnCustomer' />
+        <c:if test="#{accountExtractBean.pageId==72}">
+            <ui:param name="type" value='accountextractreportcheckbox' />
+        </c:if>
+        <c:if test="#{accountExtractBean.pageId==102}">
+            <ui:param name="type" value='employeeextractreportcheckbox' />
+        </c:if>
+        <ui:param name="parameters" value='#{[accountExtractBean.selectedBranchList.size() != 0 ? accountExtractBean.selectedBranchList : accountExtractBean.listOfBranch]}' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmAccountBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_accountcheckbox" />
+    </ui:include>
+
+    <p:overlayPanel id="olpCategory" widgetVar="olp_Category" showEvent="none" modal="true" transient="true" for="frmAccountExtract:btnCategory"  my="right top" at="left bottom" dismissable="true" hideEffect="blind" showCloseIcon="true" class="Wid30">
+        <ui:include src="/pages/general/common/categorybookcheckbox.xhtml">
+            <ui:param name="updateBean" value='#{accountExtractBean}' />
+            <ui:param name="type" value='accountExtract' />
+            <ui:param name="parameters" value='#{[accountExtractBean.pageId==102 ? 26 : 3]}' /> 
+            <ui:param name="form" value='frmCategoryBookFilter' /> 
+        </ui:include>
+    </p:overlayPanel>
+
+    <!--Print butonuna basınca movement tarafı için çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{accountExtractBean.pageId==72 ? loc.currentextract : loc.employeeextract}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+
+    </script>
+
+    <script type="text/javascript">
+        function print_pageMovement() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{accountExtractBean.pageId==72 ? loc.accountmovements : loc.employeemovements}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+
+    </script>
+</ui:composition>

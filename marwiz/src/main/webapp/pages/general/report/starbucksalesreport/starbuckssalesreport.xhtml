@@ -1,0 +1,102 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <h:form id="frmStarbucksSaleReport">
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.starbuckssalereport}"/>
+            <ui:param name="bean" value='#{starbucksSalesReportBean}' />
+            <ui:param name="update" value="frmStarbucksSaleReportDatatable:dtbStarbucksSaleReport pgrStarbucksSaleReport pgrStarbucksSaleReportDatatable" />
+        </ui:include>
+
+        <h:panelGroup id="pgrStarbucksSaleReport" class="divContent" layout="block" transient="true">  
+            <div class="panelToggle  ui-g">
+
+                <div class="ui-g-12 ui-md-6 ui-lg-2">
+                    <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                    <p:calendar  id="cldStartDate" class="datepicker" required="true" value="#{starbucksSalesReportBean.beginDate}" beforeShow="dpClearButton" timeControlType="select"  pattern="#{sessionBean.user.lastBranch.dateFormat}" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                        <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                    </p:calendar>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-2">
+                    <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                    <p:calendar  id="cldEndDate" class="datepicker" required="true" value="#{starbucksSalesReportBean.endDate}" beforeShow="dpClearButton" timeControlType="select" pattern="#{sessionBean.user.lastBranch.dateFormat}" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                        <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                    </p:calendar>
+                </div>
+
+            </div>
+        </h:panelGroup>
+
+    </h:form>
+    <div class="EmptyBox20" />
+
+    <h:panelGroup id="pgrStarbucksSaleReportDatatable" >
+        <h:panelGroup rendered="#{starbucksSalesReportBean.isFind}">
+            <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                <ui:param name="bean" value="#{starbucksSalesReportBean}"/>   <!-- Bean -->
+                <ui:param name="datatable" value="frmStarbucksSaleReportDatatable:dtbStarbucksSaleReport" />  <!-- datatable  -->
+                <ui:param name="fileName" value="#{loc.starbuckssalereport}"/>
+                <ui:param name="renderedToggler" value='true'/>
+                <ui:param name="renderedExcel" value='true'/>
+                <ui:param name="renderedPdf" value='true'/>
+                <ui:param name="renderedPrint" value='true'/>
+                <ui:param name="renderedGraphic" value='false'/>
+            </ui:include>
+
+
+            <h:form id="frmStarbucksSaleReportDatatable">
+
+                <p:dataTable  id="dtbStarbucksSaleReport" var="StarbucksSaleReport" widgetVar="starbucksSaleReportPF" emptyMessage="#{loc.norecordsfound}" value="#{starbucksSalesReportBean.listOfObjects}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{StarbucksSaleReport.transaction_id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true" lazy="true">
+
+                    <p:column id="clmDeviceName" headerText="#{loc.devicename}"  visible="#{starbucksSalesReportBean.toogleList[0]}" exportable="#{starbucksSalesReportBean.toogleList[0]}">
+                        <h:outputText value="#{StarbucksSaleReport.machine_id}" />
+                    </p:column>
+                    <p:column id="clmDate"  headerText="#{loc.date}"  visible="#{starbucksSalesReportBean.toogleList[1]}" exportable="#{starbucksSalesReportBean.toogleList[1]}">
+                        <h:outputText value="#{StarbucksSaleReport.longTime}" >
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmProcessNo" headerText="#{loc.processno}"  visible="#{starbucksSalesReportBean.toogleList[2]}" exportable="#{starbucksSalesReportBean.toogleList[2]}">
+                        <h:outputText value="#{StarbucksSaleReport.transaction_id}" />
+                    </p:column>
+                    <p:column id="clmProductName" headerText="#{loc.stockname}"  visible="#{starbucksSalesReportBean.toogleList[3]}" exportable="#{starbucksSalesReportBean.toogleList[3]}">
+                        <h:outputText value="#{StarbucksSaleReport.stockName != null ? StarbucksSaleReport.stockName : StarbucksSaleReport.stock_id}" />
+                    </p:column>
+                    <p:column id="clmProductPrice" headerText="#{loc.productprice}"  visible="#{starbucksSalesReportBean.toogleList[4]}" exportable="#{starbucksSalesReportBean.toogleList[4]}">
+                        <h:outputText value="#{StarbucksSaleReport.price}" style="float: right">
+                            <f:converter converterId="currencyConverter"  />
+                            <f:attribute name="currency"  value="#{sessionBean.user.lastBranch.currency}" />
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+                </p:dataTable>  
+            </h:form>
+        </h:panelGroup>
+    </h:panelGroup>
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.starbuckssalereport}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+
+</ui:composition>

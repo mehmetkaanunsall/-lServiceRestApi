@@ -1,0 +1,134 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmPriceDifferenceUpdateProcess">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.stockprocess}"/>
+            <ui:param name="bean" value='#{invoicePriceDifferenceStockTabBean}' />
+            <ui:param name="update" value="grdPriceDifferenceUpdateProcess" />
+            <ui:param name="btnSaveId" value="#{invoicePriceDifferenceStockTabBean.selectedInvoice.status.id==28 and invoicePriceDifferenceStockTabBean.selectedInvoice.posId==0  and invoicePriceDifferenceStockTabBean.getRendered(6, 0) ?
+                                                sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranchSetting.erpIntegrationId == 1  and
+                                                invoicePriceDifferenceStockTabBean.selectedInvoice.sapLogIsSend ? 'false' : 'true' : 'false'}" />      
+            <ui:param name="btnDeleteId" value='false' />
+            <ui:param name="btnDeleteId" value="#{invoicePriceDifferenceStockTabBean.processType==2 and invoicePriceDifferenceStockTabBean.selectedInvoice.status.id==28 and invoicePriceDifferenceStockTabBean.selectedInvoice.posId==0 and invoicePriceDifferenceStockTabBean.getRendered(7, 0) ?
+                                                  sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranchSetting.erpIntegrationId == 1  and
+                                                  invoicePriceDifferenceStockTabBean.selectedInvoice.sapLogIsSend ? 'false' : 'true' : 'false'}" />
+        </ui:include>
+
+        <p:remoteCommand name="saveItem"  delay="100"  resetValues="false" global="false"  action="#{invoicePriceDifferenceStockTabBean.saveItem()}" update="frmPriceDifferenceUpdateProcess" />
+
+        <h:panelGroup id="grdPriceDifferenceUpdateProcess" layout="block" class="divContent">
+            <div class="ui-g">
+                <div class="ui-g-12 ui-md-6 ui-lg-6">
+                    <p:outputLabel value="#{loc.stock}" for="txtStockName" styleClass="Fs12 FontBold"/> 
+                    <p:inputText id="txtStockName" value="#{invoicePriceDifferenceStockTabBean.selectedObject.stock.name}" required="true" 
+                                 readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.stockname}" >
+                    </p:inputText>
+                </div> 
+
+                <div class="ui-g-12 ui-md-6 ui-lg-6">
+                    <p:outputLabel value="#{loc.amount}" for="txtStockAmount" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtStockAmount" value="#{invoicePriceDifferenceStockTabBean.selectedObject.quantity}" class="TexAlRight" readonly="true" placeholder="#{loc.amount}"  >
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="unit" value="#{invoicePriceDifferenceStockTabBean.selectedObject.unit}"/>
+                        <f:attribute name="type" value="unit" />
+                    </p:inputText> 
+                </div>
+
+                <div class="ui-g-12 ui-md-6 ui-lg-6">
+                    <p:outputLabel value="#{loc.oldunitprice}" for="txOldUnitPrice" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txOldUnitPrice" value="#{invoicePriceDifferenceStockTabBean.selectedObject.oldUnitPrice}" class="TexAlRight" readonly="true" placeholder="#{loc.oldunitprice}"  >
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="currency" value="#{invoicePriceDifferenceStockTabBean.selectedObject.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </p:inputText> 
+                </div>
+       
+    
+
+                <h:panelGroup rendered="#{sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranchSetting.erpIntegrationId == 1  and
+                                          invoicePriceDifferenceStockTabBean.selectedInvoice.sapLogIsSend ? 'false' : 'true'}" >
+                    <div class="ui-g-12 ui-md-6 ui-lg-6">
+                        <p:outputLabel value="#{loc.unitprice}" for="txtUnitPrice" styleClass="Fs12 FontBold" />
+                        <p:inputNumber id="txtUnitPrice" decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? '.': ','}"  
+                                       thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? ',': '.'}" 
+                                       decimalPlaces="4"
+                                       symbol="#{sessionBean.currencySignOrCode(invoicePriceDifferenceStockTabBean.selectedObject.getCurrency().getId(),0)}"
+                                       symbolPosition="s" 
+                                       value="#{invoicePriceDifferenceStockTabBean.selectedObject.unitPrice}"  class="Wid95 TexAlRight"  placeholder="#{loc.totalprice}" required="true">
+                            <p:ajax event="keyup" process="@this"   global="false" listener="#{invoicePriceDifferenceStockTabBean.calcUnitPrice}" update="frmPriceDifferenceUpdateProcess:txtTaxPrice,frmPriceDifferenceUpdateProcess:txtTaxFreePrice,frmPriceDifferenceUpdateProcess:txtTotalPrice"/>
+                        </p:inputNumber>
+                    </div>
+                </h:panelGroup>
+
+
+
+
+
+                <h:panelGroup rendered="#{sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranchSetting.erpIntegrationId == 1  and
+                                          invoicePriceDifferenceStockTabBean.selectedInvoice.sapLogIsSend ? 'true' : 'false'}" >
+                    <div class="ui-g-12 ui-md-6 ui-lg-6">
+                        <p:outputLabel value="#{loc.unitprice}" for="txtUnitPrice1" styleClass="Fs12 FontBold" />
+                        <p:inputText id="txtUnitPrice1" value="#{invoicePriceDifferenceStockTabBean.selectedObject.unitPrice}" class="TexAlRight" readonly="true" placeholder="#{loc.unitprice}"  >
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{invoicePriceDifferenceStockTabBean.selectedObject.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </p:inputText>
+                    </div>
+                </h:panelGroup>
+
+
+
+                <div class="ui-g-12 ui-md-6 ui-lg-6">
+                    <p:outputLabel value="#{loc.taxrate}" for="txtTaxRate" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtTaxRate" value="#{invoicePriceDifferenceStockTabBean.selectedObject.taxRate}"  class="TexAlRight"  readonly="true" placeholder="#{loc.taxrate}" >
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="type" value="percent" />
+                    </p:inputText> 
+                </div>
+
+                <div class="ui-g-12 ui-md-6 ui-lg-6">
+                    <p:outputLabel value="#{loc.taxprice}" for="txtTaxPrice" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtTaxPrice" value="#{invoicePriceDifferenceStockTabBean.selectedObject.totalTax}" class="TexAlRight" readonly="true" placeholder="#{loc.taxprice}"  >
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="currency" value="#{invoicePriceDifferenceStockTabBean.selectedObject.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </p:inputText> 
+                </div>
+
+                <div class="ui-g-12 ui-md-6 ui-lg-6">
+                    <p:outputLabel value="#{loc.taxfreeamount}" for="txtTaxFreePrice" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtTaxFreePrice" value="#{invoicePriceDifferenceStockTabBean.selectedObject.totalPrice}" class="TexAlRight" readonly="true" placeholder="#{loc.taxfreeamount}"  >
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="currency" value="#{invoicePriceDifferenceStockTabBean.selectedObject.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </p:inputText> 
+                </div>
+
+                <div class="ui-g-12 ui-md-6 ui-lg-6">
+                    <p:outputLabel value="#{loc.totalprice}" for="txtTotalPrice" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtTotalPrice" value="#{invoicePriceDifferenceStockTabBean.selectedObject.totalMoney}" class="TexAlRight" readonly="true" placeholder="#{loc.totalprice}"  >
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="currency" value="#{invoicePriceDifferenceStockTabBean.selectedObject.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </p:inputText> 
+                </div>
+
+                <div class="ui-g-12 ui-md-12 ui-lg-12">
+                    <p:outputLabel value="#{loc.description}" for="txtDescription" styleClass="Fs12 FontBold"/>
+                    <p:inputTextarea id="txtDescription" value="#{invoicePriceDifferenceStockTabBean.selectedObject.description}" 
+                                     autoResize="false" style="resize: none;" placeholder="#{loc.description}"/>
+                </div>
+            </div>
+        </h:panelGroup>
+
+    </h:form>
+
+
+
+</ui:composition>

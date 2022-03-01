@@ -1,0 +1,69 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:form id="frmMyMenu" >  
+        <p:growl id="grwPerson" showDetail="true" globalOnly="true" life="5000"/>
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.add}"/>
+            <ui:param name="update" value="frmMyMenu" />
+            <ui:param name="btnSaveId" value="true" />               
+            <ui:param name="renderdelete" value='false' /> 
+            <ui:param name="btnDeleteId" value="false" />
+            <ui:param name="renderback" value='false'/>
+            <ui:param name="btnSaveId" value="true" />
+            <ui:param name="renderdelete" value='false' /> 
+        </ui:include>
+     
+
+        <!--   <p:focus for="txtIdentityNo"/>
+           <p:focus for="txtIdentityNo1"/> -->
+
+
+        <h:panelGroup id="pgrNewPerson1" layout="block" >
+            <div class="ui-g-12 divContent">              
+
+
+
+                <div class="ui-g-12 ui-md-6 ui-lg-4">
+                    <p:outputLabel value="#{loc.modules}" for="slcModule" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcModule" value="#{pcrdMyMenuBean.moduleId}"  styleClass="Wid95" >
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="0" />
+                        <f:selectItems value="#{sessionBean.authorizedModules}" var="module" itemLabel="#{module.nameMap.get(sessionBean.langId).name}" itemValue="#{module.id}" />
+                        <p:ajax listener="#{pcrdMyMenuBean.updateFolders()}" update="slcFolder,slcPage" />
+
+                    </p:selectOneMenu>
+                </div>
+
+
+                <div class="ui-g-12 ui-md-6 ui-lg-4">
+                    <p:outputLabel value="#{loc.folders}" for="slcFolder" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcFolder" value="#{pcrdMyMenuBean.folderId}"   styleClass="Wid95" >
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="0" />
+                        <f:selectItems value="#{pcrdMyMenuBean.selectedFolderList}" var="folder" itemLabel="#{folder.nameMap.get(sessionBean.langId).name}" itemValue="#{folder.id}" />
+                        <p:ajax listener="#{pcrdMyMenuBean.updatePages()}" update="slcPage" />
+                    </p:selectOneMenu>
+                </div>
+
+                <div class="ui-g-12 ui-md-6 ui-lg-4">
+                    <p:outputLabel value="#{loc.pages}" for="slcPage" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcPage" value="#{pcrdMyMenuBean.pageId}" styleClass="Wid95" >
+                        <f:selectItem itemLabel="#{loc.choose}" itemValue="0" />
+                        <f:selectItems value="#{pcrdMyMenuBean.selectedPageList}" var="page" itemLabel="#{page.nameMap.get(sessionBean.langId).name}" itemValue="#{page.id}" />
+
+                    </p:selectOneMenu>
+                </div>
+
+            </div>
+
+        </h:panelGroup>
+
+
+    </h:form> 
+
+
+</ui:composition>
+

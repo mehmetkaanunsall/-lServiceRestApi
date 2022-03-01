@@ -1,0 +1,127 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <style>
+        .ui-panel .ui-panel-title {
+            margin: 1px; 
+        }
+
+        .ui-panel .ui-panel-content {
+            padding: 0px !important;
+        }
+
+        .ui-panel .ui-panel-titlebar {
+            padding: 0px !important;
+        }
+        #dshWidget .ui-dashboard-column {
+            padding-bottom: 0px !important; 
+            margin: 0px !important;
+        }
+        .ui-stack .openStack li span{
+            background-color: #e2d4d400;
+        }
+
+        .ui-dashboard-column .ui-panel {
+            margin-bottom: 10px !important;
+        }
+
+    </style>
+
+
+
+    <p:dashboard id="dshWidget" model="#{pcrdMyMenuBean.model}"  widgetVar="dashboard"    >
+        <p:ajax event="reorder" listener="#{pcrdMyMenuBean.handleReorder}"  />
+    </p:dashboard>
+    
+    <h:form>
+        <p:remoteCommand name="rcGoToMyPage" action="#{pcrdMyMenuBean.goToMyPage()}" />
+        <p:remoteCommand name="rcEditDesign" action="#{pcrdMyMenuBean.editDesign()}" />
+        <p:remoteCommand name="rcDeletePage" action="#{pcrdMyMenuBean.showDeleteDialog()}" />
+    </h:form>
+
+
+    <p:stack icon="/resources/sentinel-layout/images/stack.png" expanded="true">
+        <p:menuitem   icon="/resources/sentinel-layout/images/add.png"   onclick="PF('dlg_mymenu').show()" url="#"/>
+    </p:stack>
+
+    <p:dialog  id="dlgMyMenu" widgetVar="dlg_mymenu" width="50%" resizable="false"  dynamic="true"  responsive="true"  modal="false" closeOnEscape="true">
+        <ui:include  src="/pages/general/addtomymenu.xhtml"   >
+            <ui:param name="bean" value="#{pcrdMyMenuBean}" />       
+        </ui:include>
+    </p:dialog>
+
+    <p:dialog id="dlgDesign" widgetVar="dlg_design" resizable="false" width="20%" focus="dlgDesign"  responsive="true" dynamic="true" modal="true" closeOnEscape="true">
+        <h:form id="frmIOModuleTypeProcess"  prependId="false">
+            <p:toolbar >
+                <f:facet name="right"> 
+                    <p:commandLink process="@form" id="btnSave"     title="#{loc.save}" class="Fright"   actionListener="#{pcrdMyMenuBean.saveDesign()}"  >
+                        <i class="fa fa-save Fs20 MarTop5 tlbrSaveBtn"/>                 
+                    </p:commandLink>
+                </f:facet>
+            </p:toolbar>
+
+            <h:panelGroup id="pgrIOModuleTypeProcess" layout="block">    
+
+                <div class="ui-g divContent">
+                    <div class="ui-g-12  ui-md-6">
+                        <p:outputLabel value="#{loc.color}" for="color" class="DispBlock TexAlCenter MarTop5 MarBot5 FontBold Fs12"/>
+                        <p:outputPanel class="TexAlCenter ">
+                            <p:colorPicker id="color" value="#{pcrdMyMenuBean.selectedObject.color}"  />
+                        </p:outputPanel>
+                    </div>
+
+                    <div class="ui-g-12  ui-md-6"  >
+                        <p:outputLabel value="#{loc.icon}"  for="iconSelectOneMenu" class="FontBold Fs12" />
+                        <p:inputText id="iconSelectOneMenu" value="#{pcrdMyMenuBean.selectedObject.icon}" onclick="PF('dlg_icon').show()"   class="inputPositionForBookFilter" >                            
+                        </p:inputText>
+                        <p:commandLink id="btnName" class="commandLinkPositionForBookFilter" oncomplete="PF('dlg_icon').show()" resetValues="true">
+                                <i class="fa fa-book Fs16 softgray iconPositionForBookFilter "/> 
+                        </p:commandLink>
+                    </div>
+                </div>
+            </h:panelGroup>
+
+        </h:form>
+
+    </p:dialog>
+
+
+
+    <p:dialog id="dlg_icon" widgetVar="dlg_icon" resizable="false" width="40%"  responsive="true" dynamic="true" modal="true"  closeOnEscape="true">
+        <h:form>
+            <p:dataGrid id="icons" var="moduleIcon" value="#{pcrdMyMenuBean.iconList}" columns="6" layout="grid" rows="30" paginator="true" paginatorPosition="bottom"
+                        paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                        rowsPerPageTemplate="6,12,16">
+                <p:panel  style="text-align: center">
+                    <h:panelGrid columns="1" style="width:100%">
+
+                        <p:commandLink action="#{pcrdMyMenuBean.updateIcon()}" update="frmIOModuleTypeProcess" oncomplete="PF('dlg_icon').hide()" resetValues="true">
+                            <i class="#{moduleIcon} Fs20 allİcons" title="#{moduleIcon}"> </i> 
+                            <f:setPropertyActionListener value="#{moduleIcon}" target="#{pcrdMyMenuBean.icon}"/>
+                        </p:commandLink>
+
+                    </h:panelGrid>
+                </p:panel>
+            </p:dataGrid>  
+        </h:form>
+    </p:dialog>
+    
+    <p:confirmDialog global="true" class="deleteConfirm MaxWid500"   id="dlgDeleteMyMenu" widgetVar="dlgDeleteVarMyMenu"  closeOnEscape="true" responsive="true">
+        <f:facet name="message">
+            <h:outputText value="#{loc.areyousureyouwanttodelete}"  style="white-space: pre-wrap;">
+                <i class="icon-trash Fs20 tlbrDeleteBtn" /> 
+            </h:outputText>
+
+        </f:facet>
+         <p:commandButton value="#{loc.yes}" action="#{pcrdMyMenuBean.deletePage()}" onclick="PF('dlgDeleteVarMyMenu').hide()" process="@this" styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+        <p:commandButton value="#{loc.no}" type="button" onclick="PF('dlgDeleteVarMyMenu').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+    </p:confirmDialog>
+
+   
+</ui:composition>

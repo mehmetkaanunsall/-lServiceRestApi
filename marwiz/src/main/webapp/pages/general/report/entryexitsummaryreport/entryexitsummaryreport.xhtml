@@ -1,0 +1,293 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmEntyExitSummaryReport">
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.entryexitsummaryreport}"/>
+            <ui:param name="bean" value='#{entryExitSummaryReportBean}' />
+            <ui:param name="update" value="frmEntyExitSummaryReportDatatable:dtbEntyExitSummaryReport pgEntyExitSummaryReport pgrEntyExitSummaryReportDatatable" />
+        </ui:include>
+
+        <h:panelGroup id="pgEntyExitSummaryReport" class="divContent" layout="block" transient="true">  
+            <div class="panelToggle  ui-g">
+                <div class="ui-g-12 ui-md-12 ui-lg-7">
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldStartDate" class="datepicker" value="#{entryExitSummaryReportBean.selectedObject.beginDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldEndDate" class="datepicker" value="#{entryExitSummaryReportBean.selectedObject.endDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.branch}" for="slcBranch" class="FontBold Fs12"/>
+                        <p:selectCheckboxMenu  id="slcBranch" value="#{entryExitSummaryReportBean.selectedBranchList}" 
+                                               filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                               label="#{entryExitSummaryReportBean.selectedBranchList.size()!=0 ? entryExitSummaryReportBean.selectedBranchList.size() :loc.all} #{entryExitSummaryReportBean.selectedBranchList.size()!=0 ? loc.branch : ''} #{entryExitSummaryReportBean.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                            <f:selectItems value="#{entryExitSummaryReportBean.listOfBranch}" itemLabel="#{branchSetting.branch.name}" itemValue="#{branchSetting}" var="branchSetting" />       
+                            <p:ajax oncomplete="PF('slcBranchCheckBox').show()" global="false" listener="#{entryExitSummaryReportBean.changeBranch()}" update="slcWarehouse txtStock btnStock txtCategory btnCategory pngGroupSupplier slcBranch"/>
+                            <p:ajax event="toggleSelect" listener="#{entryExitSummaryReportBean.changeBranch()}" update="slcWarehouse txtStock btnStock txtCategory btnCategory pngGroupSupplier slcBranch"  oncomplete="PF('slcBranchCheckBox').show()" global="false"/>
+                        </p:selectCheckboxMenu>
+                    </div> 
+                    <div class="ui-g-12  ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.warehouse}" for="slcWarehouse" class="FontBold Fs12"/>
+                        <p:selectCheckboxMenu  id="slcWarehouse"  value="#{entryExitSummaryReportBean.selectedObject.warehouseList}" 
+                                               filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slc_warehouseCheckBox"  
+                                               label="#{entryExitSummaryReportBean.selectedObject.warehouseList.size()!=0 ? entryExitSummaryReportBean.selectedObject.warehouseList.size() :loc.all} #{entryExitSummaryReportBean.selectedObject.warehouseList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                            <f:selectItems value="#{entryExitSummaryReportBean.listOfWarehouse}" itemLabel="#{warehouse.name}" itemValue="#{warehouse}" var="warehouse" />       
+                            <p:ajax update="slcWarehouse" oncomplete="PF('slc_warehouseCheckBox').show()" global="false"/>
+                            <p:ajax event="toggleSelect" update="slcWarehouse" oncomplete="PF('slc_warehouseCheckBox').show()" global="false"/>
+                        </p:selectCheckboxMenu>
+                    </div>
+                </div>
+                <div class="ui-g-12 ui-md-12 ui-lg-5">
+                    <div class="ui-g-12 ui-md-6 ui-lg-4">
+                        <p:outputLabel value="#{loc.stock}" for="txtStock" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtStock" value="#{stockBookCheckboxFilterBean.selectedCount}" onclick="showBook()" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}" >
+
+                        </p:inputText>
+                        <p:commandLink id="btnStock" process="@this" update="frmStockBookFilterCheckbox" actionListener="#{entryExitSummaryReportBean.openDialog(2)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_stockcheckbox').show();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax   listener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([entryExitSummaryReportBean.selectedBranchList.size() != 0 ? entryExitSummaryReportBean.selectedBranchList : entryExitSummaryReportBean.listOfBranch],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckboxwithbranch')}" />
+                        </p:commandLink>
+                    </div>
+                    <div class="ui-g-12 ui-md-6  ui-lg-4">
+                        <p:outputLabel value="#{loc.stock} #{loc.category}" for="txtCategory"  styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtCategory" onclick="showCategoryBook()" value="#{categoryBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter"  readonly="true"  placeholder="#{loc.all}" >
+
+                        </p:inputText>
+                        <p:commandLink id="btnCategory" process="@this" update="frmCategoryBookFilter" action="#{entryExitSummaryReportBean.openDialog(1)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_Category').loadContents();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax   listener="#{categoryBookCheckboxFilterBean.findFilterList([2],'frmCategoryBookFilter','olp_Category','entryExitSummaryReportcheckbox')}" />
+                        </p:commandLink>
+                    </div>
+                    <h:panelGroup id="pngGroupSupplier">
+                        <h:panelGroup rendered="#{entryExitSummaryReportBean.isCentralSupplier}">
+                            <div class="ui-g-12 ui-md-6 ui-lg-4">
+                                <p:outputLabel value="#{loc.centralsupplier}" for="txtCentralSupplier"  styleClass="Fs12 FontBold"/>
+                                <p:commandLink id="cmdCentralSupplier" resetValues="true" process="@this" global="false" title="#{loc.supplier}" actionListener="#{entryExitSummaryReportBean.centralOrLocalSupplier(0)}" update="pgEntyExitSummaryReport"  >
+                                    <i class="fa fa-refresh Fs14 tlbrAddBtn"/>                 
+                                </p:commandLink>
+
+                                <p:inputText  id="txtCentralSupplier" onclick="showCentralSupplierBook()" value="#{centralSupplierBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+
+                                </p:inputText>
+                                <p:commandLink id="btnCentralSupplier" process="@this" actionListener="#{entryExitSummaryReportBean.openDialog(3)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_centralsuppliercheckbox').loadContents();">
+                                    <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                    <p:ajax listener="#{centralSupplierBookCheckboxFilterBean.findFilterListLazyLoading([],'frmCentralSupplierBookFilterCheckbox','olp_centralsuppliercheckbox', 'reportcheckbox')}" />
+                                </p:commandLink>
+                            </div>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{!entryExitSummaryReportBean.isCentralSupplier}">
+                            <div class="ui-g-12 ui-md-6 ui-lg-4">
+                                <p:outputLabel value="#{loc.supplier}" for="txtSupplier"  styleClass="Fs12 FontBold"/>
+                                <p:commandLink id="clmSupplier" resetValues="true" process="@this" rendered="#{entryExitSummaryReportBean.isCentralSupplierIconView}" global="false" title="#{loc.centralsupplier}" actionListener="#{entryExitSummaryReportBean.centralOrLocalSupplier(1)}" update="pgEntyExitSummaryReport"  >
+                                    <i class="fa fa-refresh Fs14 tlbrAddBtn"/>                 
+                                </p:commandLink>
+
+                                <p:inputText  id="txtSupplier" onclick="showAccountBook()" value="#{accountBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+
+                                </p:inputText>
+                                <p:commandLink id="btnSupplier" process="@this" actionListener="#{entryExitSummaryReportBean.openDialog(4)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_accountcheckbox').loadContents();">
+                                    <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                    <p:ajax listener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([entryExitSummaryReportBean.selectedBranchList.size() != 0 ? entryExitSummaryReportBean.selectedBranchList : entryExitSummaryReportBean.listOfBranch],'frmAccountBookFilterCheckbox','olp_accountcheckbox', 'supplierCheckboxReport')}" />
+                                </p:commandLink>
+                            </div>
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+                </div>
+            </div>
+        </h:panelGroup>
+        <p:remoteCommand name="showCategoryBook" process="@this" update="frmCategoryBookFilter" action="#{entryExitSummaryReportBean.openDialog(1)}" oncomplete="PF('olp_Category').loadContents();" actionListener="#{categoryBookCheckboxFilterBean.findFilterList([2],'frmCategoryBookFilter','olp_Category','entryExitSummaryReportcheckbox')}" />
+        <p:remoteCommand name="showBook" process="@this" update="frmStockBookFilterCheckbox" action="#{entryExitSummaryReportBean.openDialog(2)}" oncomplete="PF('olp_stockcheckbox').show();"  actionListener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([entryExitSummaryReportBean.selectedBranchList.size() != 0 ? entryExitSummaryReportBean.selectedBranchList : entryExitSummaryReportBean.listOfBranch],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckboxwithbranch')}" />
+        <p:remoteCommand name="showCentralSupplierBook" process="@this" oncomplete="PF('olp_centralsuppliercheckbox').loadContents();" action="#{entryExitSummaryReportBean.openDialog(3)}" actionListener="#{centralSupplierBookCheckboxFilterBean.findFilterListLazyLoading([],'frmCentralSupplierBookFilterCheckbox','olp_centralsuppliercheckbox', 'reportcheckbox')}" />
+        <p:remoteCommand name="showAccountBook" process="@this" oncomplete="PF('olp_accountcheckbox').loadContents();" action="#{entryExitSummaryReportBean.openDialog(4)}" actionListener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([entryExitSummaryReportBean.selectedBranchList.size() != 0 ? entryExitSummaryReportBean.selectedBranchList : entryExitSummaryReportBean.listOfBranch],'frmAccountBookFilterCheckbox','olp_accountcheckbox', 'supplierCheckboxReport')}" />
+    </h:form>
+    <div class="EmptyBox20" />
+
+    <h:panelGroup id="pgrEntyExitSummaryReportDatatable" >
+        <h:panelGroup rendered="#{entryExitSummaryReportBean.isFind}">
+            <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                <ui:param name="bean" value="#{entryExitSummaryReportBean}"/>
+                <ui:param name="datatable" value="frmEntyExitSummaryReportDatatable:dtbEntyExitSummaryReport" />
+                <ui:param name="fileName" value="#{loc.entryexitsummaryreport}"/>
+                <ui:param name="renderedToggler" value='true'/>
+                <ui:param name="renderedExcel" value='true'/>
+                <ui:param name="renderedPdf" value='true'/>
+                <ui:param name="renderedPrint" value='true'/>
+                <ui:param name="renderedGraphic" value='false'/>
+            </ui:include>
+
+            <h:form id="frmEntyExitSummaryReportDatatable">
+
+                <p:dataTable  id="dtbEntyExitSummaryReport" class="dtbReport"  var="EntyExitSummary"  value="#{entryExitSummaryReportBean.listOfObjects}" selectionMode="single"  widgetVar="entyExitSummaryPF" emptyMessage="#{loc.norecordsfound}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{EntyExitSummary.stock.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" reflow="true" lazy="true" 
+                              >
+
+                    <p:ajax event="colReorder" listener="#{entryExitSummaryReportBean.reorder}" update="frmGridToolbar:toggle" />     
+                    <p:ajax event="colResize"  listener="#{entryExitSummaryReportBean.onResize}" />
+                
+                    <p:column id="clmBranch" headerText="#{loc.branch}" visible="#{entryExitSummaryReportBean.toogleList[0]}" exportable="#{entryExitSummaryReportBean.toogleList[0]}">
+                        <h:outputText  value="#{EntyExitSummary.branch.name}"/>
+                    </p:column>
+                    <p:column id="clmStockCode" headerText="#{loc.stockcode}" visible="#{entryExitSummaryReportBean.toogleList[1]}" exportable="#{entryExitSummaryReportBean.toogleList[1]}">
+                        <h:outputText  value="#{EntyExitSummary.stock.code}"/>
+                    </p:column>
+
+                    <p:column id="clmCenterStockCode" headerText="#{loc.centerstockcode}" visible="#{entryExitSummaryReportBean.toogleList[2]}" exportable="#{entryExitSummaryReportBean.toogleList[2]}">
+                        <h:outputText  value="#{EntyExitSummary.stock.centerProductCode}"/>
+                    </p:column>
+
+                    <p:column id="clmBarcode" headerText="#{loc.stockbarcode}" visible="#{entryExitSummaryReportBean.toogleList[3]}" exportable="#{entryExitSummaryReportBean.toogleList[3]}">
+                        <h:outputText  value="#{EntyExitSummary.stock.barcode}" />
+                    </p:column>
+
+                    <p:column id="clmStock" headerText="#{loc.stock}" visible="#{entryExitSummaryReportBean.toogleList[4]}"  exportable="#{entryExitSummaryReportBean.toogleList[4]}">
+                        <h:outputText value="#{EntyExitSummary.stock.name}" />
+                    </p:column>                   
+                    <p:column id="clmCategory" headerText="#{loc.stockcategory}"  visible="#{entryExitSummaryReportBean.toogleList[5]}" exportable="#{entryExitSummaryReportBean.toogleList[5]}">
+                        <h:outputText  value="#{EntyExitSummary.category}"/>
+                    </p:column>
+                    <p:column id="clmCentralSupplier" headerText="#{loc.centralsupplier}" visible="#{entryExitSummaryReportBean.toogleList[6]}" exportable="#{entryExitSummaryReportBean.toogleList[6]}">
+                        <h:outputText  value="#{EntyExitSummary.stock.centralSupplier.name}"/>
+                    </p:column>
+                    <p:column id="clmSupplier" headerText="#{loc.supplier}"  visible="#{entryExitSummaryReportBean.toogleList[7]}" exportable="#{entryExitSummaryReportBean.toogleList[7]}">
+                        <h:outputText  value="#{EntyExitSummary.stock.supplier.name}"/>
+                    </p:column>
+                    <p:column id="clmBrand" headerText="#{loc.brand}"  visible="#{entryExitSummaryReportBean.toogleList[8]}" exportable="#{entryExitSummaryReportBean.toogleList[8]}">
+                        <h:outputText  value="#{EntyExitSummary.stock.brand.name}"/>
+                    </p:column>
+                    <p:column id="clmWarehouse" headerText="#{loc.warehouse}" visible="#{entryExitSummaryReportBean.toogleList[9]}"  exportable="#{entryExitSummaryReportBean.toogleList[9]}">
+                        <h:outputText value="#{EntyExitSummary.warehouse.name}" />
+                    </p:column>
+
+                    <p:column id="clmTransferringAmount" headerText="#{loc.transferringamount}" visible="#{entryExitSummaryReportBean.toogleList[10]}"  exportable="#{entryExitSummaryReportBean.toogleList[10]}">
+
+                        <h:outputText value="#{entryExitSummaryReportBean.calculateTransferringBalance(EntyExitSummary)}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value="#{EntyExitSummary.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmEntryAmount" headerText="#{loc.entryamount}" visible="#{entryExitSummaryReportBean.toogleList[11]}"  exportable="#{entryExitSummaryReportBean.toogleList[11]}">
+
+                        <h:outputText value="#{EntyExitSummary.entryAmount}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value="#{EntyExitSummary.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmExitAmount" headerText="#{loc.exitamount}" visible="#{entryExitSummaryReportBean.toogleList[12]}"  exportable="#{entryExitSummaryReportBean.toogleList[12]}">
+
+                        <h:outputText value="#{EntyExitSummary.exitAmount}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value="#{EntyExitSummary.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmLastQuantity" headerText="#{loc.remainingamount}" visible="#{entryExitSummaryReportBean.toogleList[13]}"  exportable="#{entryExitSummaryReportBean.toogleList[13]}">
+
+                        <h:outputText value="#{EntyExitSummary.lastQuantity}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value="#{EntyExitSummary.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+
+
+                    <p:column id="clmStockTurnoverRate" headerText="#{loc.stockturnoverrate}" visible="#{entryExitSummaryReportBean.toogleList[14]}" exportable="#{entryExitSummaryReportBean.toogleList[14]}">
+                        <h:outputText value="#{entryExitSummaryReportBean.calculateStockTurnoverRate(EntyExitSummary)}" class="Fright">
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmStockHoldingTime" headerText="#{loc.stockholdingtime}" visible="#{entryExitSummaryReportBean.toogleList[15]}" exportable="#{entryExitSummaryReportBean.toogleList[15]}">
+                        <h:outputText value="#{entryExitSummaryReportBean.calculateStockHoldingTime(EntyExitSummary)}" class="Fright">
+                        </h:outputText>
+                    </p:column> 
+
+
+                </p:dataTable>  
+            </h:form>
+        </h:panelGroup>
+    </h:panelGroup>
+
+
+    <p:overlayPanel id="olpCategory" widgetVar="olp_Category" showEvent="none" modal="true" transient="true" for="frmEntyExitSummaryReport:btnCategory"  my="right top" at="left bottom" dismissable="true" hideEffect="blind" showCloseIcon="true" class="Wid30">
+        <ui:include src="/pages/general/common/categorybookcheckbox.xhtml">
+            <ui:param name="updateBean" value='#{entryExitSummaryReportBean}' />
+            <ui:param name="type" value='entryExitSummaryReportcheckbox' />
+            <ui:param name="parameters" value='#{[2]}' /> 
+            <ui:param name="form" value='frmCategoryBookFilter' /> 
+        </ui:include>
+    </p:overlayPanel>
+
+    <!--Kitaptan stok seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/stockbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{entryExitSummaryReportBean}' />
+        <ui:param name="for" value='frmEntyExitSummaryReport:btnStock' />
+        <ui:param name="type" value='reportcheckboxwithbranch' />
+        <ui:param name="parameters" value='#{[entryExitSummaryReportBean.selectedBranchList.size() != 0 ? entryExitSummaryReportBean.selectedBranchList : entryExitSummaryReportBean.listOfBranch]}' /> 
+        <ui:param name="columnsize" value='4' /> 
+        <ui:param name="form" value='frmStockBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_stockcheckbox" />
+    </ui:include>
+    
+    <!--Kitaptan merkezi tedarikçi seçtirmek için açılan overlay panel-->
+     <ui:include src="/pages/general/common/centralsupplierbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{entryExitSummaryReportBean}' />
+        <ui:param name="for" value='frmEntyExitSummaryReport:btnCentralSupplier' />
+        <ui:param name="type" value='reportcheckbox' />
+        <ui:param name="parameters" value='' /> 
+        <ui:param name="columnsize" value='1' /> 
+        <ui:param name="form" value='frmCentralSupplierBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_centralsuppliercheckbox" />
+    </ui:include>
+     
+     <!--Kitaptan tedarikçi seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/accountbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{entryExitSummaryReportBean}' />
+        <ui:param name="for" value='frmEntyExitSummaryReport:btnSupplier' />
+        <ui:param name="type" value='supplierCheckboxReport' />
+        <ui:param name="parameters" value='#{[entryExitSummaryReportBean.selectedBranchList.size() != 0 ? entryExitSummaryReportBean.selectedBranchList : entryExitSummaryReportBean.listOfBranch]}' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmAccountBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_accountcheckbox" />
+    </ui:include>
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.stockmovementreport}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+</ui:composition>

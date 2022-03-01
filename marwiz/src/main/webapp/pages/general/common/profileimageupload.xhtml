@@ -1,0 +1,159 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <style type="text/css">
+
+
+        .ui-fileupload-choose {
+            height: 30px !important; 
+            position: absolute;
+            opacity : 0;
+            filter : alpha( Opacity=0); 
+            -moz-opacity : 0;
+            z-index:1000;
+            bottom: 0px;
+            left: 0px;
+            width: 50% !important;
+
+        }
+
+        .ui-icon-plusthick{
+            left: 50%;
+            margin-left: -8px;
+        }
+
+        .close_button{
+            height: 30px !important; 
+            position: absolute;
+            opacity : 0;
+            filter : alpha( Opacity=0 ); 
+            -moz-opacity : 0;
+            bottom: 0px;
+            right: 0px;
+            width: 50% !important;
+            max-width: 22%;
+            left: 50%;
+            margin-bottom: 19px;                    
+            border-radius: 0 15px 15px 0 !important;
+        }
+        .close_button span:last-child{
+            
+            border-radius: 0 15px 15px 0 !important;
+        }
+
+        .ui-fileupload-buttonbar .ui-button{
+            max-width: 22%;
+            left: 29%;
+            margin-bottom: 19px;
+            border-radius: 15px 0 0 15px !important;
+            border-right: 1px solid #ECEFF1;
+        }
+
+        .ui-fileupload-choose > .ui-button-text {
+            border-radius: 0px !important;
+            -webkit-box-shadow:none !important;
+            box-shadow:none !important;
+            max-width: 150px;            
+        }
+
+
+        .close_button > .ui-button-text{
+
+            border-radius: 0px !important;
+            -webkit-box-shadow:none !important;
+            box-shadow:none !important;
+            padding-top: 4px !important;
+        }
+
+        #imagePanel:hover .ui-fileupload-choose , 
+        #imagePanel:hover .close_button{ 
+            opacity : 0.9;
+            filter : alpha( Opacity=0.9 ); 
+            -moz-opacity : 0.9;
+        }
+        .ui-fileupload-buttonbar .ui-fileupload-choose input{
+            z-index: 1000 !important;
+        }
+
+
+        .img{
+            cursor: pointer;
+            width: 120px; 
+            height: 100px; 
+        }
+        /*
+                @media (min-width: 960px) {
+                    #imagePanel{
+                        height: 100%;
+                    }
+        
+                    .img{
+                        width: 100%;
+                        margin-top: -25px !important;
+                    }
+        
+                }
+        
+                @media (min-width: 641px) and (max-width: 960px) {
+                    #imagePanel{
+                        height: 100%;
+                    }
+                    .img{
+                        width: 100%;
+                        margin-top: -0px !important;
+                    }
+        
+                }
+        */
+        .ui-button-text{
+            z-index: 0 !important;
+        } 
+
+
+        .ui-icon-close{
+            background-image: url(/Centrowiz/javax.faces.resource/images/ui-icons_ffffff_256x240.png.xhtml?ln=primefaces-sentinel) !important;
+        }
+
+        .dlg_image{
+            max-width: 60%;
+            min-width: 20%;
+
+        }
+
+        .ui-fileupload-content .ui-messages{
+            position: absolute;
+            z-index:1001;
+        }
+
+        .ui-fileupload-files{
+            position: absolute;
+        }
+
+        .ui-fileupload-files tr td:nth-child(1),.ui-fileupload-files tr td:nth-child(2),.ui-fileupload-files tr td:nth-child(3){
+            display: none !important;
+        }
+
+        .ui-fileupload-content .ui-progressbar{
+            width: 100px !important;
+        }
+
+
+    </style>
+
+    <div id="imagePanel" class="Fleft PosRelative" style="width: 100%;margin-left: auto;">
+
+        <p:fileUpload rendered="#{btnAdd}" update="@this,#{imgid}"  allowTypes="/(\.|\/)(gif|jpe?g|png)$/" invalidFileMessage="#{loc.invalidfiletype}" invalidSizeMessage="#{loc.filesizecannotbegreaterthan1mb}"
+                      label=""  auto="true" sizeLimit="1000000" fileUploadListener="#{ftpConnectionBean.handleFileUploadImage}"  mode="advanced"  />
+
+        <p:commandButton  rendered="#{btnDelete}"  process="@this"    icon="ui-icon-close white" actionListener="#{ftpConnectionBean.deleteImg()}" update="#{imgid}"  class="close_button" >
+
+        </p:commandButton>
+
+        <p:graphicImage  transient="true" cache="false" id="#{imgid}" value="#{ftpConnectionBean.path}"  class= "img" />
+
+    </div>
+</ui:composition>

@@ -1,0 +1,75 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+        <ui:param name="bean" value="#{creditCardMachineBean}"/> 
+        <ui:param name="update" value="dlgCreditCardMachineProcess"/>
+        <ui:param name="btnNewId" value='#{creditCardMachineBean.getRendered(213, 0)}'/>
+        <ui:param name="datatable" value="frmCreditCardMachine:dtbCreditCardMachine" />
+        <ui:param name="widgetvar" value="creditCardMachinePF" />
+        <ui:param name="form" value='frmToolbarCreditCardMachine' />
+        <ui:param name="fileName" value="#{loc.creditcardposdefinitions}"/> 
+        <ui:param name="renderedToggler" value='true'/>
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+    </ui:include>
+
+
+    <h:form id="frmCreditCardMachine">
+
+        <p:dataTable  id="dtbCreditCardMachine" var="creditCardMachine"  value="#{creditCardMachineBean.listOfObjects}" filteredValue="#{creditCardMachineBean.listOfFilteredObjects}" widgetVar="creditCardMachinePF" selection="#{creditCardMachineBean.selectedObject}"  selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{creditCardMachine.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                      reflow="true" rowStyleClass="#{creditCardMachine.status.id==44 ? 'ColumnColorRed' : null}" >
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{creditCardMachineBean.update()}" update="dlgCreditCardMachineProcess" global="false" /> 
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false"/>
+            <p:ajax event="colReorder" listener="#{creditCardMachineBean.reorder}" update="frmToolbarCreditCardMachine:toggle" />     
+            <p:ajax event="colResize"  listener="#{creditCardMachineBean.onResize}" />  
+
+            <f:facet name="footer" rendered="false" >
+                <p:inputText id="globalFilter" value="#{creditCardMachineBean.autoCompleteValue}"  style="display: none"  />
+            </f:facet>
+
+
+            <p:column id="clmCode" headerText="#{loc.code}" sortable="true" sortBy="#{creditCardMachine.code}" filterable="true"  filterBy="#{creditCardMachine.code}" filterMatchMode="contains" visible="#{creditCardMachineBean.toogleList[0]}" exportable="#{creditCardMachineBean.toogleList[0]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{creditCardMachine.code}" />
+            </p:column >
+            <p:column id="clmName" headerText="#{loc.name}" sortable="true" sortBy="#{creditCardMachine.name}" filterable="true"  filterBy="#{creditCardMachine.name}" filterMatchMode="contains" visible="#{creditCardMachineBean.toogleList[1]}" exportable="#{creditCardMachineBean.toogleList[1]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{creditCardMachine.name}" />
+            </p:column >
+            <p:column id="clmBankAccountName" headerText="#{loc.bankaccount}" sortable="true" sortBy="#{creditCardMachine.bankAccount.name}" filterable="true"  filterBy="#{creditCardMachine.bankAccount.name}" filterMatchMode="contains" visible="#{creditCardMachineBean.toogleList[2]}" exportable="#{creditCardMachineBean.toogleList[2]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{creditCardMachine.bankAccount.name}" />
+            </p:column >
+            <p:column id="clmStatus" headerText="#{loc.statu}" sortable="true" sortBy="#{creditCardMachine.status.tag}" filterable="true"  filterBy="#{creditCardMachine.status.tag}" filterMatchMode="contains" visible="#{creditCardMachineBean.toogleList[3]}" exportable="#{creditCardMachineBean.toogleList[3]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{creditCardMachine.status.tag}" />
+            </p:column >
+        </p:dataTable>  
+    </h:form>
+
+
+
+    <p:dialog id="dlgCreditCardMachineProcess" widgetVar="dlg_CreditCardMachineProcess" resizable="false" transient="true" focus="dlgCreditCardMachineProcess" responsive="true" dynamic="true" modal="true" closeOnEscape="true" width="40%">
+        <ui:include src="creditcardmachineprocess.xhtml" />
+    </p:dialog>
+
+
+</ui:composition>
+
+

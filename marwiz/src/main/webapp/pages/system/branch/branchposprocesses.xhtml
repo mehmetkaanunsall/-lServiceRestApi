@@ -1,0 +1,37 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+   <h:form id="frmUpdateParoIntegrationCode">
+                <p:toolbar >
+                    <f:facet name="left">
+                        <h:outputText value="#{loc.posprocesses}" class="outputTextFont Fleft MarRight8" />
+                    </f:facet>
+                    <f:facet name="right">
+                        <p:commandLink id="btnSave" title="#{loc.save}" process="@form"  rendered="#{branchSettingTabBean.getRendered(199, 0)}" class="Fright MarLeft3" update="grdUpdateParoIntegrationCode"  actionListener="#{branchSettingTabBean.savePointOfSale()}"  >
+                            <i class="fa fa-save Fs20 MarTop5 tlbrSaveBtn"/>                 
+                        </p:commandLink>
+                    </f:facet>
+                </p:toolbar>
+                <h:panelGroup id="grdUpdateParoIntegrationCode" layout="block">
+                    <div class="ui-g-12 divContent">
+                        <div class="ui-g-12 ui-md-6 ui-lg-6">     
+                            <p:outputLabel value="#{loc.pos}" for="slcPos" class="Fs12 FontBold"/>
+                            <p:selectOneMenu id="slcPos" value="#{branchSettingTabBean.selectedDialogPointOfSale.id}" required="true" styleClass="Wid95">
+                                <f:selectItem itemLabel="#{loc.choose}" itemValue="#{null}"  itemDisabled="true"/>
+                                <f:selectItems value="#{branchSettingTabBean.listOfSelectablePOS}" var="pos" itemLabel="#{pos.name}" itemValue="#{pos.id}" />
+                            </p:selectOneMenu>
+                        </div> 
+                         <div class="ui-g-12 ui-md-6 ui-lg-6"  > 
+                            <p:outputLabel value="#{loc.integrationcode}" for="txtIntegrationCode" styleClass="Fs12 FontBold"/>
+                            <p:inputText id="txtIntegrationCode" value="#{branchSettingTabBean.selectedDialogPointOfSale.integrationCode}" required="true"  placeholder="#{loc.integrationcode} "/>
+                        </div>
+                    </div>
+                </h:panelGroup>
+            </h:form>
+
+</ui:composition>

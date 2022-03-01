@@ -1,0 +1,333 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmWarehouseMovementReport">
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.warehousemovementreport}"/>
+            <ui:param name="bean" value='#{warehouseMovementReportBean}' />
+            <ui:param name="update" value="frmWarehouseMovementReportDatatable:dtbWarehouseMovementReport pgWarehouseMovementReport pgrWarehouseMovementReportDatatable" />
+        </ui:include>
+
+        <h:panelGroup id="pgWarehouseMovementReport" class="divContent" layout="block" transient="true">  
+            <div class="panelToggle  ui-g">
+                <div class="ui-g-12 ui-md-12 ui-lg-7">
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldStartDate" class="datepicker" value="#{warehouseMovementReportBean.selectedObject.beginDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldEndDate" class="datepicker" value="#{warehouseMovementReportBean.selectedObject.endDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12  ui-md-6 ui-lg-3">
+                        <p:outputLabel value="#{loc.warehouse}" for="slcWarehouse" class="FontBold Fs12"/>
+                        <p:selectCheckboxMenu  id="slcWarehouse"  value="#{warehouseMovementReportBean.selectedObject.selectedWarehouses}" 
+                                               filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slc_warehouseCheckBox"  
+                                               label="#{warehouseMovementReportBean.selectedObject.selectedWarehouses.size()!=0 ? warehouseMovementReportBean.selectedObject.selectedWarehouses.size() :loc.all} #{warehouseMovementReportBean.selectedObject.selectedWarehouses.size()!=0 ? loc.warehouse : ''} #{warehouseMovementReportBean.selectedObject.selectedWarehouses.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                            <f:selectItems value="#{warehouseMovementReportBean.listOfWarehouse}" itemLabel="#{warehouse.name}" itemValue="#{warehouse}" var="warehouse" />       
+                            <p:ajax update="slcWarehouse" oncomplete="PF('slc_warehouseCheckBox').show()" global="false"/>
+                            <p:ajax event="toggleSelect" update="slcWarehouse" oncomplete="PF('slc_warehouseCheckBox').show()" global="false"/>
+                        </p:selectCheckboxMenu>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-4 ui-lg-3">
+                        <p:outputLabel value="#{loc.type}" for="slcInvoiceType" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcInvoiceType" value="#{warehouseMovementReportBean.selectedObject.type.id}"  styleClass="Wid95">
+                            <f:selectItem itemValue="0"  itemLabel="#{loc.choose}" />
+                            <f:selectItems value="#{warehouseMovementReportBean.listOfType}"  var="type" itemLabel="#{type.nameMap.get(sessionBean.langId).name}" itemValue="#{type.id}" />
+                            <p:ajax global="false" />
+                        </p:selectOneMenu>
+                    </div> 
+
+
+
+                </div>
+
+
+
+
+                <div class="ui-g-12 ui-md-12 ui-lg-5">
+                    <div class="ui-g-12  ui-md-6 ui-lg-4">
+                        <p:outputLabel value="#{loc.entry} / #{loc.exit}" for="slcEntryExit" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcEntryExit" value="#{warehouseMovementReportBean.selectedObject.isDirection}" >
+                            <f:selectItem itemValue="0" itemLabel="#{loc.all}"  />
+                            <f:selectItem itemValue="1" itemLabel="#{loc.entry}"  />
+                            <f:selectItem itemValue="2" itemLabel="#{loc.exit}"  />
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-4">
+                        <p:outputLabel value="#{loc.stock}" for="txtStock" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtStock" value="#{stockBookCheckboxFilterBean.selectedCount}" onclick="showBook()" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}" >
+
+                        </p:inputText>
+                        <p:commandLink id="btnStock" process="@this" update="frmStockBookFilterCheckbox" actionListener="#{warehouseMovementReportBean.openDialog(1)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_stockcheckbox').show();">
+                            <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                            <p:ajax   listener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckbox')}" />
+                        </p:commandLink>
+                    </div>
+
+                    <h:panelGroup rendered="#{warehouseMovementReportBean.isCentralSupplier}">
+                        <div class="ui-g-12 ui-md-6 ui-lg-4">
+                            <p:outputLabel value="#{loc.centralsupplier}" for="txtCentralSupplier"  styleClass="Fs12 FontBold"/>
+                            <p:commandLink id="cmdCentralSupplier" resetValues="true" process="@this" global="false" title="#{loc.supplier}" actionListener="#{warehouseMovementReportBean.centralOrLocalSupplier(0)}" update="pgWarehouseMovementReport"  >
+                                <i class="fa fa-refresh Fs14 tlbrAddBtn"/>                 
+                            </p:commandLink>
+
+                            <p:inputText  id="txtCentralSupplier" onclick="showCentralSupplierBook()" value="#{centralSupplierBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+
+                            </p:inputText>
+                            <p:commandLink id="btnCentralSupplier" process="@this" actionListener="#{warehouseMovementReportBean.openDialog(2)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_centralsuppliercheckbox').loadContents();">
+                                <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                <p:ajax listener="#{centralSupplierBookCheckboxFilterBean.findFilterListLazyLoading([],'frmCentralSupplierBookFilterCheckbox','olp_centralsuppliercheckbox', 'reportcheckbox')}" />
+                            </p:commandLink>
+                        </div>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{!warehouseMovementReportBean.isCentralSupplier}">
+                        <div class="ui-g-12 ui-md-6 ui-lg-4">
+                            <p:outputLabel value="#{loc.supplier}" for="txtSupplier"  styleClass="Fs12 FontBold"/>
+                            <p:commandLink id="clmSupplier" resetValues="true" process="@this" rendered="#{sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1}" global="false" title="#{loc.centralsupplier}" actionListener="#{warehouseMovementReportBean.centralOrLocalSupplier(1)}" update="pgWarehouseMovementReport"  >
+                                <i class="fa fa-refresh Fs14 tlbrAddBtn"/>                 
+                            </p:commandLink>
+
+                            <p:inputText  id="txtSupplier" onclick="showAccountBook()" value="#{accountBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+
+                            </p:inputText>
+                            <p:commandLink id="btnSupplier" process="@this" actionListener="#{warehouseMovementReportBean.openDialog(3)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_accountcheckbox').loadContents();">
+                                <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                <p:ajax listener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([],'frmAccountBookFilterCheckbox','olp_accountcheckbox', 'supplierCheckboxReport')}" />
+                            </p:commandLink>
+                        </div>
+                    </h:panelGroup>
+                </div>
+            </div>
+        </h:panelGroup>
+        <p:remoteCommand name="showBook" process="@this" update="frmStockBookFilterCheckbox" action="#{warehouseMovementReportBean.openDialog(1)}" oncomplete="PF('olp_stockcheckbox').show();"  actionListener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckbox')}" />
+        <p:remoteCommand name="showCentralSupplierBook" process="@this" oncomplete="PF('olp_centralsuppliercheckbox').loadContents();" action="#{warehouseMovementReportBean.openDialog(2)}" actionListener="#{centralSupplierBookCheckboxFilterBean.findFilterListLazyLoading([],'frmCentralSupplierBookFilterCheckbox','olp_centralsuppliercheckbox', 'reportcheckbox')}" />
+        <p:remoteCommand name="showAccountBook" process="@this" oncomplete="PF('olp_accountcheckbox').loadContents();" action="#{warehouseMovementReportBean.openDialog(3)}" actionListener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([],'frmAccountBookFilterCheckbox','olp_accountcheckbox', 'supplierCheckboxReport')}" />
+
+    </h:form>
+    <div class="EmptyBox20" />
+
+    <h:panelGroup id="pgrWarehouseMovementReportDatatable" >
+        <h:panelGroup rendered="#{warehouseMovementReportBean.isFind}">
+            <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                <ui:param name="bean" value="#{warehouseMovementReportBean}"/>
+                <ui:param name="datatable" value="frmWarehouseMovementReportDatatable:dtbWarehouseMovementReport" />
+                <ui:param name="fileName" value="#{loc.warehousemovementreport}"/>
+                <ui:param name="renderedToggler" value='true'/>
+                <ui:param name="renderedExcel" value='true'/>
+                <ui:param name="renderedPdf" value='true'/>
+                <ui:param name="renderedPrint" value='true'/>
+                <ui:param name="renderedGraphic" value='false'/>
+            </ui:include>
+
+            <h:form id="frmWarehouseMovementReportDatatable">
+
+                <p:dataTable  id="dtbWarehouseMovementReport" class="dtbReport"  var="WarehouseMovement"  value="#{warehouseMovementReportBean.listOfObjects}" selectionMode="single"  widgetVar="productMovementPF" emptyMessage="#{loc.norecordsfound}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{WarehouseMovement.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" reflow="true" lazy="true" 
+                              >
+                    <p:ajax event="colReorder" listener="#{warehouseMovementReportBean.reorder}" update="frmGridToolbar:toggle" />     
+                    <p:ajax event="colResize"  listener="#{warehouseMovementReportBean.onResize}" />
+ 
+                    <p:column id="clmDate" headerText="#{loc.date}"  sortable="true" sortBy="#{WarehouseMovement.iwr.processdate}" visible="#{warehouseMovementReportBean.toogleList[0]}"  exportable="#{warehouseMovementReportBean.toogleList[0]}" >
+                        <h:outputText value="#{WarehouseMovement.processDate}"  >
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmWarehouse" headerText="#{loc.warehouse}" sortable="true" sortBy="#{WarehouseMovement.iw.name}" visible="#{warehouseMovementReportBean.toogleList[1]}"  exportable="#{warehouseMovementReportBean.toogleList[1]}">
+                        <h:outputText value="#{WarehouseMovement.warehouse.name}" />
+                    </p:column>
+
+                    <p:column id="clmEntryExit" headerText="#{loc.entry} / #{loc.exit}" sortable="true" sortBy="#{WarehouseMovement.iwm.is_direction}" visible="#{warehouseMovementReportBean.toogleList[2]}"  exportable="#{warehouseMovementReportBean.toogleList[2]}">
+                        <h:outputText value="#{WarehouseMovement.isDirection==1 ? loc.entry : WarehouseMovement.isDirection==2 ? loc.exit : ''}" />
+                    </p:column>
+
+                    <p:column id="clmStockCode" headerText="#{loc.stockcode}" sortable="true" sortBy="#{WarehouseMovement.stck.code}" visible="#{warehouseMovementReportBean.toogleList[3]}" exportable="#{warehouseMovementReportBean.toogleList[3]}">
+                        <h:outputText  value="#{WarehouseMovement.stock.code}"/>
+                    </p:column>
+
+                    <p:column id="clmCenterStockCode" headerText="#{loc.centerstockcode}" sortable="true" sortBy="#{WarehouseMovement.stck.centerproductcode}" visible="#{warehouseMovementReportBean.toogleList[4]}" exportable="#{warehouseMovementReportBean.toogleList[4]}">
+                        <h:outputText  value="#{WarehouseMovement.stock.centerProductCode}"/>
+                    </p:column>
+
+                    <p:column id="clmBarcode" headerText="#{loc.stockbarcode}" sortable="true" sortBy="#{WarehouseMovement.stck.barcode}" visible="#{warehouseMovementReportBean.toogleList[5]}" exportable="#{warehouseMovementReportBean.toogleList[5]}">
+                        <h:outputText  value="#{WarehouseMovement.stock.barcode}" />
+                    </p:column>
+                    <p:column id="clmStock" headerText="#{loc.stock}" sortable="true" sortBy="#{WarehouseMovement.stck.name}"  visible="#{warehouseMovementReportBean.toogleList[6]}"  exportable="#{warehouseMovementReportBean.toogleList[6]}">
+                        <h:outputText value="#{WarehouseMovement.stock.name}" />
+                    </p:column>
+                    <p:column id="clmCategory" headerText="#{loc.stockcategory}"  visible="#{warehouseMovementReportBean.toogleList[7]}" exportable="#{warehouseMovementReportBean.toogleList[7]}">
+                        <h:outputText  value="#{WarehouseMovement.category}"/>
+                    </p:column>
+                    <p:column id="clmCentralSupplier" headerText="#{loc.centralsupplier}" sortable="true" sortBy="#{WarehouseMovement.cspp.name}" rendered="#{sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType == 1}"  visible="#{warehouseMovementReportBean.toogleList[8]}" exportable="#{warehouseMovementReportBean.toogleList[8]}">
+                        <h:outputText  value="#{WarehouseMovement.stock.centralSupplier.name}"/>
+                    </p:column>
+                    <p:column id="clmSupplier" headerText="#{loc.supplier}" sortable="true" sortBy="#{WarehouseMovement.acc.name}" visible="#{warehouseMovementReportBean.toogleList[9]}" exportable="#{warehouseMovementReportBean.toogleList[9]}">
+                        <h:outputText  value="#{WarehouseMovement.stock.supplier.name}"/>
+                    </p:column>
+                    <p:column id="clmBrand" headerText="#{loc.brand}" sortable="true" sortBy="#{WarehouseMovement.br.name}" visible="#{warehouseMovementReportBean.toogleList[10]}" exportable="#{warehouseMovementReportBean.toogleList[10]}">
+                        <h:outputText  value="#{WarehouseMovement.stock.brand.name}"/>
+                    </p:column>
+
+                    <p:column id="clmQuantity" headerText="#{loc.quantity}" sortable="true" sortBy="#{WarehouseMovement.quantity}" visible="#{warehouseMovementReportBean.toogleList[11]}"  exportable="#{warehouseMovementReportBean.toogleList[11]}">
+
+                        <h:outputText value="#{WarehouseMovement.quantity}" class="Fright #{WarehouseMovement.isDirection==1 ? 'green' : 'red'}">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value="#{WarehouseMovement.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+
+                    
+                    <p:column id="clmUnitPrice" headerText="#{loc.unitprice}" sortable="true" sortBy="#{WarehouseMovement.unitPrice}" visible="#{warehouseMovementReportBean.toogleList[12]}" exportable="#{warehouseMovementReportBean.toogleList[12]}" >
+                        <h:outputText  rendered="#{WarehouseMovement.unitPrice != null}" value="#{WarehouseMovement.unitPrice}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{WarehouseMovement.currency.id > 0 ? WarehouseMovement.currency : sessionBean.user.lastBranch.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+
+                        <h:outputText  rendered="#{WarehouseMovement.unitPrice == null}"   value="-" class="Fright" />
+                          
+                    </p:column>
+
+                    <p:column id="clmTotalTax" headerText="#{loc.taxprice}"  sortable="true" sortBy="#{WarehouseMovement.totalTax}" visible="#{warehouseMovementReportBean.toogleList[13]}" exportable="#{warehouseMovementReportBean.toogleList[13]}" >
+                        <h:outputText  rendered="#{WarehouseMovement.totalTax != null}" value="#{WarehouseMovement.totalTax}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{WarehouseMovement.currency.id > 0 ? WarehouseMovement.currency : sessionBean.user.lastBranch.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+ 
+                        <h:outputText  rendered="#{WarehouseMovement.totalTax == null}"   value="-" class="Fright"/>
+                           
+                    </p:column>
+
+                    <p:column id="clmTotalMoney" headerText="#{loc.totalprice}" sortable="true" sortBy="#{WarehouseMovement.totalMoney}" visible="#{warehouseMovementReportBean.toogleList[14]}" exportable="#{warehouseMovementReportBean.toogleList[14]}" >
+                        <h:outputText  rendered="#{WarehouseMovement.totalMoney != null}" value="#{WarehouseMovement.totalMoney}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{WarehouseMovement.currency.id > 0 ? WarehouseMovement.currency : sessionBean.user.lastBranch.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+
+                        <h:outputText rendered="#{WarehouseMovement.totalMoney == null}"   value="-" class="Fright"/>
+                           
+                    </p:column>
+
+
+                    <p:columnGroup type="footer" rendered="#{warehouseMovementReportBean.listOfObjects.rowCount>0}">
+
+                        <ui:repeat value="#{warehouseMovementReportBean.currencyTotalsCollection.entrySet().toArray()}" var="entry" >
+                            <p:row>
+
+                                <p:column colspan="#{warehouseMovementReportBean.toogleList.size()-warehouseMovementReportBean.countToggle-2}" style="text-align:right" >
+                                    <f:facet name="footer" >
+                                        <h:outputText value="#{loc.quantity} : " class="FontBold" style="font-size: 15px;  color: #565656;"/>
+                                        <h:outputText value="#{warehouseMovementReportBean.currencyTotalsCollection.get(entry.key).quantity}" style="text-align:right; font-weight: bold; font-size: 15px; " >
+                                            <f:converter converterId="currencyConverter" />
+                                            <f:attribute name="type" value="" />                 
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column>
+                                
+                                 <p:column colspan="1" style="text-align:right" >
+                                    <f:facet name="footer" >
+                                        <h:outputText value="#{loc.taxprice}  : " class="FontBold" style="font-size: 15px;  color: #565656;"/>
+                                        <h:outputText value="#{warehouseMovementReportBean.currencyTotalsCollection.get(entry.key).totalTax}" style="text-align:right; font-weight: bold; font-size: 15px; " >
+                                            <f:converter converterId="currencyConverter" />
+                                            <f:attribute name="currency" value="#{warehouseMovementReportBean.currencyTotalsCollection.get(entry.key).currency.id != 0 ? warehouseMovementReportBean.currencyTotalsCollection.get(entry.key).currency : sessionBean.user.lastBranch.currency}"/>
+                                            <f:attribute name="type" value="currency" />
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column>
+
+                                <p:column colspan="1" style="text-align:right" >
+                                    <f:facet name="footer" >
+                                        <h:outputText value="#{loc.totalprice}  : " class="FontBold" style="font-size: 15px;  color: #565656;"/>
+                                        <h:outputText value="#{warehouseMovementReportBean.currencyTotalsCollection.get(entry.key).totalMoney}" style="text-align:right; font-weight: bold; font-size: 15px; " >
+                                            <f:converter converterId="currencyConverter" />
+                                            <f:attribute name="currency" value="#{warehouseMovementReportBean.currencyTotalsCollection.get(entry.key).currency.id != 0 ? warehouseMovementReportBean.currencyTotalsCollection.get(entry.key).currency : sessionBean.user.lastBranch.currency}"/>
+                                            <f:attribute name="type" value="currency" />
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column>
+
+                            </p:row>
+                        </ui:repeat>
+                    </p:columnGroup>
+
+
+                </p:dataTable>  
+            </h:form>
+        </h:panelGroup>
+    </h:panelGroup>
+
+
+    <!--Kitaptan stok seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/stockbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{warehouseMovementReportBean}' />
+        <ui:param name="for" value='frmWarehouseMovementReport:btnStock' />
+        <ui:param name="type" value='reportcheckbox' />
+        <ui:param name="parameters" value='' /> 
+        <ui:param name="columnsize" value='4' /> 
+        <ui:param name="form" value='frmStockBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_stockcheckbox" />
+    </ui:include>
+
+    <!--Kitaptan merkezi tedarikçi seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/centralsupplierbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{warehouseMovementReportBean}' />
+        <ui:param name="for" value='frmWarehouseMovementReport:btnCentralSupplier' />
+        <ui:param name="type" value='reportcheckbox' />
+        <ui:param name="parameters" value='' /> 
+        <ui:param name="columnsize" value='1' /> 
+        <ui:param name="form" value='frmCentralSupplierBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_centralsuppliercheckbox" />
+    </ui:include>
+
+    <!--Kitaptan tedarikçi seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/accountbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{warehouseMovementReportBean}' />
+        <ui:param name="for" value='frmWarehouseMovementReport:btnSupplier' />
+        <ui:param name="type" value='supplierCheckboxReport' />
+        <ui:param name="parameters" value='' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmAccountBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_accountcheckbox" />
+    </ui:include>
+
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif; font-size:14px;">#{loc.warehousemovementreport}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+
+</ui:composition>

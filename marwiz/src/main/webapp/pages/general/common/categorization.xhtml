@@ -1,0 +1,117 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <!-- Sayfalardaki kategorizasyon tabı için açılan xhtml
+    PARAMETRELER
+    bean: Hangi sayfada kullanılcaksa o sayfanın bean i
+    updateTreeandDataList: Update edilecek tree ve datalistin yolu
+    updateDataList: Update edilecek datalistin yolu
+    updateDialog: Update edilecek dialoğun yolu
+    item: Kategori clasının item objesi
+    renderBtnParent:Parent ekleme butonunun görünürlüğü
+    renderBtnChild: Child ekleme butonunun görünürlüğü
+    renderBtnEdit: Düzenleme butonunun görünürlüğü
+    renderBtnDelete: Çarpı butonunun görünürlüğü
+
+    -->
+
+    <h:form id="frmCategorization">
+        <div class="ContainerIndent">
+            <p:panelGrid columns="2" layout="grid" class="panelGridNoBorder" columnClasses="ui-grid-col-4,ui-grid-col-8">
+                <p:panel class="categoryPanelSize">
+                    <f:facet name="header">
+                        #{loc.categorytree}
+
+                        <p:commandLink class="Fright" rendered="#{renderBtnParent}" action="#{bean.createDialog(1,bean.item)}" process="@this" resetValues="true" update="#{updateDialog}" title="#{loc.addCategory}" >
+                            <i class="icon-plus Fs16 tlbrAddBtn"/>                 
+                        </p:commandLink>
+                        <p:selectBooleanCheckbox id="sbcProcess" class="Fright" value="#{bean.isSelectAllCategory}" title="#{loc.selectall}">
+                            <p:ajax update="treCategory dtlCategoryList" listener="#{bean.selectAll}" global="false" />                           
+                        </p:selectBooleanCheckbox> 
+                    </f:facet>
+                    <p:treeTable id="treCategory" value="#{bean.root}"  var="data" selectionMode="checkbox" selection="#{bean.selectedCategories}" class="categoryTreeSize treeHoverIcon" emptyMessage="#{loc.norecordsfound}">
+                        <p:ajax event="select" listener="#{bean.onNodeSelect}" update="#{updateDataList}" global="false" />
+                        <p:ajax event="unselect" listener="#{bean.onNodeUnSelect}" update="#{updateDataList}" global="false" />
+
+                        <p:column>
+
+                            <h:outputText value="#{data.name}"/>
+                            <p:commandLink class="#{sessionBean.user.isMobile?'DispInlBlock':''}" rendered="#{renderBtnChild}" process="@this" action="#{bean.createDialog(2,item)}" resetValues="true" update="#{updateDialog}" title="#{loc.add}" >
+                                <f:setPropertyActionListener value="#{data}" target="#{bean.selectedData}" />
+                                <i class="icon-plus Fs14 fltrPlusBtn"/>                 
+                            </p:commandLink>
+                            <p:commandLink class="#{sessionBean.user.isMobile?'DispInlBlock':''}" rendered="#{renderBtnEdit}" process="@this" action="#{bean.createDialog(3,item)}" resetValues="true" update="#{updateDialog}" title="#{loc.edit}" >
+                                <f:setPropertyActionListener value="#{data}" target="#{bean.selectedData}" />
+                                <i class="icon-pencil Fs14 fltrPlusBtn"/>                 
+                            </p:commandLink>
+                            <p:commandLink class="#{sessionBean.user.isMobile?'DispInlBlock':''}" rendered="#{renderBtnDelete}" process="@this" title="#{loc.delete}" action="#{bean.testBeforeDelete(bean.item)}"  update="dlgDelete">
+                                <f:setPropertyActionListener value="#{data}"  target="#{bean.selectedData}" />
+                                <i class="icon-cancel Fs14 fltrPlusBtn"/>                 
+                            </p:commandLink>
+
+                            <p:confirmDialog global="true" class="deleteConfirm MaxWid500"   id="dlgDelete" widgetVar="dlgDeleteCategory"  closeOnEscape="true" responsive="true">
+                                <f:facet name="message">
+                                    <h:outputText value="#{loc.areyousureyouwanttodelete}"  style="white-space: pre-wrap;">
+                                        <i class="icon-trash Fs20 tlbrDeleteBtn" /> 
+                                    </h:outputText>
+
+                                </f:facet>
+                                <p:commandButton value="#{loc.yes}" action="#{bean.delete()}" onclick="PF('dlgDeleteCategory').hide()" update="#{updateTreeandDataList}" process="@this" styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+                                <p:commandButton value="#{loc.no}" type="button" onclick="PF('dlgDeleteCategory').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+                            </p:confirmDialog>
+
+
+
+                        </p:column>
+                    </p:treeTable>
+
+                </p:panel>
+                <p:panel header="#{loc.categorylist}" class="categoryPanelSize">
+                    <p:dataList id="dtlCategoryList" emptyMessage="" value="#{bean.selectedCategoryList}" var="data" type="definition" class="categoryDataList" >
+
+                        <h:panelGroup class="categoryOutputText">
+                            <h:outputText value="#{data.categorization.name}" />
+                            <h:commandLink actionListener="#{bean.removeSelectedCategories}" class="TextDecNone">
+                                <i class="icon-cancel gray Fs10 Fright"></i>
+                                <f:param name="category" value="#{data.categorization.id}"/>
+                                <f:ajax render="#{updateTreeandDataList}"/>
+                            </h:commandLink>
+                        </h:panelGroup>
+                    </p:dataList>
+                </p:panel>
+
+                <div class="EmptyBox20"></div>
+            </p:panelGrid>
+        </div>
+
+        <p:remoteCommand name="deletecategory" update="#{updateTreeandDataList}" delay="500" process="@this" action="#{bean.delete()}"  />
+
+
+
+    </h:form>
+
+    <p:dialog id="dlgCategory" widgetVar="dlg_category" dynamic="true" modal="true" resizable="false" responsive="true" closeOnEscape="true" > 
+        <h:form id="frmCategory">
+            <ui:include src="/pages/general/common/processtoolbar.xhtml">
+                <ui:param name="outputtext" value="#{bean.processType==3 ? loc.editcategory :  loc.addCategory}"/>
+                <ui:param name="bean" value='#{bean}'/>
+                <ui:param name="update" value="#{updateTreeandDataList} txtCategoryName"/>
+                <ui:param name="btnSaveId" value="true"/>
+            </ui:include>
+            <h:panelGroup layout="block">
+                <div class="ui-g divContent">
+                    <div class="ui-g-12 ui-md-12">
+                        <p:outputLabel value="#{loc.categoryname}" class="FontBold Fs12" for="txtCategoryName"/>
+                        <p:inputText id="txtCategoryName" value="#{bean.category.name}" required="true" class="Wid95"/>
+                    </div>
+                </div>
+
+            </h:panelGroup>
+
+        </h:form>
+    </p:dialog>  
+
+</ui:composition>

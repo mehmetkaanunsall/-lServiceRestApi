@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                            http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://www.springframework.org/schema/context
+                            http://www.springframework.org/schema/context/spring-context.xsd
+                            http://www.springframework.org/schema/tx 
+                            http://www.springframework.org/schema/tx/spring-tx.xsd">
+    
+    <bean id="orderDao" class="com.mepsan.marwiz.finance.order.dao.OrderDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="orderService" class="com.mepsan.marwiz.finance.order.business.OrderService" lazy-init="true" scope="prototype">
+    </bean> 
+
+    <bean id="gfOrderService" class="com.mepsan.marwiz.finance.order.business.GFOrderService" lazy-init="true" scope="prototype">
+    </bean> 
+    
+    <bean id="orderItemDao" class="com.mepsan.marwiz.finance.order.dao.OrderItemDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="orderItemService" class="com.mepsan.marwiz.finance.order.business.OrderItemService" lazy-init="true" scope="prototype">
+    </bean> 
+    
+    <bean id="gfOrderItemService" class="com.mepsan.marwiz.finance.order.business.GFOrderItemService" lazy-init="true" scope="prototype">
+    </bean> 
+    
+    <bean id="orderRelatedRecordService" class="com.mepsan.marwiz.finance.order.business.OrderRelatedRecordService" lazy-init="true" scope="prototype">
+
+    </bean>
+
+    <bean id="orderRelatedRecordDao" class="com.mepsan.marwiz.finance.order.dao.OrderRelatedRecordDao" lazy-init="true" scope="prototype">
+         <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+</beans>

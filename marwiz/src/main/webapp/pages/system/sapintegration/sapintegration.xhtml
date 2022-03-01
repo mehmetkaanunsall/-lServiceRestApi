@@ -1,0 +1,151 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+    <c:if test="#{sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranchSetting.erpIntegrationId == 1}">
+        <ui:include src="integrationforsap.xhtml"/>
+    </c:if> 
+
+    <c:if test="#{!sessionBean.user.lastBranchSetting.isCentralIntegration or (sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranchSetting.erpIntegrationId != 1)}"> 
+
+        <h:form id="frmSapIntegration">
+
+
+
+
+            <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+                <ui:param name="outputtext" value="#{loc.sapintegrationprocess}"/>
+                <ui:param name="bean" value='#{sapIntegrationBean}' />
+                <ui:param name="update" value="frmSapIntegrationDatatable:dtbSapIntegration pgSapIntegration pgrSapIntegrationDatatable" />
+            </ui:include>
+
+
+
+
+            <h:panelGroup id="pgSapIntegration" class="divContent" layout="block" transient="true">  
+                <div class="panelToggle  ui-g">
+                    <div class="ui-g-12  ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.processtype}" for="slcEntryExit" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcEntryExit" value="#{sapIntegrationBean.processType}" >
+                            <f:selectItem itemValue="1" itemLabel="#{loc.recoveries}"  />
+                            <f:selectItem itemValue="2" itemLabel="#{loc.exitfromsafetobank}"  />
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldStartDate" class="datepicker" value="#{sapIntegrationBean.beginDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldEndDate" class="datepicker" value="#{sapIntegrationBean.endDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                            <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                        </p:calendar>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:panelGrid layout="grid" columns="1" class="pngCheckBoxReport"  >
+                            <p:triStateCheckbox itemLabel="#{loc.sent}" value="#{sapIntegrationBean.isSend}"/>
+                        </p:panelGrid>
+                    </div>
+
+
+                </div>
+            </h:panelGroup>
+        </h:form>
+        <div class="EmptyBox20" />
+
+        <h:panelGroup id="pgrSapIntegrationDatatable" >
+            <h:panelGroup rendered="#{sapIntegrationBean.isFind}">
+                <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                    <ui:param name="bean" value="#{sapIntegrationBean}"/>
+                    <ui:param name="datatable" value="frmSapIntegrationDatatable:dtbSapIntegration" />
+                    <ui:param name="fileName" value="#{loc.sapintegrationprocess}"/>
+                    <ui:param name="renderedToggler" value='true'/>
+                    <ui:param name="renderedExcel" value='false'/>
+                    <ui:param name="renderedPdf" value='false'/>
+                    <ui:param name="renderedPrint" value='false'/>
+                    <ui:param name="renderedIntegration" value='true'/>
+                </ui:include>
+
+                <h:form id="frmSapIntegrationDatatable">
+
+                    <p:dataTable  id="dtbSapIntegration"  var="sap"  value="#{sapIntegrationBean.listOfSap}" selection="#{sapIntegrationBean.selectedSap}"  widgetVar="productMovementPF" emptyMessage="#{loc.norecordsfound}"
+                                  rows="#{sessionBean.user.defualtGridSize}" rowKey="#{sap.financingDocument.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                                  rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"
+                                  class="salaryPaymentDatatable" >
+
+                        <p:ajax event="page" global="false"/>
+                        <p:ajax event="filter" global="false"/>
+                        <p:ajax event="rowSelectCheckbox" global="false" />
+                        <p:ajax event="rowUnselectCheckbox" global="false"  />
+                        <p:ajax event="toggleSelect" global="false" />
+
+                        <p:column selectionMode="multiple" style="width:26px; text-align:center;" selectRow="false"/>
+
+                        <p:column id="clmDate"  selectRow="false"  headerText="#{loc.date}" visible="#{sapIntegrationBean.toogleList[0]}"  exportable="#{sapIntegrationBean.toogleList[0]}">
+                            <h:outputText value="#{sap.financingDocument.documentDate}"  >
+                                <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                            </h:outputText>
+                        </p:column>
+
+                        <p:column id="clmType"  selectRow="false"  headerText="#{loc.processtype}" visible="#{sapIntegrationBean.toogleList[1]}"  exportable="#{sapIntegrationBean.toogleList[1]}">
+                            <h:outputText value="#{sap.financingDocument.financingType.id == 47 ? loc.cashproceeds : 
+                                                   (sap.financingDocument.financingType.id == 73 ? loc.creditcardcollection : loc.exitfromsafetobank)}" />
+                        </p:column>
+
+                        <p:column id="clmBranchCode"  selectRow="false"  headerText="#{loc.branchcode}" visible="#{sapIntegrationBean.toogleList[2]}"  exportable="#{sapIntegrationBean.toogleList[2]}">
+                            <h:outputText value="#{sap.branchCode}" />
+                        </p:column>
+
+                        <p:column id="clmBankName"  selectRow="false"  headerText="#{loc.bankname}" visible="#{sapIntegrationBean.toogleList[3]}" exportable="#{sapIntegrationBean.toogleList[3]}">
+                            <h:outputText  value="#{sap.bankAccount.name}"/>
+                        </p:column>
+
+                        <p:column id="clmAccountNumber"  selectRow="false"  headerText="#{loc.accountnumber}" visible="#{sapIntegrationBean.toogleList[4]}" exportable="#{sapIntegrationBean.toogleList[4]}">
+                            <h:outputText  value="#{sap.bankAccount.accountNumber}"/>
+                        </p:column>
+
+                        <p:column id="clmSafeCode"  selectRow="false"  headerText="#{loc.safecode}" visible="#{sapIntegrationBean.toogleList[5]}" exportable="#{sapIntegrationBean.toogleList[5]}">
+                            <h:outputText  value="#{sap.safe.code}" />
+                        </p:column>
+
+                        <p:column id="clmDescription"  selectRow="false"  headerText="#{loc.description}" visible="#{sapIntegrationBean.toogleList[6]}" exportable="#{sapIntegrationBean.toogleList[6]}">
+                            <h:outputText  value="#{sap.financingDocument.description}" />
+                        </p:column>
+
+                        <p:column id="clmPrice" headerText="#{loc.processamount}" visible="#{sapIntegrationBean.toogleList[7]}"  exportable="#{sapIntegrationBean.toogleList[7]}">
+                            <h:outputText value="#{sap.financingDocument.price}" class="Fright">
+                                <f:converter converterId="currencyConverter" />
+                                <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                <f:attribute name="type" value="currency" />
+                            </h:outputText>
+                        </p:column>
+
+                        <p:column id="clmSend" headerText="#{loc.sent}" class="TexAlCenter" visible="#{sapIntegrationBean.toogleList[8]}"  exportable="#{sapIntegrationBean.toogleList[8]}">
+                            <p:commandLink global="false" class="MarLeft-5" >
+                                <i class="Fs16 #{sap.isSend ? 'icon-ok green' :'icon-cancel red'} "/> 
+                            </p:commandLink>
+                        </p:column>
+
+                        <p:column id="clmSendDescription"  selectRow="false"  headerText="#{loc.senddesc}" visible="#{sapIntegrationBean.toogleList[9]}" exportable="#{sapIntegrationBean.toogleList[9]}">
+                            <h:outputText  value="#{sap.response}" />
+                        </p:column>
+
+                    </p:dataTable>  
+                </h:form>
+            </h:panelGroup>
+        </h:panelGroup>
+
+    </c:if> 
+
+
+</ui:composition>
+

@@ -1,0 +1,62 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">  
+
+
+    <h:form id="frmIncomingEInvoiceStockProcess" >  
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.stockprocess}"/>
+            <ui:param name="bean" value='#{incomingEInvoicesBean}' />
+            <ui:param name="update" value="frmIncomingEInvoiceStockProcess:pgrIncomingEInvoiceStockProcess" />
+            <ui:param name="btnSaveId" value="false" />
+            <ui:param name="btnDeleteId" value="false" />
+        </ui:include>
+
+        <h:panelGroup id="pgrIncomingEInvoiceStockProcess" layout="block">
+
+            <div class="ui-g-12 divContent">
+                <div class="ui-g-12 ">
+                    <div class="#{incomingEInvoicesBean.selectedObject.isFuel ? 'ui-g-12 ui-md-6 ui-lg-6' : 'ui-g-12 ui-md-12 ui-lg-12'}">
+                        <p:outputLabel value="#{loc.stockname}" for="txtStockName" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtStockName" onclick="showStockBook()" value="#{incomingEInvoicesBean.selectedInvoiceItem.oldStockName}" class="inputPositionForBookFilter" required="true" 
+                                     readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.stockname}">
+                        </p:inputText>
+                        <p:commandLink id="btnStock"  class="commandLinkPositionForBookFilter" process="@this" oncomplete="PF('olp_stock').loadContents();" title="#{loc.stockmatch}" >
+                            <i class="fa fa-book Fs16 softgray iconPositionForBookFilter " />   
+                            <p:ajax listener="#{stockBookFilterBean.findFilterListLazyLoading([incomingEInvoicesBean.selectedObject, incomingEInvoicesBean.selectedInvoiceItem.oldUnitName],'frmStockBookFilter','olp_stock','einvoicestock')}" global="false"   />
+                        </p:commandLink>
+                    </div>
+
+                    <h:panelGroup rendered="#{incomingEInvoicesBean.selectedObject.isFuel}">
+                        <div class="ui-g-12 ui-md-6 ui-lg-6">
+                            <p:outputLabel value="#{loc.warehouse}" for="slcWarehouse" styleClass="Fs12 FontBold"/>
+                            <p:selectOneMenu id="slcWarehouse" disabled="#{!incomingEInvoicesBean.selectedInvoiceItem.isListFuelWarehouse}" value="#{incomingEInvoicesBean.selectedInvoiceItem.warehouse.id}" required="true" >
+                                <f:selectItems value="#{incomingEInvoicesBean.selectedInvoiceItem.listOfFuelWarehouse}"  var="warehouse" itemLabel="#{warehouse.name}" itemValue="#{warehouse.id}" />
+                                <p:ajax listener="#{incomingEInvoicesBean.changeFuelWarehouse()}"  />
+                            </p:selectOneMenu>
+                        </div>
+                    </h:panelGroup>
+                </div>
+            </div>
+
+
+
+
+
+        </h:panelGroup>
+
+        <p:remoteCommand name="showStockBook" process="@this" oncomplete="PF('olp_stock').loadContents()" actionListener="#{stockBookFilterBean.findFilterListLazyLoading([incomingEInvoicesBean.selectedObject, incomingEInvoicesBean.selectedInvoiceItem.oldUnitName],'frmStockBookFilter','olp_stock','einvoicestock')}"  />
+
+    </h:form>
+
+
+</ui:composition>
+
+
+
+
+
+

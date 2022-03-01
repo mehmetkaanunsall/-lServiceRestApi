@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                            http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://www.springframework.org/schema/context
+                            http://www.springframework.org/schema/context/spring-context.xsd
+                            http://www.springframework.org/schema/tx 
+                            http://www.springframework.org/schema/tx/spring-tx.xsd">
+    
+    <bean id="bankDao" class="com.mepsan.marwiz.finance.bank.dao.BankDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+     
+    </bean>
+    
+    <bean id="bankService" class="com.mepsan.marwiz.finance.bank.business.BankService" lazy-init="true" scope="prototype">
+       
+    </bean> 
+    
+    <bean id="gFBankService" class="com.mepsan.marwiz.finance.bank.business.GFBankService" lazy-init="true" scope="prototype">
+       
+    </bean> 
+
+    <bean id="bankBranchDao" class="com.mepsan.marwiz.finance.bank.dao.BankBranchDao"  lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+     
+    </bean>
+    
+    <bean id="bankBranchService" class="com.mepsan.marwiz.finance.bank.business.BankBranchService" lazy-init="true" scope="prototype" >
+       
+    </bean> 
+
+    
+</beans>

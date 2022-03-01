@@ -1,0 +1,422 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:form id="frmFuelShift">
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.fuelshiftreport}"/>
+            <ui:param name="bean" value='#{fuelShiftReportBean}' />
+            <ui:param name="update" value="pgrDatePicker frmFuelShiftReport:dtbFuelShiftReport pngFuelShiftDatatable"/>
+        </ui:include>
+        <h:panelGroup id="pgrDatePicker" layout="block" transient="true"> 
+            <div class="ui-g divContent">
+                <div class="ui-g-12 panelToggle">
+                    <div class="ui-g-12">
+                        <div class="ui-g-12 ui-md-6 ui-lg-3">
+                            <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                            <p:calendar id="cldStartDate" class="datepicker" value="#{fuelShiftReportBean.fuelShiftReport.reportBeginDate}"  required="true" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"  beforeShow="dpClearButton"  timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20">
+                                <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                            </p:calendar>
+                        </div>
+                        <div class="ui-g-12 ui-md-6 ui-lg-3">
+                            <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                            <p:calendar id="cldEndDate" class="datepicker" value="#{fuelShiftReportBean.fuelShiftReport.reportEndDate}" required="true" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"  beforeShow="dpClearButton"  timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20">
+                                <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                            </p:calendar>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </h:panelGroup>
+    </h:form>
+
+    <div class="EmptyBox20"/>
+
+
+    <h:panelGroup id="pngFuelShiftDatatable" >
+        <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+            <ui:param name="bean" value="#{fuelShiftReportBean}"/> 
+            <ui:param name="datatable" value="frmFuelShiftReport:dtbFuelShiftReport" />
+            <ui:param name="fileName" value="#{loc.fuelshiftreport}"/>
+            <ui:param name="outputText" value="#{loc.fuelshiftreport}"/>
+            <ui:param name="renderedToggler" value='true'/>
+            <ui:param name="renderedExcel" value='true'/>
+            <ui:param name="renderedPdf" value='true'/>
+            <ui:param name="renderedPrint" value='true'/>
+            <ui:param name="renderedGraphic" value='false'/>
+
+        </ui:include>
+
+        <h:form id="frmFuelShiftReport">
+
+            <p:dataTable  id="dtbFuelShiftReport" var="Shift"  value="#{fuelShiftReportBean.listOfObjects}" selection="#{fuelShiftReportBean.selectedObject}" selectionMode="single"  widgetVar="shiftReportPF" emptyMessage="#{loc.norecordsfound}"
+                          rows="#{sessionBean.user.defualtGridSize}" rowKey="#{Shift.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                          rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="false" lazy="true" 
+                          >
+
+                <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{fuelShiftReportBean.goToDetail}" global="false" />  
+                <p:ajax event="colReorder" listener="#{fuelShiftReportBean.reorder}" update="frmGridToolbar:toggle" />     
+                <p:ajax event="colResize"  listener="#{fuelShiftReportBean.onResize}" />
+
+                <p:column id="clmShiftBeginDate" headerText="#{loc.startdate}" visible="#{fuelShiftReportBean.toogleList[0]}" exportable="#{fuelShiftReportBean.toogleList[0]}">
+                    <h:outputText value="#{Shift.beginDate}">
+                        <f:convertDateTime pattern="dd.MM.yyyy HH:mm" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmShiftEndDate" headerText="#{loc.enddate}" visible="#{fuelShiftReportBean.toogleList[1]}" exportable="#{fuelShiftReportBean.toogleList[1]}">
+                    <h:outputText value="#{Shift.endDate}">
+                        <f:convertDateTime pattern="dd.MM.yyyy HH:mm" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmFuelShiftNo" headerText="#{loc.shiftno}"   visible="#{fuelShiftReportBean.toogleList[2]}"  exportable="#{fuelShiftReportBean.toogleList[2]}">
+                    <h:outputText value="#{Shift.shiftNo}"/> 
+                </p:column>
+
+                <p:column id="clmTotalAmount" headerText="#{loc.totalsalequantity}" visible="#{fuelShiftReportBean.toogleList[3]}"   exportable="#{fuelShiftReportBean.toogleList[3]}">
+                    <h:outputText value="#{Shift.totalSalesAmount}" class="Fright">
+                        <f:converter converterId="currencyConverter"/>
+                        <f:attribute name="type" value="liter"/>
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmTotalSaleAmount" headerText="#{loc.totalsalesamount}" visible="#{fuelShiftReportBean.toogleList[4]}"   exportable="#{fuelShiftReportBean.toogleList[4]}">
+                    <h:outputText value="#{Shift.totalSalesPrice}" class="Fright">
+                        <f:converter converterId="currencyConverter"/>
+                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency"/>     
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmIncomePrice" headerText="#{loc.income}"  visible="#{fuelShiftReportBean.toogleList[5]}"   exportable="#{fuelShiftReportBean.toogleList[5]}">
+                    <h:outputText value="#{Shift.incomePrice}" class="Fright">
+                        <f:converter converterId="currencyConverter"/>
+                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency"/>     
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmCreditCardSalePrice" headerText="#{loc.creditcardcollection}"  visible="#{fuelShiftReportBean.toogleList[6]}"   exportable="#{fuelShiftReportBean.toogleList[6]}">
+                    <h:outputText value="#{Shift.creditCardPaymentPrice}" class="Fright">
+                        <f:converter converterId="currencyConverter"/>
+                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency"/>     
+                    </h:outputText>
+                </p:column> 
+
+
+            <!--    <p:column id="clmCreditSalePrice" headerText="#{loc.creditcollection}" visible="#{fuelShiftReportBean.toogleList[6]}"   exportable="#{fuelShiftReportBean.toogleList[6]}">
+                    <h:outputText value="#{Shift.creditPaymentPrice}" class="Fright">
+                        <f:converter converterId="currencyConverter"/>
+                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency"/>     
+                    </h:outputText>
+                </p:column>
+                -->
+                <p:column id="clmExpense" headerText="#{loc.expense}" visible="#{fuelShiftReportBean.toogleList[7]}"   exportable="#{fuelShiftReportBean.toogleList[7]}">
+                    <h:outputText value="#{Shift.expensePrice}" class="Fright">
+                        <f:converter converterId="currencyConverter"/>
+                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency"/>     
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmCashPrice" headerText="#{loc.cashproceeds}" visible="#{fuelShiftReportBean.toogleList[8]}"   exportable="#{fuelShiftReportBean.toogleList[8]}">
+                    <h:outputText value="#{Shift.cashPaymentPrice}" class="Fright">
+                        <f:converter converterId="currencyConverter"/>
+                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency"/>     
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmDeficitSurplus" headerText="#{loc.deficitorsurplus}" visible="#{fuelShiftReportBean.toogleList[9]}"   exportable="#{fuelShiftReportBean.toogleList[9]}">
+                    <h:outputText value="#{Shift.deficitSurplusPrice}" class="Fright">
+                        <f:converter converterId="currencyConverter"/>
+                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency"/>     
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmParo" headerText="#{loc.copyofparo}" visible="#{fuelShiftReportBean.toogleList[10]}"   exportable="#{fuelShiftReportBean.toogleList[10]}" rendered="#{fuelShiftReportBean.specialItem==1}">
+                    <h:outputText value="#{Shift.paroPaymentPrice}" class="Fright">
+                        <f:converter converterId="currencyConverter"/>
+                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency"/>     
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmTts" headerText="#{loc.copyoftts}" visible="#{fuelShiftReportBean.toogleList[11]}"   exportable="#{fuelShiftReportBean.toogleList[11]}">
+                    <h:outputText value="#{Shift.ttsPaymentPrice}" class="Fright">
+                        <f:converter converterId="currencyConverter"/>
+                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency"/>     
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmFuelCard" headerText="#{loc.fuelcard}" visible="#{fuelShiftReportBean.toogleList[12]}"   exportable="#{fuelShiftReportBean.toogleList[12]}" rendered="#{fuelShiftReportBean.specialItem==1}">
+                    <h:outputText value="#{Shift.fuelCardPaymentPrice}" class="Fright">
+                        <f:converter converterId="currencyConverter"/>
+                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency"/>     
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmGiftCard" headerText="#{loc.presentcard}" visible="#{fuelShiftReportBean.toogleList[13]}"   exportable="#{fuelShiftReportBean.toogleList[13]}" rendered="#{fuelShiftReportBean.specialItem==1}">
+                    <h:outputText value="#{Shift.presentPaymentPrice}" class="Fright">
+                        <f:converter converterId="currencyConverter"/>
+                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency"/>     
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmDkv" headerText="#{loc.copyofdkv}" visible="#{fuelShiftReportBean.toogleList[14]}"   exportable="#{fuelShiftReportBean.toogleList[14]}" rendered="#{fuelShiftReportBean.specialItem==1}">
+                    <h:outputText value="#{Shift.dkvPaymentPrice}" class="Fright">
+                        <f:converter converterId="currencyConverter"/>
+                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency"/>     
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmUkt" headerText="#{loc.copyofuta}" visible="#{fuelShiftReportBean.toogleList[15]}"   exportable="#{fuelShiftReportBean.toogleList[15]}" rendered="#{fuelShiftReportBean.specialItem==1}">
+                    <h:outputText value="#{Shift.utaPaymentPrice}" class="Fright">
+                        <f:converter converterId="currencyConverter"/>
+                        <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                        <f:attribute name="type" value="currency"/>     
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmVehicleCount" headerText="#{loc.vehiclecount}" visible="#{fuelShiftReportBean.toogleList[16]}"   exportable="#{fuelShiftReportBean.toogleList[16]}">
+                    <h:outputText value="#{Shift.numberofVehicle}"  class="Fright"/>
+                </p:column>
+
+                <p:column id="clmGraphic" style="text-align: center !important; width: 80px;" headerText="#{loc.graphic}"  visible="#{fuelShiftReportBean.toogleList[17]}"   exportable="false">
+                    <p:commandLink id="btnGraphic" title="#{loc.detail}"  actionListener="#{fuelShiftReportBean.openDialog(Shift)}"  update="dlgFuelShiftGraphic" >
+                        <i class="icon-chart-bar"/>
+                    </p:commandLink>  
+                </p:column>
+
+                <p:column id="clmPrint" headerText="#{loc.print}"   style="text-align: center !important;  width: 80px;" visible="#{fuelShiftReportBean.toogleList[18]}"   exportable="false">
+                    <p:commandLink id="btnPrint"  title="#{loc.print}" actionListener="#{fuelShiftReportBean.print(Shift)}"     >
+                        <i class="icon-print"  />
+                    </p:commandLink> 
+                </p:column>
+
+                <p:columnGroup type="footer" class="Fright" rendered="#{!fuelShiftReportBean.listOfTotals.isEmpty()}">     
+                    <p:row>
+                        <p:column style="text-align:right;" visible="#{fuelShiftReportBean.toogleList[0]}">
+                            <f:facet name="footer"  >
+                            </f:facet>
+                        </p:column>
+                        <p:column style="text-align:right;" visible="#{fuelShiftReportBean.toogleList[1]}">
+                            <f:facet name="footer"  >
+                            </f:facet>
+                        </p:column>
+                        <p:column style="text-align:right;" visible="#{fuelShiftReportBean.toogleList[2]}">
+                            <f:facet name="footer"  >
+                            </f:facet>
+                        </p:column>
+                        <p:column visible="#{fuelShiftReportBean.toogleList[3]}">
+                            <f:facet name="footer"  >
+                                <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{fuelShiftReportBean.listOfTotals.get(0).totalSalesAmount}" >
+                                    <f:converter converterId="currencyConverter"/>
+                                    <f:attribute name="type" value="liter"/>
+                                </h:outputText>
+                            </f:facet>
+                        </p:column>  
+                        <p:column visible="#{fuelShiftReportBean.toogleList[4]}">
+                            <f:facet name="footer"  >
+                                <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{fuelShiftReportBean.listOfTotals.get(0).totalSalesPrice}">
+                                    <f:converter converterId="currencyConverter"/>
+                                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                    <f:attribute name="type" value="currency"/>     
+                                </h:outputText>
+                            </f:facet>
+                        </p:column>  
+                        <p:column visible="#{fuelShiftReportBean.toogleList[5]}">
+                            <f:facet name="footer"  >
+                                <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{fuelShiftReportBean.listOfTotals.get(0).incomePrice}">
+                                    <f:converter converterId="currencyConverter"/>
+                                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                    <f:attribute name="type" value="currency"/>     
+                                </h:outputText>
+                            </f:facet>
+                        </p:column>  
+                        <p:column visible="#{fuelShiftReportBean.toogleList[6]}">
+                            <f:facet name="footer"  >
+                                <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{fuelShiftReportBean.listOfTotals.get(0).creditCardPaymentPrice}">
+                                    <f:converter converterId="currencyConverter"/>
+                                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                    <f:attribute name="type" value="currency"/>     
+                                </h:outputText>
+                            </f:facet>
+                        </p:column>  
+
+                    <!--    <p:column visible="#{fuelShiftReportBean.toogleList[7]}">
+                            <f:facet name="footer"  >
+                                <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{fuelShiftReportBean.listOfTotals.get(0).creditPaymentPrice}">
+                                    <f:converter converterId="currencyConverter"/>
+                                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                    <f:attribute name="type" value="currency"/>     
+                                </h:outputText>
+                            </f:facet>
+                        </p:column>
+                        -->
+                        <p:column visible="#{fuelShiftReportBean.toogleList[7]}">
+                            <f:facet name="footer"  >
+                                <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{fuelShiftReportBean.listOfTotals.get(0).expensePrice}">
+                                    <f:converter converterId="currencyConverter"/>
+                                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                    <f:attribute name="type" value="currency"/>     
+                                </h:outputText>
+                            </f:facet>
+                        </p:column>
+                        <p:column visible="#{fuelShiftReportBean.toogleList[8]}">
+                            <f:facet name="footer"  >
+                                <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{fuelShiftReportBean.listOfTotals.get(0).cashPaymentPrice}">
+                                    <f:converter converterId="currencyConverter"/>
+                                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                    <f:attribute name="type" value="currency"/>     
+                                </h:outputText>
+                            </f:facet>
+                        </p:column>
+                        <p:column visible="#{fuelShiftReportBean.toogleList[9]}">
+                            <f:facet name="footer"  >
+                                <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{fuelShiftReportBean.listOfTotals.get(0).deficitSurplusPrice}">
+                                    <f:converter converterId="currencyConverter"/>
+                                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                    <f:attribute name="type" value="currency"/>     
+                                </h:outputText>
+                            </f:facet>
+                        </p:column>
+
+                        <p:column visible="#{fuelShiftReportBean.toogleList[10]}" rendered="#{fuelShiftReportBean.specialItem==1}">
+                            <f:facet name="footer"  >
+                                <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{fuelShiftReportBean.listOfTotals.get(0).paroPaymentPrice}">
+                                    <f:converter converterId="currencyConverter"/>
+                                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                    <f:attribute name="type" value="currency"/>     
+                                </h:outputText>
+                            </f:facet>
+                        </p:column>
+                        <p:column visible="#{fuelShiftReportBean.toogleList[11]}">
+                            <f:facet name="footer"  >
+                                <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{fuelShiftReportBean.listOfTotals.get(0).ttsPaymentPrice}">
+                                    <f:converter converterId="currencyConverter"/>
+                                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                    <f:attribute name="type" value="currency"/>     
+                                </h:outputText>
+                            </f:facet>
+                        </p:column>
+                        <p:column style="text-align:right;" visible="#{fuelShiftReportBean.toogleList[12]}" rendered="#{fuelShiftReportBean.specialItem==1}">
+                            <f:facet name="footer"  >
+                                <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{fuelShiftReportBean.listOfTotals.get(0).fuelCardPaymentPrice}">
+                                    <f:converter converterId="currencyConverter"/>
+                                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                    <f:attribute name="type" value="currency"/>     
+                                </h:outputText>
+                            </f:facet>
+                        </p:column>
+
+                        <p:column style="text-align:right;" visible="#{fuelShiftReportBean.toogleList[13]}" rendered="#{fuelShiftReportBean.specialItem==1}">
+                            <f:facet name="footer"  >
+                                <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{fuelShiftReportBean.listOfTotals.get(0).presentPaymentPrice}">
+                                    <f:converter converterId="currencyConverter"/>
+                                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                    <f:attribute name="type" value="currency"/>     
+                                </h:outputText>
+                            </f:facet>
+                        </p:column>
+                        <p:column style="text-align:right;" visible="#{fuelShiftReportBean.toogleList[14]}" rendered="#{fuelShiftReportBean.specialItem==1}">
+                            <f:facet name="footer"  >
+                                <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{fuelShiftReportBean.listOfTotals.get(0).dkvPaymentPrice}">
+                                    <f:converter converterId="currencyConverter"/>
+                                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                    <f:attribute name="type" value="currency"/>     
+                                </h:outputText>
+                            </f:facet>
+                        </p:column>
+                        <p:column style="text-align:right;" visible="#{fuelShiftReportBean.toogleList[15]}" rendered="#{fuelShiftReportBean.specialItem==1}">
+                            <f:facet name="footer"  >
+                                <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{fuelShiftReportBean.listOfTotals.get(0).utaPaymentPrice}">
+                                    <f:converter converterId="currencyConverter"/>
+                                    <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                                    <f:attribute name="type" value="currency"/>     
+                                </h:outputText>
+                            </f:facet>
+                        </p:column>
+                        <p:column visible="#{fuelShiftReportBean.toogleList[16]}">
+                            <f:facet name="footer"  >
+                                <h:outputText class="Fright FontBold" style="font-size: 15px; color: #565656;" value="#{fuelShiftReportBean.listOfTotals.get(0).numberofVehicle}"/>
+                            </f:facet>
+                        </p:column>
+                        <p:column style="text-align:right;" visible="#{fuelShiftReportBean.toogleList[17]}">
+                            <f:facet name="footer"  >
+                            </f:facet>
+                        </p:column>                        
+                        <p:column style="text-align:right;" visible="#{fuelShiftReportBean.toogleList[18]}">
+                            <f:facet name="footer"  >
+                            </f:facet>
+                        </p:column>
+
+                    </p:row>
+                </p:columnGroup>
+
+            </p:dataTable>  
+        </h:form>
+    </h:panelGroup>
+
+    <p:dialog id="dlgFuelShiftGraphic" widgetVar="dlg_FuelShiftGraphic" resizable="false" width="60%" focus="dlgFuelShiftGraphic" modal="true" responsive="true" dynamic="true" closeOnEscape="true" class="dialogScroll" >
+        <ui:include src="shiftgraphicprocess.xhtml">
+        </ui:include>
+    </p:dialog>
+
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.fuelshiftreport}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+        }
+    </script>
+
+
+    <style type="text/css">
+        .ui-fileupload-buttonbar{
+            padding: 0px !important;
+            margin-top: -35px !important;
+            margin: -20px 2px;
+        }       
+        .wrapLabel{
+            word-wrap: break-word !important;
+        }
+        .pgrResponsive{
+            border-collapse: collapse;
+            margin: 0;
+            padding: 0px;
+            width: 100%;
+            table-layout: auto;
+        }
+
+
+    </style>
+
+</ui:composition>
+
+
+

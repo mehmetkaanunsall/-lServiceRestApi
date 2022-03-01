@@ -1,0 +1,56 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+    <h:form id="frmChequeBillPaymentTab">
+        <div class="ContainerIndent">
+            <ui:include src="/pages/general/common/tabgridtoolbar.xhtml">
+                <ui:param name="bean" value="#{chequeBillPaymentTabBean}"/>
+                <ui:param name="btnNewId" value="#{chequeBillPaymentTabBean.getRendered(28, 0)}"/>
+                <ui:param name="update" value="dlgChequeBillPaymentProcess" />
+                <ui:param name="outputtext" value="#{chequeBillPaymentTabBean.selectedChequeBill.isCustomer ? loc.recoveries : loc.payments}" />
+            </ui:include>
+
+            <p:dataTable id="dtbPayments"  var="chequeBillPayments" value="#{chequeBillPaymentTabBean.listOfObjects}" selectionMode="single" widgetVar="chequeBillPaymentPF"
+                         rows="#{sessionBean.user.defualtGridSize}" rowKey="#{chequeBillPayments.id}" emptyMessage="#{loc.norecordsfound}" selection="#{chequeBillPaymentTabBean.selectedObject}"
+                         paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                         rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                         reflow="true" >
+
+                <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{chequeBillPaymentTabBean.createDialog(2)}" update="frmChequeBillPaymentProcess" /> 
+
+                <p:column id="clmProcessDate" headerText="#{loc.processdate}">
+                    <h:outputText value="#{chequeBillPayments.processDate}" >
+                        <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmPaymentType" headerText="#{chequeBillPaymentTabBean.selectedChequeBill.isCustomer ? loc.collectiontype :loc.paymenttype}">
+                    <h:outputText value="#{chequeBillPayments.type.tag}" />
+                </p:column>
+
+                <p:column id="clmExchangeRate" headerText="#{loc.exchangerate}" rendered="#{sessionBean.lastBranchSetting.isForeignCurrency}">
+                    <h:outputText value="#{chequeBillPayments.exchangeRate}" style="float: right;">
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="currency" value="#{chequeBillPayments.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="clmTotal" headerText="#{loc.total}" >
+                    <h:outputText value="#{chequeBillPayments.price}"  style="float: right;">
+                        <f:converter converterId="currencyConverter" />
+                        <f:attribute name="currency" value="#{chequeBillPayments.currency}"/>
+                        <f:attribute name="type" value="currency" />
+                    </h:outputText>              
+                </p:column>
+            </p:dataTable>
+        </div>
+    </h:form>
+
+</ui:composition>

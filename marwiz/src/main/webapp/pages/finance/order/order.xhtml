@@ -1,0 +1,454 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+                xmlns:pe="http://primefaces.org/ui/extensions">
+
+    <h:form id="frmOrderReport">
+        <p:remoteCommand name="showAccountBook" process="@this" update="frmAccountBookFilterCheckbox" oncomplete="PF('olp_accountcheckbox').loadContents();" action="#{orderBean.openDialog(0)}" actionListener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([orderBean.searchObject.selectedBranchList.isEmpty() ? orderBean.listOfBranch : orderBean.searchObject.selectedBranchList],'frmAccountBookFilterCheckbox','olp_accountcheckbox','orderCheckBox')}" />
+        <p:remoteCommand name="showStockBook" process="@this" update="frmStockBookFilterCheckbox" oncomplete="PF('olp_stockcheckbox').show();" action="#{orderBean.openDialog(1)}" actionListener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([orderBean.searchObject.selectedBranchList.isEmpty() ? orderBean.listOfBranch : orderBean.searchObject.selectedBranchList],'frmStockBookFilterCheckbox','olp_stockcheckbox','orderCheckBox')}" />
+
+        <h:panelGroup id="pgrOrderReportFilter" layout="block" transient="true">
+            <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+                <ui:param name="outputtext" value="#{loc.orders}"/>
+                <ui:param name="bean" value='#{orderBean}' />
+                <ui:param name="update" value="cldStartDate cldEndDate txtCustomer" />
+            </ui:include>
+
+            <h:panelGroup id="pgrOrderReport" layout="block" transient="true">  
+                <div class="ui-g divContent">
+                    <div class="panelToggle ui-g-12">
+                        <div class="ui-g-12 ui-md-12 ui-lg-12" style="padding: 0px !important">
+                            <h:panelGroup rendered="#{orderBean.listOfBranch.size() > 1}">
+                                <div class="ui-g-12 ui-md-6 ui-lg-2">
+                                    <p:outputLabel value="#{loc.branch}" for="slcBranchCheckBox" styleClass="Fs12 FontBold"/>
+                                    <p:selectCheckboxMenu  id="slcBranchCheckBox" value="#{orderBean.searchObject.selectedBranchList}" 
+                                                           filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                                           label="#{orderBean.searchObject.selectedBranchList.size()!=0 ? orderBean.searchObject.selectedBranchList.size() :loc.all} #{orderBean.searchObject.selectedBranchList.size()!=0 ? loc.branch : ''} #{orderBean.searchObject.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                                        <f:selectItems value="#{orderBean.listOfBranch}" itemLabel="#{branchSetting.branch.name}" itemValue="#{branchSetting}" var="branchSetting" />       
+                                        <p:ajax oncomplete="PF('slcBranchCheckBox').show()" global="false" listener="#{orderBean.changeBranch()}" update="frmOrderReport:slcBranchCheckBox frmOrderReport:txtCustomer frmOrderReport:btnCustomer frmOrderReport:txtStock frmOrderReport:btnStock"/>
+                                        <p:ajax event="toggleSelect" listener="#{orderBean.changeBranch()}" update="frmOrderReport:slcBranchCheckBox frmOrderReport:txtCustomer frmOrderReport:btnCustomer frmOrderReport:txtStock frmOrderReport:btnStock"  oncomplete="PF('slcBranchCheckBox').show()" global="false"/>
+                                    </p:selectCheckboxMenu>
+                                </div>
+                            </h:panelGroup>
+                            <div class="ui-g-12 ui-md-6 ui-lg-2">
+                                <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                                <p:calendar  id="cldStartDate" value="#{orderBean.searchObject.beginDate}" required="true" class="datepicker" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat}" showOn="button" timeControlType="select"  showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                                    <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                                </p:calendar>
+                            </div>
+
+                            <div class="ui-g-12 ui-md-6 ui-lg-2">
+                                <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                                <p:calendar  id="cldEndDate" value="#{orderBean.searchObject.endDate}" required="true" class="datepicker" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat}" timeControlType="select"  showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                                    <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                                </p:calendar>
+                            </div>
+
+                            <div class="ui-g-12 ui-md-6 ui-lg-2">
+                                <p:outputLabel value="#{loc.current}" for="txtCustomer" styleClass="Fs12 FontBold"/>
+                                <p:inputText  id="txtCustomer" onclick="showAccountBook()" value="#{accountBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}">   
+
+                                </p:inputText>
+                                <p:commandLink id="btnCustomer" process="@this" update="frmAccountBookFilterCheckbox" actionListener="#{orderBean.openDialog(0)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_accountcheckbox').loadContents();">
+                                    <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                    <p:ajax listener="#{accountBookCheckboxFilterBean.findFilterListLazyLoading([orderBean.searchObject.selectedBranchList.isEmpty() ? orderBean.listOfBranch : orderBean.searchObject.selectedBranchList],'frmAccountBookFilterCheckbox','olp_accountcheckbox', 'orderCheckBox')}" />
+                                </p:commandLink>
+                            </div>
+                            <div class="ui-g-12 ui-md-6 ui-lg-2">
+                                <p:outputLabel value="#{loc.stock}" for="txtStock" styleClass="Fs12 FontBold"/>
+                                <p:inputText id="txtStock" value="#{stockBookCheckboxFilterBean.selectedCount}" onclick="showStockBook()" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}" >
+
+                                </p:inputText>
+                                <p:commandLink id="btnStock" process="@this" update="frmStockBookFilterCheckbox" actionListener="#{orderBean.openDialog(1)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_stockcheckbox').show();">
+                                    <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                                    <p:ajax   listener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([orderBean.searchObject.selectedBranchList.isEmpty() ? orderBean.listOfBranch : orderBean.searchObject.selectedBranchList],'frmStockBookFilterCheckbox','olp_stockcheckbox','orderCheckBox')}" />
+                                </p:commandLink>
+                            </div>
+                            <div class="ui-g-12 ui-md-6 ui-lg-2">
+                                <p:outputLabel value="#{loc.ordertype}" for="slcOrderType" styleClass="Fs12 FontBold"/>
+
+                                <p:selectOneMenu id="slcOrderType" value="#{orderBean.searchObject.orderType.id}" styleClass="Wid95">
+                                    <f:selectItem itemLabel="#{loc.all}" itemValue="0" />
+                                    <f:selectItems value="#{sessionBean.getTypes(40)}"  var="type" itemLabel="#{type.nameMap.get(sessionBean.langId).name}" itemValue="#{type.id}" />
+                                </p:selectOneMenu>
+                            </div>
+                            <div class="ui-g-12 ui-md-6 ui-lg-2">
+                                <p:outputLabel value="#{loc.showbyproduct}" styleClass="Fs12 FontBold" style="visibility: hidden"/>
+                                <p:selectBooleanCheckbox id="slcItem" itemLabel="#{loc.showbyproduct}" styleClass="FontBold Fleft" value="#{orderBean.searchObject.isCheckItem}" >
+                                    <p:ajax listener="#{orderBean.find()}"  />
+                                </p:selectBooleanCheckbox>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </h:panelGroup>
+        </h:panelGroup>
+    </h:form>
+    <div class="EmptyBox20"/>
+
+    <h:panelGroup id="pgrOrderDatatable" >
+
+
+
+        <c:if  test="#{!orderBean.searchObject.isCheckItem}">
+
+            <ui:include src="/pages/general/common/datagridtoolbar.xhtml" >
+                <ui:param name="bean" value="#{orderBean}"/>  
+                <ui:param name="update" value=""/>  
+                <ui:param name="btnNewId" value="#{orderBean.getRendered(331, 0)}"/>  
+                <ui:param name="datatable" value="frmOrder:dtbOrder" />
+                <ui:param name="dtbWidgetVar" value="orderPF" />  
+                <ui:param name="fileName" value="#{loc.orders}"/>
+                <ui:param name="renderedFilter" value='true'/>
+                <ui:param name="renderedToggler" value='true'/>
+                <ui:param name="renderedExel" value='true'/>
+                <ui:param name="renderedPdf" value='true'/>
+                <ui:param name="renderedAdd" value='true'/>
+                <ui:param name="btnCreateInvoice" value="#{orderBean.getRendered(339, 0)}" />
+                <ui:param name="btnCreateWaybill" value="#{orderBean.getRendered(340, 0)}" />
+
+            </ui:include>
+            <h:form id="frmOrder">
+
+                <p:dataTable  id="dtbOrder" var="Order" value="#{orderBean.listOfObjects}" widgetVar="orderPF" selection="#{orderBean.selectedObject}" selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{Order.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true" lazy="true" >
+                    <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{orderBean.goToProcess()}" global="true"/>
+                    <p:ajax event="sort" listener="#{orderBean.sortListener}" />
+                    <p:ajax event="colReorder" listener="#{orderBean.reorder}" update="frmGridToolbar:toggle" />     
+                    <p:ajax event="colResize"  listener="#{orderBean.onResize}" />
+
+                    <p:column id="clmInvoiceGeneration" class="TexAlCenter" headerText="#{loc.createinvoiceorwaybill}" visible="#{orderBean.toogleList[0]}" exportable="false">               
+                        <p:selectBooleanCheckbox rendered="#{Order.status.id==59 or Order.status.id==61 or Order.status.id==66}" styleClass="FontBold" value="#{Order.isCheckInvoice}" >
+                            <p:ajax listener="#{orderBean.checkOrderForInvoice(Order)}" />
+                        </p:selectBooleanCheckbox>
+                    </p:column>
+
+                    <p:column id="clmBranch" headerText="#{loc.branch}" sortable="true" sortBy="#{Order.br.name}" visible="#{orderBean.toogleList[1]}" exportable="#{orderBean.toogleList[1]}">               
+                        <h:outputText value="#{Order.branchSetting.branch.name}"  />
+                    </p:column>
+                    <p:column id="clmTransactionDate" headerText="#{loc.orderdate}" sortable="true" sortBy="#{Order.od.orderdate}" visible="#{orderBean.toogleList[2]}" exportable="#{orderBean.toogleList[2]}">               
+                        <h:outputText value="#{Order.orderDate}"  >
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmDocumentNo" headerText="#{loc.documentnumber}" sortable="true" sortBy="#{Order.od.documentnumber}" visible="#{orderBean.toogleList[3]}" exportable="#{orderBean.toogleList[3]}">
+                        <h:outputText value="#{Order.documentSerial}#{Order.documentNumber}"/>
+                    </p:column>
+
+                    <p:column id="clmCurrentName" headerText="#{loc.currentname}" sortable="true" sortBy="#{Order.acc.name}" visible="#{orderBean.toogleList[4]}" exportable="#{orderBean.toogleList[4]}">
+                        <h:outputText value="#{Order.account.name}" />
+                    </p:column>
+
+                    <p:column id="clmProductReaminingAmount" headerText="#{loc.remainingamountofproduct}" sortable="true" sortBy="#{Order.remainingQuantity}" visible="#{orderBean.toogleList[5]}" exportable="#{orderBean.toogleList[5]}">
+                        <h:outputText value="#{Order.remainingQuantity}" >
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmStatus" headerText="#{loc.statu}" sortable="true" sortBy="#{Order.sttd.name}" visible="#{orderBean.toogleList[6]}" exportable="#{orderBean.toogleList[6]}" >
+                        <h:outputText value="#{Order.status.tag}" />
+                    </p:column>
+
+                </p:dataTable>  
+            </h:form>
+
+        </c:if>
+        <c:if test="#{orderBean.searchObject.isCheckItem}">
+
+            <h:form id="frmGridToolbarItem"  >
+                <p:remoteCommand name="hotkey"  actionListener="#{orderBean.create}" resetValues="true" rendered="#{orderBean.getRendered(331, 0)}"  update=""   process="@this"/>
+                <p:hotkey  bind="ctrl+shift+a"   actionListener="#{orderBean.create}" resetValues="true" rendered="#{orderBean.getRendered(331, 0)}"  update=""   process="@this" />
+                <p:defaultCommand  target="generalFilter"   />
+                <p:commandLink    id="generalFilter" delay="100" actionListener="#{orderBean.generalFilter}"    style="display: none"   onstart="PF('orderPF').filter();" />
+
+                <p:remoteCommand name="exportLimitMessege"  action="#{orderBean.showLimitMessege()}" />
+                <p:remoteCommand name="waitToExportPdf"   actionListener="#{orderBean.waitToExportPdf()}"   />
+                <p:remoteCommand name="waitToExportExcel"   actionListener="#{orderBean.waitToExportExcel()}"   />
+                <p:remoteCommand name="exportLimitMessegeForExcel"  action="#{orderBean.showLimitMessegeForExcel()}" />
+
+                <p:toolbar  id="ttttt">
+                    <f:facet name="right" id="tttt">
+
+                        <p:commandButton class="Fleft MarTop5 tlbrIsDirection" rendered="#{orderBean.getRendered(339, 0)}" value="#{loc.waybill}" actionListener="#{orderBean.createWaybill()}"  process="@this"/>
+                        <p:commandButton class="Fleft MarTop5 tlbrIsDirection" rendered="#{orderBean.getRendered(340, 0)}" value="#{loc.invoice}" actionListener="#{orderBean.createInvoice()}"  process="@this"/>
+                        <p:selectOneButton value="#{orderBean.orderQuantityType}"  unselectable="false" class="Fleft MarTop4 tlbrIsDirection">
+                            <f:selectItem itemLabel="#{loc.minimum}" itemValue="1" />
+                            <f:selectItem itemLabel="#{loc.maximum}" itemValue="2" />
+                            <f:selectItem itemLabel="#{loc.average}" itemValue="3" />
+                            <p:ajax listener="#{orderBean.showOrderQuantityMessage()}" />
+                        </p:selectOneButton>
+
+                        <p:commandLink title="#{loc.save}" class="Fleft MarRight10" process="@form" actionListener="#{orderBean.save}" rendered="#{orderBean.getRendered(334, 0)}" >
+                            <i class="fa fa-save Fs24 MarTop4 tlbrSaveBtn"/>                 
+                        </p:commandLink>
+
+                        <h:panelGroup id="pgrExporter" class="panelGridNoBorder">
+
+
+                            <h:commandLink id="btnExcel" title="#{loc.transfertoexcel}"  class ="Fleft tlbrIcon" rendered="#{orderBean.renderExportButton}">
+                                <i class="icon-file-excel tlbrExcelBtn Fs23"  />
+                                <p:dataExporter type="xls" target="frmOrder:dtbOrder" fileName="#{orderBean.encodeFileNameForExportData(loc.orders)}" postProcessor="#{orderBean.postProcessXLS}" options="#{orderBean.excelOptions}"/>  
+                            </h:commandLink>  
+                            <h:commandLink id="btnPdf" title="#{loc.transfertopdf}"  class ="Fleft tlbrIcon "  rendered="#{orderBean.renderExportButton}">
+                                <i class="icon-file-pdf tlbrPdfBtn Fs23"  />
+                                <pe:exporter type="pdf" target="frmOrder:dtbOrder" fileName="#{orderBean.encodeFileNameForExportDataPdf(loc.orders)}"   
+                                             facetBackground="#000000" facetFontSize="8" facetFontColor="#FFFFFF" facetFontStyle="BOLD"  
+                                             cellFontColor="#000000" cellFontSize="8" cellFontStyle="NORMAL" encoding="Cp1254" />  
+                            </h:commandLink>
+                        </h:panelGroup>
+
+                        <p:commandLink  id="btnToggler" title="#{loc.editcolumns}" global="false"    class="Fright tlbrIcon">
+                            <i class="icon-list tlbrColumnBtn Fs23"  />
+                        </p:commandLink>
+                        <p:columnToggler    id="toggle"  datasource="frmOrder:dtbOrder" widgetVar="columnToggler" trigger="btnToggler" >
+                            <p:ajax event="toggle"   listener="#{orderBean.onToggle}"   global="false" update="frmOrder:dtbOrder pgrExporter" />
+                        </p:columnToggler>
+
+                        <p:commandLink id="toolbarIconMenu"  title="#{loc.processes}" class="Fright tlbrIconMenu display-none">
+                            <i class="icon-th-1 Fs23"></i>
+                        </p:commandLink>
+                        <p:menu  overlay="true" trigger="toolbarIconMenu" class="Wid20 tlbrResponsiveMenu" my="right top" at="right bottom">
+
+
+                            <p:menuitem rendered="#{orderBean.getRendered(331, 0)}" onclick="hotkey()"><i class="icon-plus Fs23 marginLevel-1 tlbrAddBtn"/></p:menuitem>
+                            <p:menuitem rendered="true" onclick="$('#frmGridToolbarItem\\:btnFilter').click();"><i class="icon-sliders Fs23 marginLevel-1 tlbrFilterBtn"/></p:menuitem>
+                            <p:menuitem rendered="#{orderBean.renderExportButton}" onclick="$('#frmGridToolbarItem\\:btnExcel').click();"><i class="icon-file-excel Fs23 marginLevel-1 tlbrExcelBtn"/></p:menuitem>
+                            <p:menuitem rendered="#{orderBean.renderExportButton}" onclick="$('#frmGridToolbarItem\\:btnPdf').click();"><i class="icon-file-pdf Fs23 marginLevel-1 tlbrPdfBtn "/></p:menuitem>
+
+                        </p:menu> 
+                    </f:facet>
+                    <f:facet name="left">
+                        <p:commandLink id="btnAdd" actionListener="#{orderBean.create}" resetValues="true" rendered="#{orderBean.getRendered(331, 0)}" title="#{loc.new}"  update="" class="Fleft tlbrIcon" process="@this" >
+                            <i class="icon-plus tlbrAddBtn Fs23" />
+                        </p:commandLink>  
+
+                        <p:inputText   id="autToolbarSearch"  value="#{orderBean.autoCompleteValue}" class="Fleft tlbrSearchInput" >
+
+                        </p:inputText>
+                        <p:watermark for="autToolbarSearch" value="#{loc.enteratleastonecharacter}" id="watermark"/>
+
+
+                    </f:facet>
+                </p:toolbar>
+                <p:focus   for="autToolbarSearch" /> 
+
+            </h:form>
+
+
+            <h:form id="frmOrder">
+
+
+                <p:dataTable  id="dtbOrder" var="OrderItem"  value="#{orderBean.listOfObjectsItem}" editable="true" editMode="cell" widgetVar="orderPF" selection="#{orderBean.selectedObjectItem}" selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{OrderItem.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true" lazy="true" >
+
+                    <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{orderBean.goToProcess()}" global="true"/>
+                    <p:ajax event="sort" listener="#{orderBean.sortListener}" />
+                    <p:ajax event="colReorder" listener="#{orderBean.reorder}" update="frmGridToolbarItem:toggle" />     
+                    <p:ajax event="colResize"  listener="#{orderBean.onResize}" />
+
+                    <p:column id="clmInvoiceGeneration" class="TexAlCenter" headerText="#{loc.createinvoiceorwaybill}" visible="#{orderBean.toogleList[0]}" exportable="false">               
+                        <p:selectBooleanCheckbox rendered="#{OrderItem.order.status.id==59 or OrderItem.order.status.id==61 or OrderItem.order.status.id==66}" styleClass="FontBold" value="#{OrderItem.isCheckInvoice}" >
+                            <p:ajax listener="#{orderBean.checkOrderItemForInvoice(OrderItem)}" />
+                        </p:selectBooleanCheckbox>
+                    </p:column>
+
+                    <p:column id="clmBranch" headerText="#{loc.branch}" sortable="true" sortBy="#{OrderItem.br.name}" visible="#{orderBean.toogleList[1]}" exportable="#{orderBean.toogleList[1]}">               
+                        <h:outputText value="#{OrderItem.order.branchSetting.branch.name}"  />
+                    </p:column>
+                    <p:column id="clmTransactionDate" headerText="#{loc.orderdate}" sortable="true" sortBy="#{OrderItem.od.orderdate}" visible="#{orderBean.toogleList[2]}" exportable="#{orderBean.toogleList[2]}">               
+                        <h:outputText value="#{OrderItem.order.orderDate}"  >
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmDocumentNo" headerText="#{loc.documentnumber}" sortable="true" sortBy="#{OrderItem.od.documentnumber}" visible="#{orderBean.toogleList[3]}" exportable="#{orderBean.toogleList[3]}">
+                        <h:outputText value="#{OrderItem.order.documentSerial}#{OrderItem.order.documentNumber}"/>
+                    </p:column>
+
+                    <p:column id="clmCurrentName" headerText="#{loc.currentname}" sortable="true" sortBy="#{OrderItem.acc.name}" visible="#{orderBean.toogleList[4]}" exportable="#{orderBean.toogleList[4]}">
+                        <h:outputText value="#{OrderItem.order.account.name}" />
+                    </p:column>
+
+                    <p:column id="clmStatus" headerText="#{loc.statu}" sortable="true" sortBy="#{OrderItem.sttd.name}" visible="#{orderBean.toogleList[5]}" exportable="#{orderBean.toogleList[5]}" >
+                        <h:outputText value="#{OrderItem.order.status.tag}" />
+                    </p:column>
+
+                    <p:column id="clmBarcode" headerText="#{loc.barcode}" sortable="true" sortBy="#{OrderItem.stck.barcode}" visible="#{orderBean.toogleList[6]}" exportable="#{orderBean.toogleList[6]}" >
+                        <h:outputText value="#{OrderItem.stock.barcode}" />
+                    </p:column>
+
+                    <p:column id="clmStock" headerText="#{loc.stock}" sortable="true" sortBy="#{OrderItem.stck.name}" visible="#{orderBean.toogleList[7]}" exportable="#{orderBean.toogleList[7]}" >
+                        <h:outputText value="#{OrderItem.stock.name}" />
+                    </p:column>
+
+                    <p:column id="clmBoxQuantity" headerText="#{loc.boxquantity}" sortable="true" sortBy="#{OrderItem.odi.boxquantity}" visible="#{orderBean.toogleList[8]}" exportable="#{orderBean.toogleList[8]}" >
+                        <h:outputText value="#{OrderItem.boxQuantity}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmShelfQuantity" headerText="#{loc.requiredamounttofilltheshelf}" sortable="true" sortBy="#{OrderItem.odi.shelfquantity}" visible="#{orderBean.toogleList[9]}" exportable="#{orderBean.toogleList[9]}" >
+
+                        <h:outputText value="#{OrderItem.shelfQuantity}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmRequiredWarehouseStock" headerText="#{loc.requiredwarehousestock}" sortable="true" sortBy="#{OrderItem.requiredwarehousestockquantity}" visible="#{orderBean.toogleList[10]}" exportable="#{orderBean.toogleList[10]}" >
+
+                        <h:outputText value="#{OrderItem.requiredWarehouseStock}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmRequiredTotalStock" headerText="#{loc.requiredtotalstock}" sortable="true" sortBy="#{OrderItem.totalstockquantity}" visible="#{orderBean.toogleList[11]}" exportable="#{orderBean.toogleList[11]}" >
+
+                        <h:outputText value="#{OrderItem.requiredTotalStock}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmTotalNumberofStock" headerText="#{loc.totalnumberofstock}" sortable="true" sortBy="#{OrderItem.odi.warehousequantity}" visible="#{orderBean.toogleList[12]}" exportable="#{orderBean.toogleList[12]}" >
+
+                        <h:outputText value="#{OrderItem.warehouseQuantity}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmLastTwoMonthSales" headerText="#{loc.lasttwomonthssales}" sortable="true" sortBy="#{OrderItem.odi.twomonthsale}" visible="#{orderBean.toogleList[13]}" exportable="#{orderBean.toogleList[13]}" >
+
+                        <h:outputText value="#{OrderItem.lastTwoMonthsSales}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmLastTwoMonthSalesActiveDay" headerText="#{loc.lasttwomonthsaledays}" sortable="true" sortBy="#{OrderItem.odi.twomonthsaleactiveday}" visible="#{orderBean.toogleList[14]}" exportable="#{orderBean.toogleList[14]}" >
+                        <h:outputText value="#{OrderItem.twoMonthSaleActiveDay}" class="Fright"/>
+                    </p:column>
+                    <p:column id="clmAverageWeeklyOrderQuantityForDaysCount" headerText="#{loc.averageweeklysalesaccordingtoday}" sortable="true" sortBy="#{OrderItem.averageweeklyorderquantityfordayscount}" visible="#{orderBean.toogleList[15]}" exportable="#{orderBean.toogleList[15]}" >
+
+                        <h:outputText value="#{OrderItem.averageWeeklyOrderQuantityForDaysCount}" class="Fright"/>
+                    </p:column>
+                    <p:column id="clmAverageWeeklyOrderQuantity" headerText="#{loc.averageweeklyorderquantity}" sortable="true" sortBy="#{OrderItem.averageweeklyorderquantity}" visible="#{orderBean.toogleList[16]}" exportable="#{orderBean.toogleList[16]}" >
+
+                        <h:outputText value="#{OrderItem.averageWeeklyOrderQuantity}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmStockEnoughDay" headerText="#{loc.stockenoughday}" sortable="true" sortBy="#{OrderItem.stockenoughdays}" visible="#{orderBean.toogleList[17]}" exportable="#{orderBean.toogleList[17]}" >
+
+                        <h:outputText value="#{OrderItem.stockEnoughDay}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmOrderCalculationSupplement" headerText="#{loc.ordercalculationsupplement}" sortable="true" sortBy="#{OrderItem.ordercalculation}" visible="#{orderBean.toogleList[18]}" exportable="#{orderBean.toogleList[18]}" >
+
+                        <h:outputText value="#{OrderItem.orderCalculationSupplement}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmMinQuantity" headerText="#{loc.minorderquantity}" sortable="true" sortBy="#{OrderItem.odi.minimumquantity}" visible="#{orderBean.toogleList[19]}" exportable="#{orderBean.toogleList[19]}" >
+
+                        <h:outputText value="#{OrderItem.minQuantity}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmMaxQuantity" headerText="#{loc.maxorderquantity}" sortable="true" sortBy="#{OrderItem.odi.maximumquantity}" visible="#{orderBean.toogleList[20]}" exportable="#{orderBean.toogleList[20]}" >
+
+                        <h:outputText value="#{OrderItem.maxQuantity}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmProductReaminingAmount2" headerText="#{loc.remainingamount}" sortable="true" sortBy="#{OrderItem.remainingQuantity}" visible="#{orderBean.toogleList[21]}" exportable="#{orderBean.toogleList[21]}" >
+                        <h:outputText value="#{OrderItem.remainingQuantity}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+                    </p:column>
+
+                    
+                    <p:column id="clmQuantity"  headerText="#{loc.orderquantity}" sortable="true" sortBy="#{OrderItem.odi.quantity}" visible="#{orderBean.toogleList[22]}" exportable="#{orderBean.toogleList[22]}" >
+
+                        <h:outputText rendered="#{OrderItem.order.status.id!=59 and OrderItem.order.status.id!=66}" value="#{OrderItem.quantity}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="" />
+                        </h:outputText>
+
+                        <p:cellEditor id="ceQuantity"  rendered="#{OrderItem.order.status.id==59 or OrderItem.order.status.id==66}">
+                            <f:facet name="output">
+                                <h:outputText value="#{OrderItem.quantity}" class="Fright">
+                                    <f:converter converterId="currencyConverter" />
+                                    <f:attribute name="type" value="" />
+                                </h:outputText>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputNumber value="#{OrderItem.quantity}"  class="editableinput"
+                                               decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol ==1 ? '.': ','}"  minValue="0"
+                                               thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}"
+                                               decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}"
+                                               roundMethod="D" emptyValue="">
+                                    <p:ajax listener="#{orderBean.changeItemQuantity(OrderItem)}"/>
+                                </p:inputNumber> 
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                </p:dataTable> 
+            </h:form>
+
+        </c:if>
+
+    </h:panelGroup>
+
+    <p:confirmDialog id="dlgOrderQuantityMessage" global="true" class="deleteConfirm"  widgetVar="dlg_OrderQuantityMessage" showEffect="fade" hideEffect="fade"  closeOnEscape="true" responsive="true">
+        <f:facet name="message">
+            <h:outputText value="#{orderBean.orderQuantityMessage}"  style="white-space: pre-wrap;">
+                <i class="icon-trash Fs20 tlbrDeleteBtn" /> 
+            </h:outputText>
+            <br/>
+            <h:outputText value="#{loc.areyousureyouwanttocontinue}"  style="white-space: pre-wrap;">
+            </h:outputText>
+        </f:facet>
+        <p:commandButton value="#{loc.yes}" actionListener="#{orderBean.setOrderQuantity()}"  onclick="PF('dlg_OrderQuantityMessage').hide()"   styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+        <p:commandButton value="#{loc.no}"  onclick="PF('dlg_OrderQuantityMessage').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+    </p:confirmDialog>
+
+
+    <ui:include src="/pages/general/common/accountbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{orderBean}' />
+        <ui:param name="for" value='frmOrderReport:btnCustomer' />
+        <ui:param name="type" value='orderCheckBox' />
+        <ui:param name="parameters" value='#{[orderBean.searchObject.selectedBranchList.isEmpty() ? orderBean.listOfBranch : orderBean.searchObject.selectedBranchList]}' /> 
+        <ui:param name="columnsize" value='2' /> 
+        <ui:param name="form" value='frmAccountBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_accountcheckbox" />
+    </ui:include>
+
+    <ui:include src="/pages/general/common/stockbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{orderBean}' />
+        <ui:param name="for" value='frmOrderReport:btnStock' />
+        <ui:param name="type" value='orderCheckBox' />
+        <ui:param name="parameters" value='#{[orderBean.searchObject.selectedBranchList.isEmpty() ? orderBean.listOfBranch : orderBean.searchObject.selectedBranchList]}' /> 
+        <ui:param name="columnsize" value='4' /> 
+        <ui:param name="form" value='frmStockBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_stockcheckbox" />
+    </ui:include>
+
+</ui:composition>

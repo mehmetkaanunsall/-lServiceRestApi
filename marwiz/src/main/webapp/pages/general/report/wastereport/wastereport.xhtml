@@ -1,0 +1,264 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmWasteReport">
+        <ui:include src="/pages/general/common/toolbarreport.xhtml" >
+            <ui:param name="outputtext" value="#{loc.wastereport}"/>
+            <ui:param name="bean" value='#{wasteReportBean}' />
+            <ui:param name="update" value="frmWasteReportDatatable:dtbWasteReport pgWasteReport pgrWasteReportDatatable" />
+        </ui:include>
+
+        <h:panelGroup id="pgWasteReport" class="divContent" layout="block" transient="true">  
+            <div class="panelToggle  ui-g">
+                <div class="ui-g-12 ui-md-6 ui-lg-2">
+                    <p:outputLabel value="#{loc.startdate}" for="cldStartDate" styleClass="Fs12 FontBold"/>
+                    <p:calendar  id="cldStartDate" class="datepicker" value="#{wasteReportBean.selectedObject.beginDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.startdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                        <p:ajax event="change" update="cldStartDate" resetValues="true" global="false"/>
+                    </p:calendar>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-2">
+                    <p:outputLabel value="#{loc.enddate}" for="cldEndDate" styleClass="Fs12 FontBold"/>
+                    <p:calendar  id="cldEndDate" class="datepicker" value="#{wasteReportBean.selectedObject.endDate}" required="true" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" timeControlType="select" showOn="button" showButtonPanel="true" placeholder="#{loc.enddate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                        <p:ajax event="change" update="cldEndDate" resetValues="true" global="false"/>
+                    </p:calendar>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-2 ">
+                    <p:outputLabel value="#{loc.branch}" for="slcBranch" class="FontBold Fs12"/>
+                    <p:selectCheckboxMenu  id="slcBranch" value="#{wasteReportBean.selectedBranchList}" 
+                                           filter="true" filterMatchMode="contains" converter="entityConverter" widgetVar="slcBranchCheckBox"  
+                                           label="#{wasteReportBean.selectedBranchList.size()!=0 ? wasteReportBean.selectedBranchList.size() :loc.all} #{wasteReportBean.selectedBranchList.size()!=0 ? loc.branch : ''} #{wasteReportBean.selectedBranchList.size()!=0 ? loc.selected : ''}" styleClass="Wid90" >
+                        <f:selectItems value="#{wasteReportBean.listOfBranch}" itemLabel="#{branchSetting.branch.name}" itemValue="#{branchSetting}" var="branchSetting" />       
+                        <p:ajax oncomplete="PF('slcBranchCheckBox').show()" global="false" listener="#{wasteReportBean.changeBranch()}" update="frmWasteReport:txtCategory, frmWasteReport:btnCategory, frmWasteReport:txtStock, frmWasteReport:btnStock, slcBranch, frmWasteReport:slcWasteReason"/>
+                        <p:ajax event="toggleSelect" listener="#{wasteReportBean.changeBranch()}" update="frmWasteReport:txtCategory, frmWasteReport:btnCategory, frmWasteReport:txtStock, frmWasteReport:btnStock, slcBranch, frmWasteReport:slcWasteReason"  oncomplete="PF('slcBranchCheckBox').show()" global="false"/>
+                    </p:selectCheckboxMenu>
+                </div>         
+                <div class="ui-g-12 ui-md-6 ui-lg-2">
+                    <p:outputLabel value="#{loc.stock}" for="txtStock" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtStock" value="#{stockBookCheckboxFilterBean.selectedCount}" onclick="showBook()" class="inputPositionForBookFilter" readonly="#{facesContext.currentPhaseId.ordinal ge 4}" placeholder="#{loc.all}" >
+                    </p:inputText>
+                    <p:commandLink id="btnStock" process="@this" update="frmStockBookFilterCheckbox" actionListener="#{wasteReportBean.openDialog(2)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_stockcheckbox').show();">
+                        <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                        <p:ajax   listener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([wasteReportBean.selectedBranchList.size() != 0 ? wasteReportBean.selectedBranchList : wasteReportBean.listOfBranch],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckboxwithbranch')}" />
+                    </p:commandLink>
+                </div>
+                <div class="ui-g-12 ui-md-6  ui-lg-2">
+                    <p:outputLabel value="#{loc.stock} #{loc.category}" for="txtCategory"  styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtCategory" onclick="showCategoryBook()" value="#{categoryBookCheckboxFilterBean.selectedCount}" class="inputPositionForBookFilter"  readonly="true"  placeholder="#{loc.all}" >
+                    </p:inputText>
+                    <p:commandLink id="btnCategory" process="@this" update="frmCategoryBookFilter" action="#{wasteReportBean.openDialog(1)}" class="commandLinkPositionForBookFilter" oncomplete="PF('olp_Category').loadContents();">
+                        <i class="fa fa-book Fs16 iconPositionForBookFilter"></i>
+                        <p:ajax   listener="#{categoryBookCheckboxFilterBean.findFilterList([2],'frmCategoryBookFilter','olp_Category','wasteReportCheckbox')}" />
+                    </p:commandLink>
+                </div>
+
+
+                <div class=" ui-g-12 ui-md-6 ui-lg-2">
+                    <p:outputLabel value="#{loc.wastereason}" for="slcWasteReason" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcWasteReason" value="#{wasteReportBean.selectedObject.wasteReason.id}">
+                        <f:selectItem itemValue="0"  itemLabel="#{loc.choose}" />
+                        <f:selectItems value="#{wasteReportBean.listOfWasteReason}" var="wasteReason" itemLabel="#{wasteReason.name}" itemValue="#{wasteReason.id}"  />
+                    </p:selectOneMenu> 
+                </div>
+
+            </div>
+        </h:panelGroup>
+        <p:remoteCommand name="showCategoryBook" process="@this" update="frmCategoryBookFilter" action="#{wasteReportBean.openDialog(1)}" oncomplete="PF('olp_Category').loadContents();" actionListener="#{categoryBookCheckboxFilterBean.findFilterList([2],'frmCategoryBookFilter','olp_Category','wasteReportCheckbox')}" />
+        <p:remoteCommand name="showBook" process="@this" update="frmStockBookFilterCheckbox" action="#{wasteReportBean.openDialog(2)}" oncomplete="PF('olp_stockcheckbox').show();"  actionListener="#{stockBookCheckboxFilterBean.findFilterListLazyLoading([wasteReportBean.selectedBranchList.size() != 0 ? wasteReportBean.selectedBranchList : wasteReportBean.listOfBranch],'frmStockBookFilterCheckbox','olp_stockcheckbox','reportcheckboxwithbranch')}" />
+
+    </h:form>
+    <div class="EmptyBox20" />
+
+    <h:panelGroup id="pgrWasteReportDatatable" >
+        <h:panelGroup rendered="#{wasteReportBean.isFind}">
+            <ui:include src="/pages/general/common/datagridtoolbarreport.xhtml" >
+                <ui:param name="bean" value="#{wasteReportBean}"/>
+                <ui:param name="datatable" value="frmWasteReportDatatable:dtbWasteReport" />
+                <ui:param name="fileName" value="#{loc.wastereport}"/>
+                <ui:param name="renderedToggler" value='true'/>
+                <ui:param name="renderedExcel" value='true'/>
+                <ui:param name="renderedPdf" value='true'/>
+                <ui:param name="renderedPrint" value='true'/>
+                <ui:param name="renderedGraphic" value='false'/>
+            </ui:include>
+
+            <h:form id="frmWasteReportDatatable">
+
+                <p:dataTable  id="dtbWasteReport" class="dtbReport"  var="Waste"  value="#{wasteReportBean.listOfObjects}" selectionMode="single"  widgetVar="entyExitSummaryPF" emptyMessage="#{loc.norecordsfound}"
+                              rows="#{sessionBean.user.defualtGridSize}" rowKey="#{Waste.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                              rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" reflow="true" lazy="true" 
+                              >
+
+                    <p:ajax event="colReorder" listener="#{wasteReportBean.reorder}" update="frmGridToolbar:toggle" />     
+                    <p:ajax event="colResize"  listener="#{wasteReportBean.onResize}" />
+                    <p:column id="clmDate" headerText="#{loc.date}" visible="#{wasteReportBean.toogleList[0]}" exportable="#{wasteReportBean.toogleList[0]}">
+                        <h:outputText value="#{Waste.warehouseReceipt.processDate}"  >
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="clmBranchName" headerText="#{loc.branch}" visible="#{wasteReportBean.toogleList[1]}" exportable="#{wasteReportBean.toogleList[1]}">
+                        <h:outputText value="#{Waste.branchSetting.branch.name}"/>
+                    </p:column>
+                    <p:column id="clmStockCode" headerText="#{loc.stockcode}" visible="#{wasteReportBean.toogleList[2]}" exportable="#{wasteReportBean.toogleList[2]}">
+                        <h:outputText  value="#{Waste.stock.code}"/>
+                    </p:column>
+
+                    <p:column id="clmCenterStockCode" headerText="#{loc.centerstockcode}" visible="#{wasteReportBean.toogleList[3]}" exportable="#{wasteReportBean.toogleList[3]}">
+                        <h:outputText  value="#{Waste.stock.centerProductCode}"/>
+                    </p:column>
+
+                    <p:column id="clmBarcode" headerText="#{loc.stockbarcode}" visible="#{wasteReportBean.toogleList[4]}" exportable="#{wasteReportBean.toogleList[4]}">
+                        <h:outputText  value="#{Waste.stock.barcode}" />
+                    </p:column>
+
+                    <p:column id="clmStock" headerText="#{loc.stock}" visible="#{wasteReportBean.toogleList[5]}"  exportable="#{wasteReportBean.toogleList[5]}">
+                        <h:outputText value="#{Waste.stock.name}" />
+                    </p:column>                   
+                    <p:column id="clmCategory" headerText="#{loc.stockcategory}"  visible="#{wasteReportBean.toogleList[6]}" exportable="#{wasteReportBean.toogleList[6]}">
+                        <h:outputText  value="#{Waste.category}"/>
+                    </p:column>
+
+                    <p:column id="clmWasteDescription" headerText="#{loc.wastedescription}"  visible="#{wasteReportBean.toogleList[7]}" exportable="#{wasteReportBean.toogleList[7]}">
+                        <h:outputText  value="#{Waste.wasteCause}"/>
+                    </p:column>
+
+                    <p:column id="clmWasteReason" headerText="#{loc.wastereason}"  visible="#{wasteReportBean.toogleList[8]}" exportable="#{wasteReportBean.toogleList[8]}">
+                        <h:outputText  value="#{Waste.wasteReason}"/>
+                    </p:column>
+
+                    <p:column id="clmExpirationDate" headerText="#{loc.expirationdate}" visible="#{wasteReportBean.toogleList[9]}" exportable="#{wasteReportBean.toogleList[9]}">
+                        <h:outputText value="#{Waste.expirationDate}"  >
+                            <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} "/>
+                        </h:outputText>
+                    </p:column>
+                    
+                    <p:column id="clmQuantity" headerText="#{loc.quantity}" visible="#{wasteReportBean.toogleList[10]}"  exportable="#{wasteReportBean.toogleList[10]}">
+
+                        <h:outputText value="#{Waste.quantity}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="unit" value="#{Waste.stock.unit}"/>
+                            <f:attribute name="type" value="unit" />
+                        </h:outputText>
+                    </p:column>
+                    
+                    <p:column id="clmPurchasePrice" headerText="#{loc.unitprice}" visible="#{wasteReportBean.toogleList[11]}"  exportable="#{wasteReportBean.toogleList[11]}">
+
+                        <h:outputText value="#{Waste.purchasePrice}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+
+
+
+                    <p:column id="clmTaxRate"  width="100" headerText="#{loc.taxrate}" visible="#{wasteReportBean.toogleList[12]}" exportable="#{wasteReportBean.toogleList[12]}" >
+                        <h:outputText value="#{Waste.taxRate}" class="Fright" >
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="type" value="percent" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column id="clmTaxPrice" headerText="#{loc.taxprice}"  width="100"  visible="#{wasteReportBean.toogleList[13]}" exportable="#{wasteReportBean.toogleList[13]}">
+                        <h:outputText value="#{(Waste.purchasePrice - (Waste.purchasePrice/(1+(Waste.taxRate)/100))) * Waste.quantity}" class="Fright" >
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+
+
+                    <p:column id="clmTotal" headerText="#{loc.sum}" visible="#{wasteReportBean.toogleList[14]}"  exportable="#{wasteReportBean.toogleList[14]}">
+                        <h:outputText value="#{wasteReportBean.calculateTotal(Waste.purchasePrice, Waste.quantity)}" class="Fright">
+                            <f:converter converterId="currencyConverter" />
+                            <f:attribute name="currency" value="#{sessionBean.user.lastBranch.currency}"/>
+                            <f:attribute name="type" value="currency" />
+                        </h:outputText>
+                    </p:column>
+
+
+
+
+                    <p:columnGroup type="footer" class="Fright">
+                        <ui:repeat value="#{wasteReportBean.listOfTotals}" var="totals" >
+                            <p:row>
+                                <p:column colspan="#{wasteReportBean.toogleList.size()-wasteReportBean.countToggle-2}" style="text-align:right; font-weight: bold; " priority="1">
+                                    <f:facet name="footer"  >
+                                        <h:outputText value="#{loc.sum} :" style="text-align:right; font-weight: bold; font-size: 15px; " />
+                                    </f:facet>
+                                </p:column>
+                                <p:column colspan="1" style="text-align:right; font-weight: bold; ">
+                                    <f:facet name="footer"  >
+                                        <h:outputText  style="text-align:right; font-weight: bold; font-size: 15px; " value="#{totals.quantity}" >
+                                            <f:converter converterId="currencyConverter" />
+                                            <f:attribute name="unit" value="#{totals.stock.unit}"/>
+                                            <f:attribute name="type" value="unit" />
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column>
+                                <p:column colspan="1" style="text-align:right; font-weight: bold; ">
+                                    <f:facet name="footer"  >
+                                        <h:outputText  style="text-align:right; font-weight: bold; font-size: 15px; " value="#{totals.total}" >
+                                            <f:converter converterId="currencyConverter" />
+                                            <f:attribute name="currency" value="#{totals.currency}"/>
+                                            <f:attribute name="type" value="currency" />
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column>
+                            </p:row>
+                        </ui:repeat>
+                    </p:columnGroup> 
+
+                </p:dataTable>  
+            </h:form>
+        </h:panelGroup>
+    </h:panelGroup>
+
+
+    <p:overlayPanel id="olpCategory" widgetVar="olp_Category" showEvent="none" modal="true" transient="true" for="frmWasteReport:btnCategory"  my="right top" at="left bottom" dismissable="true" hideEffect="blind" showCloseIcon="true" class="Wid30">
+        <ui:include src="/pages/general/common/categorybookcheckbox.xhtml">
+            <ui:param name="updateBean" value='#{wasteReportBean}' />
+            <ui:param name="type" value='wasteReportCheckbox' />
+            <ui:param name="parameters" value='#{[2]}' /> 
+            <ui:param name="form" value='frmCategoryBookFilter' /> 
+        </ui:include>
+    </p:overlayPanel>
+
+    <!--Kitaptan stok seçtirmek için açılan overlay panel-->
+    <ui:include src="/pages/general/common/stockbookcheckbox.xhtml" >
+        <ui:param name="updateBean" value='#{wasteReportBean}' />
+        <ui:param name="for" value='frmWasteReport:btnStock' />
+        <ui:param name="type" value='reportcheckboxwithbranch' />
+        <ui:param name="parameters" value='#{[wasteReportBean.selectedBranchList.size() != 0 ? wasteReportBean.selectedBranchList : wasteReportBean.listOfBranch]}' /> 
+        <ui:param name="columnsize" value='4' /> 
+        <ui:param name="form" value='frmStockBookFilterCheckbox' /> 
+        <ui:param name="overlay" value="olp_stockcheckbox" />
+    </ui:include>
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.wastereport}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+</ui:composition>

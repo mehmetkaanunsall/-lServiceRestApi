@@ -1,0 +1,391 @@
+<?xml version='1.0' encoding='UTF-8'?><!-- Published by JAX-WS RI (http://jax-ws.java.net). RI's version is Metro/2.3.2-b608 (trunk-7979; 2015-01-21T12:50:19+0000) JAXWS-RI/2.2.11-b150120.1832 JAXWS-API/2.2.12 JAXB-RI/2.2.12-b141219.1637 JAXB-API/2.2.13-b141020.1521 svn-revision#unknown. --><xs:schema xmlns:tns="http://ws/" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://ws/">
+
+<xs:element name="CheckCustomerLimit" type="tns:CheckCustomerLimit"/>
+
+<xs:element name="CheckCustomerLimitResponse" type="tns:CheckCustomerLimitResponse"/>
+
+<xs:element name="CheckStockRequest" type="tns:CheckStockRequest"/>
+
+<xs:element name="CheckStockRequestResponse" type="tns:CheckStockRequestResponse"/>
+
+<xs:element name="GetBrand" type="tns:GetBrand"/>
+
+<xs:element name="GetBrandResponse" type="tns:GetBrandResponse"/>
+
+<xs:element name="GetCentralPrice" type="tns:GetCentralPrice"/>
+
+<xs:element name="GetCentralPriceResponse" type="tns:GetCentralPriceResponse"/>
+
+<xs:element name="GetMarketSale" type="tns:GetMarketSale"/>
+
+<xs:element name="GetMarketSaleResponse" type="tns:GetMarketSaleResponse"/>
+
+<xs:element name="GetPurchase" type="tns:GetPurchase"/>
+
+<xs:element name="GetPurchaseResponse" type="tns:GetPurchaseResponse"/>
+
+<xs:element name="GetStock" type="tns:GetStock"/>
+
+<xs:element name="GetStockRequest" type="tns:GetStockRequest"/>
+
+<xs:element name="GetStockRequestResponse" type="tns:GetStockRequestResponse"/>
+
+<xs:element name="GetStockResponse" type="tns:GetStockResponse"/>
+
+<xs:element name="GetTax" type="tns:GetTax"/>
+
+<xs:element name="GetTaxResponse" type="tns:GetTaxResponse"/>
+
+<xs:element name="GetUnit" type="tns:GetUnit"/>
+
+<xs:element name="GetUnitResponse" type="tns:GetUnitResponse"/>
+
+<xs:element name="GetWhiteList" type="tns:GetWhiteList"/>
+
+<xs:element name="GetWhiteListResponse" type="tns:GetWhiteListResponse"/>
+
+<xs:element name="InsertCustomerSale" type="tns:InsertCustomerSale"/>
+
+<xs:element name="InsertCustomerSaleResponse" type="tns:InsertCustomerSaleResponse"/>
+
+<xs:element name="PlatformAuthorizeSale" type="tns:PlatformAuthorizeSale"/>
+
+<xs:element name="PlatformAuthorizeSaleResponse" type="tns:PlatformAuthorizeSaleResponse"/>
+
+<xs:element name="PlatformGetProductPrice" type="tns:PlatformGetProductPrice"/>
+
+<xs:element name="PlatformGetProductPriceResponse" type="tns:PlatformGetProductPriceResponse"/>
+
+<xs:element name="PlatformReqSaleStatus" type="tns:PlatformReqSaleStatus"/>
+
+<xs:element name="PlatformReqSaleStatusResponse" type="tns:PlatformReqSaleStatusResponse"/>
+
+<xs:element name="SendEform" type="tns:SendEform"/>
+
+<xs:element name="SendEformResponse" type="tns:SendEformResponse"/>
+
+<xs:element name="WsIncome" type="tns:WsIncome"/>
+
+<xs:element name="WsIncomeResponse" type="tns:WsIncomeResponse"/>
+
+<xs:complexType name="GetMarketSale">
+<xs:sequence>
+<xs:element name="station" type="xs:string" minOccurs="0"/>
+<xs:element name="sale" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetMarketSaleResponse">
+<xs:sequence>
+<xs:element name="TransactionResult" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetStockRequest">
+<xs:sequence>
+<xs:element name="station" type="xs:string" minOccurs="0"/>
+<xs:element name="stockRequest" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetStockRequestResponse">
+<xs:sequence>
+<xs:element name="TransactionResult" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="WsIncome">
+<xs:sequence>
+<xs:element name="ContactXmlData" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="WsIncomeResponse">
+<xs:sequence>
+<xs:element name="TransactionResult" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetCentralPrice">
+<xs:sequence>
+<xs:element name="StationCode" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetCentralPriceResponse">
+<xs:sequence>
+<xs:element name="TransactionResult" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetUnit">
+<xs:sequence>
+<xs:element name="station" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetUnitResponse">
+<xs:sequence>
+<xs:element name="TransactionResult" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetWhiteList">
+<xs:sequence>
+<xs:element name="StationCode" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetWhiteListResponse">
+<xs:sequence>
+<xs:element name="TransactionResult" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="CheckCustomerLimit">
+<xs:sequence>
+<xs:element name="StationCode" type="xs:string" minOccurs="0"/>
+<xs:element name="RfID" type="xs:string" minOccurs="0"/>
+<xs:element name="FuelNo" type="xs:string" minOccurs="0"/>
+<xs:element name="UnitPrice" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="CheckCustomerLimitResponse">
+<xs:sequence>
+<xs:element name="TransactionResult" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetStock">
+<xs:sequence>
+<xs:element name="station" type="xs:string" minOccurs="0"/>
+<xs:element name="processdate" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetStockResponse">
+<xs:sequence>
+<xs:element name="TransactionResult" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetBrand">
+<xs:sequence>
+<xs:element name="station" type="xs:string" minOccurs="0"/>
+<xs:element name="processdate" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetBrandResponse">
+<xs:sequence>
+<xs:element name="TransactionResult" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="PlatformAuthorizeSale">
+<xs:sequence>
+<xs:element name="TerminalId" type="xs:string" minOccurs="0"/>
+<xs:element name="GroupNo" type="xs:string" minOccurs="0"/>
+<xs:element name="OrderNo" type="xs:string" minOccurs="0"/>
+<xs:element name="TransactionNo" type="xs:string" minOccurs="0"/>
+<xs:element name="AuthorizeType" type="xs:string" minOccurs="0"/>
+<xs:element name="PumpNo" type="xs:string" minOccurs="0"/>
+<xs:element name="Amount" type="xs:string" minOccurs="0"/>
+<xs:element name="UnitPrice" type="xs:string" minOccurs="0"/>
+<xs:element name="DiscountedUP" type="xs:string" minOccurs="0"/>
+<xs:element name="DiscountPercent" type="xs:string" minOccurs="0"/>
+<xs:element name="FleetName" type="xs:string" minOccurs="0"/>
+<xs:element name="FleetID" type="xs:string" minOccurs="0"/>
+<xs:element name="CardNo" type="xs:string" minOccurs="0"/>
+<xs:element name="ProductType" type="xs:string" minOccurs="0"/>
+<xs:element name="Plate" type="xs:string" minOccurs="0"/>
+<xs:element name="AutomationIp" type="xs:string" minOccurs="0"/>
+<xs:element name="SubSaleTypeId" type="xs:string" minOccurs="0"/>
+<xs:element name="Username" type="xs:string" minOccurs="0"/>
+<xs:element name="Password" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="PlatformAuthorizeSaleResponse">
+<xs:sequence>
+<xs:element name="TransactionResult" type="tns:authorizeSale" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="authorizeSale">
+<xs:sequence>
+<xs:element name="ResponseCode" type="xs:string" minOccurs="0"/>
+<xs:element name="Message" type="xs:string" minOccurs="0"/>
+<xs:element name="TerminalId" type="xs:string" minOccurs="0"/>
+<xs:element name="GroupNo" type="xs:string" minOccurs="0"/>
+<xs:element name="OrderNo" type="xs:string" minOccurs="0"/>
+<xs:element name="TransactionNo" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="CheckStockRequest">
+<xs:sequence>
+<xs:element name="station" type="xs:string" minOccurs="0"/>
+<xs:element name="stockrequest" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="CheckStockRequestResponse">
+<xs:sequence>
+<xs:element name="TransactionResult" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="PlatformGetProductPrice">
+<xs:sequence>
+<xs:element name="TerminalId" type="xs:string" minOccurs="0"/>
+<xs:element name="GroupNo" type="xs:string" minOccurs="0"/>
+<xs:element name="OrderNo" type="xs:string" minOccurs="0"/>
+<xs:element name="TransactionNo" type="xs:string" minOccurs="0"/>
+<xs:element name="PumpNo" type="xs:string" minOccurs="0"/>
+<xs:element name="ProductType" type="xs:string" minOccurs="0"/>
+<xs:element name="AutomationIp" type="xs:string" minOccurs="0"/>
+<xs:element name="Username" type="xs:string" minOccurs="0"/>
+<xs:element name="Password" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="PlatformGetProductPriceResponse">
+<xs:sequence>
+<xs:element name="TransactionResult" type="tns:getProductPrice" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getProductPrice">
+<xs:sequence>
+<xs:element name="IsPMDiscComp" type="xs:string" minOccurs="0"/>
+<xs:element name="UnitPrice" type="xs:string" minOccurs="0"/>
+<xs:element name="ProductType" type="xs:string" minOccurs="0"/>
+<xs:element name="PompaNo" type="xs:string" minOccurs="0"/>
+<xs:element name="TerminalId" type="xs:string" minOccurs="0"/>
+<xs:element name="GroupNo" type="xs:string" minOccurs="0"/>
+<xs:element name="OrderNo" type="xs:string" minOccurs="0"/>
+<xs:element name="TransactionNo" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="InsertCustomerSale">
+<xs:sequence>
+<xs:element name="StationCode" type="xs:string" minOccurs="0"/>
+<xs:element name="PumpNo" type="xs:string" minOccurs="0"/>
+<xs:element name="NozzleNo" type="xs:string" minOccurs="0"/>
+<xs:element name="FuelNo" type="xs:string" minOccurs="0"/>
+<xs:element name="TankNo" type="xs:string" minOccurs="0"/>
+<xs:element name="Plate" type="xs:string" minOccurs="0"/>
+<xs:element name="FillingAmount" type="xs:string" minOccurs="0"/>
+<xs:element name="FillingVolume" type="xs:string" minOccurs="0"/>
+<xs:element name="UnitPrice" type="xs:string" minOccurs="0"/>
+<xs:element name="DefaultPrice" type="xs:string" minOccurs="0"/>
+<xs:element name="SalesType" type="xs:string" minOccurs="0"/>
+<xs:element name="CustomerRfID" type="xs:string" minOccurs="0"/>
+<xs:element name="FiscalReceiptNo" type="xs:string" minOccurs="0"/>
+<xs:element name="PrinterReceiptNo" type="xs:string" minOccurs="0"/>
+<xs:element name="VehicleKm" type="xs:string" minOccurs="0"/>
+<xs:element name="VehicleTimer" type="xs:string" minOccurs="0"/>
+<xs:element name="RequestID" type="xs:string" minOccurs="0"/>
+<xs:element name="Constat" type="xs:string" minOccurs="0"/>
+<xs:element name="NozzleUpTime" type="xs:string" minOccurs="0"/>
+<xs:element name="ReadRfIDTime" type="xs:string" minOccurs="0"/>
+<xs:element name="ResultRfIDTime" type="xs:string" minOccurs="0"/>
+<xs:element name="AuthorizeStartTime" type="xs:string" minOccurs="0"/>
+<xs:element name="FillingStartTime" type="xs:string" minOccurs="0"/>
+<xs:element name="FiscalTime" type="xs:string" minOccurs="0"/>
+<xs:element name="PaidConfTime" type="xs:string" minOccurs="0"/>
+<xs:element name="NozzleDownTime" type="xs:string" minOccurs="0"/>
+<xs:element name="SaleRecordTime" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="InsertCustomerSaleResponse">
+<xs:sequence>
+<xs:element name="TransactionResult" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetTax">
+<xs:sequence>
+<xs:element name="station" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetTaxResponse">
+<xs:sequence>
+<xs:element name="TransactionResult" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetPurchase">
+<xs:sequence>
+<xs:element name="station" type="xs:string" minOccurs="0"/>
+<xs:element name="purchase" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetPurchaseResponse">
+<xs:sequence>
+<xs:element name="TransactionResult" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="SendEform">
+<xs:sequence>
+<xs:element name="StationCode" type="xs:string" minOccurs="0"/>
+<xs:element name="RfID" type="xs:string" minOccurs="0"/>
+<xs:element name="FuelNo" type="xs:string" minOccurs="0"/>
+<xs:element name="UnitPrice" type="xs:string" minOccurs="0"/>
+<xs:element name="DriverName" type="xs:string" minOccurs="0"/>
+<xs:element name="DriverPhone" type="xs:string" minOccurs="0"/>
+<xs:element name="CompanyPhone" type="xs:string" minOccurs="0"/>
+<xs:element name="VehicleOdometer" type="xs:string" minOccurs="0"/>
+<xs:element name="VehicleEngineHour" type="xs:string" minOccurs="0"/>
+<xs:element name="StationManagerName" type="xs:string" minOccurs="0"/>
+<xs:element name="Description" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="SendEformResponse">
+<xs:sequence>
+<xs:element name="TransactionResult" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="PlatformReqSaleStatus">
+<xs:sequence>
+<xs:element name="TerminalId" type="xs:string" minOccurs="0"/>
+<xs:element name="GroupNo" type="xs:string" minOccurs="0"/>
+<xs:element name="OrderNo" type="xs:string" minOccurs="0"/>
+<xs:element name="TransactionNo" type="xs:string" minOccurs="0"/>
+<xs:element name="AutomationIp" type="xs:string" minOccurs="0"/>
+<xs:element name="Username" type="xs:string" minOccurs="0"/>
+<xs:element name="Password" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="PlatformReqSaleStatusResponse">
+<xs:sequence>
+<xs:element name="TransactionResult" type="tns:reqSaleStatus" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="reqSaleStatus">
+<xs:sequence>
+<xs:element name="ResponseCode" type="xs:string" minOccurs="0"/>
+<xs:element name="ResponseMessage" type="xs:string" minOccurs="0"/>
+<xs:element name="OtomasyonTxnId" type="xs:string" minOccurs="0"/>
+<xs:element name="Volume" type="xs:string" minOccurs="0"/>
+<xs:element name="UnitPrice" type="xs:string" minOccurs="0"/>
+<xs:element name="Amount" type="xs:string" minOccurs="0"/>
+<xs:element name="Message" type="xs:string" minOccurs="0"/>
+<xs:element name="TerminalId" type="xs:string" minOccurs="0"/>
+<xs:element name="GroupNo" type="xs:string" minOccurs="0"/>
+<xs:element name="OrderNo" type="xs:string" minOccurs="0"/>
+<xs:element name="TransactionNo" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+</xs:schema>

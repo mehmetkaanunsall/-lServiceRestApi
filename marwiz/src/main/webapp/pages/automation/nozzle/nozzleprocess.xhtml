@@ -1,0 +1,134 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions" 
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <h:form id="frmNozzleProcess">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.nozzleprocesses}"/>
+            <ui:param name="bean" value='#{nozzleProcessBean}' />
+            <ui:param name="update" value="pgrNozzleProcess" />
+            <ui:param name="btnSaveId" value="#{nozzleProcessBean.getRendered(168, 0)}" />     
+            <ui:param name="renderback" value='true'/>
+            <c:if test="#{nozzleProcessBean.processType==2}">
+                <ui:param name="renderSelectedObject" value='true'/>
+                <ui:param name="selectedObjectName" value="#{nozzleProcessBean.selectedObject.name}"/>
+                <ui:param name="btnDeleteId" value="#{nozzleProcessBean.getRendered(169, 0)}" />
+                <ui:param name="btnTestBeforeDeleteId" value='true' />
+
+            </c:if>
+        </ui:include>
+
+        <h:panelGroup id="pgrNozzleProcess" layout="block">
+            <div class="ui-g divContent">
+                <div class="ui-g-12 panelToggle">
+                    <p:focus for="txtNozzleName"/>
+                    <div   class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.nozzlename}" for="txtNozzleName" styleClass="Fs12 FontBold" />
+                        <p:inputText id="txtNozzleName" value="#{nozzleProcessBean.selectedObject.name}" placeholder="#{loc.nozzlename}" required="true" >
+                            <p:keyFilter regEx="/[^\\\{\}\[\]\,\:\u0022]/" preventPaste="false" />
+                            <f:validateRegex pattern="[^\\\{\}\[\]\,\:\u0022]*" />
+                        </p:inputText>
+                    </div>
+
+
+                    <div  class="ui-g-12 ui-md-6 ui-lg-2"  >
+                        <p:outputLabel value="#{loc.tank}" for="slcTank" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcTank" disabled="#{nozzleProcessBean.pageFromTank == true ? 'true':'false'}"  value="#{nozzleProcessBean.selectedObject.warehouse.id}" required="true">
+                            <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true" />
+                            <f:selectItems value="#{nozzleProcessBean.listOfWarehouse}" var="warehouse" itemLabel="#{warehouse.name}" itemValue="#{warehouse.id}"  />
+                        </p:selectOneMenu> 
+                    </div>       
+                    <div  class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.pumpno}" for="txtPumpNo" styleClass="Fs12 FontBold" />
+                        <p:inputText id="txtPumpNo" value="#{nozzleProcessBean.selectedObject.pumpNo}" placeholder="#{loc.pumpno}" required="true" />
+                    </div>
+
+                    <div  class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.nozzleno}" for="txtNozzleNo" styleClass="Fs12 FontBold" />
+                        <p:inputText id="txtNozzleNo" value="#{nozzleProcessBean.selectedObject.nozzleNo}" placeholder="#{loc.nozzleno}" required="true" />
+                    </div>
+
+
+
+
+                    <div   class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.index}" for="txtIndex" styleClass="Fs12 FontBold" />
+                        <p:inputNumber id="txtIndex" decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}"  
+                                       thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                       roundMethod="D" decimalPlaces="#{sessionBean.user.lastBranch.currencyrounding}" 
+                                       value="#{nozzleProcessBean.selectedObject.index}"  class="Wid97 TexAlRight"  placeholder="#{loc.index}" required="true">
+                        </p:inputNumber>
+                    </div>
+
+
+                    <div  class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.indextype}" for="slcIndexType" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcIndexType" value="#{nozzleProcessBean.selectedObject.isAscending}" required="true">
+                            <f:selectItem itemLabel="#{loc.decreasing}" itemValue="false"  />
+                            <f:selectItem itemLabel="#{loc.growing}" itemValue="true"  />
+                        </p:selectOneMenu> 
+                    </div>
+
+
+                    <div  class="ui-g-12 ui-md-6 ui-lg-10">
+                        <p:outputLabel value="#{loc.description}" for="txtDescription" styleClass="Fs12 FontBold" />
+                        <p:inputText id="txtDescription" value="#{nozzleProcessBean.selectedObject.description}" placeholder="#{loc.description}"  />
+                    </div>
+
+                    <div  class="ui-g-12 ui-md-6 ui-lg-2">
+                        <p:outputLabel value="#{loc.statu}" for="slcStatu" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcStatu" value="#{nozzleProcessBean.selectedObject.status.id}" required="true" >
+                            <f:selectItems value="#{sessionBean.getStatus(27)}" var="statu" itemLabel="#{statu.nameMap.get(sessionBean.langId).name}" itemValue="#{statu.id}"  />
+                        </p:selectOneMenu>
+                    </div>
+
+                </div>
+            </div>
+        </h:panelGroup>
+      
+    </h:form>
+
+    <div class="EmptyBox10" />
+
+    <p:tabView id="tbvNozzleProc" activeIndex="#{marwiz.tabIndex}" rendered="#{nozzleProcessBean.processType==2 and nozzleProcessBean.getRendered(48, 1)}" scrollable="true" dynamic="true" cache="true">
+
+        <p:ajax event="tabChange"  listener="#{nozzleProcessBean.onTabChange}" />
+        <p:tab id="tab48" title="#{loc.movements}" rendered="#{nozzleProcessBean.getRendered(48, 1)}">
+            <c:if test="#{nozzleProcessBean.activeIndex==48}">
+                <div class="EmptyBox10" />    
+                <ui:include src="/pages/automation/nozzle/nozzlemovements.xhtml"/>
+            </c:if>
+        </p:tab>
+    </p:tabView>
+
+
+    <!--Print butonuna basınca çalışan kısım-->
+    <p:panel id="printerContainer" style="display: none"  >
+        <p:panelGrid id="printerPanel" >
+
+        </p:panelGrid>
+    </p:panel> 
+
+
+
+    <script type="text/javascript">
+        function print_page() {
+            var divContents = $("#printerPanel").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<div style="text-align:center; font-weight:bold; font-family:sans-serif;">#{loc.bankaccountmovements}</div>');
+            printWindow.document.write('<div id="printerDiv">');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</div>');
+            printWindow.document.close();
+            printWindow.print();
+
+        }
+    </script>
+
+
+
+</ui:composition>

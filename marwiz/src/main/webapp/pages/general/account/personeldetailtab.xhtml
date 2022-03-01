@@ -1,0 +1,77 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <h:form id="frmPersonDetailTab" >
+
+        <p:commandButton id="btnFindDetail" style="display: none"  actionListener="#{personelDetailTabBean.find()}"/>
+
+        <div class="ContainerIndent">
+
+            <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+                <ui:param name="bean" value='#{personelDetailTabBean}'/>
+                <ui:param name="outputtext" value="#{loc.employeedetail}"/>
+                <ui:param name="update" value="grdPersonDetail" />
+                <ui:param name="btnSaveId" value="#{(!sessionBean.user.lastBranchSetting.isProcessPassiveAccount and accountProcessBean.selectedObject.status.id == 6) ? 'false' : personelDetailTabBean.getRendered(71, 0)}" />     
+                <ui:param name="btnDeleteId" value='false' /> 
+
+            </ui:include>
+
+            <h:panelGroup id="grdPersonDetail" class="divContent" layout="block">
+
+                <div class="ui-g">
+                    <div class="ui-g-12 ui-md-2">
+                        <p:outputLabel value="#{loc.integrationcode}" for="txtintegrationcode" styleClass="Fs12 FontBold" />
+                        <p:inputText id="txtintegrationcode" value="#{personelDetailTabBean.integrationcode}" placeholder="#{loc.integrationcode}" />
+                    </div>
+
+                    <div class="ui-g-12 ui-md-2">
+                        <p:outputLabel value="#{loc.exactsalary}" for="txtexactsalary" styleClass="Fs12 FontBold" />
+                        <p:inputNumber id="txtexactsalary" value="#{personelDetailTabBean.exactsalary}" placeholder="#{loc.exactsalary}" padControl="false"/>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-2">
+                        <p:outputLabel value="#{loc.agi}" for="txtagi" styleClass="Fs12 FontBold" />
+                        <p:inputNumber id="txtagi" value="#{personelDetailTabBean.agi}" placeholder="#{loc.agi}" padControl="false"/>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-2">
+                        <p:outputLabel value="#{loc.grosssalary}" for="txtgrossSalary" styleClass="Fs12 FontBold" />
+                        <p:inputNumber id="txtgrossSalary" value="#{personelDetailTabBean.grossSalary}" placeholder="#{loc.grosssalary}" padControl="false" readonly="true"/>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-2">
+                        <p:outputLabel value="#{loc.employeestartdate}" for="cldstartdate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldstartdate" value="#{personelDetailTabBean.startDate}"  class="datepicker" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat}" showOn="button" showButtonPanel="true" placeholder="#{loc.employeestartdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                        </p:calendar>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-2">
+                        <p:outputLabel value="#{loc.employeequitdate}" for="cldenddate" styleClass="Fs12 FontBold"/>
+                        <p:calendar  id="cldenddate" value="#{personelDetailTabBean.endDate}"  class="datepicker" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat}" showOn="button" showButtonPanel="true" placeholder="#{loc.employeequitdate}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                        </p:calendar>
+                    </div>
+
+                </div>
+            </h:panelGroup>
+
+
+        </div>
+
+
+    </h:form>
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            window.onload = my_code();
+        });
+
+        function my_code() {
+            document.getElementById('tbvAccountProc:frmPersonDetailTab:btnFindDetail').click();
+        }
+    </script>
+
+</ui:composition>

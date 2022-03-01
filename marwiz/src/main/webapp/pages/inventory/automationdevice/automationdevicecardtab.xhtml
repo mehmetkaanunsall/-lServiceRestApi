@@ -1,0 +1,49 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmCardTab"  >
+        <div class="ContainerIndent">
+            <ui:include src="/pages/general/common/tabgridtoolbar.xhtml">
+                <ui:param name="bean" value="#{automationDeviceCardTabBean}"/>
+                <ui:param name="btnNewId" value="#{automationDeviceCardTabBean.getRendered(226, 0)}"/>
+                <ui:param name="update" value="dlgCardProcess" />
+                <ui:param name="outputtext" value="#{loc.cards}" />
+                <ui:param name="btnAddMasterCard" value="true" />
+                <ui:param name="btnDeleteMasterCard" value="true" />
+                <ui:param name="btnAddNormalCard" value="true" />
+                <ui:param name="btnDeleteNormalCard" value="true" />
+                <ui:param name="btnAddCardReader" value="true" />
+            </ui:include>
+            <p:dataTable id="dtbCard"  var="automationCard" value="#{automationDeviceCardTabBean.listOfObject}" selection="#{automationDeviceCardTabBean.selectedObject}" selectionMode="single"  widgetVar="automationCardPF"
+                         rowKey="#{automationCard.id}" rowStyleClass="#{automationCard.status.id==58 ? 'ColumnColorRed' : null}"  emptyMessage="#{loc.norecordsfound}" class="tabDatatable" resizableColumns="true" >
+
+                <p:ajax event="#{sessionBean.user.gridRowSelect}" resetValues="true" listener="#{automationDeviceCardTabBean.createDialog(2)}" update="dlgCardProcess"  />  
+
+                <p:column id="clmCardNo" headerText="#{loc.cardno}" sortBy="#{automationCard.rfNo}">
+                    <h:outputText value="#{automationCard.rfNo}" />
+                </p:column>
+
+                <p:column id="clmName" headerText="#{loc.name}" sortBy="#{automationCard.name}">
+                    <h:outputText value="#{automationCard.name}" />
+                </p:column>
+
+                <p:column id="clmCardType" headerText="#{loc.cardtype}" sortBy="#{automationCard.type.tag}" rendered="#{automationDeviceCardTabBean.automationDevice.deviceType.id!=111}">
+                    <h:outputText value="#{automationCard.type.tag}" />
+                </p:column>
+
+                <p:column id="clmStatu" headerText="#{loc.statu}" sortBy="#{automationCard.status.tag}">
+                    <h:outputText value="#{automationCard.status.tag}" />
+                </p:column>
+
+
+
+            </p:dataTable>
+        </div>
+    </h:form>
+
+</ui:composition>

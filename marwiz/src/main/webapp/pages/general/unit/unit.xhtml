@@ -1,0 +1,105 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+        <ui:param name="bean" value="#{unitBean}"/>   <!-- Bean -->
+        <ui:param name="update" value="dlgUnitDefinitionProc"/>  <!-- Yeni butonuna basınca açılacak sayfa  -->
+        <ui:param name="btnNewId" value="#{sessionBean.user.lastBranchSetting.isCentralIntegration ? false : unitBean.getRendered(251, 0)}"/>  <!-- buton id yetki kontrolü için  -->
+        <ui:param name="datatable" value="frmUnitDefinition:dtbUnitDefinition" />  <!-- datatable  -->       
+        <ui:param name="widgetvar" value='unitPF' />
+        <ui:param name="form" value='frmToolbarUnit' />
+        <ui:param name="renderedToggler" value='false'/>       
+        <ui:param name="renderedExel" value='false'/>
+        <ui:param name="renderedPdf" value='false'/>
+    </ui:include>
+
+
+    <h:form id="frmUnitDefinition">
+
+        <p:dataTable  id="dtbUnitDefinition" var="Unit" widgetVar="unitPF"  value="#{unitBean.listOfObjects}" filteredValue="#{unitBean.listOfFilteredObjects}" selection="#{unitBean.selectedObject}" selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{Unit.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true"  >
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" update="dlgUnitDefinitionProc" listener="#{unitBean.update()}" resetValues="true" global="false" />
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false"/>
+            <p:ajax event="colReorder" listener="#{unitBean.reorder}" update="frmToolbarUnit:toggle" />     
+            <p:ajax event="colResize"  listener="#{unitBean.onResize}" /> 
+
+            <f:facet  name="footer"     >
+                <p:inputText id="globalFilter" value="#{unitBean.autoCompleteValue}"  style="display: none" />
+            </f:facet>
+
+            <p:column id="clmUnitName" headerText="#{loc.unitname}" sortable="true" sortBy="#{Unit.name}" filterable="true"  filterBy="#{Unit.name}" filterMatchMode="contains">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+
+                <h:outputText value="#{Unit.name}" />
+            </p:column> 
+
+            <p:column id="clmShortName" headerText="#{loc.shortname}" sortable="true" sortBy="#{Unit.sortName}" filterable="true"  filterBy="#{Unit.sortName}" filterMatchMode="contains">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{Unit.sortName}" />
+            </p:column> 
+
+            <p:column id="clmUitRounding" headerText="#{loc.roundingvalue}" sortable="true" sortBy="#{Unit.unitRounding}" filterable="true"  filterBy="#{Unit.unitRounding}" filterMatchMode="contains">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{Unit.unitRounding}" />
+            </p:column> 
+
+            <p:column id="clmInternationalCode" headerText="#{loc.internationalcode}" sortable="true" sortBy="#{Unit.internationalCode}" filterable="true"  filterBy="#{Unit.internationalCode}" filterMatchMode="contains" rendered="#{sessionBean.user.lastBranchSetting.isEInvoice}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{Unit.internationalCode}" />
+            </p:column> 
+            <p:column id="clmIntegrationCode" headerText="#{loc.integrationcode}" sortable="true" sortBy="#{Unit.integrationCode}" filterable="true"  filterBy="#{Unit.integrationCode}" filterMatchMode="contains" >
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{Unit.integrationCode}" />
+            </p:column> 
+            <p:column id="clmMainUnitName" headerText="#{loc.mainunit}" sortable="true" sortBy="#{Unit.mainWeightUnit.name}" filterable="true"  filterBy="#{Unit.mainWeightUnit.name}" filterMatchMode="contains">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{Unit.mainWeightUnit.name}" />
+            </p:column> 
+            <p:column id="clmMainWeight" headerText="#{loc.mainweight}"  sortBy="#{Unit.mainWeight}" sortable="true" filterable="true" filterBy="#{Unit.mainWeight}" filterMatchMode="contains">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet>
+                <h:outputText value="#{Unit.mainWeight}" class="Fright">
+                    <f:converter converterId="currencyConverter" />
+                    <f:attribute name="type" value="" />
+                </h:outputText>
+            </p:column>
+
+
+
+        </p:dataTable>  
+    </h:form>
+
+    <p:dialog id="dlgUnitDefinitionProc" widgetVar="dlg_unitdeffinitionproc" modal="true" resizable="false" width="40%" focus="dlgUnitDefinitionProc" responsive="true" dynamic="true" closeOnEscape="true">
+        <p:ajax event="close" global="false" listener="#{unitBean.closeDialog()}" />
+        <ui:include src="unitprocess.xhtml">
+            <ui:param name="bean" value='#{unitBean}' />
+        </ui:include>
+    </p:dialog>
+
+    <p:dialog id="dlgUnitInternationalCode" widgetVar="dlg_unitinternationalcode" modal="true" resizable="false" width="40%" focus="dlgUnitInternationalCode" responsive="true" dynamic="true" closeOnEscape="true">
+        <ui:include src="unitcodeprocess.xhtml">
+            <ui:param name="bean" value='#{unitBean}' />
+        </ui:include>
+    </p:dialog>
+
+
+</ui:composition> 

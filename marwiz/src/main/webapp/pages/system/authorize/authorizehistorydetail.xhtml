@@ -1,0 +1,34 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+
+
+
+    <h:form id="frmHistoryDetail">   
+        <div class="ContainerIndent">
+            <p:dataTable id="dtbHistoryDetail"  class="tabDatatableHistoryDetail historyDetailDatatable" emptyMessage="#{loc.norecordsfound}" 
+                         var="authorizeHistory" value="#{authorizeHistoryTabBean.listOfAllValueIds}"  rowKey="#{authorizeHistory.id}"
+                         rows="#{sessionBean.user.defualtGridSize}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                         rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}"  reflow="true"> 
+                <f:facet name="header">
+                    <h:panelGroup > 
+                        <h:outputText class="outputTextFont font Fs14" value=" #{loc.registrationinformation} : #{authorizeHistoryTabBean.selectedHistoryDetail.branch} / #{authorizeHistoryTabBean.selectedHistoryDetail.userData.fullName} - #{authorizeHistoryTabBean.selectedHistoryDetail.userData.username}
+                                      / #{authorizeHistoryTabBean.dateFormat.format(authorizeHistoryTabBean.selectedHistoryDetail.getProcessDate())} / #{authorizeHistoryTabBean.selectedHistoryDetail.columnName!=null ? sessionBean.loc.getString(authorizeHistoryTabBean.selectedHistoryDetail.columnName):''} "/>
+                    </h:panelGroup>
+                </f:facet>
+                <p:column headerText="#{loc.changedfield}">
+                    <h:outputText rendered="#{authorizeHistoryTabBean.selectedHistoryDetail.getColumnName().equals('ga.name')}" value="#{authorizeHistory.name}"/>
+                    <h:outputText rendered="#{!authorizeHistoryTabBean.selectedHistoryDetail.getColumnName().equals('ga.name')}" value="#{authorizeHistory.name} "/>
+                </p:column>
+                <p:column headerText="#{loc.processtype}">
+                    <h:outputText value="#{authorizeHistory.valueName} "/>
+                </p:column>
+            </p:dataTable>
+        </div>
+    </h:form>
+</ui:composition>

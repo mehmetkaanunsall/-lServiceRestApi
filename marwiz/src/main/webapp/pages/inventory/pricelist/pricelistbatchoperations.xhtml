@@ -1,0 +1,518 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <style type="text/css">
+        .ui-tree .ui-tree-container {
+            height: 90% !important;
+        }
+    </style>
+
+    <div class="ContainerIndent">
+
+        <h:form id="frmPriceListBatchOperationsTab">
+            <p:defaultCommand target="btnDisplayNone"/> 
+            <p:commandLink id="btnDisplayNone" process="@form" class="DispNone" global="false"/>  
+            <p:growl id="growlMessage" showDetail="true" globalOnly="true" life="5000" />  
+
+            <h:panelGroup id="pgPriceListBatchOperationsTab" class="divContent" layout="block">  
+                <div class=" ui-g">
+                    <div  class="ui-g-12 ui-md-2 ui-lg-4">
+                        <div  class="ui-g-12 ui-md-6">
+                            <p:outputLabel value="#{loc.processtype}" for="slcProcessType" styleClass="Fs12 FontBold"/>
+                            <p:selectOneMenu id="slcProcessType" value="#{priceListBatchOpreationsBean.processType}">
+                                <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true" />
+                                <f:selectItem itemLabel="#{loc.tag} #{loc.print}" itemValue="1" />
+                                <f:selectItem itemLabel="#{loc.printregisteredtag}" itemValue="3" />
+                                <c:if test="#{!(priceListStockTabBean.selectedPriceList.isPurchase and priceListStockTabBean.selectedPriceList.isDefault and sessionBean.getLastBranchSetting().purchaseUnitPriceUpdateOptionId==0) and priceListBatchOpreationsBean.getRendered(143, 0)}">
+                                    <f:selectItem itemLabel="#{loc.unitpriceupdate}" itemValue="2" />
+                                </c:if>
+                                <p:ajax update="pgrCategorizationList pgrSave pgrStocksList pgrAccountList tbvPriceList:frmPriceListBatchOperationsTab pgrCentralSupplierList" global="true"  listener="#{priceListBatchOpreationsBean.changeProcessType()}"  />
+                            </p:selectOneMenu>   
+                        </div>
+                        <h:panelGroup rendered="#{priceListBatchOpreationsBean.processType!=3}">
+                            <div  class="ui-g-12 ui-md-6">
+                                <p:outputLabel value="#{loc.stocktype}" for="slcStockType" styleClass="Fs12 FontBold"/>
+                                <p:selectOneMenu id="slcStockType" value="#{priceListBatchOpreationsBean.stockType}">
+                                    <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true" />
+                                    <f:selectItem itemLabel="#{loc.categories}" itemValue="1" />
+                                    <f:selectItem itemLabel="#{loc.stock}" itemValue="2" />
+                                    <f:selectItem itemLabel="#{loc.supplier} (#{loc.fromwaybill})" itemValue="3" />
+                                    <f:selectItem itemLabel="#{loc.supplier}" itemValue="4" />
+                                    <c:if test="#{sessionBean.user.lastBranchSetting.isCentralIntegration and sessionBean.user.lastBranch.conceptType ==1}">
+                                        <f:selectItem itemLabel="#{loc.centralsupplier}" itemValue="5" rendered="#{sessionBean.user.lastBranchSetting.isCentralIntegration}"/>
+                                    </c:if>
+
+                                    <p:ajax update="pgrCategorizationList pgrSave pgrStocksList pgrAccountList pgrRecordedStocksList pgrCentralSupplierList" global="true" listener="#{priceListBatchOpreationsBean.changeStockType()}" />
+                                </p:selectOneMenu>     
+                            </div>
+                        </h:panelGroup>
+
+                    </div>
+
+
+                    <div  class="ui-g-12 ui-md-7 ui-lg-5">
+                        <h:panelGroup id="pgrCategorizationList" >
+                            <h:panelGroup rendered="#{priceListBatchOpreationsBean.stockType == 1}">
+                                <p:panel class="pnlCategory">
+                                    <f:facet name="header">
+                                        #{loc.categorylist}
+                                        <p:selectBooleanCheckbox id="sbcProcess" class="Fright" value="#{priceListBatchOpreationsBean.isSelectAllCategory}" title="#{loc.selectall}">
+                                            <p:ajax update="treCategory" listener="#{priceListBatchOpreationsBean.selectAllCategory}" global="false" />                           
+                                        </p:selectBooleanCheckbox> 
+                                    </f:facet>
+
+                                    <p:treeTable id="treCategory" value="#{priceListBatchOpreationsBean.rootCategories}" var="data" selectionMode="checkbox"  selection="#{priceListBatchOpreationsBean.selectedCategories}" class="categoryTreeSize treeHoverIcon">
+
+                                        <p:ajax event="select" listener="#{priceListBatchOpreationsBean.onNodeCategorizationSelect}" global="false" />
+                                        <p:ajax event="unselect" listener="#{priceListBatchOpreationsBean.onNodeCategorizationUnSelect}" global="false" />
+                                        <p:column>
+                                            <h:outputText value="#{data.name}"/>
+                                            <c:if test="#{priceListBatchOpreationsBean.processType == 1}">
+                                                <p:commandLink class="MarLeft7" action="#{priceListBatchOpreationsBean.openTagDialog}" process="@this" resetValues="true" update="tbvPriceList:dlgOpenTagQuantity" >
+                                                    <f:setPropertyActionListener value="#{data}" target="#{priceListBatchOpreationsBean.selectedDataCategories}"  />
+                                                    <i class="fa fa-tags gray Fs10 Fright"></i>
+                                                </p:commandLink>
+                                            </c:if>
+                                        </p:column>
+                                        <p:column rendered="#{priceListBatchOpreationsBean.processType == 1}">
+                                            <h:outputText value="#{data.tagQuantity}"/>
+                                        </p:column>
+                                    </p:treeTable>
+
+                                </p:panel>
+                            </h:panelGroup>
+                        </h:panelGroup>
+
+                        <h:panelGroup id="pgrStocksList" >
+                            <h:panelGroup rendered="#{priceListBatchOpreationsBean.stockType == 2}">
+                                <p:panel class="pnlStocks">
+                                    <f:facet name="header">
+                                        #{loc.stock}
+                                        <p:selectBooleanCheckbox id="sbcProcess2" class="Fright" value="#{priceListBatchOpreationsBean.isSelectAllStock}" title="#{loc.selectall}">
+                                            <p:ajax update="dtbStock tbvPriceList:frmPriceListBatchOperationsTab:pngStockCountList" listener="#{priceListBatchOpreationsBean.selectAllStocks()}" global="false" />                           
+                                        </p:selectBooleanCheckbox> 
+                                        <p:commandLink global="false" title="#{loc.fileupload}" rendered="#{priceListBatchOpreationsBean.processType==1}" resetValues="true" class ="Fleft tlbrIcon Fright MarRight12 MarTop-8"  update="dlgFileUploadForTag" actionListener="#{priceListBatchOpreationsBean.openFileUpload}" >
+                                            <i class="fa fa-cloud-upload tlbrUploadBtn Fs23" style="margin-top: 7px;margin-left: 4px;" />
+                                        </p:commandLink>
+                                        <h:panelGroup id="pngStockCountList">
+                                            <h:outputText id="txtStockCount" class="Fright MarRight12 MarTop1" rendered="#{priceListBatchOpreationsBean.processType==1 and !priceListBatchOpreationsBean.tempSelectedDataList.isEmpty()}" value="(&#32;#{priceListBatchOpreationsBean.tempSelectedDataList.size()} #{loc.stock} #{loc.selected}&#32;)"/>
+                                        </h:panelGroup>
+                                    </f:facet>
+                                    <div class="ui-g-12 ui-lg-12 ui-md-12">
+                                        <p:defaultCommand  target= "testStock" />
+                                        <p:commandLink  id="testStock" delay="100" process="@this" update="dtbStock" actionListener="#{priceListBatchOpreationsBean.generalFilter()}" style="display: none" onstart="PF('stockBatchPF').filter();" />                                        
+                                        <p:inputText value="#{priceListBatchOpreationsBean.autoCompleteValueStock}" class="Fleft MarTop5 tlbrSearchInputMaxWidth" style="border-radius: 5px" >
+                                            <p:ajax event="keyup" global="false"/>
+                                        </p:inputText>                                                                                    
+                                    </div>
+
+                                    <p:dataTable id="dtbStock" var="priceListItem" editable="true" editMode="cell"  value="#{priceListBatchOpreationsBean.stockList}" selection="#{priceListBatchOpreationsBean.selectedStcokList}" widgetVar="stockBatchPF" emptyMessage="#{loc.norecordsfound}"
+                                                 rowKey="#{priceListItem.id}" sortBy="#{priceListItem.stck.name}" class="dtbStockBatchTable datatableLikeTree" 
+                                                 rowSelectMode="checkbox" rows="#{sessionBean.user.defualtGridSize}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                                                 rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" lazy="true" reflow="true">
+
+                                        <p:ajax event="rowSelectCheckbox" listener="#{priceListBatchOpreationsBean.changeSelected()}" update="tbvPriceList:frmPriceListBatchOperationsTab:pngStockCountList"/>
+                                        <p:ajax event="rowUnselectCheckbox" listener="#{priceListBatchOpreationsBean.changeSelected()}" update="tbvPriceList:frmPriceListBatchOperationsTab:pngStockCountList"/>
+                                        <p:ajax event="rowSelectCheckbox" listener="#{priceListBatchOpreationsBean.onRowSelect}" update="tbvPriceList:frmPriceListBatchOperationsTab:pngStockCountList"/>
+
+                                        <p:ajax event="cellEdit" listener="#{priceListBatchOpreationsBean.onCellEditStock}" process="@this" global="false" />
+
+                                        <p:column selectionMode="multiple" style="width:26px;text-align:center;" selectRow="false" class="check"/> 
+
+                                        <p:column id="clmStockName" >
+                                            <f:facet name="filter">
+                                                <p:outputLabel   rendered="false" />
+                                            </f:facet> 
+                                            <h:outputText value="(#{priceListItem.stock.barcode})-" style="color: #316996"/>
+                                            <h:outputText value="#{priceListItem.stock.name}"/>
+                                            <h:outputText id="altBarcode" value="#{priceListItem.alternativeBarcodes}"  />
+                                        </p:column>
+                                        <p:column id="clmTagQuantity"  rendered="#{priceListBatchOpreationsBean.processType == 1}" style="width:26px;text-align:center;">
+                                            <p:cellEditor  >
+                                                <f:facet name="output">
+                                                    <h:outputText value="#{priceListItem.tagQuantity}" class="Fright" />
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputNumber id="inputTagStock" value="#{priceListItem.tagQuantity}" class="MaxWid500 :!important" onclick="this.setSelectionRange(0, this.value.length)"
+                                                                   minValue="0" roundMethod="D" emptyValue="" decimalPlaces="0" >
+                                                        <p:ajax />
+                                                        <p:ajax event="blur" process="@this" global="false" listener="#{priceListBatchOpreationsBean.isCheckFalseStock()}" update="tbvPriceList:frmPriceListBatchOperationsTab:dtbStock:0:inputTagStock"/>
+                                                    </p:inputNumber>  
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:panel>
+                            </h:panelGroup>
+                        </h:panelGroup>
+
+                        <h:panelGroup id="pgrRecordedStocksList" >
+                            <h:panelGroup rendered="#{priceListBatchOpreationsBean.processType == 3}">
+                                <p:panel class="pnlRecordedStocks">
+                                    <f:facet name="header">
+                                        #{loc.stock}
+                                        <p:selectBooleanCheckbox id="sbcRecordedProcess2" class="Fright" value="#{priceListBatchOpreationsBean.isSelectAllRecordedStock}" title="#{loc.selectall}">
+                                            <p:ajax update="dtbRecordedStock" listener="#{priceListBatchOpreationsBean.selectAllRecordedStocks()}" global="false" />                           
+                                        </p:selectBooleanCheckbox> 
+                                    </f:facet>
+                                    <div class="ui-g-12 ui-lg-12 ui-md-12">
+                                        <p:defaultCommand  target="testRecordedStock" />
+                                        <p:commandLink  id="testRecordedStock" delay="100" actionListener="#{priceListBatchOpreationsBean.generalFilterRecordedStock()}" style="display: none" onstart="PF('recordedStockPF').filter();" />
+                                        <p:inputText value="#{priceListBatchOpreationsBean.autoCompleteValueRecordedStock}" class="Fleft MarTop5 tlbrSearchInputMaxWidth" style="border-radius: 5px" />
+                                    </div>
+                                    <p:dataTable id="dtbRecordedStock" var="priceListItem"  value="#{priceListBatchOpreationsBean.recordedStockList}" selection="#{priceListBatchOpreationsBean.selectedRecordedStock}" widgetVar="recordedStockPF" emptyMessage="#{loc.norecordsfound}"
+                                                 rowSelectMode="checkbox" rowKey="#{priceListItem.id}" sortBy="#{priceListItem.stck.name}" class="dtbStockBatchTable datatableLikeTree"
+                                                 rows="#{sessionBean.user.defualtGridSize}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                                                 rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" lazy="true">
+
+                                        <p:ajax event="rowSelectCheckbox" listener="#{priceListBatchOpreationsBean.changeSelectedRecordedStock()}" />
+                                        <p:ajax event="rowUnselectCheckbox" listener="#{priceListBatchOpreationsBean.changeSelectedRecordedStock()}" />
+
+                                        <p:defaultCommand  target="test" />
+                                        <p:commandLink  id="test" global="false" style="display: none"   />
+
+                                        <p:column selectionMode="multiple" style="width:26px;text-align:center;" class="check" selectRow="false"/>
+
+                                        <p:column id="clmStockName" selectRow="false">
+                                            <f:facet name="filter">
+                                                <p:outputLabel   rendered="false" />
+                                            </f:facet> 
+                                            <h:outputText value="(#{priceListItem.stock.barcode})-" style="color: #316996"/>
+                                            <h:outputText value="#{priceListItem.stock.name}-" />
+                                            <h:outputText value="#{loc.tagcount} : #{sessionBean.numberFormat.format(priceListItem.printTagQuantity)}" style="color: #3b99cd"/>
+                                            <h:outputText id="altBarcode" value="#{priceListItem.alternativeBarcodes}" style="display: none;" />
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:panel>
+                            </h:panelGroup>
+                        </h:panelGroup>
+
+
+                        <h:panelGroup id="pgrAccountList" >
+                            <h:panelGroup rendered="#{priceListBatchOpreationsBean.stockType == 3 or priceListBatchOpreationsBean.stockType == 4}">
+                                <p:panel class="pnlAccounts">
+                                    <f:facet name="header">
+                                        #{loc.supplier}
+                                        <p:selectBooleanCheckbox id="sbcProcess3" class="Fright" value="#{priceListBatchOpreationsBean.isSelectAllAccount}" title="#{loc.selectall}">
+                                            <p:ajax update="dtbAccount" listener="#{priceListBatchOpreationsBean.selectAllAccounts()}" global="false" />                           
+                                        </p:selectBooleanCheckbox> 
+                                    </f:facet>
+                                    <div class="ui-g-12 ui-lg-12 ui-md-12">
+                                        <p:inputText id="globalFilterAccount" value="#{priceListBatchOpreationsBean.autoCompleteValueAccount}" styleClass="Fleft tlbrSearchInputMaxWidth" style="border-radius: 5px">
+                                            <p:ajax event="keyup"  global="false" onstart="PF('accountPF').filter();" update="dtbAccount" />
+                                        </p:inputText>
+                                        <p:watermark for="globalFilterAccount"  value="#{loc.enteratleastonecharacter}" id="watermark"/>
+                                    </div>
+
+                                    <p:dataTable id="dtbAccount" var="account" editable="true" editMode="cell" value="#{priceListBatchOpreationsBean.accountList}" selection="#{priceListBatchOpreationsBean.selectedAccountList}" widgetVar="accountPF" emptyMessage="#{loc.norecordsfound}"
+                                                 rowKey="#{account.id}" style="height: 600px !important;overflow-y: hidden;" class="dialogDatatableWith600 datatableLikeTree"
+                                                 reflow="true" rowSelectMode="checkbox" filteredValue="#{priceListBatchOpreationsBean.listOfFilteredAccountObjects}" >
+
+                                        <p:ajax event="rowSelectCheckbox"  global="false"/>
+                                        <p:ajax event="rowUnselectCheckbox"  global="false"/>
+                                        <p:ajax event="filter" global="false"/>
+                                        <p:ajax event="cellEdit" listener="#{priceListBatchOpreationsBean.onCellEditAccount}" process="@this" global="false"/>
+
+                                        <f:facet  name="footer"     >
+                                            <p:inputText id="globalFilter" value="#{priceListBatchOpreationsBean.autoCompleteValueAccount}"  style="display: none" />
+                                        </f:facet>
+
+                                        <p:column selectionMode="multiple" style="width:26px;text-align:center;" selectRow="false" class="check"/>
+
+                                        <p:column id="clmAccountName" headerText="#{loc.employee}" filterable="true" filterBy="#{account.name}" filterMatchMode="contains" selectRow="false" >
+                                            <f:facet name="filter">
+                                                <p:outputLabel   rendered="false" />
+                                            </f:facet> 
+                                            <h:outputText value="#{account.name}"/>  
+                                        </p:column>
+                                        <p:column id="clmTagQuantity1" rendered="#{priceListBatchOpreationsBean.processType == 1}">
+                                            <p:cellEditor >
+                                                <f:facet name="output">
+                                                    <h:outputText value="#{account.tagQuantity}" class="Fright"/>
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputNumber value="#{account.tagQuantity}" class="editableinput" onclick="this.setSelectionRange(0, this.value.length)"
+                                                                   minValue="0" roundMethod="D" emptyValue="" decimalPlaces="0"/>  
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+                                    </p:dataTable>
+
+                                </p:panel>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:panelGroup id="pgrCentralSupplierList" >
+                            <h:panelGroup rendered="#{priceListBatchOpreationsBean.stockType == 5}">
+                                <p:panel class="pnlCentralSupplier">
+                                    <f:facet name="header">
+                                        #{loc.centralsupplier}
+                                        <p:selectBooleanCheckbox id="sbcRecordedProcess4" class="Fright" value="#{priceListBatchOpreationsBean.isSelectAllCentralSupplier}" title="#{loc.selectall}">
+                                            <p:ajax update="dtbCentralSupplier" listener="#{priceListBatchOpreationsBean.selectAllCentralSupplier()}" global="false" />                           
+                                        </p:selectBooleanCheckbox> 
+                                    </f:facet>
+                                    <div class="ui-g-12 ui-lg-12 ui-md-12">
+                                        <p:defaultCommand  target="testCentralSupplier" />
+                                        <p:commandLink  id="testCentralSupplier" delay="100" process="@this" update="dtbCentralSupplier" actionListener="#{priceListBatchOpreationsBean.generalFilterCentralSupplier()}" style="display: none" onstart="PF('centralSupplierPF').filter();" />
+                                        <p:inputText value="#{priceListBatchOpreationsBean.autoCompleteValueCentralSupplier}" class="Fleft MarTop5 tlbrSearchInputMaxWidth" style="border-radius: 5px" >                
+                                            <p:ajax event="keyup" global="false"/>
+                                        </p:inputText>
+                                    </div>
+                                    <p:dataTable id="dtbCentralSupplier" var="centralSupplier"  value="#{priceListBatchOpreationsBean.centralSupplierList}" selection="#{priceListBatchOpreationsBean.selectedCentralSupplierList}" widgetVar="centralSupplierPF" emptyMessage="#{loc.norecordsfound}"
+                                                 rowKey="#{centralSupplier.id}" class="dtbStockBatchTable datatableLikeTree" editable="true" editMode="cell"
+                                                 rows="#{sessionBean.user.defualtGridSize}" rowSelectMode="checkbox" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                                                 rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" lazy="true">
+
+                                        <p:ajax event="rowSelectCheckbox" listener="#{priceListBatchOpreationsBean.changeSelectedCentralSupplier()}" />
+                                        <p:ajax event="rowUnselectCheckbox" listener="#{priceListBatchOpreationsBean.changeSelectedCentralSupplier()}" />
+                                        <p:ajax event="cellEdit" listener="#{priceListBatchOpreationsBean.onCellEditCentralSupplier}" process="@this" global="false"/>
+
+                                        <p:column selectionMode="multiple" style="width:26px;text-align:center;" selectRow="false"/>
+
+                                        <p:column id="clmCentralSupplierName">
+                                            <f:facet name="filter">
+                                                <p:outputLabel   rendered="false" />
+                                            </f:facet> 
+                                            <h:outputText value="#{centralSupplier.name}" />
+                                        </p:column>
+                                        <p:column id="clmTagQuantity2" rendered="#{priceListBatchOpreationsBean.processType == 1}">
+                                            <p:cellEditor  >
+                                                <f:facet name="output">
+                                                    <h:outputText value="#{centralSupplier.tagQuantity}" class="Fright"/>
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputNumber id="inputTagCentralSupplier" value="#{centralSupplier.tagQuantity}" class="editableinput" onclick="this.setSelectionRange(0, this.value.length)"
+                                                                   minValue="0" roundMethod="D" emptyValue="" decimalPlaces="0">
+                                                        <p:ajax />
+                                                        <p:ajax event="blur" global="false" listener="#{priceListBatchOpreationsBean.isCheckFalseCentralSupplier()}" update="inputTagCentralSupplier"/>
+                                                    </p:inputNumber>  
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:panel>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </div>  
+
+                    <div  class="ui-g-12 ui-md-3 ui-lg-3">
+                        <h:panelGroup id="pgrSave" >
+                            <h:panelGroup rendered="#{priceListBatchOpreationsBean.stockType != 0 and priceListBatchOpreationsBean.processType == 2}">
+                                <div  class="ui-g-12 ui-md-6 ui-lg-6">
+                                    <div class="ui-inputgroup">
+                                        <p:outputLabel value="#{priceListBatchOpreationsBean.isRate == true ? loc.rate : loc.total}"  styleClass="Fs12 FontBold"/>
+                                        <p:commandLink class="commandLinkPositionForBookFilter"   action="#{priceListBatchOpreationsBean.changedRatePrice()}"  update="pgrSave" process="@this">
+                                            <i class="fa fa-refresh Fs16 iconPositionForBookFilter " style="margin-top: 23px !important;" title="#{priceListBatchOpreationsBean.isRate == true ? loc.total : loc.rate}"/>   
+                                        </p:commandLink>
+                                    </div>
+                                    <p:inputNumber id="rate" value="#{priceListBatchOpreationsBean.price}"   required="true"
+                                                   decimalSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? '.': ','}" thousandSeparator="#{sessionBean.user.lastBranch.decimalsymbol==1 ? ',': '.'}" 
+                                                   class="TexAlRight">
+
+                                    </p:inputNumber>
+                                    <p:outputLabel value="#{loc.youcanenterminusvaluetoapplydiscount}"  style="display: block;"/>
+
+
+                                </div>
+                                <div  class="ui-g-12 ui-md-6 ui-lg-6">
+                                    <p:outputLabel value="#{loc.search}"  style="visibility: hidden; display: block;"/>
+                                    <p:commandButton action="#{priceListBatchOpreationsBean.confirmShow()}" value="#{loc.update}" process="@form"    update="frmPriceListBatchOperationsTab"  ></p:commandButton>
+
+                                </div> 
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{(priceListBatchOpreationsBean.stockType != 0 and priceListBatchOpreationsBean.processType == 1) or priceListBatchOpreationsBean.processType ==3}">
+                                <div  class="#{priceListBatchOpreationsBean.processType==3 ? 'ui-g-12 ui-md-6 ui-lg-6' : 'ui-g-12 ui-md-6 ui-lg-6'}">
+                                    <p:outputLabel value="#{loc.search}"  style="visibility: hidden; display: block;"/>
+                                    <p:commandButton action="#{priceListBatchOpreationsBean.goToBeforePrintTag(1)}"  value="#{loc.printfromdevice}" class="#{priceListBatchOpreationsBean.processType==3 ? 'Fright' : ''}"  process="@form" >
+                                    </p:commandButton>
+                                </div> 
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{(priceListBatchOpreationsBean.stockType != 0 and priceListBatchOpreationsBean.processType == 1) or priceListBatchOpreationsBean.processType ==3}">
+                                <div  class="#{priceListBatchOpreationsBean.processType==3 ? 'ui-g-12 ui-md-6 ui-lg-3' : 'ui-g-12 ui-md-6 ui-lg-6'}">
+                                    <p:outputLabel value="#{loc.search}"  style="visibility: hidden; display: block;"/>
+                                    <p:commandButton action="#{priceListBatchOpreationsBean.goToBeforePrintTag(0)}"  value="#{loc.print}" class="#{priceListBatchOpreationsBean.processType==3 ? 'MarRight-5 Fright' : ''}"  process="@form"    update="frmPriceListBatchOperationsTab tbvPriceList:printPanel"  >
+                                    </p:commandButton>
+                                </div> 
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{priceListBatchOpreationsBean.processType==3}">
+                                <div  class="ui-g-12 ui-md-6 ui-lg-3">
+                                    <p:outputLabel value="#{loc.search}"  style="visibility: hidden; display: block;"/>
+                                    <p:commandButton action="#{priceListBatchOpreationsBean.beforeDeleteRecordStock()}"  value="#{loc.delete}"  process="@form"    update="frmPriceListBatchOperationsTab tbvPriceList:printPanel"  >
+                                    </p:commandButton>
+                                </div> 
+                            </h:panelGroup>
+                        </h:panelGroup>
+                    </div>  
+
+                </div>
+            </h:panelGroup>
+
+        </h:form>
+    </div>
+
+    <p:confirmDialog global="true" class="deleteConfirm MaxWid500"   id="dlgDelete" widgetVar="dlgDeleteVar" showEffect="fade" hideEffect="fade"  closeOnEscape="true" responsive="true">
+        <f:facet name="message">
+            <h:outputText value="#{loc.areyousure}"  style="white-space: pre-wrap;">
+                <i class="icon-trash Fs20 tlbrDeleteBtn" /> 
+            </h:outputText>
+        </f:facet>
+        <p:commandButton   action="#{priceListBatchOpreationsBean.update()}"   onclick="PF('dlgDeleteVar').hide()"  process="@this"  value="#{loc.yes}" styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white" />
+        <p:commandButton value="#{loc.no}"    type="button" onclick="PF('dlgDeleteVar').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+    </p:confirmDialog>
+    <p:dialog id="dlgOpenTagQuantity" widgetVar="dlg_openTagQuantity" resizable="false" width="20%" focus="dlgOpenTagQuantity" modal="true" responsive="true" closeOnEscape="true">
+        <p:ajax event="close" listener="#{priceListBatchOpreationsBean.closeCategoryDialog()}" global="false" />
+        <ui:include src="pricelistcategorytagquantity.xhtml"/>
+    </p:dialog>
+
+
+    <!-- Kaydedilen ürünleri silerken çıkan uyarı dilogu -->
+    <p:confirmDialog id="dlgConfirmDeleteRecordStock"  class="deleteConfirm controlDelete"  widgetVar="dlgConfirmDeleteRecordStock" closable="true" width="20%" responsive="true">
+        <f:facet name="message">
+            <p:panel class="divContent">
+                <div class="ui-g">
+                    <div class="ui-g-12 ui-md-12 ui-lg-12">
+                        <h:outputText value="#{loc.recordedstockwillbedeleted}" />
+                    </div>
+                    <div class="ui-g-12 ui-md-12 ui-lg-12">
+                        <h:outputText value="#{loc.areyousureyouwanttocontinue}" />
+                    </div>
+                    <div class="ui-g-12 ui-md-12 ui-lg-6">
+                        <p:commandButton value="#{loc.yes}" action="#{priceListBatchOpreationsBean.deleteRecordStock()}" update="tbvPriceList:frmPriceListBatchOperationsTab:dtbRecordedStock" onclick="PF('dlgConfirmDeleteRecordStock').hide()" process="@this" styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+                    </div>
+                    <div class="ui-g-12 ui-md-12 ui-lg-6">
+                        <p:commandButton value="#{loc.no}" type="button" onclick="PF('dlgConfirmDeleteRecordStock').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+                    </div>
+                </div>
+            </p:panel>
+        </f:facet>
+    </p:confirmDialog>
+
+
+    <div style="display: none">
+        <p:outputPanel id="printPanel"  style="width: 22cm;height: 29cm; position: relative;padding: 0; page-break-before: auto; page-break-after: auto; page-break-inside: avoid; float:left;display: inline-block; width: 1000px;">
+            <p:outputPanel id="pricelist" >
+                <style>
+                    @page{
+                        margin:5mm;
+                    }
+                    .pricetaglabel{
+                        color:black!important; 
+                        /*margin:0;
+                        padding:0;*/
+                        position:absolute; 
+                        overflow: hidden;
+                    }
+                    .pricetagcontainer{
+                        position: relative;padding: 0; page-break-before: auto; page-break-after: auto; page-break-inside: avoid; float:left
+                    }
+                    #{priceListBatchOpreationsBean.pricetagStyle}
+                </style>
+                <div style="display: block;" class="ui-g">
+                    <p:repeat value="#{priceListBatchOpreationsBean.tagStockList}" var="stock">
+                        <p:panel style="position: relative; display: inline-block;width:#{priceListBatchOpreationsBean.documentTemplate.width.multiply(5)}px;height:#{priceListBatchOpreationsBean.documentTemplate.height.multiply(5)}px; margin-bottom:80px;">
+
+                            <c:forEach  items="#{priceListBatchOpreationsBean.jsonDocumentDemplate.listOfObjects}" var="dto">
+                                <c:if test="#{dto.keyWord.contains('container')}">
+                                    <p:outputPanel class="#{dto.keyWord}"  style="#{dto.keyWord.contains('container') ? 'position: absolute;':'display:none;'}; border: 1px solid black;width:#{dto.width*(4.5)}px;height:#{dto.height*(4.5)}px;" />
+                                </c:if>
+                                       <c:if test="#{!dto.keyWord.contains('domesticproductsimagepnl') and dto.keyWord.contains('imagepnl')}">
+                                    <p:graphicImage   class="#{dto.keyWord}"   style="#{!dto.keyWord.contains('domesticproductsimagepnl') and dto.keyWord.contains('imagepnl')  ? 'position: absolute;':'display:none;'};" 
+                                                      url="../upload/template/#{priceListBatchOpreationsBean.documentTemplate.id}_#{dto.keyWord}.png" >
+                                    </p:graphicImage> 
+                                </c:if>        
+
+                                <p:graphicImage  class="#{dto.keyWord}"   style="#{dto.keyWord.contains('domesticproductsimagepnl') and (sessionBean.user.lastBranch.country.id  eq stock.stock.country.id) ? 'position: absolute;': 'display:none;'};" 
+                                                 url="../upload/template/#{priceListBatchOpreationsBean.documentTemplate.id}_#{dto.keyWord}.png" >
+                                </p:graphicImage> 
+  
+                                <c:if test="#{!dto.keyWord.contains('imagepnl') and !dto.keyWord.contains('container')}">
+                                    <p:outputPanel class="#{dto.keyWord}"  style="#{!dto.keyWord.contains('imagepnl') and !dto.keyWord.contains('container') ? 'position: absolute;':'display:none'}" >
+
+                                        <c:if test="#{dto.keyWord.contains('textpnl')}">
+                                            <!--labelTitle--><p:outputLabel style="#{dto.keyWord.contains('textpnl')  ? 'position: absolute;':'display:none'};"  class="#{dto.keyWord}" value="#{dto.name}" ></p:outputLabel>
+                                        </c:if>
+                                        <c:if test="#{dto.keyWord.contains('productnamepnl') or dto.keyWord.contains('madeinpnl')}">
+                                            <!--labelTitle--><p:outputLabel style="#{dto.keyWord.contains('productnamepnl') or dto.keyWord.contains('madeinpnl') ? 'position: absolute;':'display:none'}" class="#{dto.keyWord}"  value="#{dto.keyWord.contains('productnamepnl') ? ((stock.stock.name == null ? '':stock.stock.name)):
+                                                                                     dto.keyWord.contains('madeinpnl') ? ((stock.stock.country.tag == null ? '':stock.stock.country.tag)):
+                                                                                     ''}"  ></p:outputLabel>
+                                        </c:if>
+                                        <c:if test="#{dto.keyWord.contains('lastunitpricechangedatepnl')}">
+                                            <!--labelDate--><p:outputLabel style="#{dto.keyWord.contains('lastunitpricechangedatepnl') ? 'position: absolute;':'display:none'}" class="#{dto.keyWord}"  value="#{                                                                             
+                                                                                    dto.keyWord.contains('lastunitpricechangedatepnl') ? ((stock.stock.stockInfo.lastSalePriceChangeDate == null ? '':stock.stock.stockInfo.lastSalePriceChangeDate )):
+                                                                                    ''}"  > <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat}" /></p:outputLabel>
+                                        </c:if>
+                                        <c:if test="#{dto.keyWord.contains('salepricepnl')}">
+                                            <!--labelNumeric--><p:outputLabel style="#{dto.keyWord.contains('salepricepnl') ? 'position: absolute;':'display:none'} #{stock.stock.stockInfo.saleMandatoryPrice   gt 0  ? ' text-decoration: line-through; color: red; margin-top:-5px;':'' }  "  class="#{dto.keyWord}" value="#{ dto.keyWord.contains('salepricepnl') 
+                                                                                       ?  stock.stock.stockInfo.saleMandatoryPrice   gt 0 ? stock.stock.stockInfo.recommendedPrice :  (stock.priceWithTax == null ? 0: stock.priceWithTax ): 0}" >
+
+                                                <f:converter converterId="currencyConverter" /> 
+                                                <f:attribute name="currency" value="#{stock.stock.stockInfo.saleMandatoryPrice gt 0 ? stock.stock.stockInfo.saleMandatoryCurrency  :  stock.currency}"/>
+                                                <f:attribute name="type" value="currency" />
+                                            </p:outputLabel> 
+                                        </c:if>
+                                        <c:if test="#{dto.keyWord.contains('salepricepnl')}">
+                                            <!--labelNumeric--><p:outputLabel style="#{dto.keyWord.contains('salepricepnl') ? 'position: absolute;':'display:none'} #{stock.stock.stockInfo.saleMandatoryPrice   gt 0 ? 'margin-top: 15px;' : ' display:none;'} "  class="#{dto.keyWord}" value="#{ dto.keyWord.contains('salepricepnl') 
+                                                                                       ? stock.stock.stockInfo.saleMandatoryPrice : 0}"  >
+
+                                                <f:converter converterId="currencyConverter" />
+                                                <f:attribute name="currency" value="#{stock.stock.stockInfo.saleMandatoryCurrency}"/>
+                                                <f:attribute name="type" value="currency" />
+                                            </p:outputLabel> 
+                                        </c:if>
+                                        <c:if test="#{(dto.keyWord.contains('lastchangingunitpricepnl'))}">
+                                            <!--labelNumeric--><p:outputLabel style="#{dto.keyWord.contains('lastchangingunitpricepnl') and  ((stock.stock.stockInfo.weightUnit.mainWeightUnit.id != 0 ? stock.stock.stockInfo.weightUnit.mainWeightUnit.id : stock.stock.stockInfo.weightUnit.id ) gt 0) ? 'position: absolute;': 'display:none'};"  class="#{dto.keyWord}" value="#{priceListBatchOpreationsBean.calculateUnitPrice(stock)}" >
+                                                <f:converter converterId="currencyConverter" />  
+                                                <f:attribute name="currency" value="#{stock.stock.stockInfo.saleMandatoryCurrency.id gt 0 ? stock.stock.stockInfo.saleMandatoryCurrency :  (stock.stock.stockInfo.currentSaleCurrency.id == 0 ? sessionBean.user.lastBranch.currency : stock.stock.stockInfo.currentSaleCurrency)}"/>
+                                                <f:attribute name="type" value="currency" />  
+                                            </p:outputLabel>
+                                            <p:outputLabel style="#{dto.keyWord.contains('lastchangingunitpricepnl') and ((stock.stock.stockInfo.weightUnit.mainWeightUnit.id != 0 ? stock.stock.stockInfo.weightUnit.mainWeightUnit.id : stock.stock.stockInfo.weightUnit.id ) gt 0) ? 'position: absolute;     margin-left: 64px; ':'display:none'};"  class="#{dto.keyWord}"  value="  / #{(stock.stock.stockInfo.weightUnit.mainWeightUnit.id != 0 ? stock.stock.stockInfo.weightUnit.mainWeightUnit.sortName : stock.stock.stockInfo.weightUnit.sortName)}"/>
+                                        </c:if>
+                                        <c:if test="#{dto.keyWord.contains('stockbarcode')}">
+                                            <!--labelNumeric-->
+                                            <p:barcode class="#{dto.keyWord}" value="#{stock.stock.barcode}" type="#{stock.stock.barcode.length() gt 8  ? 'ean13' : 'ean8'}"/>
+                                        </c:if>
+
+                                    </p:outputPanel>
+                                </c:if>
+
+                            </c:forEach> 
+                        </p:panel>
+
+
+                    </p:repeat>
+                </div>
+
+            </p:outputPanel>
+        </p:outputPanel>  
+
+
+        <script type="text/javascript">
+            //<![CDATA[
+            function printData()
+            {
+                var divToPrint = document.getElementById("tbvPriceList:printPanel");
+                newWin = window.open('', '', 'height=400,width=800');
+                newWin.document.write(divToPrint.outerHTML);
+                newWin.document.close();
+                newWin.focus();
+
+                newWin.addEventListener('load', function () {
+                    newWin.print();
+                });
+
+
+                // setTimeout(function () { newWin.close(); }, 500);
+                //var writtenNumber = require('written-number');
+            }
+
+            //]]>
+
+        </script> 
+    </div>
+
+
+</ui:composition>

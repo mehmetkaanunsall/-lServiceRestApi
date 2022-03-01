@@ -1,0 +1,58 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+        <ui:param name="bean" value="#{authorizeBean}"/>   <!-- Bean -->
+        <ui:param name="update" value="dlgAuthorizationProc"/>  <!-- Yeni butonuna basınca açılacak sayfa  -->
+        <ui:param name="btnNewId" value="#{authorizeBean.getRendered(180, 0)}"/>  <!-- buton id yetki kontrolü için  -->
+        <ui:param name="datatable" value="frmAuthorization:dtbAuthorization" />  <!-- datatable  -->
+        <ui:param name="widgetvar" value="authorizationPF" />  <!--   datatable WidgetVar  -->
+        <ui:param name="form" value='frmToolbarAuthorization' />
+        <ui:param name="fileName" value="#{loc.authorizations}"/>
+        <ui:param name="renderedToggler" value='false'/>
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+    </ui:include>
+
+
+    <h:form id="frmAuthorization">
+        <p:growl id="grwAuthorize" showDetail="true" life="5000"/> 
+
+        <p:dataTable  id="dtbAuthorization" widgetVar="authorizationPF" var="Authorize" rowKey="#{Authorize.id}" value="#{authorizeBean.listOfObjects}" selection="#{authorizeBean.selectedObject}" filteredValue="#{authorizeBean.listOfFilteredObjects}" selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" reflow="true"  >
+
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{marwiz.goToPage('/pages/system/authorize/authorizeprocess.xhtml', authorizeBean.selectedObject, 0, 16)}"/> 
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false"/>
+            <p:ajax event="colReorder" listener="#{authorizeBean.reorder}" update="frmToolbarAuthorization:toggle" />     
+            <p:ajax event="colResize"  listener="#{authorizeBean.onResize}" /> 
+
+            <f:facet name="footer" rendered="false" >
+                <p:inputText id="globalFilter" value="#{authorizeBean.autoCompleteValue}"  style="display: none"  />
+            </f:facet>
+            <p:column id="clmAuthorizationName" headerText="#{loc.authorizationname}" sortable="true" sortBy="#{Authorize.name}" filterable="true"  filterBy="#{Authorize.name}" filterMatchMode="contains">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{Authorize.name}"/>
+            </p:column>
+
+
+        </p:dataTable>  
+
+    </h:form>
+
+    <p:dialog id="dlgAuthorizationProc" widgetVar="dlg_autherizationproc" resizable="false" width="20%" focus="dlgAuthorizationProc" responsive="true" dynamic="true" closeOnEscape="true">
+        <ui:include src="newauthorize.xhtml">
+            <ui:param name="bean" value='#{authorizeBean}' />
+
+        </ui:include>
+
+    </p:dialog>
+
+</ui:composition>

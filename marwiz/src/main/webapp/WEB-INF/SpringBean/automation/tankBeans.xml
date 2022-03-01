@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                            http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://www.springframework.org/schema/tx 
+                            http://www.springframework.org/schema/tx/spring-tx.xsd">
+      
+    <bean id="tankDao" class="com.mepsan.marwiz.automation.tank.dao.TankDao" lazy-init="true" scope="prototype" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+     
+    <bean id="tankService" class="com.mepsan.marwiz.automation.tank.business.TankService" lazy-init="true" scope="prototype" >
+    </bean>
+    
+         
+    <bean id="tankMovementTabDao" class="com.mepsan.marwiz.automation.tank.dao.TankMovementTabDao" lazy-init="true" scope="request" >
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+     
+    <bean id="tankMovementTabService" class="com.mepsan.marwiz.automation.tank.business.TankMovementTabService" lazy-init="true" scope="request" >
+    </bean>
+    
+    
+</beans>

@@ -1,0 +1,175 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+        <ui:param name="bean" value="#{stockTakingBean}"/>   <!-- Bean -->
+        <ui:param name="update" value=""/>  <!-- Yeni butonuna basınca açılacak sayfa  -->
+        <ui:param name="btnNewId" value="#{stockTakingBean.getRendered(37, 0)}"/>  <!-- buton id yetki kontrolü için  -->
+        <ui:param name="datatable" value="frmStockTaking:dtbStockTaking" />  <!-- datatable  -->       
+        <ui:param name="widgetvar" value='stockTakingPF' />
+        <ui:param name="form" value='frmToolbarStockTaking' />
+        <ui:param name="fileName" value="#{loc.stocktaking}"/> 
+        <ui:param name="renderedToggler" value='true'/>       
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+    </ui:include>
+
+
+    <h:form id="frmStockTaking">
+
+        <p:dataTable  id="dtbStockTaking" var="StockTaking"  value="#{stockTakingBean.listOfObjects}" widgetVar="stockTakingPF" selection="#{stockTakingBean.selectedObject}" filteredValue="#{stockTakingBean.listOfFilteredObjects}" selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{StockTaking.id}" paginator="true" 
+                      paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" 
+                      paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                      reflow="true" rowStyleClass="#{StockTaking.status.id==15 ? 'ColumnColorGreen' : null}" >
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{stockTakingBean.update()}"  />  
+
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false"/>
+            <p:ajax event="colReorder" listener="#{stockTakingBean.reorder}" update="frmToolbarStockTaking:toggle" />     
+            <p:ajax event="colResize"  listener="#{stockTakingBean.onResize}" /> 
+
+            <f:facet name="footer" rendered="false" >
+                <p:inputText id="globalFilter" value="#{stockTakingBean.autoCompleteValue}"  style="display: none"  />
+            </f:facet>
+
+            <p:column id="clmName" headerText="#{loc.name}" sortable="true" sortBy="#{StockTaking.name}" filterable="true"  filterBy="#{StockTaking.name}" filterMatchMode="contains" visible="#{stockTakingBean.toogleList[0]}" exportable="#{stockTakingBean.toogleList[0]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{StockTaking.name}" />
+            </p:column >
+            <p:column id="clmWarehouseName" headerText="#{loc.warehousename}" sortable="true" sortBy="#{StockTaking.warehouse.name}" filterable="true"  filterBy="#{StockTaking.warehouse.name}" filterMatchMode="contains" visible="#{stockTakingBean.toogleList[1]}" exportable="#{stockTakingBean.toogleList[1]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{StockTaking.warehouse.name}" />
+            </p:column >
+            <p:column id="clmControl" headerText="#{loc.control}" sortable="true" sortBy="#{StockTaking.isControl}" filterable="true"  filterBy="#{StockTaking.isControl}" filterMatchMode="contains" visible="#{stockTakingBean.toogleList[2]}" exportable="#{stockTakingBean.toogleList[2]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{StockTaking.isControl ? loc.controlled : loc.uncontrolled}" />
+            </p:column >
+            <p:column id="clmDescription" headerText="#{loc.description}" sortable="true" sortBy="#{StockTaking.description}" filterable="true"  filterBy="#{StockTaking.description}" filterMatchMode="contains" visible="#{stockTakingBean.toogleList[3]}" exportable="#{stockTakingBean.toogleList[3]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{StockTaking.description}" />
+            </p:column >
+
+
+            <p:column id="clmTakingEmployee" headerText="#{loc.stocktakingemployee}" sortable="true" sortBy="#{StockTaking.takingEmployee.name}" filterable="true"  filterBy="#{StockTaking.takingEmployee.name}" filterMatchMode="contains" visible="#{stockTakingBean.toogleList[4]}" exportable="#{stockTakingBean.toogleList[4]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{StockTaking.takingEmployee.name} #{StockTaking.takingEmployee.title}" />
+            </p:column >
+
+            <p:column id="clmBeginDate" headerText="#{loc.startdate}" sortable="true" sortBy="#{StockTaking.beginDate}" filterable="true"  filterBy="#{StockTaking.beginDate}" filterMatchMode="contains" visible="#{stockTakingBean.toogleList[5]}" exportable="#{stockTakingBean.toogleList[5]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{StockTaking.beginDate}">
+                    <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" />
+                </h:outputText>
+            </p:column>
+
+
+            <p:column id="clmEndDate" headerText="#{loc.enddate}" sortable="true" sortBy="#{StockTaking.endDate}" filterable="true"  filterBy="#{StockTaking.endDate}" filterMatchMode="contains" visible="#{stockTakingBean.toogleList[6]}" exportable="#{stockTakingBean.toogleList[6]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{StockTaking.endDate}">
+                    <f:convertDateTime pattern="#{sessionBean.user.lastBranch.dateFormat} HH:mm:ss" />
+                </h:outputText>
+            </p:column>
+
+            <p:column id="clmSystemTakingQuantity" headerText="#{loc.systemquantity}" sortable="true" sortBy="#{StockTaking.systemTakingQuantity}" filterable="true"  filterBy="#{StockTaking.systemTakingQuantity}" filterMatchMode="contains" visible="#{stockTakingBean.toogleList[7]}" exportable="#{stockTakingBean.toogleList[7]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{StockTaking.systemTakingQuantity}" />
+            </p:column >
+            <p:column id="clmSystemTakingPrice" headerText="#{loc.systemprice}" sortable="true" sortBy="#{StockTaking.systemTakingPrice}" filterable="true"  filterBy="#{StockTaking.systemTakingPrice}" filterMatchMode="contains" visible="#{stockTakingBean.toogleList[8]}" exportable="#{stockTakingBean.toogleList[8]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{StockTaking.systemTakingPrice}" />
+            </p:column >
+
+
+            <p:column id="clmRealTakingQuantity" headerText="#{loc.takingquantity}" sortable="true" sortBy="#{StockTaking.realTakingQuantity}" filterable="true"  filterBy="#{StockTaking.realTakingQuantity}" filterMatchMode="contains" visible="#{stockTakingBean.toogleList[9]}" exportable="#{stockTakingBean.toogleList[9]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{StockTaking.realTakingQuantity}" />
+            </p:column >
+            <p:column id="clmRealTakingPrice" headerText="#{loc.takingprice}" sortable="true" sortBy="#{StockTaking.realTakingPrice}" filterable="true"  filterBy="#{StockTaking.realTakingPrice}" filterMatchMode="contains" visible="#{stockTakingBean.toogleList[10]}" exportable="#{stockTakingBean.toogleList[10]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{StockTaking.realTakingPrice}" />
+            </p:column >
+
+
+            <p:column id="clmDifferenceQuantity" headerText="#{loc.differencequantity}" sortable="true" sortBy="#{StockTaking.diffQuantity}" filterable="true"  filterBy="#{StockTaking.diffQuantity}" filterMatchMode="contains" visible="#{stockTakingBean.toogleList[11]}" exportable="#{stockTakingBean.toogleList[11]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{StockTaking.diffQuantity}" />
+            </p:column >
+            <p:column id="clmDifferencePrice" headerText="#{loc.differenceprice}" sortable="true" sortBy="#{StockTaking.diffPrice}" filterable="true"  filterBy="#{StockTaking.diffPrice}" filterMatchMode="contains" visible="#{stockTakingBean.toogleList[12]}" exportable="#{stockTakingBean.toogleList[12]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{StockTaking.diffPrice}" />
+            </p:column >
+
+
+            <p:column id="clmStatus" headerText="#{loc.statu}" sortable="true" sortBy="#{StockTaking.status.tag}" filterable="true"  filterBy="#{StockTaking.status.tag}" filterMatchMode="contains" visible="#{stockTakingBean.toogleList[13]}" exportable="#{stockTakingBean.toogleList[13]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{StockTaking.status.tag}" />
+            </p:column>
+
+        </p:dataTable>  
+    </h:form>
+
+    <p:dialog id="dlgStockTakingProcess" widgetVar="dlg_StockTakingProcess" resizable="false" transient="true" focus="dlgStockTakingProcess" responsive="true" dynamic="true"  closeOnEscape="true" width="50%">
+
+        <ui:include src="/pages/inventory/stocktaking/newstocktaking.xhtml">
+            <ui:param name="bean" value='#{stockTakingBean}' />
+        </ui:include>
+
+    </p:dialog>
+
+    <p:confirmDialog id="dlgConfirmOK" global="true"  class="deleteConfirm MaxWid500" widgetVar="dlg_ConfirmOK" showEffect="fade" hideEffect="fade"  closeOnEscape="true" responsive="true">
+        <f:facet name="message">
+            <h:outputText value="#{loc.invoicesmustbeenteredinthesystembeforeopeningthestocktaking}"  style="white-space: pre-wrap;">
+                <i class="icon-trash Fs20 tlbrDeleteBtn" /> 
+            </h:outputText>
+        </f:facet>
+        <p:commandButton value="#{loc.cancel}" type="button" onclick="PF('dlg_ConfirmOK').hide()" process="@this" styleClass="ui-confirmdialog-no"  />
+
+        <p:commandButton value="#{loc.goon}" actionListener="#{stockTakingBean.createAfterConfirm()}" resetValues="true"  onclick="PF('dlg_ConfirmOK').hide()"  process="@this" styleClass="ui-confirmdialog-yes"   />
+    </p:confirmDialog>
+
+    <p:dialog id="dlgCategoryStock" widgetVar="dlg_CategoryStock" resizable="false" transient="true" focus="dlgCategoryStock" responsive="true" dynamic="true" closeOnEscape="true" width="40%">
+        <ui:include src="/pages/inventory/stocktaking/stocktakingstockcontrol.xhtml" >
+            <ui:param name="bean" value='#{stockTakingBean}' />
+            <ui:param name="btnName" value="#{loc.openstocktaking}" />
+        </ui:include>
+    </p:dialog>
+    
+</ui:composition>
+
+
+

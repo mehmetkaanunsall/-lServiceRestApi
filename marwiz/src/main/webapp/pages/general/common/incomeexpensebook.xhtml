@@ -1,0 +1,26 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <h:form id="#{form}"> 
+        <ui:include src="/pages/general/common/tabgridtoolbar.xhtml">
+            <ui:param name="btnNewId" value="false"/>
+            <ui:param name="update" value="" />
+            <ui:param name="outputtext" value="#{loc.incomeexpense}" />
+            <ui:param name="btnOk" value='false' />
+            <ui:param name="filterBean" value='#{incomeExpenseBookFilterBean}' />
+        </ui:include>
+
+        <div class="divContent" style="max-height: 300px;">
+            <p:tree id="ttbCategory" value="#{incomeExpenseBookFilterBean.root}" animate="true" style="max-height: inherit;" var="incex" class="panelGridNoBorder treeScroll treeHeight" filterBy="#{incex}" selectionMode="single"
+                    selection="#{incomeExincomeExpenseBookFilterBeandNode}" >
+                <p:ajax event="select" resetValues="true" async="true" listener="#{incomeExpenseBookFilterBean.onNodeSelect}"/>
+                <p:treeNode>
+                    <h:outputText class="#{(incex.parentId==null or incex.parentId.id==0) ? '' : 'outputTextFontTab'}" value="#{incex}" />
+                </p:treeNode>
+            </p:tree>
+        </div>
+
+    </h:form>
+</ui:composition>

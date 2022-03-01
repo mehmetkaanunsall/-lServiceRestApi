@@ -1,0 +1,110 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">  
+
+
+    <h:form id="frmWashingMachicnePlatformProcess" >  
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{ loc.platformprocess}"/>
+            <ui:param name="bean" value='#{washingMachicnePlatformTabBean}' />
+            <ui:param name="update" value="pgrWashingMachincnePlatformProcess" />
+            <ui:param name="btnSaveId" value="#{washingMachicnePlatformTabBean.getRendered(240, 0)}" />
+            <ui:param name="btnDeleteId" value="false" />
+            <c:if test="#{washingMachicnePlatformTabBean.processType==2}">
+                <ui:param name="btnDeleteId" value="#{washingMachicnePlatformTabBean.getRendered(241, 0)}" />
+                <ui:param name="btnTestBeforeDeleteId" value='true' />
+            </c:if>
+        </ui:include>
+
+        <h:panelGroup id="pgrWashingMachincnePlatformProcess" layout="block">
+            <div class="ui-g-12 divContent">
+                <div class="ui-g-12 ">
+                    <div class="ui-g-12 ui-md-12 ui-lg-4">
+                        <p:outputLabel value="#{loc.platformno}" for="txtPlatformNo" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtPlatformNo" value="#{washingMachicnePlatformTabBean.selectedObject.platformNo}" styleClass="Wid95" required="true" placeholder="#{loc.platformno} ">
+                            <p:keyFilter regEx ="/[0-9]/"/>
+                        </p:inputText>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-4">
+                        <p:outputLabel value="#{loc.port}" for="slcPort" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcPort" value="#{washingMachicnePlatformTabBean.selectedObject.port}" required="true" >
+                            <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="true" />
+                            <f:selectItem itemLabel="1" itemValue="1"/>
+                            <f:selectItem itemLabel="2" itemValue="2" />
+                            <f:selectItem itemLabel="3" itemValue="3"/>
+                            <f:selectItem itemLabel="4" itemValue="4" />
+                        </p:selectOneMenu>     
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-4">
+                        <p:outputLabel value="#{loc.barcodereaderaddress}" for="txtBarcodeAddress" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtBarcodeAddress" value="#{washingMachicnePlatformTabBean.selectedObject.barcodeAddress}" styleClass="Wid95" placeholder="#{loc.barcodereaderaddress} ">
+                            <p:keyFilter regEx ="/[0-9]/"/>
+                        </p:inputText>
+                    </div>
+                </div>
+
+
+                <div class="ui-g-12">
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-4">
+                        <p:outputLabel value="#{loc.barcodereaderportno}" for="slcBarcodePort" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcBarcodePort" value="#{washingMachicnePlatformTabBean.selectedObject.barcodePortNo}" >
+                            <f:selectItem itemLabel="#{loc.choose}" itemValue="0" itemDisabled="false" />
+                            <f:selectItem itemLabel="1" itemValue="1"/>
+                            <f:selectItem itemLabel="2" itemValue="2" />
+                            <f:selectItem itemLabel="3" itemValue="3"/>
+                            <f:selectItem itemLabel="4" itemValue="4" />
+                        </p:selectOneMenu>    
+                    </div>
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-4">
+                        <p:outputLabel value="#{loc.barcodereadertimeout} (ms)" for="txtBarcodeTimeOut" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtBarcodeTimeOut" value="#{washingMachicnePlatformTabBean.selectedObject.barcodeTimeOut}" styleClass="Wid95" placeholder="#{loc.barcodereadertimeout} ">
+                            <p:keyFilter regEx ="/[0-9]/"/>
+                        </p:inputText>
+                    </div>
+                    
+                     <div class="ui-g-12 ui-md-6 ui-lg-4">
+                        <p:outputLabel value="#{loc.barcodereaderstatu}" for="slcBarcodeStatus" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcBarcodeStatus" value="#{washingMachicnePlatformTabBean.selectedObject.isActiveBarcode}" >
+                            <f:selectItem itemLabel="#{loc.active}" itemValue="true"/>
+                            <f:selectItem itemLabel="#{loc.passive}" itemValue="false" />
+                        </p:selectOneMenu>      
+                    </div>
+                    
+
+                    <div class="ui-g-12 ui-md-6 ui-lg-4">
+                        <p:outputLabel value="#{loc.statu}" for="slcStatus" styleClass="Fs12 FontBold"/>
+                        <p:selectOneMenu id="slcStatus" value="#{washingMachicnePlatformTabBean.selectedObject.isActive}" required="true" >
+                            <f:selectItem itemLabel="#{loc.active}" itemValue="true"/>
+                            <f:selectItem itemLabel="#{loc.passive}" itemValue="false" />
+                            <p:ajax event="change" listener="#{washingMachicnePlatformTabBean.changeStatus()}" />
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="ui-g-12 ui-md-12 ui-lg-8">
+                        <p:outputLabel value="#{loc.description}" for="txtDescription" styleClass="Fs12 FontBold"/>
+                        <p:inputText id="txtDescription" value="#{washingMachicnePlatformTabBean.selectedObject.description}" styleClass="Wid95" placeholder="#{loc.description} "/>
+                    </div>   
+                </div>
+            </div>
+        </h:panelGroup>
+    </h:form>
+
+    <h:panelGroup id="pngNozzleTab" rendered="#{washingMachicnePlatformTabBean.processType==2}">
+        <div class="EmptyBox10"/>
+        <p:tabView id="tbvNozzleTab" rendered="#{washingMachicnePlatformTabBean.processType==2 and washingMachicnePlatformTabBean.getRendered(59, 1)}" scrollable="true" dynamic="true" cache="true">
+            <p:ajax event="tabChange" listener="#{washingMachicnePlatformTabBean.onTabChange}" />
+            <p:tab id="tab59" title="#{loc.nozzle}" rendered="#{washingMachicnePlatformTabBean.getRendered(59, 1)}">
+                <c:if test="#{washingMachicnePlatformTabBean.activeIndex==59}"> 
+                    <ui:include src="/pages/automat/washingmachicne/washingmachicnenozzletab.xhtml"/>
+                </c:if>
+            </p:tab>
+        </p:tabView>
+    </h:panelGroup>
+</ui:composition>

@@ -1,0 +1,96 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+
+    <h:form id="frmResponsibleProc">
+        <ui:include src="/pages/general/common/processtoolbar.xhtml" >
+            <ui:param name="outputtext" value="#{loc.responsibleprocesses}"/>
+            <ui:param name="bean" value='#{responsibleBean}' />
+            <ui:param name="update" value="grdResponsibleProc" />
+            <ui:param name="btnSaveId" value="#{btnSaveId}" />      
+            <ui:param name="btnDeleteId" value="#{btnDeleteId}" />
+        </ui:include>
+        <h:panelGroup id="grdResponsibleProc" layout="block">
+
+            <div class="ui-g-12 divContent">
+                <div class="ui-g-12 ui-md-6  ui-lg-4">
+                    <p:outputLabel value="#{loc.identityno}" for="txtPersonIdentityNo"  styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtPersonIdentityNo" value="#{responsibleBean.selectedObject.identityNo}" placeholder="#{loc.identityno}" >
+                        <p:keyFilter regEx="/[0-9]/"/>
+                    </p:inputText>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-4">
+                    <p:outputLabel value="#{loc.name}" for="txtPersonName" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtPersonName" value="#{responsibleBean.selectedObject.name}" required="true" placeholder="#{loc.name}" >
+                    </p:inputText>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-4">
+                    <p:outputLabel value="#{loc.surname}" for="txtPersonSurname" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtPersonSurname" value="#{responsibleBean.selectedObject.surname}" required="true" placeholder="#{loc.surname}"  >
+                    </p:inputText>
+                </div>
+
+                <div class="ui-g-12 ui-md-6 ui-lg-4">
+                    <p:outputLabel value="#{loc.birthday}" for="cldPersonBirthday" styleClass="Fs12 FontBold"/>
+                    <p:calendar  id="cldPersonBirthday" value="#{responsibleBean.selectedObject.birthdate}" class="datepicker" beforeShow="dpClearButton" pattern="#{sessionBean.user.lastBranch.dateFormat}" showOn="button" showButtonPanel="true" placeholder="#{loc.birthday}" mask="true" navigator="true" locale="#{sessionBean.locale}" yearRange="c-100:c+20" >
+                        <p:ajax event="change" update="cldPersonBirthday" resetValues="true" global="false"/>
+                    </p:calendar>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-4">
+                    <p:outputLabel value="#{loc.gender}" for="slcPersonGender" styleClass="Fs12 FontBold"/>
+                    <p:selectOneMenu id="slcPersonGender" value="#{responsibleBean.selectedObject.gender}" styleClass="Wid95" >
+                        <f:selectItem itemLabel="#{loc.man}" itemValue="true" />
+                        <f:selectItem itemLabel="#{loc.woman}" itemValue="false" />
+
+                    </p:selectOneMenu>
+                </div>
+                <div class="ui-g-12 ui-md-6 ui-lg-4">     
+                    <p:outputLabel value="#{loc.position}" for="txtPosition" styleClass="Fs12 FontBold"/>
+                    <p:inputText id="txtPosition" value="#{responsibleBean.selectedObject.position}" required="true" placeholder="#{loc.position}"  />
+                </div> 
+
+            </div>
+        </h:panelGroup>
+        <div class="EmptyBox10" />
+    </h:form>
+
+    <h:panelGroup id="pngResponsibleTab">
+        <p:tabView id="tbvResponsibleProc" rendered="#{tabViewRendered}" scrollable="true" dynamic="true" cache="true">
+            <p:ajax event="tabChange" listener="#{responsibleBean.onTabChange}" />
+            <p:tab id="#{tabId}" title="#{loc.communication}" rendered="#{tabRendered}">
+                <c:if test="#{cifRendered}" >
+                    #{responsibleCommunicationBean.setDlgWidgetVar("dlg_ResponsibleCommunication")}
+                    #{responsibleCommunicationBean.setObject(responsibleBean.selectedObject)}
+                    #{responsibleCommunicationBean.setCommunicationList(responsibleCommunicationBean.convertToWotCommunication(responsibleService.findCommunications(responsibleBean.selectedObject)))}
+                    <h:form id="frmResponsibleCommunicationTab"  >
+                        <div class="ContainerIndent">
+                            <ui:include src="/pages/general/common/tabgridtoolbar.xhtml">
+
+                                <ui:param name="bean" value="#{responsibleCommunicationBean}"/>
+                                <ui:param name="btnNewId" value="#{btnCommunicationNewId}"/>
+                                <ui:param name="update" value="dlgResponsibleCommunication frmResponsibleCommunication:txtAddress frmResponsibleCommunication:slcCountry frmResponsibleCommunication:slcCity frmResponsibleCommunication:slcCounty frmResponsibleCommunication:txtInternet frmResponsibleCommunication:txtPhone" />
+                                <ui:param name="outputtext" value="#{loc.communication}" />
+
+                            </ui:include>
+
+                            <ui:include src="/pages/general/common/communicationdatatable.xhtml">
+                                <ui:param name="bean" value="#{responsibleCommunicationBean}"/>
+                                <ui:param name="updateDialog" value="dlgResponsibleCommunication"/>
+
+                            </ui:include>
+
+                        </div>
+                    </h:form>
+                </c:if>
+                
+            </p:tab>
+        </p:tabView>
+    </h:panelGroup>
+
+
+
+</ui:composition>

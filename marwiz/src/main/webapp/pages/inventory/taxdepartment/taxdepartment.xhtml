@@ -1,0 +1,91 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:include src="/pages/general/common/datagridtoolbardefinition.xhtml" >
+        <ui:param name="bean" value="#{taxDepartmentBean}"/> 
+        <ui:param name="update" value="dlgTaxDepartmentProcess"/>
+        <ui:param name="btnNewId" value='#{taxDepartmentBean.getRendered(292, 0)}'/>
+        <ui:param name="datatable" value="frmTaxDepartment:dtbTaxDepartment" />
+        <ui:param name="widgetvar" value="taxDepartmentPF" />
+        <ui:param name="form" value='frmToolbarTaxDepartment' />
+        <ui:param name="fileName" value="#{loc.cashregisterdepartmentdefinitions}"/> 
+        <ui:param name="renderedToggler" value='true'/>
+        <ui:param name="renderedExel" value='true'/>
+        <ui:param name="renderedPdf" value='true'/>
+        <ui:param name="renderedProcessInfo2" value="true"/>
+        <ui:param name="tltpProcessInfo2" value="#{loc.taxratesmustbedescribedincashregister}"/>
+        <ui:param name="renderedTaxDepartment" value='true'/>
+    </ui:include>
+
+
+    <h:form id="frmTaxDepartment">
+
+        <p:dataTable  id="dtbTaxDepartment" var="taxDepartment"  value="#{taxDepartmentBean.listOfObjects}" filteredValue="#{taxDepartmentBean.listOfFilteredObjects}" widgetVar="taxDepartmentPF" selection="#{taxDepartmentBean.selectedObject}"  selectionMode="single" emptyMessage="#{loc.norecordsfound}"
+                      rows="#{sessionBean.user.defualtGridSize}" rowKey="#{taxDepartment.id}" paginator="true" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown} {CurrentPageReport}"
+                      rowsPerPageTemplate="#{sessionBean.user.gridSize}" paginatorPosition="bottom" currentPageReportTemplate="{startRecord}-{endRecord} #{loc.intotal} {totalRecords}" 
+                      reflow="true" >
+            <p:ajax event="#{sessionBean.user.gridRowSelect}" listener="#{taxDepartmentBean.update()}" update="dlgTaxDepartmentProcess" global="false" resetValues="true"/> 
+            <p:ajax event="page" global="false"/>
+            <p:ajax event="filter" global="false"/> 
+
+            <f:facet name="footer" rendered="false" >
+                <p:inputText id="globalFilter" value="#{taxDepartmentBean.autoCompleteValue}"  style="display: none"  />
+            </f:facet>
+
+
+            <p:column id="clmNumber" headerText="#{loc.departmentno}" sortable="true" sortBy="#{taxDepartment.departmentNo}" filterable="true"  filterBy="#{taxDepartment.departmentNo}" filterMatchMode="contains" visible="#{taxDepartmentBean.toogleList[0]}" exportable="#{taxDepartmentBean.toogleList[0]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{taxDepartment.departmentNo}" />
+            </p:column >
+            <p:column id="clmName" headerText="#{loc.name}" sortable="true" sortBy="#{taxDepartment.name}" filterable="true"  filterBy="#{taxDepartment.name}" filterMatchMode="contains" visible="#{taxDepartmentBean.toogleList[1]}" exportable="#{taxDepartmentBean.toogleList[1]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{taxDepartment.name}" />
+            </p:column >
+            <p:column id="clmTaxRate" headerText="#{loc.taxgroup}" sortable="true" sortBy="#{taxDepartment.taxGroup.name}" filterable="true"  filterBy="#{taxDepartment.taxGroup.name}" filterMatchMode="contains" visible="#{taxDepartmentBean.toogleList[2]}" exportable="#{taxDepartmentBean.toogleList[2]}">
+                <f:facet name="filter">
+                    <p:outputLabel   rendered="false" />
+                </f:facet> 
+                <h:outputText value="#{taxDepartment.taxGroup.name}" />
+            </p:column >
+        </p:dataTable>  
+    </h:form>
+
+    <p:overlayPanel id="ovlHistory" widgetVar="ovlHistory" dynamic="true" for="frmTaxDepartmentProcess:btnHistoryProcess"  hideEffect="blind"  modal="true" class="Wid50" showCloseIcon="true" transient="true">  
+        <ui:include src="/pages/general/common/historydatatabledlg.xhtml">
+            <ui:param name="bean" value='#{taxDepartmentBean}' />
+        </ui:include>
+    </p:overlayPanel> 
+
+    <p:dialog id="dlgTaxDepartmentProcess" widgetVar="dlg_TaxDepartmentProcess" resizable="false" transient="true" focus="dlgTaxDepartmentProcess" responsive="true" dynamic="true" modal="true" closeOnEscape="true" width="40%">
+        <ui:include  src="taxdepartmentprocess.xhtml"/>
+    </p:dialog>
+
+    <p:confirmDialog id="dlgChangeStockTaxDepartment" global="true"  class="deleteConfirm controlDelete" severity="alert" widgetVar="dlg_ChangeStockTaxDepartment" closeOnEscape="true" width="20%" responsive="true">
+        <f:facet name="message">
+            <div class="ui-g-12 ui-md-12 ui-lg-12">
+                <h:outputText value="#{loc.departmentofallstocksarechangedaccordingtotaxgroup}"  style="white-space: pre-wrap;">
+                    <i class="icon-trash Fs20 tlbrDeleteBtn" /> 
+                </h:outputText>
+            </div>
+            <div class="ui-g-12 ui-md-12 ui-lg-12">
+                <h:outputText value="#{loc.areyousureyouwanttocontinue}" />
+            </div>
+            <p:commandButton value="#{loc.yes}" actionListener="#{taxDepartmentBean.changeStockTaxDepartment()}" onclick="PF('dlg_ChangeStockTaxDepartment').hide()"   styleClass="ui-confirmdialog-yes" icon="ui-icon-check fa fa-check Fs14 white"   />
+            <p:commandButton value="#{loc.no}"  onclick="PF('dlg_ChangeStockTaxDepartment').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close fa fa-close Fs14 white" />
+
+        </f:facet>
+
+    </p:confirmDialog>
+
+
+</ui:composition>
+
+
